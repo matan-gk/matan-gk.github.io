@@ -11,5 +11,5 @@ Just a single project right now
 
 ## 📂 Featured Project
 
-### [Math Quest](https://matan-gk.github.io/math-quest)
+### [Math Quest](https://matan-gk.github.io/math-quest.html)
 A simple math game for a 6-year old
