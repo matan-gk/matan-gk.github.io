@@ -51,9 +51,16 @@ h1{
 .lolliitems{display:flex; gap:2px; flex-wrap:wrap; min-height:32px; justify-content:center}
 .lolliitems span{font-size:1.9rem}
 .lolliitems .empty{font-size:.78rem; color:var(--muted); font-weight:600}
-.bonusbox{max-width:400px; text-align:center}
-.bonushead{font-family:'Baloo 2',sans-serif; color:var(--pink); font-weight:800; margin-bottom:10px; font-size:1.05rem}
-.bonusbox .qtext{text-align:right}
+.card.bonus-mode{
+  border:3px solid var(--yellow);
+  box-shadow:0 14px 34px rgba(255,196,60,.45);
+  background:linear-gradient(160deg, var(--card) 78%, rgba(255,196,60,.14) 100%);
+}
+.bonustag{
+  display:inline-block; background:linear-gradient(90deg,var(--yellow),var(--pink));
+  color:#4a2a00; padding:3px 12px; border-radius:999px; font-weight:800;
+  font-family:'Baloo 2',sans-serif; font-size:.82rem; margin-left:6px;
+}
 .stickerbook span{font-size:1.3rem}
 .stickerbook .empty{color:var(--muted); font-size:.8rem; font-weight:600}
 .levels{display:flex; gap:8px; margin-bottom:14px; overflow-x:auto; padding-bottom:4px}
@@ -199,7 +206,7 @@ const LEVELS = [
 ];
 const STICKERS = ["🦄","🧁","🍦","🍩","🌈","🍓","🍒","🎀","🍬","🍨","🩷","✨","🍥","🧋"];
 const PRAISE = ["מעולה! 🌟","כל הכבוד!","קאפקייק שמחה מאוד! 🦄","פגיעה מדויקת! 🎯","וואו, איזו גאונה! 💫"];
-let level = 1, score = 0, streak = 0, current = null, collection = [], lollipops = [];
+let level = 1, score = 0, streak = 0, current = null, collection = [], lollipops = [], bonusActive = false;
 const SAVE_KEY = 'cupcakeQuestSave_v1';
 function saveState(){
   try{ localStorage.setItem(SAVE_KEY, JSON.stringify({score,streak,collection,lollipops,level})); }catch(e){}
@@ -300,7 +307,7 @@ function gGroups(){
 }
 function gRemainder(){
   const item = pickItem();
-  const K = ri(3,6); let T;
+  const K = ri(4,7); let T;
   do{ T = ri(K+1, K*6); } while(T%K===0);
   const rem = T%K;
   const choices = new Set([rem]); while(choices.size<4){ const x=ri(0,K-1); choices.add(x); }
@@ -421,6 +428,91 @@ const pools = {
       gMachine, gSequence, gMissingMiddleSeq, gMoneyCoins, gCheaperBundle, gChange, gSplitCost]
 };
 
+// ---- BONUS QUESTIONS (slightly harder, one lollipop-worthy question per streak milestone) ----
+function bL1_CombineThenDivide(){
+  const item = pickItem();
+  const numKids = ri(3,6), per = ri(3,8);
+  const total = numKids*per;
+  const A = ri(1,total-1), B = total-A;
+  return {label:"בונוס: חלוקה דו-שלבית", text:`יש <span class="hl">${A}</span> ${item} בקבוצה א' ו-<span class="hl">${B}</span> ${item} בקבוצה ב'. רוצים לחלק את כל ה${item} כך שכל ילד יקבל בדיוק <span class="hl">${per}</span> ${item}. לכמה ילדים זה יספיק?`,
+    type:'mcq', answer: numKids, choices: mcqFrom(numKids,3)};
+}
+function bL1_ChainMinusLoss(){
+  const [p1,p2] = pickPeople(2); const {act,item} = ACTIVITIES[ri(0,ACTIVITIES.length-1)];
+  const a = ri(3,8), k = ri(2,3); const b = a*k;
+  const loss = ri(1, Math.max(1,Math.floor(b/3))); const remain = b-loss;
+  return {label:"בונוס: שרשרת עם אובדן", text:`${p1.n} ${v(p1,act.m,act.f)} <span class="hl">${a}</span> ${item}. ${p2.n} ${v(p2,act.m,act.f)} פי <span class="hl">${k}</span> יותר מ${p1.n}, אבל <span class="hl">${loss}</span> מה${item} של ${p2.n} התקלקלו. כמה ${item} תקינים נשארו ל${p2.n}?`,
+    type:'mcq', answer: remain, choices: mcqFrom(remain, Math.max(4,b/3))};
+}
+function bL2_ThreeEquations(){
+  const [s1,s2,s3] = pickSyms(3);
+  const x=ri(2,12), y=ri(2,12), z=ri(2,12);
+  const AB=x+y, BC=y+z, AC=x+z;
+  const which = ri(0,2);
+  const targets = [{sym:s1, val:x}, {sym:s2, val:y}, {sym:s3, val:z}];
+  const t = targets[which];
+  return {label:"בונוס: שלוש משוואות", text:`<span class="eq">${s1} + ${s2} = <span class="hl">${AB}</span></span><br><span class="eq">${s2} + ${s3} = <span class="hl">${BC}</span></span><br><span class="eq">${s1} + ${s3} = <span class="hl">${AC}</span></span><br>רמז: חברו את שלוש התוצאות וחלקו ב-2 כדי לקבל את סכום כל השלושה.<br>מה המספר של ${t.sym}?`,
+    type:'mcq', answer: t.val, choices: mcqFrom(t.val,4)};
+}
+function bL2_FourLinkChain(){
+  const [s1,s2,s3,s4] = pickSyms(4);
+  const trueStmt = `${s1} > ${s4}`;
+  const distractors = [`${s4} > ${s1}`, `${s3} > ${s1}`, `${s4} > ${s2}`];
+  const choices = shuffle([trueStmt, ...distractors]);
+  return {label:"בונוס: שרשרת של ארבעה", text:`ידוע: <span class="eq">${s1} > ${s2}</span><br>וגם: <span class="eq">${s2} > ${s3}</span><br>וגם: <span class="eq">${s3} > ${s4}</span><br>איזה משפט חייב להיות נכון?`,
+    type:'mcq', answer: trueStmt, choices};
+}
+function bL3_TwoStepMachine(){
+  const addK = ri(1,6), mulK = ri(2,3);
+  const order = ri(0,1);
+  const out = v => order===0 ? (v+addK)*mulK : v*mulK+addK;
+  const inputs = [ri(1,6),ri(1,6),ri(1,6)];
+  const q = ri(1,6);
+  const rows = inputs.map(v=>`${v} ⟶ ${out(v)}`).join('<br>');
+  return {label:"בונוס: מכונה כפולה", text:`למכונה הזו יש שני שלבים נסתרים! הנה דוגמאות:<br><span class="mono">${rows}</span><br>לפי אותו כלל, מה יוצא כאשר מכניסים ${q}?`,
+    type:'mcq', answer: out(q), choices: mcqFrom(out(q), Math.max(6,out(q)/3))};
+}
+function bL3_ComboMoneyChange(){
+  const F = ri(0,1)===0? 2:3;
+  const [p1,p2,p3] = pickPeople(3);
+  const namesStr = F===2 ? `${p1.n} ו${p2.n}` : `${p1.n}, ${p2.n} ו${p3.n}`;
+  const per = ri(3,12); const total = per*F;
+  const mealPrice = ri(2,total-2); const dessertPrice = total-mealPrice;
+  if(dessertPrice<2) return bL3_ComboMoneyChange();
+  const bills=[5,10,20,50]; const bill = bills.find(b=>b>per) || 50;
+  const change = bill-per;
+  return {label:"בונוס: כסף ועודף משולב", text:`${namesStr} קנו יחד ארוחה ב-<span class="hl">${mealPrice}</span> ש"ח וקינוח ב-<span class="hl">${dessertPrice}</span> ש"ח, וחילקו את הכל שווה בשווה בין ${F} חברים. כל אחד שילם עם שטר של <span class="hl">${bill}</span> ש"ח. כמה עודף קיבל כל אחד?`,
+    type:'mcq', answer: change, choices: mcqFrom(change, Math.max(4,change))};
+}
+function bL4_WordToSymbol(){
+  const [p1,p2] = pickPeople(2); const item = pickItem();
+  const per = ri(3,9); const total = per*2;
+  const [s1,s2] = pickSyms(2);
+  const sum2 = per + ri(2,10);
+  return {label:"בונוס: משימה כפולה", text:`שלב 1: ${p1.n} ו${p2.n} אספו יחד <span class="hl">${total}</span> ${item} וחילקו אותם שווה בשווה. כל אחד קיבל מספר מסוים.<br>שלב 2: ${s1} = המספר שקיבל כל אחד.<br><span class="eq">${s1} + ${s2} = <span class="hl">${sum2}</span></span><br>מה המספר של ${s2}?`,
+    type:'mcq', answer: sum2-per, choices: mcqFrom(sum2-per,4)};
+}
+function bL4_SpotErrorSequence(){
+  const start=ri(1,8), step=ri(2,6);
+  const arr=[0,1,2,3,4].map(i=>start+i*step);
+  const idx = ri(1,3);
+  let wrongVal = arr[idx] + (Math.random()<0.5? 1:-1)*ri(1,3);
+  if(wrongVal===arr[idx]) wrongVal += 2;
+  const displayArr = arr.slice(); displayArr[idx]=wrongVal;
+  const correctVal = arr[idx];
+  const set = new Set([correctVal, wrongVal]);
+  while(set.size<4){ let d=ri(-step*2,step*2); if(d===0) d=1; let val=correctVal+d; if(val>=0) set.add(val); }
+  return {label:"בונוס: מצאו את הטעות", text:`אחד המספרים בסדרה הבאה לא מתאים לחוק שלה:<br><span class="eq">${displayArr.join(' , ')}</span><br>מה המספר שאמור להיות שם באמת?`,
+    type:'mcq', answer: correctVal, choices: shuffle([...set])};
+}
+
+const BONUS_POOLS = {
+  1: [bL1_CombineThenDivide, bL1_ChainMinusLoss],
+  2: [bL2_ThreeEquations, bL2_FourLinkChain],
+  3: [bL3_TwoStepMachine, bL3_ComboMoneyChange],
+  4: [bL4_WordToSymbol, bL4_SpotErrorSequence]
+};
+
 
 function renderLevels(){
   const el = document.getElementById('levels'); el.innerHTML='';
@@ -476,92 +568,20 @@ function showMilestone(){
     f = (f+1) % theme.seq.length;
     partyImg.src = theme.frames[theme.seq[f]];
   }, 260);
-  const cleanup = ()=>{ clearInterval(timer); overlay.remove(); showBonusQuestion(); };
+  const cleanup = ()=>{ clearInterval(timer); overlay.remove(); renderBonus(); };
   overlay.onclick = cleanup;
   setTimeout(cleanup, 5000);
 }
 
-function showBonusQuestion(){
-  const pool = pools[level];
-  const bq = pool[ri(0,pool.length-1)]();
-  const overlay = document.createElement('div');
-  overlay.className='milestone';
-  overlay.innerHTML = `<div class="box bonusbox">
-    <div class="bonushead">🍭 שאלת בונוס! נסי אם בא לך — אפשר גם לדלג</div>
-    <div class="qlabel">${bq.label}</div>
-    <div class="qtext" id="bonusQtext">${bq.text}</div>
-    <div id="bonusAnswerArea"></div>
-    <button class="btn secondary" id="bonusSkip" style="display:block; background:var(--card2); color:var(--text)">דלגי על הבונוס</button>
-    <div class="feedback" id="bonusFeedback"></div>
-  </div>`;
-  document.body.appendChild(overlay);
-  const area = document.getElementById('bonusAnswerArea');
-  const finishBonus = ()=>overlay.remove();
-  document.getElementById('bonusSkip').onclick = finishBonus;
-
-  function bonusResult(val, btnEl, grid){
-    const ok = val === bq.answer;
-    const fb = document.getElementById('bonusFeedback');
-    if(grid){
-      [...grid.children].forEach(c=>{
-        c.style.pointerEvents='none';
-        if(c.textContent == String(bq.answer)) c.classList.add('correct');
-        else if(c===btnEl) c.classList.add('wrong');
-      });
-    }
-    document.getElementById('bonusSkip').style.display='none';
-    if(ok){
-      lollipops.push('🍭');
-      renderLolli();
-      saveState();
-      burstConfetti(20);
-      fb.textContent = 'וואו! זכית בסוכרייה על מקל! 🍭🎉';
-      fb.className='feedback good';
-    } else {
-      fb.textContent = `הפעם לא, אבל אין דבר! התשובה הייתה ${bq.answer}.`;
-      fb.className='feedback bad';
-    }
-    setTimeout(finishBonus, 2200);
-  }
-
-  if(bq.type==='mcq'){
-    const grid = document.createElement('div'); grid.className='choices';
-    bq.choices.forEach(c=>{
-      const btn=document.createElement('div'); btn.className='choice'; btn.textContent=c;
-      if(!/[\u0590-\u05FF]/.test(String(c))) btn.style.direction='ltr';
-      btn.onclick=()=>bonusResult(c, btn, grid);
-      grid.appendChild(btn);
-    });
-    area.appendChild(grid);
-  } else {
-    const form = document.createElement('form');
-    form.innerHTML = `<input type="text" inputmode="numeric" pattern="-?[0-9]*" id="bonusNumAns" placeholder="התשובה שלך" autocomplete="off"><button type="submit" class="btn">בדקי 🍭</button>`;
-    area.appendChild(form);
-    form.addEventListener('submit', e=>{
-      e.preventDefault();
-      const v = Number(document.getElementById('bonusNumAns').value);
-      bonusResult(v, null, null);
-    });
-    setTimeout(()=>document.getElementById('bonusNumAns') && document.getElementById('bonusNumAns').focus(), 50);
-  }
-}
-
-function nextQuestion(){
-  document.getElementById('nextBtn').style.display='none';
-  document.getElementById('feedback').textContent='';
-  document.getElementById('feedback').className='feedback';
-  const pool = pools[level];
-  current = pool[ri(0,pool.length-1)]();
-  document.getElementById('qlabel').textContent = current.label;
-  document.getElementById('qtext').innerHTML = current.text;
+function renderAnswerArea(q, onAnswer){
   const area = document.getElementById('answerArea');
   area.innerHTML = '';
-  if(current.type==='mcq'){
+  if(q.type==='mcq'){
     const grid = document.createElement('div'); grid.className='choices';
-    current.choices.forEach(c=>{
+    q.choices.forEach(c=>{
       const btn=document.createElement('div'); btn.className='choice'; btn.textContent=c;
       if(!/[\u0590-\u05FF]/.test(String(c))) btn.style.direction='ltr';
-      btn.onclick=()=>checkAnswer(c, btn, grid);
+      btn.onclick=()=>onAnswer(c, btn, grid);
       grid.appendChild(btn);
     });
     area.appendChild(grid);
@@ -573,10 +593,45 @@ function nextQuestion(){
     form.addEventListener('submit', e=>{
       e.preventDefault();
       const v = Number(document.getElementById('numAns').value);
-      checkAnswer(v, null, null);
+      onAnswer(v, null, null);
     });
     setTimeout(()=>document.getElementById('numAns') && document.getElementById('numAns').focus(), 50);
   }
+  return area;
+}
+
+function nextQuestion(){
+  bonusActive = false;
+  document.getElementById('card').classList.remove('bonus-mode');
+  document.getElementById('nextBtn').style.display='none';
+  document.getElementById('feedback').textContent='';
+  document.getElementById('feedback').className='feedback';
+  const pool = pools[level];
+  current = pool[ri(0,pool.length-1)]();
+  document.getElementById('qlabel').textContent = current.label;
+  document.getElementById('qtext').innerHTML = current.text;
+  renderAnswerArea(current, checkAnswer);
+}
+
+function renderBonus(){
+  bonusActive = true;
+  document.getElementById('nextBtn').style.display='none';
+  document.getElementById('feedback').textContent='';
+  document.getElementById('feedback').className='feedback';
+  document.getElementById('card').classList.add('bonus-mode');
+  const pool = BONUS_POOLS[level] || BONUS_POOLS[1];
+  current = pool[ri(0,pool.length-1)]();
+  document.getElementById('qlabel').innerHTML = `<span class="bonustag">🍭 שאלת בונוס</span> — אפשר גם לדלג!`;
+  document.getElementById('qtext').innerHTML = current.text;
+  const area = renderAnswerArea(current, checkAnswer);
+  const skipBtn = document.createElement('button');
+  skipBtn.type='button';
+  skipBtn.id='bonusSkipBtn';
+  skipBtn.className='btn';
+  skipBtn.style.cssText='width:100%; margin-top:10px; background:var(--card2); color:var(--text);';
+  skipBtn.textContent='דלגי על הבונוס';
+  skipBtn.onclick = nextQuestion;
+  area.appendChild(skipBtn);
 }
 
 function checkAnswer(val, btnEl, grid){
@@ -588,6 +643,23 @@ function checkAnswer(val, btnEl, grid){
       if(c.textContent == String(current.answer)) c.classList.add('correct');
       else if(c===btnEl) c.classList.add('wrong');
     });
+  }
+  if(bonusActive){
+    const skipBtn = document.getElementById('bonusSkipBtn');
+    if(skipBtn) skipBtn.style.display='none';
+    if(ok){
+      lollipops.push('🍭');
+      renderLolli();
+      burstConfetti(20);
+      fb.textContent = 'וואו! זכית בסוכרייה על מקל! 🍭🎉';
+      fb.className='feedback good';
+    } else {
+      fb.textContent = `הפעם לא, אבל אין דבר! התשובה הייתה ${current.answer}.`;
+      fb.className='feedback bad';
+    }
+    document.getElementById('nextBtn').style.display='block';
+    saveState();
+    return;
   }
   if(ok){
     score += 10 + streak*2; streak++;
