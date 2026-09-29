@@ -82,6 +82,7 @@ h1{
 .qtext .hl{color:var(--pink)}
 .mono{font-family:'Baloo 2',sans-serif; font-size:1.35rem; letter-spacing:1px; direction:ltr; display:inline-block}
 .eq{font-family:'Baloo 2',sans-serif; font-size:1.1rem; direction:ltr; unicode-bidi:isolate; display:inline-block}
+.eq.shapes{font-size:1.9rem; line-height:1.6}
 .choices{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px}
 .choice{
   background:var(--card2); border:2px solid transparent; border-radius:14px; padding:14px 8px;
@@ -89,6 +90,7 @@ h1{
   transition:.12s;
 }
 .choice:active{transform:scale(.96)}
+.choice.emoji-choice{font-size:2.6rem; padding:12px 6px; line-height:1.1; word-break:break-word}
 .choice.correct{background:var(--good); color:#083330; border-color:var(--good)}
 .choice.wrong{background:var(--bad); color:#3a0a12; border-color:var(--bad)}
 #answerForm{display:flex; gap:10px; margin-bottom:12px}
@@ -202,7 +204,8 @@ const LEVELS = [
   {id:1, name:"טירונות מתוקה", emoji:"🍬"},
   {id:2, name:"סימנים קסומים", emoji:"🦄"},
   {id:3, name:"מגדל הקינוחים", emoji:"🍰"},
-  {id:4, name:"אתגר הקשת בענן", emoji:"🌈"},
+  {id:4, name:"בלשית הצורות", emoji:"🔍"},
+  {id:5, name:"אתגר הקשת בענן", emoji:"🌈"},
 ];
 const STICKERS = ["🦄","🧁","🍦","🍩","🌈","🍓","🍒","🎀","🍬","🍨","🩷","✨","🍥","🧋"];
 const PRAISE = ["מעולה! 🌟","כל הכבוד!","קאפקייק שמחה מאוד! 🦄","פגיעה מדויקת! 🎯","וואו, איזו גאונה! 💫"];
@@ -220,7 +223,7 @@ function loadState(){
     if(typeof d.streak==='number') streak=d.streak;
     if(Array.isArray(d.collection)) collection=d.collection;
     if(Array.isArray(d.lollipops)) lollipops=d.lollipops;
-    if(typeof d.level==='number' && d.level>=1 && d.level<=4) level=d.level;
+    if(typeof d.level==='number' && d.level>=1 && d.level<=5) level=d.level;
   }catch(e){}
 }
 
@@ -260,6 +263,28 @@ const CONTAINERS = [
 ];
 const SYM_POOL = ["🦄","🍭","🧁","🍩","🍓","🍒","🍬","🍨","🌈","🎀","🍥","🧋","🍪","🍉","🍇","🎈"];
 function pickSyms(k){ return shuffle(SYM_POOL.slice()).slice(0,k); }
+
+// ---- LOGIC POOLS ----
+const CIRCLES = ["🔴","🟠","🟡","🟢","🔵","🟣","🟤","⚫","⚪"];
+const SQUARES = ["🟥","🟧","🟨","🟩","🟦","🟪","🟫","⬛","⬜"];
+const HEARTS  = ["❤️","🧡","💛","💚","💙","💜","🤎","🖤","🤍"];
+const SHAPE_FAMILIES = [CIRCLES, SQUARES, HEARTS];
+const CATEGORY_POOLS = [
+  {items:["🍰","🍩","🧁","🍪","🍫"]},
+  {items:["🍎","🍌","🍇","🍊","🍓"]},
+  {items:["🐶","🐱","🐹","🐰","🐻"]},
+  {items:["🚗","🚌","🚲","🚓","🚚"]},
+  {items:["🎸","🎹","🥁","🎺","🎻"]},
+  {items:["👕","👗","🧦","👖","🧥"]},
+  {items:["🐠","🐬","🐙","🦑","🐳"]},
+];
+const ANALOGY_SETS = [
+  [["גור","כלב"],["סייח","סוס"],["טלה","כבשה"],["עגל","פרה"],["גוזל","ציפור"]],
+  [["צמר","סוודר"],["עץ","כיסא"],["זכוכית","כוס"],["בד","חולצה"],["נייר","ספר"]],
+  [["מברשת","צייר"],["סכין","טבח"],["מחט","תופרת"],["פטיש","נגר"],["מספריים","ספר"]],
+  [["בית","דלת"],["מכונית","גלגל"],["עץ","ענף"],["גוף","יד"],["ספר","עמוד"]],
+  [["אריה","שואג"],["כלב","נובח"],["חתול","מיילל"],["נחש","מלחש"],["ציפור","מצייצת"]],
+];
 
 // ---- LEVEL 1: word problems ----
 function gSharing(){
@@ -419,13 +444,135 @@ function gSplitCost(){
     type:'mcq', answer: per, choices: mcqFrom(per,4)};
 }
 
+// ---- LEVEL 4 (NEW): logic puzzles ----
+function gAnalogyWord(){
+  const setIdx = ri(0,ANALOGY_SETS.length-1);
+  const set = ANALOGY_SETS[setIdx];
+  const [pairA,pairB] = shuffle(set.slice()).slice(0,2);
+  const answer = pairB[1];
+  const distract = new Set([answer]);
+  let guard=0;
+  while(distract.size<4 && guard<50){
+    guard++;
+    const otherIdx = ri(0,ANALOGY_SETS.length-1);
+    if(otherIdx===setIdx) continue;
+    const otherSet = ANALOGY_SETS[otherIdx];
+    distract.add(otherSet[ri(0,otherSet.length-1)][1]);
+  }
+  return {label:"היגיון: אנלוגיה", text:`${pairA[0]} שייך ל-${pairA[1]}, בדיוק כמו ש-${pairB[0]} שייך ל-?`,
+    type:'mcq', answer, choices: shuffle([...distract])};
+}
+function gOddOneOutCategory(){
+  const [catA,catB] = shuffle(CATEGORY_POOLS.slice()).slice(0,2);
+  const three = shuffle(catA.items.slice()).slice(0,3);
+  const odd = catB.items[ri(0,catB.items.length-1)];
+  return {label:"היגיון: מי לא שייך לקבוצה?", text:`איזה מהבאים לא שייך לקבוצה?`,
+    type:'mcq', answer: odd, choices: shuffle([...three, odd])};
+}
+function gOddOneOutShape(){
+  const byColor = Math.random()<0.5;
+  if(byColor){
+    // same shape family throughout; three share one color, one is a different color
+    const fam = SHAPE_FAMILIES[ri(0,2)];
+    let majC=ri(0,8), minC=ri(0,8); while(minC===majC) minC=ri(0,8);
+    const items = [fam[majC], fam[majC], fam[majC]];
+    const oddItem = fam[minC];
+    return {label:"היגיון: מי לא שייך לקבוצה?", text:`איזה מהבאים לא שייך לקבוצה?`,
+      type:'mcq', answer: oddItem, choices: shuffle([...items, oddItem])};
+  } else {
+    // same color throughout; three share one shape family, one is a different family
+    const colorIdx = ri(0,8);
+    let famA=ri(0,2), famB=ri(0,2); while(famB===famA) famB=ri(0,2);
+    const items = [SHAPE_FAMILIES[famA][colorIdx], SHAPE_FAMILIES[famA][colorIdx], SHAPE_FAMILIES[famA][colorIdx]];
+    const oddItem = SHAPE_FAMILIES[famB][colorIdx];
+    return {label:"היגיון: מי לא שייך לקבוצה?", text:`איזה מהבאים לא שייך לקבוצה?`,
+      type:'mcq', answer: oddItem, choices: shuffle([...items, oddItem])};
+  }
+}
+function gShapeAnalogy(){
+  const ruleType = Math.random()<0.5 ? "double" : "swap";
+  if(ruleType==="double"){
+    const fam = Math.random()<0.5?CIRCLES:SQUARES;
+    let i=ri(0,fam.length-1), j=ri(0,fam.length-1); while(j===i) j=ri(0,fam.length-1);
+    const A=fam[i], Aprime=A+A, B=fam[j], answer=B+B;
+    const distract=new Set([answer]);
+    while(distract.size<4){ const k=ri(0,fam.length-1); const opt=Math.random()<0.5?fam[k]:fam[k]+fam[k]; if(opt!==answer) distract.add(opt); }
+    return {label:"היגיון: מצאו את החוק", text:`<span class="eq shapes">${A} ⟶ ${Aprime}</span><br>לפי אותו חוק: <span class="eq shapes">${B} ⟶ ?</span>`,
+      type:'mcq', answer, choices: shuffle([...distract])};
+  }
+  let i=ri(0,8), j=ri(0,8); while(j===i) j=ri(0,8);
+  const A=CIRCLES[i], Aprime=SQUARES[i], B=CIRCLES[j], answer=SQUARES[j];
+  const distract=new Set([answer]);
+  while(distract.size<4){ const k=ri(0,8); if(SQUARES[k]!==answer) distract.add(SQUARES[k]); }
+  return {label:"היגיון: מצאו את החוק", text:`<span class="eq shapes">${A} ⟶ ${Aprime}</span><br>לפי אותו חוק: <span class="eq shapes">${B} ⟶ ?</span>`,
+    type:'mcq', answer, choices: shuffle([...distract])};
+}
+function gShapeSequence(){
+  // Rainbow order only (red, orange, yellow, green, blue, purple) so the rule is actually learnable, not an arbitrary hidden order.
+  const fam = (Math.random()<0.5?CIRCLES:SQUARES).slice(0,6);
+  const start = ri(0,5);
+  const arr = [0,1,2,3].map(k=>fam[(start+k)%6]);
+  const answer = fam[(start+4)%6];
+  const distract=new Set([answer]);
+  while(distract.size<4){ const k=ri(0,5); if(fam[k]!==answer) distract.add(fam[k]); }
+  return {label:"היגיון: סדר הקשת בענן", text:`הצבעים הולכים לפי סדר הקשת בענן (אדום, כתום, צהוב, ירוק, כחול, סגול) וחוזר חלילה. מה הצבע הבא?<br><span class="eq shapes">${arr.join(' , ')} , ?</span>`,
+    type:'mcq', answer, choices: shuffle([...distract])};
+}
+function gCountingPattern(){
+  const fam = Math.random()<0.5?CIRCLES:SQUARES;
+  const shape = fam[ri(0,8)];
+  const arr = [1,2,3,4].map(n=>shape.repeat(n));
+  const answer = shape.repeat(5);
+  const distract = new Set([answer, shape.repeat(4), shape.repeat(6)]);
+  while(distract.size<4){ distract.add(shape.repeat(ri(1,7))); }
+  return {label:"היגיון: כמה יופיעו?", text:`כמה צורות יופיעו בשלב הבא?<br><span class="eq shapes">${arr.join(' , ')} , ?</span>`,
+    type:'mcq', answer, choices: shuffle([...distract])};
+}
+function gCountAttribute(){
+  const fam = Math.random()<0.5?CIRCLES:SQUARES;
+  const colorIdx = ri(0,8); const target = fam[colorIdx];
+  const rowLen = ri(6,9); const targetCount = ri(2, Math.min(5, rowLen-1));
+  let row = Array(targetCount).fill(target);
+  while(row.length<rowLen){ const other=fam[ri(0,8)]; if(other!==target) row.push(other); }
+  row = shuffle(row);
+  return {label:"היגיון: ספרו בעיון", text:`כמה פעמים מופיעה הצורה <span style="font-size:1.7em">${target}</span> בשורה הבאה?<br><span class="eq shapes">${row.join(' ')}</span>`,
+    type:'mcq', answer: targetCount, choices: mcqFrom(targetCount,3)};
+}
+function bLogic_ComboRule(){
+  // Two rules at once, both directly observable from the single example: shape swaps family, AND the count doubles.
+  let i=ri(0,8), j=ri(0,8); while(j===i) j=ri(0,8);
+  const A=CIRCLES[i], Aprime=SQUARES[i]+SQUARES[i];
+  const B=CIRCLES[j], answer=SQUARES[j]+SQUARES[j];
+  const distract=new Set([answer]);
+  while(distract.size<4){
+    const k=ri(0,8);
+    const opts=[SQUARES[k], SQUARES[k]+SQUARES[k]+SQUARES[k], CIRCLES[k]+CIRCLES[k], SQUARES[j]];
+    const opt = opts[ri(0,opts.length-1)];
+    if(opt!==answer) distract.add(opt);
+  }
+  return {label:"בונוס היגיון: שני חוקים ביחד", text:`<span class="eq shapes">${A} ⟶ ${Aprime}</span><br>לפי אותו חוק (יש כאן שני שינויים ביחד!): <span class="eq shapes">${B} ⟶ ?</span>`,
+    type:'mcq', answer, choices: shuffle([...distract])};
+}
+function bLogic_HardCount(){
+  const rowLen = ri(8,10);
+  const shapeFamCount = ri(3, Math.min(6,rowLen-2));
+  let row = [];
+  for(let i=0;i<shapeFamCount;i++) row.push(CIRCLES[ri(0,8)]);
+  while(row.length<rowLen) row.push(SQUARES[ri(0,8)]);
+  row = shuffle(row);
+  return {label:"בונוס היגיון: ספירה חכמה", text:`כמה מהצורות בשורה הבאה הן עיגולים (בכל צבע שהוא)?<br><span class="eq shapes">${row.join(' ')}</span>`,
+    type:'mcq', answer: shapeFamCount, choices: mcqFrom(shapeFamCount,3)};
+}
+
 const pools = {
   1: [gSharing, gMultiplyChain, gLeftover, gFillNumber, gDifferenceMore, gGroups, gRemainder],
   2: [gTwoSymbols, gThreeSymbols, gCirclePattern, gInequality, gSingleSymbolMul, gSumDiff, gCompareSymbols],
   3: [gMachine, gSequence, gMissingMiddleSeq, gMoneyCoins, gCheaperBundle, gChange, gSplitCost],
-  4: [gSharing, gMultiplyChain, gLeftover, gDifferenceMore, gGroups, gRemainder,
+  4: [gAnalogyWord, gOddOneOutCategory, gOddOneOutShape, gShapeAnalogy, gShapeSequence, gCountingPattern, gCountAttribute],
+  5: [gSharing, gMultiplyChain, gLeftover, gDifferenceMore, gGroups, gRemainder,
       gTwoSymbols, gThreeSymbols, gCirclePattern, gInequality, gSingleSymbolMul, gSumDiff, gCompareSymbols,
-      gMachine, gSequence, gMissingMiddleSeq, gMoneyCoins, gCheaperBundle, gChange, gSplitCost]
+      gMachine, gSequence, gMissingMiddleSeq, gMoneyCoins, gCheaperBundle, gChange, gSplitCost,
+      gAnalogyWord, gOddOneOutCategory, gOddOneOutShape, gShapeAnalogy, gShapeSequence, gCountingPattern, gCountAttribute]
 };
 
 // ---- BONUS QUESTIONS (slightly harder, one lollipop-worthy question per streak milestone) ----
@@ -510,7 +657,8 @@ const BONUS_POOLS = {
   1: [bL1_CombineThenDivide, bL1_ChainMinusLoss],
   2: [bL2_ThreeEquations, bL2_FourLinkChain],
   3: [bL3_TwoStepMachine, bL3_ComboMoneyChange],
-  4: [bL4_WordToSymbol, bL4_SpotErrorSequence]
+  4: [bLogic_ComboRule, bLogic_HardCount],
+  5: [bL4_WordToSymbol, bL4_SpotErrorSequence]
 };
 
 
@@ -580,7 +728,19 @@ function renderAnswerArea(q, onAnswer){
     const grid = document.createElement('div'); grid.className='choices';
     q.choices.forEach(c=>{
       const btn=document.createElement('div'); btn.className='choice'; btn.textContent=c;
-      if(!/[\u0590-\u05FF]/.test(String(c))) btn.style.direction='ltr';
+      const str = String(c);
+      const isHebrew = /[\u0590-\u05FF]/.test(str);
+      const isPureNumber = /^-?\d+$/.test(str.trim());
+      if(!isHebrew){
+        btn.style.direction='ltr';
+        if(!isPureNumber){
+          btn.classList.add('emoji-choice');
+          const len = [...str].length;
+          if(len>=8) btn.style.fontSize='1.3rem';
+          else if(len>=4) btn.style.fontSize='1.7rem';
+          else if(len>=2) btn.style.fontSize='2.1rem';
+        }
+      }
       btn.onclick=()=>onAnswer(c, btn, grid);
       grid.appendChild(btn);
     });
