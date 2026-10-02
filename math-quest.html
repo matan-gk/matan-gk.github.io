@@ -472,19 +472,22 @@ function gOddOneOutCategory(){
 function gOddOneOutShape(){
   const byColor = Math.random()<0.5;
   if(byColor){
-    // same shape family throughout; three share one color, one is a different color
-    const fam = SHAPE_FAMILIES[ri(0,2)];
-    let majC=ri(0,8), minC=ri(0,8); while(minC===majC) minC=ri(0,8);
-    const items = [fam[majC], fam[majC], fam[majC]];
-    const oddItem = fam[minC];
+    // three items share one COLOR across two different shape families (not all identical); the odd one is the third, unused family, in a different color
+    const colorIdx = ri(0,8);
+    const [famX,famY,famZ] = shuffle([0,1,2]);
+    const items = [SHAPE_FAMILIES[famX][colorIdx], SHAPE_FAMILIES[famX][colorIdx], SHAPE_FAMILIES[famY][colorIdx]];
+    let oddColorIdx = ri(0,8); while(oddColorIdx===colorIdx) oddColorIdx = ri(0,8);
+    const oddItem = SHAPE_FAMILIES[famZ][oddColorIdx];
     return {label:"היגיון: מי לא שייך לקבוצה?", text:`איזה מהבאים לא שייך לקבוצה?`,
       type:'mcq', answer: oddItem, choices: shuffle([...items, oddItem])};
   } else {
-    // same color throughout; three share one shape family, one is a different family
-    const colorIdx = ri(0,8);
-    let famA=ri(0,2), famB=ri(0,2); while(famB===famA) famB=ri(0,2);
-    const items = [SHAPE_FAMILIES[famA][colorIdx], SHAPE_FAMILIES[famA][colorIdx], SHAPE_FAMILIES[famA][colorIdx]];
-    const oddItem = SHAPE_FAMILIES[famB][colorIdx];
+    // three items share one SHAPE family across two different colors (not all identical); the odd one is a different family, in a third, fresh color
+    const famIdx = ri(0,2);
+    const fam = SHAPE_FAMILIES[famIdx];
+    const [colorX,colorY,colorZ] = shuffle([0,1,2,3,4,5,6,7,8]);
+    const items = [fam[colorX], fam[colorX], fam[colorY]];
+    const otherFamIdx = (famIdx+1+ri(0,1))%3;
+    const oddItem = SHAPE_FAMILIES[otherFamIdx][colorZ];
     return {label:"היגיון: מי לא שייך לקבוצה?", text:`איזה מהבאים לא שייך לקבוצה?`,
       type:'mcq', answer: oddItem, choices: shuffle([...items, oddItem])};
   }
