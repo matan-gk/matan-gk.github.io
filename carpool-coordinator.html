@@ -27,14 +27,20 @@
   .wrap { max-width: 720px; margin: 0 auto; padding: 28px 18px 60px; }
   h1 { font-family: Georgia, "Times New Roman", serif; font-weight: 400; font-size: 30px; margin: 0 0 4px; }
   .sub { color: var(--ink-soft); font-size: 14px; margin: 0 0 22px; }
+  h2.section { font-family: Georgia, serif; font-weight: 400; font-size: 18px; margin: 0 0 10px; }
 
-  .families { display: flex; gap: 10px; margin-bottom: 26px; flex-wrap: wrap; }
-  .fam-chip { display: flex; align-items: center; gap: 8px; background: var(--card);
-    border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px; }
+  .families { display: flex; flex-direction: column; gap: 10px; margin-bottom: 26px; }
+  .fam-card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+  .fam-top { display: flex; align-items: center; gap: 8px; }
   .fam-dot { width: 20px; height: 20px; border-radius: 50%; flex-shrink: 0; }
-  .fam-chip input { border: none; border-bottom: 1.5px dashed var(--line); background: none;
-    font-size: 15px; width: 120px; color: var(--ink); font-family: inherit; padding: 2px 0; }
-  .fam-chip input:focus { outline: none; border-bottom-style: solid; border-bottom-color: var(--ink); }
+  .fam-top input.fam-name { border: none; border-bottom: 1.5px dashed var(--line); background: none;
+    font-size: 15px; font-weight: 600; flex: 1; min-width: 0; color: var(--ink); font-family: inherit; padding: 2px 0; }
+  .fam-top input.fam-name:focus { outline: none; border-bottom-style: solid; border-bottom-color: var(--ink); }
+  .fam-instructions-label { font-size: 11px; color: var(--ink-soft); margin: 8px 0 4px; text-transform: uppercase; letter-spacing: 0.04em; }
+  textarea.fam-instructions { width: 100%; border: 1px solid var(--line); border-radius: 6px; padding: 7px 8px;
+    font-size: 14px; font-family: inherit; color: var(--ink); background: var(--paper); resize: vertical;
+    min-height: 38px; }
+  textarea.fam-instructions::placeholder { color: var(--ink-soft); opacity: .6; }
 
   .day { margin-bottom: 16px; background: var(--card); border: 1px solid var(--line);
     border-radius: 10px; overflow: hidden; }
@@ -46,11 +52,14 @@
   .slot-label { font-size: 12px; color: var(--ink-soft); margin-bottom: 8px; }
   .tag { display: inline-block; font-size: 13px; padding: 2px 10px; border-radius: 999px; margin-bottom: 8px; }
   .tag.empty { background: var(--paper-dark); color: var(--ink-soft); }
-  .assign-row { display: flex; gap: 8px; margin-bottom: 8px; }
+  .assign-row { display: flex; gap: 8px; margin-bottom: 8px; align-items: center; }
   .assign-btn { width: 32px; height: 32px; border-radius: 50%; border: 2px solid transparent;
     cursor: pointer; padding: 0; }
   .assign-btn.selected { border-color: var(--ink); box-shadow: 0 0 0 2px var(--card) inset; }
   .assign-btn:focus-visible, .note:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+  .change-btn { font: inherit; font-size: 13px; padding: 6px 12px; border-radius: 999px;
+    border: 1px solid var(--line); background: var(--paper); color: var(--ink); cursor: pointer; }
+  .note-label { font-size: 11px; color: var(--ink-soft); margin: 2px 0 4px; text-transform: uppercase; letter-spacing: 0.04em; }
   .note { width: 100%; border: 1px solid var(--line); border-radius: 6px; padding: 7px 8px;
     font-size: 14px; font-family: inherit; color: var(--ink); background: var(--paper); }
   .note::placeholder { color: var(--ink-soft); opacity: .6; }
@@ -69,17 +78,18 @@
 <body>
 <div class="wrap">
   <h1>Carpool schedule</h1>
-  <p class="sub">Tap a colored dot to claim a drop-off or pickup. Tap it again to release it.</p>
+  <p class="sub">Tap a colored dot to claim a drop-off or pickup. Everyone with the link sees updates right away.</p>
   <div class="banner" id="banner" hidden></div>
+
+  <h2 class="section">Families</h2>
   <div class="families" id="families"></div>
+
   <div id="days"></div>
   <p class="status" id="status">Loading…</p>
 </div>
 
 <script>
 // ===== CONFIG =====
-// Paste your Firebase Realtime Database URL here, e.g.
-// "https://my-carpool-default-rtdb.europe-west1.firebasedatabase.app"
 const DATABASE_URL = "https://carpool-coordinator-2-default-rtdb.firebaseio.com";
 // Week layout (Israeli school week). Edit freely.
 const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday"];
@@ -98,10 +108,14 @@ if (!room) {
 }
 
 const base = DATABASE_URL.replace(/\/$/, "") + "/carpool/" + room;
+// state.families[id] = { name, instructions }
 let state = { families: {}, slots: {} };
 let renderPending = false;
 
-const famName = (id, i) => state.families[id] || ("Family " + (i + 1));
+function famInfo(id, i) {
+  const f = state.families[id] || {};
+  return { name: f.name || ("Family " + (i + 1)), instructions: f.instructions || "" };
+}
 
 async function api(path, method, body) {
   const res = await fetch(base + path + ".json", {
@@ -116,30 +130,58 @@ function setStatus(t) { document.getElementById("status").textContent = t; }
 
 function render() {
   const ae = document.activeElement;
-  if (ae && ae.tagName === "INPUT") { renderPending = true; return; }
+  if (ae && (ae.tagName === "INPUT" || ae.tagName === "TEXTAREA")) { renderPending = true; return; }
   renderPending = false;
 
   const famDiv = document.getElementById("families");
   famDiv.innerHTML = "";
   FAM_IDS.forEach((id, i) => {
-    const chip = document.createElement("div");
-    chip.className = "fam-chip";
-    chip.innerHTML = '<div class="fam-dot" style="background:var(--fam' + (i + 1) + ')"></div>';
-    const input = document.createElement("input");
-    input.value = famName(id, i);
-    input.maxLength = 20;
-    input.setAttribute("aria-label", "Family " + (i + 1) + " name");
-    let t;
-    const commit = () => {
-      const v = input.value.trim() || ("Family " + (i + 1));
-      state.families[id] = v;
-      api("/families/" + id, "PUT", v).catch(() => setStatus("Couldn't save — check your connection."));
+    const info = famInfo(id, i);
+    const card = document.createElement("div");
+    card.className = "fam-card";
+
+    const top = document.createElement("div");
+    top.className = "fam-top";
+    top.innerHTML = '<div class="fam-dot" style="background:var(--fam' + (i + 1) + ')"></div>';
+
+    const nameInput = document.createElement("input");
+    nameInput.className = "fam-name";
+    nameInput.value = info.name;
+    nameInput.maxLength = 20;
+    nameInput.setAttribute("aria-label", "Family " + (i + 1) + " name");
+    let nameTimer;
+    const commitName = () => {
+      const v = nameInput.value.trim() || ("Family " + (i + 1));
+      state.families[id] = Object.assign({}, state.families[id], { name: v });
+      api("/families/" + id + "/name", "PUT", v).catch(() => setStatus("Couldn't save — check your connection."));
     };
-    input.addEventListener("input", () => { clearTimeout(t); t = setTimeout(commit, 500); });
-    input.addEventListener("blur", () => { clearTimeout(t); commit(); render(); });
-    input.addEventListener("keydown", e => { if (e.key === "Enter") input.blur(); });
-    chip.appendChild(input);
-    famDiv.appendChild(chip);
+    nameInput.addEventListener("input", () => { clearTimeout(nameTimer); nameTimer = setTimeout(commitName, 500); });
+    nameInput.addEventListener("blur", () => { clearTimeout(nameTimer); commitName(); render(); });
+    nameInput.addEventListener("keydown", e => { if (e.key === "Enter") nameInput.blur(); });
+    top.appendChild(nameInput);
+    card.appendChild(top);
+
+    const instrLabel = document.createElement("div");
+    instrLabel.className = "fam-instructions-label";
+    instrLabel.textContent = "Standing instructions";
+    card.appendChild(instrLabel);
+
+    const instrInput = document.createElement("textarea");
+    instrInput.className = "fam-instructions";
+    instrInput.placeholder = "Anything that applies every time — car seat needed, gate code, usual car, phone number…";
+    instrInput.value = info.instructions;
+    instrInput.rows = 1;
+    let instrTimer;
+    const commitInstr = () => {
+      const v = instrInput.value.trim();
+      state.families[id] = Object.assign({}, state.families[id], { instructions: v });
+      api("/families/" + id + "/instructions", "PUT", v || null).catch(() => setStatus("Couldn't save — check your connection."));
+    };
+    instrInput.addEventListener("input", () => { clearTimeout(instrTimer); instrTimer = setTimeout(commitInstr, 600); });
+    instrInput.addEventListener("blur", () => { clearTimeout(instrTimer); commitInstr(); render(); });
+    card.appendChild(instrInput);
+
+    famDiv.appendChild(card);
   });
 
   const daysDiv = document.getElementById("days");
@@ -162,13 +204,13 @@ function render() {
       label.textContent = t.label;
       slotEl.appendChild(label);
 
+      const assignedIdx = FAM_IDS.indexOf(slot.f);
       const tag = document.createElement("div");
-      const idx = FAM_IDS.indexOf(slot.f);
-      if (idx >= 0) {
+      if (assignedIdx >= 0) {
         tag.className = "tag";
-        tag.style.background = "var(--fam" + (idx + 1) + "-bg)";
-        tag.style.color = "var(--fam" + (idx + 1) + ")";
-        tag.textContent = famName(slot.f, idx);
+        tag.style.background = "var(--fam" + (assignedIdx + 1) + "-bg)";
+        tag.style.color = "var(--fam" + (assignedIdx + 1) + ")";
+        tag.textContent = famInfo(slot.f, assignedIdx).name;
       } else {
         tag.className = "tag empty";
         tag.textContent = "Nobody yet";
@@ -177,20 +219,35 @@ function render() {
 
       const row = document.createElement("div");
       row.className = "assign-row";
-      FAM_IDS.forEach((id, i) => {
-        const b = document.createElement("button");
-        b.className = "assign-btn" + (slot.f === id ? " selected" : "");
-        b.style.background = "var(--fam" + (i + 1) + ")";
-        b.setAttribute("aria-label", famName(id, i));
-        b.setAttribute("aria-pressed", slot.f === id);
-        b.addEventListener("click", () => setSlot(key, { f: slot.f === id ? null : id }));
-        row.appendChild(b);
-      });
+      if (assignedIdx >= 0) {
+        // Someone is assigned: show only a "Change" button, no other colors.
+        const changeBtn = document.createElement("button");
+        changeBtn.className = "change-btn";
+        changeBtn.textContent = "Change";
+        changeBtn.addEventListener("click", () => setSlot(key, { f: null }));
+        row.appendChild(changeBtn);
+      } else {
+        // Nobody assigned yet: show all family dots to choose from.
+        FAM_IDS.forEach((id, i) => {
+          const info = famInfo(id, i);
+          const b = document.createElement("button");
+          b.className = "assign-btn";
+          b.style.background = "var(--fam" + (i + 1) + ")";
+          b.setAttribute("aria-label", info.name);
+          b.addEventListener("click", () => setSlot(key, { f: id }));
+          row.appendChild(b);
+        });
+      }
       slotEl.appendChild(row);
+
+      const noteLabel = document.createElement("div");
+      noteLabel.className = "note-label";
+      noteLabel.textContent = "Additional notes";
+      slotEl.appendChild(noteLabel);
 
       const note = document.createElement("input");
       note.className = "note";
-      note.placeholder = "Time, address, notes";
+      note.placeholder = "Just for this " + t.label.toLowerCase() + " — time, address…";
       note.value = slot.n || "";
       note.maxLength = 120;
       note.addEventListener("blur", () => {
@@ -241,13 +298,9 @@ function showBanner() {
 document.addEventListener("focusout", () => setTimeout(() => { if (renderPending) render(); }, 0));
 
 render();
-if (!DATABASE_URL) {
-  setStatus("Setup needed: add your Firebase URL to DATABASE_URL at the top of this file's script.");
-} else {
-  if (isNewRoom) showBanner();
-  poll();
-  setInterval(poll, POLL_MS);
-}
+if (isNewRoom) showBanner();
+poll();
+setInterval(poll, POLL_MS);
 </script>
 </body>
 </html>
