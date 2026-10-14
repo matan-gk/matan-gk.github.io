@@ -656,7 +656,12 @@ const GRID_RULES = [
   {name:"הלוח סימטרי משמאל לימין", f:g=>[0,1,2].every(r=>g[r*3]===g[r*3+2])},
   {name:"הלוח סימטרי מלמעלה למטה", f:g=>[0,1,2].every(c=>g[c]===g[6+c])},
   {name:"כל הריבועים השחורים נמצאים בפינות", f:g=>g.every((x,i)=>!x||[0,2,6,8].includes(i)), corners:true},
-  {name:"הלוח סימטרי לפי האלכסון", f:g=>g[1]===g[3]&&g[2]===g[6]&&g[5]===g[7]},
+];
+// other visible symmetries: never allowed to split the four boards 2/2 (that would confuse the child)
+const GRID_SYMS = [
+  g=>g[1]===g[3]&&g[2]===g[6]&&g[5]===g[7],
+  g=>g[1]===g[5]&&g[0]===g[8]&&g[3]===g[7],
+  g=>[0,1,2,3].every(i=>g[i]===g[8-i]),
 ];
 const GRID_EXTRA = [
   g=>sumG(g)%2===0, g=>g[4]===1, g=>[0,1,2].some(r=>g[r*3]&&g[r*3+1]&&g[r*3+2]),
@@ -675,8 +680,9 @@ function randGrid(want, rule){
   return null;
 }
 function gOddGrid(){
-  for(let attempt=0; attempt<300; attempt++){
-    const R = pick(GRID_RULES);
+  for(let attempt=0; attempt<1500; attempt++){
+    const kk = ri(3,5);
+    const R = pick([...GRID_RULES, {name:`בכל לוח יש בדיוק ${kk} ריבועים שחורים`, f:g=>sumG(g)===kk}, {name:"הריבוע האמצעי שחור", f:g=>g[4]===1}]);
     const goods=[], keys=new Set();
     let ok=true;
     while(goods.length<3){
@@ -689,7 +695,8 @@ function gOddGrid(){
     const oddIdx = all.findIndex(x=>x.odd);
     // every other possible rule must not point at a different grid
     let clean=true;
-    [...GRID_RULES.map(r=>r.f), ...GRID_EXTRA].forEach(f=>{
+    [...GRID_RULES.map(r=>r.f), ...GRID_SYMS].forEach(f=>{ if(all.filter(x=>f(x.g)).length===2) clean=false; });
+    [...GRID_RULES.map(r=>r.f), ...GRID_SYMS, ...GRID_EXTRA].forEach(f=>{
       const vals = all.map(x=>f(x.g)); const t = vals.filter(Boolean).length;
       if(t===3){ if(vals.findIndex(v=>!v)!==oddIdx) clean=false; }
       else if(t===1){ if(vals.findIndex(v=>v)!==oddIdx) clean=false; }
