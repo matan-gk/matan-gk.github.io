@@ -144,6 +144,74 @@ h1{
 .look.locked::after{content:'🔒'; position:absolute; font-size:1rem}
 .look.active{border-color:var(--pink); box-shadow:0 0 10px rgba(255,111,176,.5)}
 .roomhint{font-size:.75rem; color:var(--muted); margin:2px 0 8px; font-weight:600}
+
+.chipbtn{border:0; cursor:pointer; color:var(--text); font-family:'Rubik',sans-serif}
+.chipbtn:active{transform:scale(.97)}
+.roomoverlay.profs{z-index:60}
+.prow{display:flex; align-items:center; gap:10px; background:var(--card2); border:2px solid transparent; border-radius:14px; padding:10px; margin-bottom:8px}
+.prow.active{border-color:var(--yellow)}
+.pav{font-size:2rem; line-height:1}
+.pinfo{flex:1; min-width:0; display:flex; flex-direction:column}
+.pinfo b{font-size:1rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.pinfo small{color:var(--muted); font-weight:600}
+.pinfo small .nw{white-space:nowrap}
+.pact{display:flex; gap:6px; align-items:center}
+.pbtn{border:0; border-radius:999px; padding:7px 12px; font-weight:800; font-family:'Rubik',sans-serif; cursor:pointer; background:var(--card); color:var(--text); font-size:.85rem}
+.pbtn.main{background:linear-gradient(90deg,var(--teal),var(--purple)); color:#fff}
+.pbtn.danger{background:var(--bad); color:#3a0a12}
+.pbadge{font-size:.78rem; font-weight:800; color:var(--teal)}
+.pconfirm{flex-basis:100%; display:flex; gap:8px; align-items:center; flex-wrap:wrap; font-size:.85rem; font-weight:600}
+.prow.confirming{flex-wrap:wrap}
+.pform label.lbl{display:block; font-weight:800; font-size:.85rem; color:var(--purple); margin:10px 0 6px}
+.pform input[type=text]{width:100%; font-size:1.1rem; padding:10px 12px; border-radius:12px; border:2px solid var(--card2); background:var(--card2); color:var(--text); font-family:'Rubik',sans-serif}
+.gopts{display:grid; grid-template-columns:repeat(3,1fr); gap:8px}
+.gopt{position:relative; display:flex; flex-direction:column; align-items:center; gap:2px; background:var(--card2); border:3px solid transparent; border-radius:14px; padding:10px 4px; cursor:pointer; text-align:center}
+.gopt input{position:absolute; opacity:0; pointer-events:none}
+.gopt .gav{font-size:1.8rem}
+.gopt small{color:var(--muted); font-weight:600; font-size:.72rem}
+.gopt.sel,.gopt:has(input:checked){border-color:var(--pink); background:var(--card)}
+.perr{color:var(--bad); font-weight:700; font-size:.85rem; min-height:1.2em; margin-top:6px}
+.pbtns{display:flex; gap:8px; margin-top:12px}
+.pbtns .btn{flex:1}
+.pbtns .btn.ghost{background:var(--card2); color:var(--text)}
+.pwelcome{text-align:center; font-weight:600; margin:0 0 4px}
+.ptabs{display:flex; gap:6px; margin:2px 0 12px; background:var(--card2); border-radius:999px; padding:4px}
+.ptab{flex:1; border:0; border-radius:999px; padding:8px 6px; font-weight:800; font-family:'Rubik',sans-serif; cursor:pointer; background:transparent; color:var(--muted); font-size:.9rem}
+.ptab.on{background:var(--card); color:var(--purple); box-shadow:0 1px 6px var(--shadow)}
+.ppick{display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px}
+.ppick .pbtn.on{background:linear-gradient(90deg,var(--teal),var(--purple)); color:#fff}
+.sk-hero{display:flex; align-items:center; gap:12px; background:var(--card2); border-radius:16px; padding:12px; margin-bottom:10px}
+.sk-hero .big{font-size:2.4rem; line-height:1}
+.sk-hero b{display:block; font-size:1.05rem}
+.sk-hero small{color:var(--muted); font-weight:600}
+.sk-facts{display:grid; grid-template-columns:repeat(3,1fr); gap:6px; margin-bottom:6px}
+.sk-fact{background:var(--card2); border-radius:12px; padding:8px 4px; text-align:center}
+.sk-fact b{display:block; font-family:'Baloo 2',sans-serif; font-size:1.15rem; color:var(--purple)}
+.sk-fact small{color:var(--muted); font-weight:600; font-size:.72rem}
+.sk-h{font-size:.82rem; font-weight:800; margin:14px 0 6px; display:flex; align-items:center; gap:6px}
+.sk-h span.cnt{color:var(--muted); font-weight:700}
+.sk-bar{display:block; height:9px; border-radius:99px; background:var(--card2); overflow:hidden; min-width:48px}
+.sk-bar i{display:block; height:100%; border-radius:99px}
+.sk-skill .sk-bar{background:var(--card)}
+.sk-area{display:grid; grid-template-columns:1fr 70px 40px 22px; align-items:center; gap:6px; padding:5px 0; font-size:.88rem; font-weight:600}
+.sk-skill{background:var(--card2); border-radius:12px; margin-bottom:6px}
+.sk-skill>summary{list-style:none; cursor:pointer; display:grid; grid-template-columns:1fr 52px 38px 20px 12px; align-items:center; gap:6px; padding:9px 10px; font-size:.88rem; font-weight:600}
+.sk-skill>summary::-webkit-details-marker{display:none}
+.sk-skill>summary::after{content:'▾'; color:var(--muted); font-size:.8rem}
+.sk-skill[open]>summary::after{content:'▴'}
+.sk-name{overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.sk-pct{text-align:end; font-weight:800}
+.sk-det{padding:2px 12px 10px; font-size:.82rem; font-weight:600; color:var(--text); line-height:1.6}
+.sk-det div{border-top:1px dashed var(--shadow); padding-top:4px; margin-top:4px}
+.sk-det .m{color:var(--muted)}
+.sk-days{display:flex; align-items:flex-end; gap:3px; height:64px; margin:6px 0 2px}
+.sk-day{flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; height:100%; gap:2px}
+.sk-day i{display:block; width:100%; min-height:2px; border-radius:4px 4px 0 0; background:var(--purple)}
+.sk-day i.none{background:var(--card2)}
+.sk-day small{font-size:.62rem; color:var(--muted); font-weight:700}
+.sk-empty{text-align:center; padding:26px 8px; font-weight:600; color:var(--muted)}
+.sk-empty .big{font-size:2.6rem; display:block; margin-bottom:6px}
+.sk-legend{font-size:.75rem; color:var(--muted); font-weight:600; line-height:1.7; margin-top:14px}
 .stickerbook span{font-size:1.3rem}
 .stickerbook .empty{color:var(--muted); font-size:.8rem; font-weight:600}
 .levels{display:flex; gap:8px; margin:-6px -4px 14px; overflow-x:auto; padding:8px 4px 8px}
@@ -239,6 +307,7 @@ footer{text-align:center; color:var(--muted); font-size:.75rem; margin-top:16px}
   <div class="hud">
     <div class="chip">⭐ ניקוד: <span id="score">0</span></div>
     <div class="chip">🔥 רצף: <span id="streak">0</span></div>
+    <button type="button" class="chip chipbtn" id="profileChip" aria-label="פרופילים">👤 <span id="profileName"></span> ⚙️</button>
   </div>
 
   <button type="button" class="rewardstrip" id="rewardsStrip" aria-label="פתחי את חדר המתנות">
@@ -251,6 +320,15 @@ footer{text-align:center; color:var(--muted); font-size:.75rem; margin-top:16px}
     </span>
     <span class="rs-recent" id="rsRecent"><span class="rs-empty">עוד אין מתנות 🎀</span></span>
   </button>
+  <div class="roomoverlay profs" id="profOverlay" hidden>
+    <div class="room" role="dialog" aria-label="ניהול פרופילים">
+      <div class="roomhead">
+        <div class="roomtitle" id="profTitle">⚙️ פרופילים</div>
+        <button type="button" class="roomclose" id="profClose" aria-label="סגירה">✕</button>
+      </div>
+      <div class="roombody" id="profBody"></div>
+    </div>
+  </div>
   <div class="roomoverlay celeb" id="celebOverlay" hidden>
     <div class="room celebbox" role="dialog"><div class="celebbody" id="celebBody"></div><div class="celebbtns" id="celebBtns"></div></div>
   </div>
@@ -365,31 +443,297 @@ const LOOKS = [
 ];
 const MERGE_COST = 10;   // identical items needed to merge into an upgraded one, and upgraded items needed for a new look
 const STICKERS = ["🦄","🧁","🍦","🍩","🌈","🍓","🍒","🎀","🍬","🍨","🩷","✨","🍭","🧋"];
-const PRAISE = ["מעולה! 🌟","כל הכבוד!","קאפקייק שמחה מאוד! 🦄","פגיעה מדויקת! 🎯","וואו, איזו גאונה! 💫"];
+function childName(){ const p=activeProfile(); return p && p.name ? p.name.trim() : ''; }
+function praise(){
+  const t=PRAISE[ri(0,PRAISE.length-1)]; const n=childName();
+  if(t==='@@GENIUS@@') return G('וואו, איזו גאונה! 💫','וואו, איזה גאון! 💫','וואו, איזה גאונים! 💫');
+  if(t==='@@NAME1@@') return n ? 'כל הכבוד, '+n+'! 🌟' : 'כל הכבוד! 🌟';
+  if(t==='@@NAME2@@') return n ? n+', '+G('את מדהימה','אתה מדהים','אתם מדהימים')+'! ✨' : G('את מדהימה','אתה מדהים','אתם מדהימים')+'! ✨';
+  return t; }
+const PRAISE = ["מעולה! 🌟","כל הכבוד!","קאפקייק שמחה מאוד! 🦄","פגיעה מדויקת! 🎯","@@GENIUS@@","@@NAME1@@","@@NAME2@@"];
 let level = 1, score = 0, streak = 0, current = null, collection = [], lollipops = [], bonusActive = false;
 let golden = [], looks = [], activeLook = -1;   // upgraded rewards, unlocked look indexes, currently worn look (-1 = automatic moods)
 const COTTON_CANDY_IMG = "data:image/webp;base64,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";
-const SAVE_KEY = 'cupcakeQuestSave_v1';
+// ===== PROFILES & STORAGE =====
+// v1 (old): one save object under 'cupcakeQuestSave_v1'. It is never modified or deleted, so it stays as a backup.
+// v2/v3 (current): {version:3, activeId, profiles:[{id,name,gender,progress:{...},stats:{...}}]} under 'cupcakeQuestSave_v2'.
+// (version 3 only adds the optional per-profile `stats`; the key is unchanged and version-2 data loads as is, with empty stats.)
+const SAVE_KEY_V1 = 'cupcakeQuestSave_v1';
+const SAVE_KEY = 'cupcakeQuestSave_v2';
+const MAX_PROFILES = 8;
+let store = {version:3, activeId:null, profiles:[]};
+let curGender = 'f';                                   // 'f' = girl, 'm' = boy, 'n' = neutral (plural address)
+const G = (f,m,n) => curGender==='m' ? m : (curGender==='n' ? n : f);
+const GENDER_INFO = {
+  f:{label:'בת',     avatar:'👧', example:'לחצי כאן'},
+  m:{label:'בן',     avatar:'👦', example:'לחץ כאן'},
+  n:{label:'ניטרלי', avatar:'🧒', example:'לחצו כאן'}
+};
+function activeProfile(){ return store.profiles.find(p=>p.id===store.activeId) || null; }
+function profileName(p, i){ return (p.name && p.name.trim()) || ('פרופיל '+((i>=0?i:store.profiles.indexOf(p))+1)); }
+function captureProgress(){ return {score,streak,collection,lollipops,level,golden,looks,activeLook}; }
+function applyProgress(d){
+  d = (d && typeof d==='object') ? d : {};
+  score  = typeof d.score==='number' ? d.score : 0;
+  streak = typeof d.streak==='number' ? d.streak : 0;
+  collection = Array.isArray(d.collection) ? d.collection.filter(x=>typeof x==='string') : [];
+  lollipops  = Array.isArray(d.lollipops) ? d.lollipops.slice() : [];
+  golden     = Array.isArray(d.golden) ? d.golden.filter(x=>typeof x==='string') : [];
+  // the swirl 🍥 was replaced by the lollipop 🍭: carry old saves over
+  collection = collection.map(x=>x==='🍥'?'🍭':x); golden = golden.map(x=>x==='🍥'?'🍭':x);
+  looks = Array.isArray(d.looks) ? d.looks.filter(i=>Number.isInteger(i)&&i>=0&&i<LOOKS.length) : [];
+  activeLook = (Number.isInteger(d.activeLook) && looks.includes(d.activeLook)) ? d.activeLook : -1;
+  level = (typeof d.level==='number' && d.level>=1 && d.level<=5) ? d.level : 1;
+}
+function persist(){ try{ localStorage.setItem(SAVE_KEY, JSON.stringify(store)); }catch(e){} }
 function saveState(){
-  try{ localStorage.setItem(SAVE_KEY, JSON.stringify({score,streak,collection,lollipops,level,golden,looks,activeLook})); }catch(e){}
+  const p = activeProfile();
+  if(p){ p.progress = captureProgress(); persist(); }
+}
+function newProfileId(){ return 'p'+Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
+function makeProfile(name, gender, progress){
+  return {id:newProfileId(), name:(name||'').trim().slice(0,20), gender:GENDER_INFO[gender]?gender:'n', progress:progress||{}, stats:statsNew()};
 }
 function loadState(){
-  try{
-    const raw = localStorage.getItem(SAVE_KEY);
-    if(!raw) return;
-    const d = JSON.parse(raw);
-    if(typeof d.score==='number') score=d.score;
-    if(typeof d.streak==='number') streak=d.streak;
-    if(Array.isArray(d.collection)) collection=d.collection;
-    if(Array.isArray(d.lollipops)) lollipops=d.lollipops;
-    if(Array.isArray(d.golden)) golden=d.golden.filter(x=>typeof x==='string');
-    // the swirl 🍥 was replaced by the lollipop 🍭: carry old saves over
-    collection = collection.map(x=>x==='🍥'?'🍭':x); golden = golden.map(x=>x==='🍥'?'🍭':x);
-    if(Array.isArray(d.looks)) looks=d.looks.filter(i=>Number.isInteger(i)&&i>=0&&i<LOOKS.length);
-    if(Number.isInteger(d.activeLook) && looks.includes(d.activeLook)) activeLook=d.activeLook;
-    if(typeof d.level==='number' && d.level>=1 && d.level<=5) level=d.level;
-  }catch(e){}
+  let raw2=null, raw1=null;
+  try{ raw2 = localStorage.getItem(SAVE_KEY); }catch(e){}
+  if(raw2){
+    try{
+      const d = JSON.parse(raw2);
+      if(d && Array.isArray(d.profiles) && d.profiles.length){
+        store = {version:3, activeId:d.activeId, profiles:d.profiles.filter(p=>p&&typeof p.id==='string').map(p=>({id:p.id, name:typeof p.name==='string'?p.name:'', gender:GENDER_INFO[p.gender]?p.gender:'f', progress:p.progress||{}, stats:statsSanitize(p.stats)}))};
+        if(!store.profiles.length) throw new Error('no profiles');
+        if(!activeProfile()) store.activeId = store.profiles[0].id;
+        enterProfile(); return;
+      }
+    }catch(e){
+      // unreadable v2 data: keep a copy of it, then fall through to the old save (or a fresh start)
+      try{ localStorage.setItem(SAVE_KEY+'_corrupt_backup', raw2); }catch(e2){}
+    }
+  }
+  try{ raw1 = localStorage.getItem(SAVE_KEY_V1); }catch(e){}
+  if(raw1){
+    try{
+      const old = JSON.parse(raw1);
+      // existing single-player save becomes the first profile (girl wording, as before); nothing is lost
+      const prof = makeProfile('', 'f', old);
+      store = {version:3, activeId:prof.id, profiles:[prof]};
+      enterProfile(); persist(); return;
+    }catch(e){}
+  }
+  store = {version:3, activeId:null, profiles:[]};   // brand new player: the welcome screen creates the first profile
+  applyProgress({}); curGender='f';
 }
+function enterProfile(){
+  const p = activeProfile(); if(!p) return;
+  curGender = GENDER_INFO[p.gender] ? p.gender : 'f';
+  applyProgress(p.progress);
+}
+
+// ===== STATS ENGINE =====
+// No UI. Pure data + functions; every threshold, label and window size lives in STATS_CONFIG / SKILL_META below.
+// Per-profile data (profile.stats): {v:1, log:[record...], daily:{'YYYY-MM-DD':{skillId:{n,c,t}}}}
+//   record: {t:time ms, s:skillId, l:level, b:1 if bonus, c:1 correct/0 wrong, d:seconds, x:chosen answer*, a:correct answer*}   (*wrong answers only)
+//   When the log passes logCap, the oldest records are folded into the daily summaries (n=answers, c=correct, t=seconds) and removed.
+// Skill id = the question generator's function name (see SKILL_META). From the browser console: cqStats() prints the active profile's report.
+const STATS_CONFIG = {
+  logCap: 2000,          // raw answer records kept per profile
+  window: 30,            // the last N answers of ONE skill decide that skill's current label
+  minAnswers: 8,         // fewer answers than this in the window => "not enough data", never a label
+  maxSeconds: 120,       // one answer's time is capped here (a child who wandered off)
+  listSize: 5,           // how many skills the weakest / strongest lists hold
+  // Label bands, judged on current accuracy only (no comparison with the past). The highest band whose min <= accuracy wins.
+  bands: [
+    {id:'solid',    min:0.85, emoji:'⭐', label:'חזק'},
+    {id:'ontheway', min:0.60, emoji:'🌿', label:'בדרך'},
+    {id:'practice', min:0,    emoji:'🌱', label:'דורש תרגול'}
+  ],
+  insufficient: {id:'unknown', emoji:'❔', label:'אין מספיק נתונים'},
+  // Trend is separate from the label: the latest `window` answers against the `window` before them.
+  trend: {
+    window: 30, minPerWindow: 8,
+    flat: 0.10,          // a change smaller than this (as a fraction, 0.10 = 10 points) counts as flat
+    labels: {up:{emoji:'📈', label:'משתפר'}, flat:{emoji:'➡️', label:'יציב'}, down:{emoji:'📉', label:'יורד'}},
+    insufficient: {emoji:'', label:''}
+  },
+  areas: {wordproblems:'בעיות מילוליות', symbols:'חידות סמלים', patterns:'דפוסים וסדרות', money:'כסף', logic:'היגיון מילולי', visual:'היגיון חזותי', other:'אחר'}
+};
+// One entry per question generator. Optional per skill: bands:[...] (replaces the global bands) or bandShift:-0.05 (moves every threshold above 0).
+const SKILL_META = {
+  gSharing:{area:'wordproblems', he:'בעיית חלוקה'}, gMultiplyChain:{area:'wordproblems', he:'בעיית כפל'}, gLeftover:{area:'wordproblems', he:'בעיית שאריות'},
+  gFillNumber:{area:'patterns', he:'השלימו את המספר'}, gDifferenceMore:{area:'wordproblems', he:'בעיית הפרש'}, gGroups:{area:'wordproblems', he:'בעיית קבוצות'}, gRemainder:{area:'wordproblems', he:'בעיית שארית'},
+  gTwoSymbols:{area:'symbols', he:'חידת סמלים'}, gThreeSymbols:{area:'symbols', he:'חידת סמלים משולשת'}, gCirclePattern:{area:'symbols', he:'מספרים בקשת'}, gInequality:{area:'symbols', he:'אי-שוויון'},
+  gSingleSymbolMul:{area:'symbols', he:'חידת סמל בודד'}, gSumDiff:{area:'symbols', he:'סכום והפרש'}, gCompareSymbols:{area:'symbols', he:'השוואת סמלים'},
+  gMachine:{area:'patterns', he:'מכונת הקינוחים'}, gSequence:{area:'patterns', he:'סדרה'}, gMissingMiddleSeq:{area:'patterns', he:'סדרה עם חור'},
+  gMoneyCoins:{area:'money', he:'מטבעות'}, gCheaperBundle:{area:'money', he:'השוואת מחירים'}, gChange:{area:'money', he:'עודף'}, gSplitCost:{area:'money', he:'חלוקת הוצאה'},
+  gAnalogyWord:{area:'logic', he:'אנלוגיה'}, gPairAnalogy:{area:'logic', he:'זוגות תואמים'}, gOddOneOutCategory:{area:'logic', he:'מי לא שייך (קבוצה)'}, gHiddenOdd:{area:'logic', he:'מי לא שייך'},
+  gHeightOrder:{area:'logic', he:'סדר גבהים'}, gLogicGrid:{area:'logic', he:'טבלת רמזים'},
+  gOddOneOutShape:{area:'visual', he:'מי לא שייך (צורות)'}, gShapeAnalogy:{area:'visual', he:'מצאו את החוק'}, gShapeSequence:{area:'visual', he:'סדר הקשת בענן'}, gCountingPattern:{area:'visual', he:'כמה יופיעו'},
+  gCountAttribute:{area:'visual', he:'ספרו בעיון'}, gOddGrid:{area:'visual', he:'איזה לוח שונה'}, gMovingSquare:{area:'visual', he:'הריבוע ההולך'}, gTwoRules:{area:'visual', he:'שני חוקים ביחד'},
+  gGrowingSteps:{area:'patterns', he:'צעדים שגדלים'}, gCondCount:{area:'visual', he:'ספירה חכמה'},
+  // bonus questions are their own skills (harder, so they are judged separately)
+  bL1_CombineThenDivide:{area:'wordproblems', bonus:1, he:'בונוס: חלוקה דו-שלבית'}, bL1_ChainMinusLoss:{area:'wordproblems', bonus:1, he:'בונוס: שרשרת עם אובדן'},
+  bL2_ThreeEquations:{area:'symbols', bonus:1, he:'בונוס: שלוש משוואות'}, bL2_FourLinkChain:{area:'symbols', bonus:1, he:'בונוס: שרשרת של ארבעה'},
+  bL3_TwoStepMachine:{area:'patterns', bonus:1, he:'בונוס: מכונה כפולה'}, bL3_ComboMoneyChange:{area:'money', bonus:1, he:'בונוס: כסף ועודף'},
+  bL4_WordToSymbol:{area:'symbols', bonus:1, he:'בונוס: משימה כפולה'}, bL4_SpotErrorSequence:{area:'patterns', bonus:1, he:'בונוס: מצאו את הטעות'},
+  bLogic_ComboRule:{area:'visual', bonus:1, he:'בונוס: שני חוקים'}, bLogic_HardCount:{area:'visual', bonus:1, he:'בונוס: ספירה חכמה'},
+  bLogicMatrix:{area:'visual', bonus:1, he:'בונוס: מטריצה'}, bLogicGrid2:{area:'logic', bonus:1, he:'בונוס: טבלת רמזים'}
+};
+
+const statsPad2 = n => String(n).padStart(2,'0');
+function statsDateKey(ts){ const d=new Date(ts); return d.getFullYear()+'-'+statsPad2(d.getMonth()+1)+'-'+statsPad2(d.getDate()); }
+function statsNew(){ return {v:1, log:[], daily:{}}; }
+function skillInfo(id){ const m=SKILL_META[id]||{}; return {id, area:m.area||'other', he:m.he||id, bonus:!!m.bonus}; }
+
+// ---- storage hygiene: accept anything, keep only well-formed data ----
+function statsSanitize(s, cfg){
+  cfg = cfg||STATS_CONFIG;
+  const out = statsNew();
+  if(!s || typeof s!=='object') return out;
+  if(Array.isArray(s.log)){
+    out.log = s.log.filter(r=>r && typeof r.s==='string' && Number.isFinite(r.t) && (r.c===0||r.c===1)).map(r=>{
+      const o = {t:r.t, s:r.s, l:Number.isInteger(r.l)?r.l:0, b:r.b?1:0, c:r.c, d:Number.isFinite(r.d)?Math.max(0,r.d):0};
+      if(r.c===0){ if(r.x!==undefined) o.x=String(r.x).slice(0,24); if(r.a!==undefined) o.a=String(r.a).slice(0,24); }
+      return o;
+    }).sort((a,b)=>a.t-b.t);
+  }
+  if(s.daily && typeof s.daily==='object'){
+    for(const [day,m] of Object.entries(s.daily)){
+      if(!m || typeof m!=='object') continue;
+      for(const [sk,v] of Object.entries(m)){
+        if(v && Number.isFinite(v.n) && Number.isFinite(v.c) && v.c>=0 && v.n>=v.c) (out.daily[day] = out.daily[day]||{})[sk] = {n:v.n, c:v.c, t:Number.isFinite(v.t)?v.t:0};
+      }
+    }
+  }
+  statsCompact(out, cfg);
+  return out;
+}
+
+// ---- recording ----
+function statsRollInto(stats, r){
+  const day = statsDateKey(r.t);
+  const m = (stats.daily[day] = stats.daily[day]||{});
+  const e = (m[r.s] = m[r.s]||{n:0,c:0,t:0});
+  e.n++; e.c+=r.c; e.t = Math.round((e.t + r.d)*10)/10;
+}
+function statsCompact(stats, cfg){
+  cfg = cfg||STATS_CONFIG;
+  while(stats.log.length > cfg.logCap) statsRollInto(stats, stats.log.shift());
+}
+// rec: {skill, level, bonus, ok, seconds, chosen, correct, t}
+function statsRecord(stats, rec, cfg){
+  cfg = cfg||STATS_CONFIG;
+  const r = {t:Number.isFinite(rec.t)?rec.t:Date.now(), s:rec.skill, l:rec.level|0, b:rec.bonus?1:0, c:rec.ok?1:0,
+             d:Math.round(Math.min(cfg.maxSeconds, Math.max(0, rec.seconds||0))*10)/10};
+  if(!rec.ok){ if(rec.chosen!==undefined) r.x=String(rec.chosen).slice(0,24); if(rec.correct!==undefined) r.a=String(rec.correct).slice(0,24); }
+  const L = stats.log;
+  if(L.length && r.t < L[L.length-1].t) r.t = L[L.length-1].t;   // keep the log ordered even if the clock moved back
+  L.push(r);
+  statsCompact(stats, cfg);
+  return r;
+}
+
+// ---- measuring ----
+function statsMedian(a){ if(!a.length) return null; const s=a.slice().sort((x,y)=>x-y), m=s.length>>1; return s.length%2 ? s[m] : (s[m-1]+s[m])/2; }
+function statsSummarize(recs){
+  const n=recs.length, c=recs.reduce((t,r)=>t+r.c,0);
+  return {n, correct:c, accuracy:n?c/n:null, medianSec:statsMedian(recs.map(r=>r.d))};
+}
+// the last `size` records of a skill, skipping the `skip` most recent ones (newest first)
+function statsRecent(stats, skill, size, skip){
+  const out=[]; let skipped=0; skip=skip||0;
+  for(let i=stats.log.length-1; i>=0 && out.length<size; i--){
+    const r=stats.log[i]; if(r.s!==skill) continue;
+    if(skipped<skip){ skipped++; continue; }
+    out.push(r);
+  }
+  return out;
+}
+function statsBand(acc, skill, cfg){
+  cfg = cfg||STATS_CONFIG;
+  const meta = SKILL_META[skill]||{};
+  const bands = (meta.bands||cfg.bands).slice().sort((a,b)=>b.min-a.min);
+  const shift = meta.bandShift||0;
+  for(const b of bands){ if(acc >= (b.min>0 ? b.min+shift : b.min) - 1e-9) return {id:b.id, emoji:b.emoji, label:b.label}; }
+  const last = bands[bands.length-1]; return {id:last.id, emoji:last.emoji, label:last.label};
+}
+function statsPoolBand(acc, cfg){ return statsBand(acc, null, cfg); }
+
+// assessment: how she is right now, from the recent window only
+function assessSkill(stats, skill, cfg){
+  cfg = cfg||STATS_CONFIG;
+  const info = skillInfo(skill);
+  const w = statsSummarize(statsRecent(stats, skill, cfg.window, 0));
+  const ready = w.n >= cfg.minAnswers;
+  return {skill, name:info.he, area:info.area, bonus:info.bonus, n:w.n, correct:w.correct, accuracy:w.accuracy, medianSec:w.medianSec,
+          ready, band: ready ? statsBand(w.accuracy, skill, cfg) : Object.assign({}, cfg.insufficient)};
+}
+// trend: separate from the assessment; latest window against the window before it
+function trendSkill(stats, skill, cfg){
+  cfg = cfg||STATS_CONFIG;
+  const T = cfg.trend;
+  const rec = statsSummarize(statsRecent(stats, skill, T.window, 0));
+  const prev = statsSummarize(statsRecent(stats, skill, T.window, T.window));
+  const ready = rec.n >= T.minPerWindow && prev.n >= T.minPerWindow;
+  if(!ready) return {ready:false, dir:null, delta:null, recent:{n:rec.n, accuracy:rec.accuracy}, previous:{n:prev.n, accuracy:prev.accuracy}, ...T.insufficient};
+  const delta = rec.accuracy - prev.accuracy;
+  const dir = delta > T.flat ? 'up' : (delta < -T.flat ? 'down' : 'flat');
+  return {ready:true, dir, delta, recent:{n:rec.n, accuracy:rec.accuracy}, previous:{n:prev.n, accuracy:prev.accuracy}, ...T.labels[dir]};
+}
+// everything ever answered for a skill (daily summaries + raw log)
+function lifetimeSkill(stats, skill){
+  let n=0,c=0,t=0;
+  for(const m of Object.values(stats.daily)){ const e=m[skill]; if(e){ n+=e.n; c+=e.c; t+=e.t; } }
+  for(const r of stats.log) if(r.s===skill){ n++; c+=r.c; t+=r.d; }
+  return {n, correct:c, accuracy:n?c/n:null, avgSec:n?t/n:null};
+}
+function statsSkillIds(stats){
+  const ids = new Set();
+  for(const m of Object.values(stats.daily)) for(const k of Object.keys(m)) ids.add(k);
+  for(const r of stats.log) ids.add(r.s);
+  return [...ids];
+}
+// wrong numeric answers grouped by (chosen - correct), e.g. +1, -10: the "type of mistake" view
+function numericErrorPatterns(stats, skill, k){
+  const h = new Map(); let other=0;
+  for(const r of stats.log){
+    if(r.c || (skill && r.s!==skill)) continue;
+    const x=Number(r.x), a=Number(r.a);
+    if(r.x!==undefined && r.a!==undefined && r.x!=='' && r.a!=='' && Number.isFinite(x) && Number.isFinite(a)){ const d=x-a; h.set(d,(h.get(d)||0)+1); } else other++;
+  }
+  return {patterns:[...h.entries()].map(([diff,count])=>({diff,count})).sort((p,q)=>q.count-p.count).slice(0,k||5), other};
+}
+function statsActivity(stats){
+  const days = {};
+  for(const [day,m] of Object.entries(stats.daily)) for(const e of Object.values(m)){ const d=(days[day]=days[day]||{n:0,c:0}); d.n+=e.n; d.c+=e.c; }
+  for(const r of stats.log){ const day=statsDateKey(r.t), d=(days[day]=days[day]||{n:0,c:0}); d.n++; d.c+=r.c; }
+  const perDay = Object.keys(days).sort().map(day=>({day, n:days[day].n, correct:days[day].c}));
+  return {daysPlayed:perDay.length, firstDay:perDay.length?perDay[0].day:null, lastDay:perDay.length?perDay[perDay.length-1].day:null,
+          totalAnswers:perDay.reduce((t,d)=>t+d.n,0), perDay};
+}
+// the full picture, ready for any UI
+function statsReport(stats, cfg){
+  cfg = cfg||STATS_CONFIG;
+  const skills = statsSkillIds(stats).map(id=>({...assessSkill(stats,id,cfg), lifetime:lifetimeSkill(stats,id), trend:trendSkill(stats,id,cfg)}));
+  const areaIds = [...new Set(skills.map(s=>s.area))];
+  const areas = areaIds.map(area=>{
+    const recs = skills.filter(s=>s.area===area).flatMap(s=>statsRecent(stats, s.skill, cfg.window, 0));
+    const w = statsSummarize(recs), ready = w.n>=cfg.minAnswers;
+    return {area, name:cfg.areas[area]||area, n:w.n, accuracy:w.accuracy, medianSec:w.medianSec, ready,
+            band: ready ? statsPoolBand(w.accuracy, cfg) : Object.assign({}, cfg.insufficient), skills:skills.filter(s=>s.area===area).map(s=>s.skill)};
+  });
+  const all = statsSummarize(skills.flatMap(s=>statsRecent(stats, s.skill, cfg.window, 0)));
+  const readySkills = skills.filter(s=>s.ready);
+  const byAcc = (a,b)=> (a.accuracy-b.accuracy) || (b.n-a.n);
+  return {
+    skills, areas,
+    overall: {n:all.n, accuracy:all.accuracy, medianSec:all.medianSec, ready:all.n>=cfg.minAnswers, band: all.n>=cfg.minAnswers ? statsPoolBand(all.accuracy,cfg) : Object.assign({}, cfg.insufficient)},
+    weakest: readySkills.slice().sort(byAcc).slice(0,cfg.listSize).map(s=>s.skill),
+    strongest: readySkills.slice().sort((a,b)=>byAcc(b,a)).slice(0,cfg.listSize).map(s=>s.skill),
+    activity: statsActivity(stats)
+  };
+}
+// ===== /STATS ENGINE =====
 
 function ri(a,b){ return Math.floor(Math.random()*(b-a+1))+a; }
 function shuffle(a){ for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]];} return a; }
@@ -582,7 +926,7 @@ function gMissingMiddleSeq(){
 }
 function gMoneyCoins(){
   const coin=0.5; const items=[ri(1,4),ri(1,4)]; const total=items[0]+items[1]; const coins=total/coin;
-  return {label:"בעיית מטבעות", text:`בקופה של חנות הממתקים יש רק מטבעות של חצי שקל. קנית שני פריטים: אחד ב-<span class="hl">${items[0]}</span> ש"ח ואחד ב-<span class="hl">${items[1]}</span> ש"ח. בכמה מטבעות של חצי שקל תשלמי?`,
+  return {label:"בעיית מטבעות", text:`בקופה של חנות הממתקים יש רק מטבעות של חצי שקל. ${G('קנית','קנית','קניתם')} שני פריטים: אחד ב-<span class="hl">${items[0]}</span> ש"ח ואחד ב-<span class="hl">${items[1]}</span> ש"ח. בכמה מטבעות של חצי שקל ${G('תשלמי','תשלם','תשלמו')}?`,
     type:'mcq', answer: coins, choices: mcqFrom(coins,4)};
 }
 function gCheaperBundle(){
@@ -596,7 +940,7 @@ function gCheaperBundle(){
 function gChange(){
   const bill = [10,20,50][ri(0,2)];
   const price = ri(2, bill-2);
-  return {label:"בעיית עודף", text:`שילמת עם שטר של <span class="hl">${bill}</span> ש"ח על פריט שעולה <span class="hl">${price}</span> ש"ח. כמה עודף תקבלי?`,
+  return {label:"בעיית עודף", text:`${G('שילמת','שילמת','שילמתם')} עם שטר של <span class="hl">${bill}</span> ש"ח על פריט שעולה <span class="hl">${price}</span> ש"ח. כמה עודף ${G('תקבלי','תקבל','תקבלו')}?`,
     type:'mcq', answer: bill-price, choices: mcqFrom(bill-price,5)};
 }
 function gSplitCost(){
@@ -1200,20 +1544,20 @@ function renderRewards(){
 }
 function renderRoom(){
   const body = document.getElementById('roomBody');
-  if(!collection.length && !lollipops.length && !golden.length){ body.innerHTML='<div class="roomempty">עוד אין מתנות. פתרי שאלה כדי לקבל את הראשונה! 🎀</div>'; return; }
+  if(!collection.length && !lollipops.length && !golden.length){ body.innerHTML=`<div class="roomempty">עוד אין מתנות. ${G('פתרי','פתור','פתרו')} שאלה כדי לקבל את הראשונה! 🎀</div>`; return; }
   const rank = x=>{ const i=STICKERS.indexOf(x); return i<0?999:i; };
   let h = '';
   const ready = readyList();
   if(ready.length){
     h += `<div class="roomsec">✨ מוכנים לשדרוג</div>`;
     ready.forEach(r=>{
-      if(r.type==='merge') h += `<div class="mcard"><span class="mfrom">${itemHTML(r.kind,false,34)}<b>×${MERGE_COST}</b></span><span class="marrow">›</span><span class="mto">${itemHTML(r.kind,true,38)}</span><button class="mbtn" data-act="merge" data-kind="${r.kind}">מזגי ✨</button></div>`;
-      else h += `<div class="mcard"><span class="mfrom">${itemHTML(r.kind,true,34)}<b>×${MERGE_COST}</b></span><span class="marrow">›</span><span class="mto">🎀 לוק חדש</span><button class="mbtn" data-act="look" data-kind="${r.kind}">פתחי לוק</button></div>`;
+      if(r.type==='merge') h += `<div class="mcard"><span class="mfrom">${itemHTML(r.kind,false,34)}<b>×${MERGE_COST}</b></span><span class="marrow">›</span><span class="mto">${itemHTML(r.kind,true,38)}</span><button class="mbtn" data-act="merge" data-kind="${r.kind}">${G('מזגי','מזג','מזגו')} ✨</button></div>`;
+      else h += `<div class="mcard"><span class="mfrom">${itemHTML(r.kind,true,34)}<b>×${MERGE_COST}</b></span><span class="marrow">›</span><span class="mto">🎀 לוק חדש</span><button class="mbtn" data-act="look" data-kind="${r.kind}">${G('פתחי','פתח','פתחו')} לוק</button></div>`;
     });
   }
   h += `<div class="roomsec">הלוקים של קאפקייק · ${looks.length}/${LOOKS.length}</div>`;
   if(looks.length){
-    h += `<div class="roomhint">לחצי על לוק כדי ללבוש אותו, ושוב כדי לחזור לרגיל.</div><div class="wardrobe">` +
+    h += `<div class="roomhint">${G('לחצי','לחץ','לחצו')} על לוק כדי ללבוש אותו, ושוב כדי לחזור לרגיל.</div><div class="wardrobe">` +
       looks.map(i=>`<div class="look ${activeLook===i?'active':''}" data-act="wear" data-i="${i}"><img src="${LOOKS[i].img}" alt="${LOOKS[i].name}"></div>`).join('') + '</div>';
   } else {
     h += `<div class="roomhint">עוד לא נפתחו לוקים. כל ${MERGE_COST} פריטים משודרגים מאותו סוג פותחים לוק חדש!</div>`;
@@ -1260,8 +1604,8 @@ function closeCeleb(){
 }
 function showReadyCeleb(kind){
   burstConfetti(22);
-  showCeleb(`<div class="cbig">${itemHTML(kind,false,90)}</div><div class="ctitle">וואו! יש לך ${MERGE_COST} ${kindName(kind)}!</div><div class="csub">אפשר למזג אותם לגרסה משודרגת ומיוחדת.</div>`,
-    [{label:'✨ מזגי עכשיו', fn:()=>doMerge(kind)}, {label:'אחר כך', ghost:true, fn:closeCeleb}]);
+  showCeleb(`<div class="cbig">${itemHTML(kind,false,90)}</div><div class="ctitle">וואו! ${G('יש לך','יש לך','יש לכם')} ${MERGE_COST} ${kindName(kind)}!</div><div class="csub">אפשר למזג אותם לגרסה משודרגת ומיוחדת.</div>`,
+    [{label:`✨ ${G('מזגי','מזג','מזגו')} עכשיו`, fn:()=>doMerge(kind)}, {label:'אחר כך', ghost:true, fn:closeCeleb}]);
 }
 function doMerge(kind){
   removeBase(kind, MERGE_COST); golden.push(kind); saveState(); renderRewards();
@@ -1273,15 +1617,15 @@ function doMerge(kind){
     if(goldenCount(kind)%MERGE_COST===0 && looks.length<LOOKS.length) queueCeleb({type:'look',kind});
     const more = baseCount(kind)>=MERGE_COST;
     const btns = [];
-    if(more) btns.push({label:'✨ מזגי עוד', fn:()=>doMerge(kind)});
+    if(more) btns.push({label:`✨ ${G('מזגי','מזג','מזגו')} עוד`, fn:()=>doMerge(kind)});
     btns.push({label:'סגירה', ghost:more, fn:closeCeleb});
-    showCeleb(`<div class="cbig">${itemHTML(kind,true,110)}</div><div class="ctitle">קיבלת גרסה משודרגת!</div><div class="csub">היא נשמרת בחדר המתנות.</div>`, btns);
+    showCeleb(`<div class="cbig">${itemHTML(kind,true,110)}</div><div class="ctitle">${G('קיבלת','קיבלת','קיבלתם')} גרסה משודרגת!</div><div class="csub">היא נשמרת בחדר המתנות.</div>`, btns);
   }, 1050);
 }
 function showLookReady(kind){
   burstConfetti(26);
   showCeleb(`<div class="cbig">${itemHTML(kind,true,100)}</div><div class="ctitle">${MERGE_COST} משודרגים מאותו סוג!</div><div class="csub">זה מספיק כדי לפתוח לוק חדש לקאפקייק.</div>`,
-    [{label:'🎀 פתחי לוק חדש', fn:()=>doUnlockLook(kind)}, {label:'אחר כך', ghost:true, fn:closeCeleb}]);
+    [{label:`🎀 ${G('פתחי','פתח','פתחו')} לוק חדש`, fn:()=>doUnlockLook(kind)}, {label:'אחר כך', ghost:true, fn:closeCeleb}]);
 }
 function doUnlockLook(kind){
   if(looks.length>=LOOKS.length || goldenCount(kind)<MERGE_COST){ closeCeleb(); return; }
@@ -1317,7 +1661,7 @@ function showMilestone(){
   overlay.className='milestone';
   const emoji = ["🦄🎉","🌈✨","🍰🎊","🧁💖"][ri(0,3)];
   const theme = PARTY_THEMES[ri(0,PARTY_THEMES.length-1)];
-  overlay.innerHTML = `<div class="box"><img id="partyImg" src="${theme.frames[theme.seq[0]]}" alt="קאפקייק חוגגת"><div class="big">${emoji}</div><h2>מסיבת קאפקייק!</h2><p>${streak} תשובות נכונות ברצף — את פשוט קוסמת מספרים! 🪄</p></div>`;
+  overlay.innerHTML = `<div class="box"><img id="partyImg" src="${theme.frames[theme.seq[0]]}" alt="קאפקייק חוגגת"><div class="big">${emoji}</div><h2>מסיבת קאפקייק!</h2><p>${childName()?esc(childName())+', ':''}${streak} תשובות נכונות ברצף — ${G('את פשוט קוסמת מספרים','אתה פשוט קוסם מספרים','אתם פשוט קוסמי מספרים')}! 🪄</p></div>`;
   document.body.appendChild(overlay);
   burstConfetti(26);
   let f = 0;
@@ -1365,7 +1709,7 @@ function renderAnswerArea(q, onAnswer){
   } else {
     const form = document.createElement('form');
     form.id='answerForm';
-    form.innerHTML = `<input type="text" inputmode="numeric" pattern="-?[0-9]*" id="numAns" placeholder="התשובה שלך" autocomplete="off"><button type="submit" class="btn">בדקי 🍬</button>`;
+    form.innerHTML = `<input type="text" inputmode="numeric" pattern="-?[0-9]*" id="numAns" placeholder="${G('התשובה שלך','התשובה שלך','התשובה שלכם')}" autocomplete="off"><button type="submit" class="btn">${G('בדקי','בדוק','בדקו')} 🍬</button>`;
     area.appendChild(form);
     form.addEventListener('submit', e=>{
       e.preventDefault();
@@ -1377,6 +1721,27 @@ function renderAnswerArea(q, onAnswer){
   return area;
 }
 
+// ---- answer logging (feeds the stats engine) ----
+let qTimer = {start:Date.now(), hidden:0, hideAt:null};
+function startQTimer(){ qTimer = {start:Date.now(), hidden:0, hideAt:document.hidden?Date.now():null}; }
+document.addEventListener('visibilitychange', ()=>{       // time spent with the tab hidden does not count
+  if(document.hidden) qTimer.hideAt = Date.now();
+  else if(qTimer.hideAt){ qTimer.hidden += Date.now()-qTimer.hideAt; qTimer.hideAt = null; }
+});
+function logAnswer(ok, chosen){
+  const p = activeProfile();
+  if(!p || !current || !current.skill || current._logged) return;
+  current._logged = true;
+  try{
+    if(!p.stats) p.stats = statsNew();
+    const hidden = qTimer.hidden + (qTimer.hideAt ? Date.now()-qTimer.hideAt : 0);
+    statsRecord(p.stats, {skill:current.skill, level, bonus:current.isBonus, ok, seconds:(Date.now()-qTimer.start-hidden)/1000,
+                          chosen, correct:current.answer});
+  }catch(e){}   // stats must never break the game
+}
+// from the browser console: cqStats() = report for the active profile; STATS_CONFIG can be edited live to try other thresholds
+window.cqStats = ()=>{ const p=activeProfile(); return p ? statsReport(p.stats||statsNew()) : null; };
+
 function nextQuestion(){
   const wasBonus = bonusActive;
   bonusActive = false;
@@ -1385,7 +1750,8 @@ function nextQuestion(){
   document.getElementById('feedback').textContent='';
   document.getElementById('feedback').className='feedback';
   const pool = pools[level];
-  current = pool[ri(0,pool.length-1)]();
+  const gen = pool[ri(0,pool.length-1)];
+  current = gen(); current.skill = gen.name; current.isBonus = false; startQTimer();
   document.getElementById('qlabel').textContent = current.label;
   document.getElementById('qtext').innerHTML = current.text;
   renderAnswerArea(current, checkAnswer);
@@ -1399,7 +1765,8 @@ function renderBonus(){
   document.getElementById('feedback').className='feedback';
   document.getElementById('card').classList.add('bonus-mode');
   const pool = BONUS_POOLS[level] || BONUS_POOLS[1];
-  current = pool[ri(0,pool.length-1)]();
+  const gen = pool[ri(0,pool.length-1)];
+  current = gen(); current.skill = gen.name; current.isBonus = true; startQTimer();
   document.getElementById('qlabel').innerHTML = `<span class="bonustag">🍭 שאלת בונוס</span> — אפשר גם לדלג!`;
   document.getElementById('qtext').innerHTML = current.text;
   const area = renderAnswerArea(current, checkAnswer);
@@ -1408,13 +1775,14 @@ function renderBonus(){
   skipBtn.id='bonusSkipBtn';
   skipBtn.className='btn';
   skipBtn.style.cssText='width:100%; margin-top:10px; background:var(--card2); color:var(--text);';
-  skipBtn.textContent='דלגי על הבונוס';
+  skipBtn.textContent=G('דלגי','דלג','דלגו')+' על הבונוס';
   skipBtn.onclick = nextQuestion;
   area.appendChild(skipBtn);
 }
 
 function checkAnswer(val, btnEl, grid){
   const ok = val === current.answer;
+  logAnswer(ok, val);
   const fb = document.getElementById('feedback');
   if(grid){
     [...grid.children].forEach(c=>{
@@ -1431,7 +1799,7 @@ function checkAnswer(val, btnEl, grid){
       if(lollipops.length%MERGE_COST===0) queueCeleb({type:'merge',kind:'cotton'});
       renderLolli();
       burstConfetti(20);
-      fb.innerHTML = `וואו! זכית בשערות סבתא! <img src="${COTTON_CANDY_IMG}" alt="שערות סבתא" class="inline-cotton"> 🎉`;
+      fb.innerHTML = `וואו${childName()?', '+esc(childName()):''}! ${G('זכית','זכית','זכיתם')} בשערות סבתא! <img src="${COTTON_CANDY_IMG}" alt="שערות סבתא" class="inline-cotton"> 🎉`;
       fb.className='feedback good';
     } else {
       fb.textContent = `הפעם לא, אבל אין דבר! התשובה הייתה ${current.answerText||current.answer}.${current.explain?' '+current.explain:''}`;
@@ -1448,7 +1816,7 @@ function checkAnswer(val, btnEl, grid){
     if(baseCount(sticker)%MERGE_COST===0) queueCeleb({type:'merge',kind:sticker});
     renderStickerbook();
     burstConfetti(10);
-    fb.textContent = PRAISE[ri(0,PRAISE.length-1)] + `  קיבלת ${sticker}` + (current.explain? ' — '+current.explain : '');
+    fb.textContent = praise() + `  ${G('קיבלת','קיבלת','קיבלתם')} ${sticker}` + (current.explain? ' — '+current.explain : '');
     fb.className='feedback good';
     let pool = MOOD_POOL.filter(m=>m!==lastMood);
     setMood(pool[ri(0,pool.length-1)]);
@@ -1456,7 +1824,7 @@ function checkAnswer(val, btnEl, grid){
     else setTimeout(flushCelebs, 700);
   } else {
     streak = 0;
-    fb.textContent = `כמעט! התשובה הנכונה היא ${current.answerText||current.answer}.${current.explain?' '+current.explain:''} ננסה עוד אחת קסומה!`;
+    fb.textContent = `כמעט${childName()?', '+childName():''}! התשובה הנכונה היא ${current.answerText||current.answer}.${current.explain?' '+current.explain:''} ננסה עוד אחת קסומה!`;
     fb.className='feedback bad';
     const card = document.getElementById('card');
     card.classList.remove('shake'); void card.offsetWidth; card.classList.add('shake');
@@ -1465,6 +1833,184 @@ function checkAnswer(val, btnEl, grid){
   document.getElementById('streak').textContent = streak;
   document.getElementById('nextBtn').style.display='block';
   saveState();
+}
+
+
+// ===== PROFILE PANEL =====
+let profMode = {view:'list', editId:null, first:false, confirmDel:null, error:''};
+let profTab = 'profiles';          // 'profiles' | 'progress'
+let statsViewId = null;            // which profile the Progress tab shows
+function renderProfileChip(){
+  const p = activeProfile();
+  document.getElementById('profileName').textContent = p ? profileName(p, store.profiles.indexOf(p)) : 'פרופיל חדש';
+}
+function applyGenderStatic(){
+  document.getElementById('rewardsStrip').setAttribute('aria-label', G('פתחי','פתח','פתחו')+' את חדר המתנות');
+}
+function refreshAll(){
+  applyGenderStatic();
+  document.querySelectorAll('.milestone').forEach(e=>e.remove());
+  celebQueue = []; celebOpen = false; document.getElementById('celebOverlay').hidden = true;
+  closeRoom();
+  lastRewardCount = -1;
+  renderLevels(); renderRewards();
+  document.getElementById('score').textContent = score;
+  document.getElementById('streak').textContent = streak;
+  setMood(lastMood||'happy');
+  renderProfileChip();
+  nextQuestion();
+}
+function switchProfile(id){
+  if(id===store.activeId) return;
+  saveState();
+  store.activeId = id; statsViewId = id; enterProfile(); persist();
+  refreshAll();
+}
+function openProfiles(first){
+  const empty = !store.profiles.length;
+  profMode = {view:(first||empty)?'form':'list', editId:null, first:!!(first||empty), confirmDel:null, error:''};
+  profTab = 'profiles'; statsViewId = store.activeId;
+  document.getElementById('profOverlay').hidden = false; renderProfiles();
+}
+function closeProfiles(){
+  if(!store.profiles.length) return;          // the first profile must be created before the game can be used
+  document.getElementById('profOverlay').hidden = true;
+}
+function profileStats(p){
+  const pr = (p.id===store.activeId) ? captureProgress() : (p.progress||{});
+  const rewards = (pr.collection||[]).length + (pr.lollipops||[]).length + (pr.golden||[]).length;
+  return `<span class="nw">⭐ ${pr.score||0}</span> &nbsp;<span class="nw">🎁 ${rewards}</span>`;
+}
+const esc = t => String(t).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function renderProfiles(){
+  const body = document.getElementById('profBody');
+  const closeBtn = document.getElementById('profClose');
+  closeBtn.style.visibility = profMode.first ? 'hidden' : 'visible';
+  if(profMode.view==='form'){
+    const editing = profMode.editId ? store.profiles.find(x=>x.id===profMode.editId) : null;
+    document.getElementById('profTitle').textContent = profMode.first ? '👋 ברוכים הבאים!' : (editing ? '✏️ עריכת פרופיל' : '➕ פרופיל חדש');
+    body.innerHTML = `<div class="pform">
+      ${profMode.first?'<p class="pwelcome">מי משחק? אפשר להוסיף עוד פרופילים בהמשך.</p>':''}
+      <label class="lbl" for="pfName">שם (אפשר להשאיר ריק)</label>
+      <input type="text" id="pfName" maxlength="20" autocomplete="off" value="${editing?esc(editing.name):''}">
+      <label class="lbl">איך פונים אל השחקן?</label>
+      <div class="gopts">` + ['f','m','n'].map(g=>`<label class="gopt"><input type="radio" name="pfG" value="${g}" ${editing&&editing.gender===g?'checked':''}><span class="gav">${GENDER_INFO[g].avatar}</span><b>${GENDER_INFO[g].label}</b><small>${GENDER_INFO[g].example}</small></label>`).join('') + `</div>
+      <div class="perr" id="pfErr">${profMode.error||''}</div>
+      <div class="pbtns"><button type="button" class="btn" data-pact="save">שמירה</button>${(profMode.first)?'':'<button type="button" class="btn ghost" data-pact="cancel">ביטול</button>'}</div>
+    </div>`;
+    return;
+  }
+  document.getElementById('profTitle').textContent = '⚙️ ניהול';
+  const tabs = `<div class="ptabs" role="tablist"><button type="button" role="tab" class="ptab ${profTab==='profiles'?'on':''}" aria-selected="${profTab==='profiles'}" data-pact="tab" data-id="profiles">👤 פרופילים</button><button type="button" role="tab" class="ptab ${profTab==='progress'?'on':''}" aria-selected="${profTab==='progress'}" data-pact="tab" data-id="progress">📊 התקדמות</button></div>`;
+  if(profTab==='progress'){ body.innerHTML = tabs + renderProgressHTML(); return; }
+  const multi = store.profiles.length>1;
+  body.innerHTML = tabs + store.profiles.map((p,i)=>{
+    const active = p.id===store.activeId, confirming = profMode.confirmDel===p.id;
+    return `<div class="prow ${active?'active':''} ${confirming?'confirming':''}">
+      <span class="pav">${GENDER_INFO[p.gender].avatar}</span>
+      <div class="pinfo"><b>${esc(profileName(p,i))}</b><small>${GENDER_INFO[p.gender].label} &nbsp;${profileStats(p)}</small></div>
+      <div class="pact">${active?'<span class="pbadge">✓ פעיל</span>':`<button type="button" class="pbtn main" data-pact="switch" data-id="${p.id}">בחירה</button>`}
+        <button type="button" class="pbtn" data-pact="edit" data-id="${p.id}" aria-label="עריכה">✏️</button>
+        ${multi?`<button type="button" class="pbtn" data-pact="del" data-id="${p.id}" aria-label="מחיקה">🗑️</button>`:''}</div>
+      ${confirming?`<div class="pconfirm">למחוק את "${esc(profileName(p,i))}" עם כל ההתקדמות? אי אפשר לבטל. <button type="button" class="pbtn danger" data-pact="delyes" data-id="${p.id}">כן, למחוק</button><button type="button" class="pbtn" data-pact="delno">ביטול</button></div>`:''}
+    </div>`;
+  }).join('') +
+  (store.profiles.length<MAX_PROFILES ? `<button type="button" class="btn" style="width:100%;margin-top:6px" data-pact="new">➕ פרופיל חדש</button>` : '') +
+  `<div class="roomhint" style="margin-top:12px">הפנייה בפרופיל קובעת איך המשחק מדבר: בת "לחצי כאן", בן "לחץ כאן", ניטרלי "לחצו כאן". ההתקדמות נשמרת בנפרד לכל פרופיל, בדפדפן הזה בלבד.</div>`;
+}
+
+// ===== PROGRESS TAB (reads the stats engine; nothing here decides thresholds or labels) =====
+const pctText = a => a==null ? '–' : Math.round(a*100)+'%';
+const secText = x => x==null ? '–' : (x<10 ? (Math.round(x*10)/10) : Math.round(x))+' שנ׳';
+function bandColor(id){
+  const bs = STATS_CONFIG.bands.slice().sort((a,b)=>b.min-a.min), i = bs.findIndex(b=>b.id===id);
+  return i<0 ? 'var(--muted)' : (i===0 ? 'var(--good)' : (i===bs.length-1 ? 'var(--bad)' : 'var(--yellow)'));
+}
+function skBar(acc, id){ return `<span class="sk-bar" aria-hidden="true"><i style="width:${acc==null?0:Math.round(acc*100)}%;background:${bandColor(id)}"></i></span>`; }
+function skDetail(sk, stats){
+  const C = STATS_CONFIG, lt = sk.lifetime, tr = sk.trend;
+  const rows = [];
+  rows.push(`<div>${sk.ready ? `לפי ${sk.n} התשובות האחרונות: <b>${sk.correct}</b> נכונות (${pctText(sk.accuracy)}) · זמן חציוני ${secText(sk.medianSec)}` : `עד עכשיו ${sk.n} תשובות. צריך לפחות ${C.minAnswers} כדי לקבוע רמה.`}</div>`);
+  rows.push(`<div><span class="m">בסך הכול:</span> ${lt.n} תשובות, ${pctText(lt.accuracy)} נכונות</div>`);
+  rows.push(`<div><span class="m">מגמה:</span> ${tr.ready ? `${tr.emoji} ${tr.label} (${pctText(tr.previous.accuracy)} ← ${pctText(tr.recent.accuracy)})` : `אין עדיין מספיק נתונים (צריך ${C.trend.minPerWindow} תשובות בכל אחת משתי התקופות)`}</div>`);
+  const ep = numericErrorPatterns(stats, sk.skill, 3);
+  if(ep.patterns.length) rows.push(`<div><span class="m">טעויות מספריות נפוצות (טעות ביחס לנכון):</span> ${ep.patterns.map(p=>`<bdi dir="ltr">${p.diff>0?'+':'−'}${Math.abs(p.diff)} ×${p.count}</bdi>`).join(' · ')}</div>`);
+  return `<div class="sk-det">${rows.join('')}</div>`;
+}
+function skSkillRow(sk, stats){
+  const tr = sk.trend;
+  return `<details class="sk-skill"><summary><span class="sk-name">${sk.bonus?'🍭 ':''}${esc(sk.name)}</span>${sk.ready?skBar(sk.accuracy, sk.band.id):skBar(sk.n/STATS_CONFIG.minAnswers, sk.band.id)}<span class="sk-pct">${sk.ready?pctText(sk.accuracy):`${sk.n}/${STATS_CONFIG.minAnswers}`}</span><span title="${esc(tr.label||'')}">${tr.ready?tr.emoji:''}</span></summary>${skDetail(sk, stats)}</details>`;
+}
+function skLegend(){
+  const C = STATS_CONFIG, bs = C.bands.slice().sort((a,b)=>b.min-a.min);
+  const lines = bs.map((b,i)=>{
+    const lo = Math.round(b.min*100), hi = i===0 ? null : Math.round(bs[i-1].min*100);
+    return `${b.emoji} ${esc(b.label)}: ` + (i===0 ? `${lo}% ומעלה` : (b.min===0 ? `פחות מ-${hi}%` : `${lo}% עד ${hi}%`));
+  });
+  return `<div class="sk-legend">${lines.join('<br>')}<br>${esc(C.insufficient.emoji)} ${esc(C.insufficient.label)}: פחות מ-${C.minAnswers} תשובות.<br>הרמה נקבעת רק לפי ${C.window} התשובות האחרונות בכל סוג שאלה, בלי קשר לעבר. החצים (${C.trend.labels.up.emoji}/${C.trend.labels.flat.emoji}/${C.trend.labels.down.emoji}) משווים את התקופה האחרונה לזו שלפניה ומופיעים רק כשיש מספיק נתונים. שאלות בונוס נמדדות בנפרד כי הן קשות יותר.</div>`;
+}
+function renderProgressHTML(){
+  const C = STATS_CONFIG;
+  const prof = store.profiles.find(x=>x.id===statsViewId) || activeProfile();
+  if(!prof) return '';
+  const stats = prof.stats || statsNew();
+  const pick = store.profiles.length>1 ? `<div class="ppick">${store.profiles.map((p,i)=>`<button type="button" class="pbtn ${p.id===prof.id?'on':''}" data-pact="statsprof" data-id="${p.id}">${GENDER_INFO[p.gender].avatar} ${esc(profileName(p,i))}</button>`).join('')}</div>` : '';
+  const R = statsReport(stats), act = R.activity;
+  if(!act.totalAnswers) return pick + `<div class="sk-empty"><span class="big">🌱</span>עוד אין נתונים עבור ${esc(profileName(prof, store.profiles.indexOf(prof)))}.<br>אחרי כמה שאלות יופיעו כאן החוזקות והנושאים לתרגול.</div>`;
+  const ov = R.overall;
+  const hero = `<div class="sk-hero"><span class="big">${ov.band.emoji}</span><div><b>${esc(ov.band.label)}${ov.ready?` · ${pctText(ov.accuracy)}`:''}</b><small>${ov.ready?`סיכום כללי לפי התשובות האחרונות · זמן חציוני ${secText(ov.medianSec)}`:'עוד מוקדם לסכם'}</small></div></div>`;
+  const facts = `<div class="sk-facts"><div class="sk-fact"><b>${act.totalAnswers}</b><small>תשובות בסך הכול</small></div><div class="sk-fact"><b>${act.daysPlayed}</b><small>ימי משחק</small></div><div class="sk-fact"><b>${R.skills.filter(x=>x.ready).length}/${R.skills.length}</b><small>נושאים עם רמה</small></div></div>`;
+  const areas = `<div class="sk-h">🧭 לפי תחום</div>` + R.areas.slice().sort((a,b)=>(a.accuracy==null)-(b.accuracy==null) || a.accuracy-b.accuracy).map(a=>`<div class="sk-area"><span>${esc(a.name)}</span>${skBar(a.accuracy,a.band.id)}<span class="sk-pct">${a.ready?pctText(a.accuracy):'–'}</span><span title="${esc(a.band.label)}">${a.band.emoji}</span></div>`).join('');
+  // skills grouped by label, weakest group first, then "not enough data"
+  const bandsAsc = C.bands.slice().sort((a,b)=>a.min-b.min);
+  let groups = bandsAsc.map(b=>({b, list:R.skills.filter(x=>x.ready && x.band.id===b.id).sort((x,y)=>x.accuracy-y.accuracy)}));
+  groups.push({b:C.insufficient, list:R.skills.filter(x=>!x.ready).sort((x,y)=>y.n-x.n)});
+  const skills = groups.filter(g=>g.list.length).map(g=>`<div class="sk-h"><span>${g.b.emoji}</span>${esc(g.b.label)} <span class="cnt">(${g.list.length})</span></div>` + g.list.map(x=>skSkillRow(x, stats)).join('')).join('');
+  // last 14 days
+  const byDay = {}; act.perDay.forEach(d=>byDay[d.day]=d);
+  const days = []; for(let i=13;i>=0;i--){ const dt=new Date(); dt.setDate(dt.getDate()-i); const k=statsDateKey(dt.getTime()); days.push({k, n:(byDay[k]||{n:0}).n, dow:'אבגדהוש'[dt.getDay()]}); }
+  const mx = Math.max(1, ...days.map(d=>d.n));
+  const dayBars = `<div class="sk-h">📅 14 הימים האחרונים</div><div class="sk-days">` + days.map(d=>`<div class="sk-day" title="${d.k}: ${d.n} תשובות"><i class="${d.n?'':'none'}" style="height:${d.n?Math.max(8,Math.round(d.n/mx*100)):3}%"></i><small>${d.dow}</small></div>`).join('') + `</div>`;
+  return pick + hero + facts + areas + skills + dayBars + skLegend();
+}
+
+function profileAction(act, id){
+  if(act==='tab'){ profTab = id==='progress' ? 'progress' : 'profiles'; if(profTab==='progress' && !store.profiles.some(x=>x.id===statsViewId)) statsViewId = store.activeId; return renderProfiles(); }
+  if(act==='statsprof'){ statsViewId = id; return renderProfiles(); }
+  if(act==='new'){ profMode={view:'form',editId:null,first:false,confirmDel:null,error:''}; return renderProfiles(); }
+  if(act==='edit'){ profMode={view:'form',editId:id,first:false,confirmDel:null,error:''}; return renderProfiles(); }
+  if(act==='cancel'){ profMode={view:'list',editId:null,first:false,confirmDel:null,error:''}; return renderProfiles(); }
+  if(act==='switch'){ switchProfile(id); return renderProfiles(); }
+  if(act==='del'){ profMode.confirmDel=id; return renderProfiles(); }
+  if(act==='delno'){ profMode.confirmDel=null; return renderProfiles(); }
+  if(act==='delyes'){
+    if(store.profiles.length<2) return;
+    const wasActive = id===store.activeId;
+    if(wasActive){ const other = store.profiles.find(x=>x.id!==id); store.activeId = other.id; enterProfile(); }
+    store.profiles = store.profiles.filter(x=>x.id!==id);
+    persist(); profMode.confirmDel=null;
+    if(wasActive) refreshAll(); else saveState();
+    return renderProfiles();
+  }
+  if(act==='save'){
+    const name = document.getElementById('pfName').value;
+    const g = (document.querySelector('input[name=pfG]:checked')||{}).value;
+    if(!g){ profMode.error='בחרו איך לפנות (בת, בן או ניטרלי)'; document.getElementById('pfErr').textContent = profMode.error; return; }
+    if(profMode.editId){
+      const p = store.profiles.find(x=>x.id===profMode.editId);
+      p.name = name.trim().slice(0,20); p.gender = g;
+      if(p.id===store.activeId){ curGender = g; saveState(); refreshAll(); } else persist();
+      profMode={view:'list',editId:null,first:false,confirmDel:null,error:''};
+    } else {
+      const first = !store.profiles.length;
+      const np = makeProfile(name, g, {});
+      store.profiles.push(np);
+      if(first){ store.activeId = np.id; enterProfile(); persist(); refreshAll(); document.getElementById('profOverlay').hidden = true; return; }
+      switchProfile(np.id);
+      profMode={view:'list',editId:null,first:false,confirmDel:null,error:''};
+    }
+    return renderProfiles();
+  }
 }
 
 function setMood(name){
@@ -1486,14 +2032,24 @@ document.getElementById('roomBody').addEventListener('click', e=>{
   else if(act==='wear') wearLook(Number(t.dataset.i));
 });
 document.getElementById('roomOverlay').addEventListener('click', e=>{ if(e.target.id==='roomOverlay') closeRoom(); });
-document.addEventListener('keydown', e=>{ if(e.key==='Escape' && document.getElementById('celebOverlay').hidden) closeRoom(); });
+document.getElementById('profileChip').onclick = ()=>openProfiles(false);
+document.getElementById('profClose').onclick = closeProfiles;
+document.getElementById('profOverlay').addEventListener('change', e=>{ document.querySelectorAll('.gopt').forEach(l=>l.classList.toggle('sel', l.querySelector('input').checked)); });
+document.getElementById('profOverlay').addEventListener('click', e=>{
+  if(e.target.id==='profOverlay') closeProfiles();
+  const t = e.target.closest('[data-pact]'); if(t) profileAction(t.dataset.pact, t.dataset.id);
+});
+document.addEventListener('keydown', e=>{ if(e.key==='Escape' && document.getElementById('celebOverlay').hidden){ if(!document.getElementById('profOverlay').hidden) closeProfiles(); else closeRoom(); } });
 renderLevels();
 renderStickerbook();
 renderLolli();
 document.getElementById('score').textContent = score;
 document.getElementById('streak').textContent = streak;
 setMood('happy');
+applyGenderStatic();
+renderProfileChip();
 nextQuestion();
+if(!store.profiles.length) openProfiles(true);
 </script>
 </body>
 </html>
