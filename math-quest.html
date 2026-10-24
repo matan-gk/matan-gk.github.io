@@ -433,6 +433,104 @@ footer{text-align:center; color:var(--muted); font-size:.75rem; margin-top:16px}
 .milestone .box img{width:150px; margin-bottom:6px}
 @media (min-width:720px){ .wrap{max-width:720px} .levels{grid-template-columns:repeat(4,minmax(0,1fr))} .levels .levelbtn, .levels[data-rem] .levelbtn:last-child, .levels[data-rem] .levelbtn:nth-last-child(-n+2){grid-column:auto} }
 @media (min-width:1100px){ .wrap{max-width:880px} .levels{grid-template-columns:repeat(8,minmax(0,1fr))} .levelbtn{font-size:.95rem; padding:12px 8px} .card{padding:28px 28px} }
+/* ===== PARENT AREA (אזור הורים): full screen, fixed layout, one set of components ===== */
+:root{--pa-bg:#f3eefa; --pa-line:rgba(120,90,170,.16)}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){--pa-bg:#1a1225; --pa-line:rgba(255,255,255,.12)} }
+:root[data-theme="dark"]{--pa-bg:#1a1225; --pa-line:rgba(255,255,255,.12)}
+.roomoverlay.profs{padding:0; align-items:stretch; justify-content:stretch; background:var(--pa-bg); z-index:60}
+#reportOverlay{z-index:66}
+.room.pa{max-width:none; max-height:none; width:100%; height:100%; border-radius:0; background:var(--pa-bg); box-shadow:none; animation:none; display:flex; flex-direction:column}
+.pa-head{display:flex; align-items:center; gap:12px; padding:calc(10px + env(safe-area-inset-top,0px)) 16px 10px; background:linear-gradient(90deg,#7a4fe0,var(--purple)); color:#fff; flex:none}
+.pa-brand{display:inline-flex; align-items:center; gap:6px; background:rgba(255,255,255,.2); border-radius:999px; padding:5px 12px; font-weight:800; font-size:.85rem; white-space:nowrap}
+.pa-head .roomtitle{flex:1; min-width:0; color:#fff; font-size:1.1rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.pa-head .roomclose{width:auto; min-width:40px; height:40px; border-radius:999px; padding:0 14px; background:rgba(255,255,255,.22); color:#fff; font-family:'Rubik',sans-serif; font-size:.9rem; display:inline-flex; align-items:center; justify-content:center; gap:6px}
+.pa-head .roomclose:hover{background:rgba(255,255,255,.34)}
+.pa-close-t{display:none}
+.room.pa .roombody{padding:0; overflow:hidden; flex:1; min-height:0; display:flex}
+.pa-shell{flex:1; min-width:0; min-height:0; display:flex; flex-direction:column}
+.pa-main{flex:1; min-height:0; overflow-y:auto; scrollbar-gutter:stable; padding:16px}
+.pa-page{max-width:760px; margin:0 auto; display:flex; flex-direction:column; gap:14px}
+.pa-page.narrow{max-width:520px}
+.pa-nav.vtabs{flex:none; order:2; display:flex; flex-direction:row; width:auto; position:static; gap:0; background:var(--card); border-top:1px solid var(--pa-line); padding-bottom:env(safe-area-inset-bottom,0px)}
+.vtab.pa-tab{flex:1; min-width:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; border:0; border-radius:0; background:transparent; color:var(--muted); font-family:'Rubik',sans-serif; font-weight:800; font-size:.7rem; padding:8px 2px 7px; cursor:pointer; text-align:center; box-shadow:none; line-height:1.2}
+.vtab.pa-tab .pa-ico{font-size:1.35rem; line-height:1}
+.vtab.pa-tab.on{color:var(--purple); background:transparent; box-shadow:inset 0 3px 0 var(--purple)}
+.pa-lbl{display:none}
+.pa-tab:focus-visible{outline:2px solid var(--purple); outline-offset:-3px}
+.pa-card{background:var(--card); border-radius:18px; padding:16px; box-shadow:0 2px 10px var(--shadow)}
+.pa-h{font-size:1.02rem; font-weight:800; margin:0 0 4px; color:var(--text)}
+.pa-sub{font-size:.85rem; color:var(--muted); font-weight:600; line-height:1.65; margin:0 0 10px}
+.pa-sub:last-child{margin-bottom:0}
+.pa-rows{display:flex; flex-direction:column}
+.pa-row{display:flex; align-items:center; gap:12px; padding:12px 0; flex-wrap:wrap}
+.pa-row+.pa-row{border-top:1px solid var(--pa-line)}
+.pa-row.prow{background:transparent; border-radius:0; border:0; margin:0; border-top:0}
+.pa-row.prow+.pa-row.prow{border-top:1px solid var(--pa-line)}
+.pa-row.prow.active{background:var(--card2); border-radius:14px; padding:12px; margin:2px -4px}
+.pa-row.prow.active+.pa-row.prow{border-top:0}
+.pa-main-txt{flex:1; min-width:150px; display:flex; flex-direction:column; gap:2px}
+.pa-main-txt b{font-size:.98rem}
+.pa-main-txt small{color:var(--muted); font-weight:600; font-size:.8rem; line-height:1.5}
+.pa-ctl{display:flex; align-items:center; gap:8px; flex:none; margin-inline-start:auto}
+.pa-row.prow .pa-main-txt{min-width:96px}
+.pa-btn{min-height:44px; padding:0 18px; border-radius:12px; border:2px solid transparent; font:800 .95rem 'Rubik',sans-serif; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:6px; background:linear-gradient(90deg,var(--pink),var(--purple)); color:#fff; transition:transform .1s}
+.pa-btn:active{transform:scale(.97)}
+.pa-btn:focus-visible{outline:3px solid var(--purple); outline-offset:2px}
+.pa-btn.sec{background:transparent; border-color:var(--purple); color:var(--purple)}
+.pa-btn.danger{background:var(--bad); color:#3a0a12}
+.pa-btn.sm{min-height:38px; padding:0 14px; font-size:.85rem}
+.pa-btn.icon{width:38px; padding:0}
+.pa-btn.block{width:100%}
+.pa-btn[disabled]{opacity:.5; cursor:default}
+.pa-actions{display:flex; gap:8px; flex-wrap:wrap; margin-top:12px}
+.pa-field{display:flex; flex-direction:column; gap:6px; margin-bottom:12px}
+.pa-field>label,.pa-lbl{font-weight:800; font-size:.85rem; color:var(--text)}
+.pa select,.pa textarea,.pa input[type=text]{width:100%; min-height:44px; padding:10px 12px; border-radius:12px; border:2px solid var(--card2); background:var(--card2); color:var(--text); font:600 1rem 'Rubik',sans-serif}
+.pa select:focus,.pa textarea:focus,.pa input[type=text]:focus{outline:none; border-color:var(--purple)}
+.pa textarea.bkarea{font-family:ui-monospace,Menlo,Consolas,monospace; font-size:.76rem; min-height:96px}
+.pa .bkrow{background:transparent; border-radius:0; padding:12px 0; margin:0}
+.pa .bkrow+.bkrow{border-top:1px solid var(--pa-line)}
+.pa .bkrow select{width:auto; min-height:40px; margin-inline-start:auto; font-size:.88rem; border-color:var(--card2); background:var(--card2)}
+.pa-switch{flex:none; display:flex; padding:6px 0 6px 2px; cursor:pointer; position:relative}
+.pa-switch input{position:absolute; opacity:0; pointer-events:none}
+.pa-switch .tgl{flex:none; width:48px; height:28px; border-radius:999px; background:#c9bfe0; position:relative; transition:background .15s}
+.pa-switch .tgl::after{content:''; position:absolute; top:4px; right:4px; width:20px; height:20px; border-radius:50%; background:#fff; transition:transform .15s; box-shadow:0 1px 3px rgba(0,0,0,.3)}
+.pa-switch input:checked + .tgl{background:var(--teal)}
+.pa-switch input:checked + .tgl::after{transform:translateX(-20px)}
+.pa-switch input:focus-visible + .tgl{outline:3px solid var(--purple); outline-offset:2px}
+.pa-scope{display:flex; align-items:center; gap:10px; flex-wrap:wrap; background:var(--card); border-radius:18px; padding:10px 14px; box-shadow:0 2px 10px var(--shadow)}
+.pa-scope-l{font-weight:800; font-size:.85rem; color:var(--muted)}
+.pa-seg{display:flex; gap:6px; flex-wrap:wrap}
+.pa-chip{min-height:38px; padding:0 14px; border-radius:999px; border:2px solid var(--card2); background:var(--card2); color:var(--text); font:800 .88rem 'Rubik',sans-serif; cursor:pointer}
+.pa-chip.on{background:linear-gradient(90deg,var(--teal),var(--purple)); color:#fff; border-color:transparent}
+.pa-chip:focus-visible{outline:3px solid var(--purple); outline-offset:2px}
+.pa .bkmsg{margin:10px 0 0}
+.pa .perr{min-height:0; margin-top:4px}
+.pa .perr:empty{display:none}
+.pa .pform{background:var(--card); border-radius:18px; padding:18px; box-shadow:0 2px 10px var(--shadow)}
+.pa .pform input[type=text]{font-size:1.05rem}
+.pa .gopt{background:var(--card2)}
+.pa .gopt.sel,.pa .gopt:has(input:checked){background:var(--card)}
+.pa .guide{background:var(--card); border-radius:18px; padding:8px 18px 14px; box-shadow:0 2px 10px var(--shadow)}
+.pa .sk-hero,.pa .sk-fact,.pa .sk-skill{background:var(--card2)}
+.pa .sk-empty{background:var(--card); border-radius:18px; padding:30px 12px; box-shadow:0 2px 10px var(--shadow)}
+.pa .sk-h:first-child{margin-top:0}
+.pa .sk-legend{margin-top:0}
+.pa .pconfirm{flex-basis:100%}
+@media (min-width:860px){
+  .pa-head{padding-inline:28px}
+  .pa-close-t{display:inline}
+  .pa-shell{flex-direction:row}
+  .pa-nav.vtabs{order:0; flex-direction:column; width:248px; gap:4px; padding:18px 12px; border-top:0; border-inline-end:1px solid var(--pa-line); overflow-y:auto}
+  .vtab.pa-tab{flex:none; flex-direction:row; justify-content:flex-start; gap:12px; font-size:.98rem; padding:13px 14px; border-radius:14px; text-align:start}
+  .vtab.pa-tab .pa-ico{font-size:1.3rem; width:1.6em; text-align:center}
+  .vtab.pa-tab.on{background:var(--card2); box-shadow:inset -4px 0 0 var(--purple)}
+  .pa-lbl{display:inline} .pa-lbl-s{display:none}
+  .pa-main{padding:28px 32px}
+  .pa-page{gap:16px}
+  .pa-card{padding:20px}
+}
+@media (max-width:520px){ .pa-ctl{margin-inline-start:0} .pa-row.prow .pa-ctl{margin-inline-start:auto} }
 </style>
 </head>
 <body>
@@ -461,10 +559,11 @@ footer{text-align:center; color:var(--muted); font-size:.75rem; margin-top:16px}
     <span class="rs-recent" id="rsRecent"><span class="rs-empty">עוד אין מתנות 🎀</span></span>
   </button>
   <div class="roomoverlay profs" id="profOverlay" hidden>
-    <div class="room" role="dialog" aria-label="ניהול פרופילים">
-      <div class="roomhead">
+    <div class="room pa" role="dialog" aria-label="אזור הורים">
+      <div class="roomhead pa-head">
+        <div class="pa-brand"><span aria-hidden="true">🔒</span><span>אזור הורים</span></div>
         <div class="roomtitle" id="profTitle">⚙️ פרופילים</div>
-        <button type="button" class="roomclose" id="profClose" aria-label="סגירה">✕</button>
+        <button type="button" class="roomclose" id="profClose" aria-label="חזרה למשחק"><span class="pa-close-t">חזרה למשחק</span><span aria-hidden="true">✕</span></button>
       </div>
       <div class="roombody" id="profBody"></div>
     </div>
@@ -1591,25 +1690,28 @@ const CLOUD_STATUS_TEXT = {
 };
 function renderAccountHTML(){
   const u = cloud.user && !cloud.user.anon ? cloud.user : null;
-  let h = `<div class="bksec">שמירה בענן</div>`;
+  let h = `<section class="pa-card"><h2 class="pa-h">שמירה בענן</h2>`;
   if(!u){
-    h += `<p class="bkhint">התחברות עם חשבון Google של ההורה שומרת את ההתקדמות של כל הפרופילים בענן: אפשר להמשיך מכל מכשיר, וההתקדמות לא הולכת לאיבוד אם המכשיר מתחלף. המשחק ממשיך לעבוד גם בלי אינטרנט.</p>
-      <p class="bkhint">נשמרים: שם הפרופיל (אם הוזן), בן/בת/ניטרלי, ההתקדמות והסטטיסטיקות. לא נשמרים: תמונות, מיקום או פרטים נוספים. אפשר למחוק את הכול מהענן בכל רגע.</p>
-      <div class="bkbtns"><button type="button" class="btn" data-pact="cloudin" ${cloud.status==='signingin'?'disabled':''}>התחברות עם Google</button></div>`;
+    h += `<p class="pa-sub">התחברות עם חשבון Google של ההורה שומרת את ההתקדמות של כל הפרופילים בענן: אפשר להמשיך מכל מכשיר, וההתקדמות לא הולכת לאיבוד אם המכשיר מתחלף. המשחק ממשיך לעבוד גם בלי אינטרנט.</p>
+      <p class="pa-sub">נשמרים: שם הפרופיל (אם הוזן), בן/בת/ניטרלי, ההתקדמות והסטטיסטיקות. לא נשמרים: תמונות, מיקום או פרטים נוספים. אפשר למחוק את הכול מהענן בכל רגע.</p>
+      <div class="pa-actions"><button type="button" class="pa-btn" data-pact="cloudin" ${cloud.status==='signingin'?'disabled':''}>התחברות עם Google</button></div>`;
     if(cloud.status==='signingin') h += `<div class="bkmsg">מתחברים...</div>`;
   } else {
     const t = cloud.lastSync ? new Date(cloud.lastSync).toLocaleTimeString('he-IL',{hour:'2-digit',minute:'2-digit'}) : '';
-    h += `<div class="bkinfo">מחוברים כ-<bdi dir="ltr">${esc(u.email||u.name||'')}</bdi></div>
-      <div class="bkmsg ${cloud.status==='ok'?'good':(cloud.status==='syncing'?'':'bad')}">${esc(CLOUD_STATUS_TEXT[cloud.status]||'')}${cloud.status==='ok'&&t?' · '+esc(t):''}</div>
-      <div class="bkbtns"><button type="button" class="btn" data-pact="cloudsync" ${cloud.busy?'disabled':''}>סנכרון עכשיו</button><button type="button" class="btn ghost" data-pact="cloudout">התנתקות</button></div>
-      <p class="bkhint">ההתקדמות נשמרת אוטומטית. אם אותו ילד נוצר בשני מכשירים לפני ההתחברות, יופיעו שני פרופילים, ואפשר למחוק את המיותר בלשונית "פרופילים".</p>
-      <div class="bkdiv"></div><div class="bksec">מחיקת הנתונים מהענן</div>`;
-    if(cloud.confirmWipe) h += `<p class="bkhint">למחוק את כל הפרופילים של החשבון הזה מהענן ולהתנתק? ההתקדמות תישאר במכשיר הזה.</p><div class="bkbtns"><button type="button" class="btn danger" data-pact="cloudwipeyes">כן, למחוק מהענן</button><button type="button" class="btn ghost" data-pact="cloudwipeno">ביטול</button></div>`;
-    else h += `<div class="bkbtns"><button type="button" class="btn ghost" data-pact="cloudwipe">מחיקת הנתונים שלי מהענן</button></div>`;
+    h += `<div class="pa-row" style="padding-top:4px"><div class="pa-main-txt"><b>מחוברים כ-<bdi dir="ltr">${esc(u.email||u.name||'')}</bdi></b><small>${esc(CLOUD_STATUS_TEXT[cloud.status]||'')}${cloud.status==='ok'&&t?' · '+esc(t):''}</small></div></div>
+      <div class="pa-actions" style="margin-top:0"><button type="button" class="pa-btn" data-pact="cloudsync" ${cloud.busy?'disabled':''}>סנכרון עכשיו</button><button type="button" class="pa-btn sec" data-pact="cloudout">התנתקות</button></div>
+      <p class="pa-sub" style="margin-top:10px">ההתקדמות נשמרת אוטומטית. אם אותו ילד נוצר בשני מכשירים לפני ההתחברות, יופיעו שני פרופילים, ואפשר למחוק את המיותר בלשונית "פרופילים".</p>`;
   }
   if(cloud.msg) h += `<div class="bkmsg ${cloud.msgOk?'good':'bad'}">${esc(cloud.msg)}</div>`;
-  h += `<div class="bkdiv"></div><div class="bksec">דיווח על בעיה</div><p class="bkhint">משהו לא עובד, שאלה לא ברורה או שגויה? אפשר לשלוח דיווח.</p><div class="bkbtns"><button type="button" class="btn ghost" data-pact="report">דיווח על בעיה</button></div>
-    <p class="bkhint" style="margin-top:10px">גרסה ${esc(APP_VERSION)}</p>`;
+  h += `</section>`;
+  if(u){
+    h += `<section class="pa-card"><h2 class="pa-h">מחיקת הנתונים מהענן</h2>`;
+    if(cloud.confirmWipe) h += `<p class="pa-sub">למחוק את כל הפרופילים של החשבון הזה מהענן ולהתנתק? ההתקדמות תישאר במכשיר הזה.</p><div class="pa-actions" style="margin-top:0"><button type="button" class="pa-btn danger" data-pact="cloudwipeyes">כן, למחוק מהענן</button><button type="button" class="pa-btn sec" data-pact="cloudwipeno">ביטול</button></div>`;
+    else h += `<p class="pa-sub">מוחק את הפרופילים של החשבון הזה מהענן. ההתקדמות נשארת במכשיר.</p><div class="pa-actions" style="margin-top:0"><button type="button" class="pa-btn sec" data-pact="cloudwipe">מחיקת הנתונים שלי מהענן</button></div>`;
+    h += `</section>`;
+  }
+  h += `<section class="pa-card"><h2 class="pa-h">דיווח על בעיה</h2><p class="pa-sub">משהו לא עובד, שאלה לא ברורה או שגויה? אפשר לשלוח דיווח.</p><div class="pa-actions" style="margin-top:0"><button type="button" class="pa-btn sec" data-pact="report">דיווח על בעיה</button></div>
+    <p class="pa-sub" style="margin-top:12px">גרסה ${esc(APP_VERSION)}</p></section>`;
   return h;
 }
 
@@ -1676,6 +1778,8 @@ function openGuide(){ openPanel('guide'); }
 // ===== TOP-RIGHT MENU =====
 const PANEL_TITLES = {profiles:'ניהול פרופילים', progress:'התקדמות', settings:'הגדרות', backup:'גיבוי ושחזור', account:'חשבון', guide:'מדריך להורים'};
 const PANEL_NAV = {profiles:'פרופילים', progress:'התקדמות', settings:'הגדרות', backup:'גיבוי ושחזור', account:'חשבון', guide:'מדריך להורים'};
+const PANEL_SHORT = {profiles:'פרופילים', progress:'התקדמות', settings:'הגדרות', backup:'גיבוי', account:'חשבון', guide:'מדריך'};
+const PANEL_ICON = {profiles:'👥', progress:'📊', settings:'⚙️', backup:'💾', account:'☁️', guide:'📖'};
 function openPanel(tab){
   closeMenu();
   profTab = (PANEL_TITLES[tab] && (tab!=='account' || cloudOn())) ? tab : 'profiles';
@@ -3254,9 +3358,12 @@ function stepPairs(first, step, wrongSteps){      // pair strings "a ו-b" for t
   return wrongSteps.filter(s=>s!==step && s!==0).map(s=>[first+s, first+2*s]);
 }
 function pairChoices(ans, wrongs){
-  const A = pairWords(ans[0], ans[1]), set = [A];
-  shuffle(wrongs.filter(p=>p[0]>=0 && p[1]>=0 && p[0]<=100 && p[1]<=100)).forEach(p=>{ const w = pairWords(p[0],p[1]); if(set.length<4 && !set.includes(w)) set.push(w); });
-  let g=0; while(set.length<4 && g++<200){ const a = ans[0]+ri(-4,4), w = pairWords(a, a+(ans[1]-ans[0])+ri(-2,2)); if(a>=0 && !set.includes(w)) set.push(w); }
+  // two numbers asked for "in any order" must never appear twice with swapped order
+  const key = (a,b)=>Math.min(a,b)+'_'+Math.max(a,b);
+  const A = pairWords(ans[0], ans[1]), set = [A], used = new Set([key(ans[0],ans[1])]);
+  const add = (a,b)=>{ const k=key(a,b); if(set.length<4 && a>=0 && b>=0 && a<=100 && b<=100 && !used.has(k)){ used.add(k); set.push(pairWords(a,b)); } };
+  shuffle(wrongs).forEach(p=>add(p[0],p[1]));
+  let g=0; while(set.length<4 && g++<300){ const a = ans[0]+ri(-4,4); add(a, a+(ans[1]-ans[0])+ri(-2,2)); }
   return {answer:A, choices:shuffle(set)};
 }
 function gSkipPair(){
@@ -4089,12 +4196,24 @@ function profileStats(p){
   return `<span class="nw">⭐ ${pr.score||0}</span> &nbsp;<span class="nw">🎁 ${rewards}</span>`;
 }
 const esc = t => String(t).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let paLastTab = null;
+function paScope(act, curId, label){
+  const chips = store.profiles.map((p,i)=>`<button type="button" class="pa-chip ${p.id===curId?'on':''}" aria-pressed="${p.id===curId}" data-pact="${act}" data-id="${p.id}">${GENDER_INFO[p.gender].avatar} ${esc(profileName(p,i))}</button>`).join('');
+  return `<div class="pa-scope"><span class="pa-scope-l">${label}</span><div class="pa-seg">${chips}</div></div>`;
+}
 function renderProfiles(){
   renderProfilesInner();
-  if(profMode.view!=='list') return;                       // welcome / edit / restore forms have no navigation
   const body = document.getElementById('profBody');
-  const nav = Object.keys(PANEL_NAV).filter(k=>k!=='account'||cloudOn()).map(k=>`<button type="button" role="tab" class="vtab ${profTab===k?'on':''}" aria-selected="${profTab===k}" data-pact="tab" data-id="${k}">${PANEL_NAV[k]}</button>`).join('');
-  body.innerHTML = `<div class="pshell"><nav class="vtabs" role="tablist" aria-orientation="vertical" aria-label="חלקים">${nav}</nav><div class="pcontent">${body.innerHTML}</div></div>`;
+  const content = body.innerHTML;
+  if(profMode.view!=='list'){                                // welcome / edit / restore forms: no navigation
+    body.innerHTML = `<div class="pa-shell"><main class="pa-main"><div class="pa-page narrow">${content}</div></main></div>`;
+    paLastTab = null; return;
+  }
+  const prev = document.getElementById('paMain'), keep = prev && paLastTab===profTab ? prev.scrollTop : 0;
+  const nav = Object.keys(PANEL_NAV).filter(k=>k!=='account'||cloudOn()).map(k=>`<button type="button" role="tab" class="vtab pa-tab ${profTab===k?'on':''}" aria-selected="${profTab===k}" data-pact="tab" data-id="${k}"><span class="pa-ico" aria-hidden="true">${PANEL_ICON[k]}</span><span class="pa-lbl">${PANEL_NAV[k]}</span><span class="pa-lbl-s">${PANEL_SHORT[k]}</span></button>`).join('');
+  body.innerHTML = `<div class="pa-shell"><nav class="pa-nav vtabs" role="tablist" aria-orientation="vertical" aria-label="חלקים">${nav}</nav><main class="pa-main" id="paMain"><div class="pa-page">${content}</div></main></div>`;
+  paLastTab = profTab;
+  if(keep) document.getElementById('paMain').scrollTop = keep;
 }
 function renderProfilesInner(){
   const body = document.getElementById('profBody');
@@ -4102,47 +4221,48 @@ function renderProfilesInner(){
   closeBtn.style.visibility = profMode.first ? 'hidden' : 'visible';
   if(profMode.view==='restorefirst'){
     document.getElementById('profTitle').textContent = 'שחזור מקוד שמירה';
-    body.innerHTML = renderRestoreHTML(true);
+    body.innerHTML = `<section class="pa-card">${renderRestoreHTML(true)}</section>`;
     return;
   }
   if(profMode.view==='form'){
     const editing = profMode.editId ? store.profiles.find(x=>x.id===profMode.editId) : null;
     document.getElementById('profTitle').textContent = profMode.first ? '👋 ברוכים הבאים!' : (editing ? '✏️ עריכת פרופיל' : '➕ פרופיל חדש');
     body.innerHTML = `<div class="pform">
-      ${profMode.first?'<p class="pwelcome">מי משחק? אפשר להוסיף עוד פרופילים בהמשך.</p>':''}
-      <label class="lbl" for="pfName">שם (אפשר להשאיר ריק)</label>
-      <input type="text" id="pfName" maxlength="20" autocomplete="off" value="${editing?esc(editing.name):''}">
-      <label class="lbl">איך פונים אל השחקן?</label>
-      <div class="gopts">` + ['f','m','n'].map(g=>`<label class="gopt"><input type="radio" name="pfG" value="${g}" ${editing&&editing.gender===g?'checked':''}><span class="gav">${GENDER_INFO[g].avatar}</span><b>${GENDER_INFO[g].label}</b><small>${GENDER_INFO[g].example}</small></label>`).join('') + `</div>
+      ${profMode.first?'<p class="pa-sub" style="text-align:center">מי משחק? אפשר להוסיף עוד פרופילים בהמשך.</p>':''}
+      <div class="pa-field"><label for="pfName">שם (אפשר להשאיר ריק)</label>
+      <input type="text" id="pfName" maxlength="20" autocomplete="off" value="${editing?esc(editing.name):''}"></div>
+      <div class="pa-field"><label>איך פונים אל השחקן?</label>
+      <div class="gopts">` + ['f','m','n'].map(g=>`<label class="gopt"><input type="radio" name="pfG" value="${g}" ${editing&&editing.gender===g?'checked':''}><span class="gav">${GENDER_INFO[g].avatar}</span><b>${GENDER_INFO[g].label}</b><small>${GENDER_INFO[g].example}</small></label>`).join('') + `</div></div>
       <div class="perr" id="pfErr">${profMode.error||''}</div>
-      <div class="pbtns"><button type="button" class="btn" data-pact="save">שמירה</button>${(profMode.first)?'':'<button type="button" class="btn ghost" data-pact="cancel">ביטול</button>'}</div>
-      ${profMode.first?'<div class="bkdiv"></div><button type="button" class="pbtn" style="width:100%" data-pact="restorefirst">יש לי קוד שמירה: שחזור</button>':''}
-      ${profMode.first&&cloudOn()?'<button type="button" class="pbtn" style="width:100%;margin-top:6px" data-pact="cloudin">יש לי חשבון: התחברות עם Google</button>'+(cloud.msg?'<div class="bkmsg bad">'+esc(cloud.msg)+'</div>':''):''}
+      <div class="pa-actions"><button type="button" class="pa-btn" data-pact="save">שמירה</button>${(profMode.first)?'':'<button type="button" class="pa-btn sec" data-pact="cancel">ביטול</button>'}</div>
+      ${profMode.first?'<div class="pa-actions"><button type="button" class="pa-btn sec block" data-pact="restorefirst">יש לי קוד שמירה: שחזור</button></div>':''}
+      ${profMode.first&&cloudOn()?'<div class="pa-actions" style="margin-top:8px"><button type="button" class="pa-btn sec block" data-pact="cloudin">יש לי חשבון: התחברות עם Google</button></div>'+(cloud.msg?'<div class="bkmsg bad">'+esc(cloud.msg)+'</div>':''):''}
     </div>`;
     return;
   }
   document.getElementById('profTitle').textContent = PANEL_TITLES[profTab] || PANEL_TITLES.profiles;
-  const tabs = '';
   if(profTab==='guide'){ body.innerHTML = '<div class="guide">'+guideHTML()+'</div>'; return; }
-  if(profTab==='progress'){ body.innerHTML = tabs + renderProgressHTML(); return; }
-  if(profTab==='settings'){ body.innerHTML = tabs + renderSettingsHTML(); return; }
-  if(profTab==='backup'){ body.innerHTML = tabs + renderBackupHTML(); return; }
-  if(profTab==='account' && cloudOn()){ body.innerHTML = tabs + renderAccountHTML(); return; }
+  if(profTab==='progress'){ body.innerHTML = renderProgressHTML(); return; }
+  if(profTab==='settings'){ body.innerHTML = renderSettingsHTML(); return; }
+  if(profTab==='backup'){ body.innerHTML = renderBackupHTML(); return; }
+  if(profTab==='account' && cloudOn()){ body.innerHTML = renderAccountHTML(); return; }
   const multi = store.profiles.length>1;
-  body.innerHTML = tabs + store.profiles.map((p,i)=>{
+  const rows = store.profiles.map((p,i)=>{
     const active = p.id===store.activeId, confirming = profMode.confirmDel===p.id;
-    return `<div class="prow ${active?'active':''} ${confirming?'confirming':''}">
+    return `<div class="prow pa-row ${active?'active':''} ${confirming?'confirming':''}">
       <span class="pav">${GENDER_INFO[p.gender].avatar}</span>
-      <div class="pinfo"><b>${esc(profileName(p,i))}</b><small>${GENDER_INFO[p.gender].label} &nbsp;${profileStats(p)}</small></div>
-      <div class="pact">${active?'<span class="pbadge">✓ פעיל</span>':`<button type="button" class="pbtn main" data-pact="switch" data-id="${p.id}">בחירה</button>`}
-        <button type="button" class="pbtn" data-pact="edit" data-id="${p.id}" aria-label="עריכה">✏️</button>
-        ${multi?`<button type="button" class="pbtn" data-pact="del" data-id="${p.id}" aria-label="מחיקה">🗑️</button>`:''}</div>
-      ${confirming?`<div class="pconfirm">למחוק את "${esc(profileName(p,i))}" עם כל ההתקדמות? אי אפשר לבטל. <button type="button" class="pbtn danger" data-pact="delyes" data-id="${p.id}">כן, למחוק</button><button type="button" class="pbtn" data-pact="delno">ביטול</button></div>`:''}
+      <div class="pinfo pa-main-txt"><b>${esc(profileName(p,i))}</b><small>${GENDER_INFO[p.gender].label} &nbsp;${profileStats(p)}</small></div>
+      <div class="pact pa-ctl">${active?'<span class="pbadge">✓ פעיל</span>':`<button type="button" class="pa-btn sm" data-pact="switch" data-id="${p.id}">בחירה</button>`}
+        <button type="button" class="pa-btn sm sec icon" data-pact="edit" data-id="${p.id}" aria-label="עריכה">✏️</button>
+        ${multi?`<button type="button" class="pa-btn sm sec icon" data-pact="del" data-id="${p.id}" aria-label="מחיקה">🗑️</button>`:''}</div>
+      ${confirming?`<div class="pconfirm"><span>למחוק את "${esc(profileName(p,i))}" עם כל ההתקדמות? אי אפשר לבטל.</span><button type="button" class="pa-btn sm danger" data-pact="delyes" data-id="${p.id}">כן, למחוק</button><button type="button" class="pa-btn sm sec" data-pact="delno">ביטול</button></div>`:''}
     </div>`;
-  }).join('') +
-  (store.profiles.length<MAX_PROFILES ? `<button type="button" class="btn" style="width:100%;margin-top:6px" data-pact="new">➕ פרופיל חדש</button>` : '') +
-
-  `<div class="roomhint" style="margin-top:12px">הפנייה בפרופיל קובעת איך המשחק מדבר: בת "לחצי כאן", בן "לחץ כאן", ניטרלי "לחצו כאן". ההתקדמות נשמרת בנפרד לכל פרופיל, בדפדפן הזה בלבד.</div>`;
+  }).join('');
+  body.innerHTML = `<section class="pa-card"><h2 class="pa-h">הפרופילים במשחק</h2>
+    <p class="pa-sub">הפנייה בפרופיל קובעת איך המשחק מדבר: בת "לחצי כאן", בן "לחץ כאן", ניטרלי "לחצו כאן". ההתקדמות נשמרת בנפרד לכל פרופיל, בדפדפן הזה בלבד.</p>
+    <div class="pa-rows">${rows}</div>
+    ${store.profiles.length<MAX_PROFILES ? `<div class="pa-actions"><button type="button" class="pa-btn" data-pact="new">➕ פרופיל חדש</button></div>` : `<p class="pa-sub" style="margin-top:10px">אפשר עד ${MAX_PROFILES} פרופילים.</p>`}
+  </section>`;
 }
 
 // ===== PROGRESS TAB (reads the stats engine; nothing here decides thresholds or labels) =====
@@ -4186,17 +4306,14 @@ function renderSettingsHTML(){
   const prof = store.profiles.find(x=>x.id===setViewId) || activeProfile();
   if(!prof) return '';
   const on = profileDiff(prof);
-  const pick = store.profiles.length>1 ? `<div class="ppick">${store.profiles.map((p,i)=>`<button type="button" class="pbtn ${p.id===prof.id?'on':''}" data-pact="setprof" data-id="${p.id}">${GENDER_INFO[p.gender].avatar} ${esc(profileName(p,i))}</button>`).join('')}</div>` : '';
   const regular = new Set(Object.values(pools).flat().map(g=>g.name));
   const count = id => [...regular].filter(n=>skillDifficulty(n)===id).length;
-  const rows = DIFFICULTY.levels.map(l=>`<div class="dsw"><span class="dtxt"><b>${esc(l.he)}</b><small>${esc(l.desc||'')} · ${count(l.id)} סוגי שאלות</small></span><button type="button" class="pbtn" data-pact="sample" data-id="${l.id}">דוגמאות</button><label class="tglw"><input type="checkbox" data-dlvl="${l.id}" ${on.includes(l.id)?'checked':''} aria-label="${esc(l.he)}"><span class="tgl" aria-hidden="true"></span></label></div>`).join('');
-  const who = store.profiles.length>1 ? pick : `<div class="ppick"><span class="pbtn on">${GENDER_INFO[prof.gender].avatar} ${esc(profileName(prof, 0))}</span></div>`;
-  return `<div class="setfor"><div class="setforhead">⚙️ ההגדרות שלמטה חלות על הפרופיל:</div>${who}</div>
-    <div class="bksec">רמות קושי של השאלות</div>
-    <p class="bkhint">בוחרים אילו רמות יופיעו ב${esc(profileName(prof, store.profiles.indexOf(prof)))}. אפשר להפעיל רמה אחת, שתיים או שלוש. ברירת המחדל: כל הרמות.</p>
-    <div class="dswl">${rows}</div>
+  const rows = DIFFICULTY.levels.map(l=>`<div class="pa-row"><div class="pa-main-txt"><b>${esc(l.he)}</b><small>${esc(l.desc||'')} · ${count(l.id)} סוגי שאלות</small></div><div class="pa-ctl"><button type="button" class="pa-btn sm sec" data-pact="sample" data-id="${l.id}">דוגמאות</button><label class="tglw pa-switch"><input type="checkbox" data-dlvl="${l.id}" ${on.includes(l.id)?'checked':''} aria-label="${esc(l.he)}"><span class="tgl" aria-hidden="true"></span></label></div></div>`).join('');
+  return paScope('setprof', prof.id, 'ההגדרות חלות על:') + `<section class="pa-card"><h2 class="pa-h">רמות קושי של השאלות</h2>
+    <p class="pa-sub">בוחרים אילו רמות יופיעו ב${esc(profileName(prof, store.profiles.indexOf(prof)))}. אפשר להפעיל רמה אחת, שתיים או שלוש. ברירת המחדל: כל הרמות.</p>
+    <div class="pa-rows">${rows}</div>
     <div class="perr" id="dswErr">${setMsg?esc(setMsg):''}</div>
-    <p class="bkhint">שאלות בונוס הן תמיד ברמה קשה, ולכן ההגדרה הזאת לא משפיעה עליהן.</p>`;
+    <p class="pa-sub" style="margin-top:10px">שאלות בונוס הן תמיד ברמה קשה, ולכן ההגדרה הזאת לא משפיעה עליהן.</p></section>`;
 }
 let setMsg = '';
 // ---- sample questions for a difficulty level (modal) ----
@@ -4237,13 +4354,13 @@ function renderProgressHTML(){
   const prof = store.profiles.find(x=>x.id===statsViewId) || activeProfile();
   if(!prof) return '';
   const stats = prof.stats || statsNew();
-  const pick = store.profiles.length>1 ? `<div class="ppick">${store.profiles.map((p,i)=>`<button type="button" class="pbtn ${p.id===prof.id?'on':''}" data-pact="statsprof" data-id="${p.id}">${GENDER_INFO[p.gender].avatar} ${esc(profileName(p,i))}</button>`).join('')}</div>` : '';
+  const pick = paScope('statsprof', prof.id, 'התקדמות של:');
   const R = statsReport(stats), act = R.activity;
   if(!act.totalAnswers) return pick + `<div class="sk-empty"><span class="big">🌱</span>עוד אין נתונים עבור ${esc(profileName(prof, store.profiles.indexOf(prof)))}.<br>אחרי כמה שאלות יופיעו כאן החוזקות והנושאים לתרגול.</div>`;
   const ov = R.overall;
   const hero = `<div class="sk-hero"><span class="big">${ov.band.emoji}</span><div><b>${esc(ov.band.label)}${ov.ready?` · ${pctText(ov.accuracy)}`:''}</b><small>${ov.ready?`סיכום כללי לפי התשובות האחרונות · זמן חציוני ${secText(ov.medianSec)}`:'עוד מוקדם לסכם'}</small></div></div>`;
   const facts = `<div class="sk-facts"><div class="sk-fact"><b>${act.totalAnswers}</b><small>תשובות בסך הכול</small></div><div class="sk-fact"><b>${act.daysPlayed}</b><small>ימי משחק</small></div><div class="sk-fact"><b>${R.skills.filter(x=>x.ready).length}/${R.skills.length}</b><small>נושאים עם רמה</small></div></div>`;
-  const areas = `<div class="sk-h">🧭 לפי תחום</div>` + R.areas.slice().sort((a,b)=>(a.accuracy==null)-(b.accuracy==null) || a.accuracy-b.accuracy).map(a=>`<div class="sk-area"><span>${esc(a.name)}</span>${skBar(a.accuracy,a.band.id)}<span class="sk-pct">${a.ready?pctText(a.accuracy):'–'}</span><span title="${esc(a.band.label)}">${a.band.emoji}</span></div>`).join('');
+  const areas = `<h2 class="pa-h">🧭 לפי תחום</h2>` + R.areas.slice().sort((a,b)=>(a.accuracy==null)-(b.accuracy==null) || a.accuracy-b.accuracy).map(a=>`<div class="sk-area"><span>${esc(a.name)}</span>${skBar(a.accuracy,a.band.id)}<span class="sk-pct">${a.ready?pctText(a.accuracy):'–'}</span><span title="${esc(a.band.label)}">${a.band.emoji}</span></div>`).join('');
   // skills grouped by label, weakest group first, then "not enough data"
   const bandsAsc = C.bands.slice().sort((a,b)=>a.min-b.min);
   let groups = bandsAsc.map(b=>({b, list:R.skills.filter(x=>x.ready && x.band.id===b.id).sort((x,y)=>x.accuracy-y.accuracy)}));
@@ -4253,8 +4370,8 @@ function renderProgressHTML(){
   const byDay = {}; act.perDay.forEach(d=>byDay[d.day]=d);
   const days = []; for(let i=13;i>=0;i--){ const dt=new Date(); dt.setDate(dt.getDate()-i); const k=statsDateKey(dt.getTime()); days.push({k, n:(byDay[k]||{n:0}).n, dow:'אבגדהוש'[dt.getDay()]}); }
   const mx = Math.max(1, ...days.map(d=>d.n));
-  const dayBars = `<div class="sk-h">📅 14 הימים האחרונים</div><div class="sk-days">` + days.map(d=>`<div class="sk-day" title="${d.k}: ${d.n} תשובות"><i class="${d.n?'':'none'}" style="height:${d.n?Math.max(8,Math.round(d.n/mx*100)):3}%"></i><small>${d.dow}</small></div>`).join('') + `</div>`;
-  return pick + hero + facts + areas + skills + dayBars + skLegend();
+  const dayBars = `<h2 class="pa-h">📅 14 הימים האחרונים</h2><div class="sk-days">` + days.map(d=>`<div class="sk-day" title="${d.k}: ${d.n} תשובות"><i class="${d.n?'':'none'}" style="height:${d.n?Math.max(8,Math.round(d.n/mx*100)):3}%"></i><small>${d.dow}</small></div>`).join('') + `</div>`;
+  return pick + `<section class="pa-card">${hero}${facts}</section><section class="pa-card">${areas}</section><section class="pa-card"><h2 class="pa-h">📚 לפי נושא</h2>${skills}</section><section class="pa-card">${dayBars}</section><section class="pa-card">${skLegend()}</section>`;
 }
 
 
@@ -4266,25 +4383,25 @@ const SC_ERRORS = {
 };
 function bkRewards(pr){ return (pr.collection||[]).length + (pr.lollipops||[]).length + (pr.golden||[]).length; }
 function renderRestoreHTML(first){
-  let h = `<div class="bksec">הזנת קוד שמירה</div><p class="bkhint">${first?'הדביקו כאן את הקוד שנוצר במכשיר אחר או בעבר. הפרופילים יתווספו למשחק.':'הדביקו כאן קוד שנוצר בלשונית "גיבוי" (במכשיר הזה או באחר). לפני השחזור תוצג תצוגה מקדימה ותוכלו לבחור מה לשחזר.'}</p>
-    <textarea id="bkRestoreText" class="bkarea" rows="4" dir="ltr" placeholder="CQ1.z...." spellcheck="false" autocomplete="off">${esc(bk.restoreText)}</textarea>
-    <div class="bkbtns"><button type="button" class="btn" data-pact="bkcheck">בדיקת הקוד</button>${first?'<button type="button" class="btn ghost" data-pact="restoreback">חזרה</button>':''}</div>`;
+  let h = `<h2 class="pa-h">הזנת קוד שמירה</h2><p class="pa-sub">${first?'הדביקו כאן את הקוד שנוצר במכשיר אחר או בעבר. הפרופילים יתווספו למשחק.':'הדביקו כאן קוד שנוצר בחלק "יצירת קוד שמירה" (במכשיר הזה או באחר). לפני השחזור תוצג תצוגה מקדימה ותוכלו לבחור מה לשחזר.'}</p>
+    <textarea id="bkRestoreText" class="bkarea" rows="4" dir="ltr" placeholder="CQ1.z...." spellcheck="false" autocomplete="off" aria-label="קוד שמירה">${esc(bk.restoreText)}</textarea>
+    <div class="pa-actions"><button type="button" class="pa-btn" data-pact="bkcheck">בדיקת הקוד</button>${first?'<button type="button" class="pa-btn sec" data-pact="restoreback">חזרה</button>':''}</div>`;
   if(bk.msg && bk.where!=='gen') h += `<div class="bkmsg ${bk.ok?'good':'bad'}">${esc(bk.msg)}</div>`;
   if(bk.preview){
     const pv = bk.preview;
-    h += `<div class="bksec" style="margin-top:12px">נמצאו ${pv.profiles.length} פרופילים בקוד${pv.saved?` (נוצר ב-${esc(pv.saved)})`:''}</div>`;
+    h += `<h2 class="pa-h" style="margin-top:16px">נמצאו ${pv.profiles.length} פרופילים בקוד${pv.saved?` (נוצר ב-${esc(pv.saved)})`:''}</h2><div class="pa-rows">`;
     h += pv.profiles.map((c,i)=>{
       const ex = store.profiles.find(p=>p.id===c.id);
       const sel = bk.choices[c.id] || (ex ? 'new' : 'add');
       const opts = ex ? [['new','הוספה כפרופיל חדש'],['replace','החלפת הפרופיל הקיים'],['skip','דילוג']] : [['add','הוספה'],['skip','דילוג']];
       const answers = c.stats ? (c.stats.log.length + Object.values(c.stats.daily).reduce((t,m)=>t+Object.values(m).reduce((u,e)=>u+e.n,0),0)) : null;
-      return `<div class="bkrow"><span class="pav">${GENDER_INFO[c.gender].avatar}</span>
-        <div class="pinfo"><b>${esc(c.name || ('פרופיל '+(i+1)))}</b><small>${GENDER_INFO[c.gender].label} &nbsp;<span class="nw">⭐ ${c.progress.score}</span> &nbsp;<span class="nw">🎁 ${bkRewards(c.progress)}</span>${answers!==null?` &nbsp;<span class="nw">${answers} תשובות</span>`:' &nbsp;<span class="nw">בלי סטטיסטיקות</span>'}</small>
+      return `<div class="bkrow pa-row"><span class="pav">${GENDER_INFO[c.gender].avatar}</span>
+        <div class="pinfo pa-main-txt"><b>${esc(c.name || ('פרופיל '+(i+1)))}</b><small>${GENDER_INFO[c.gender].label} &nbsp;<span class="nw">⭐ ${c.progress.score}</span> &nbsp;<span class="nw">🎁 ${bkRewards(c.progress)}</span>${answers!==null?` &nbsp;<span class="nw">${answers} תשובות</span>`:' &nbsp;<span class="nw">בלי סטטיסטיקות</span>'}</small>
         ${ex?`<small>קיים פרופיל עם אותו מזהה: ${esc(profileName(ex, store.profiles.indexOf(ex)))} (⭐ ${ex.id===store.activeId?score:((ex.progress||{}).score||0)})</small>`:''}</div>
         <select class="bkchoice" data-id="${esc(c.id)}" aria-label="מה לעשות עם הפרופיל">${opts.map(o=>`<option value="${o[0]}" ${o[0]===sel?'selected':''}>${o[1]}</option>`).join('')}</select></div>`;
-    }).join('');
-    h += `<div class="bkbtns"><button type="button" class="btn" data-pact="bkrestore">שחזור</button></div>
-      <p class="bkhint" style="margin-top:8px">לפני כל שחזור נשמר עותק של המצב הנוכחי בדפדפן, למקרה של טעות.</p>`;
+    }).join('') + `</div>`;
+    h += `<div class="pa-actions"><button type="button" class="pa-btn" data-pact="bkrestore">שחזור</button></div>
+      <p class="pa-sub" style="margin-top:10px">לפני כל שחזור נשמר עותק של המצב הנוכחי בדפדפן, למקרה של טעות.</p>`;
   }
   return h;
 }
@@ -4292,18 +4409,18 @@ function renderBackupHTML(){
   const profs = store.profiles;
   const opts = `<option value="all" ${bk.sel==='all'?'selected':''}>כל הפרופילים (${profs.length})</option>` +
     profs.map((p,i)=>`<option value="${esc(p.id)}" ${bk.sel===p.id?'selected':''}>${esc(profileName(p,i))}</option>`).join('');
-  let h = `<div class="bksec">יצירת קוד שמירה</div>
-    <p class="bkhint">הקוד הוא טקסט אחד שמכיל את ההתקדמות. שומרים אותו במקום בטוח (הודעה לעצמכם, מסמך), ובמקרה של מחיקת נתוני הדפדפן, מעבר למכשיר אחר או דפדפן אחר, מזינים אותו בחלק "שחזור" למטה. מי שמחזיק בקוד יכול לשחזר את ההתקדמות.</p>
-    <select id="bkSel" class="bksel" aria-label="אילו פרופילים לשמור">${opts}</select>
-    <label class="bkchk"><input type="checkbox" id="bkStats" ${bk.stats?'checked':''}> לכלול סטטיסטיקות התקדמות (הקוד יהיה ארוך יותר)</label>
-    <div class="bkbtns"><button type="button" class="btn" data-pact="bkgen">יצירת קוד</button></div>`;
+  let h = `<section class="pa-card"><h2 class="pa-h">יצירת קוד שמירה</h2>
+    <p class="pa-sub">הקוד הוא טקסט אחד שמכיל את ההתקדמות. שומרים אותו במקום בטוח (הודעה לעצמכם, מסמך), ובמקרה של מחיקת נתוני הדפדפן, מעבר למכשיר אחר או דפדפן אחר, מזינים אותו בחלק "הזנת קוד שמירה" למטה. מי שמחזיק בקוד יכול לשחזר את ההתקדמות.</p>
+    <div class="pa-field"><label for="bkSel">אילו פרופילים לשמור</label><select id="bkSel" class="bksel">${opts}</select></div>
+    <div class="pa-row" style="padding-top:0"><div class="pa-main-txt"><b>לכלול סטטיסטיקות התקדמות</b><small>הקוד יהיה ארוך יותר</small></div><label class="pa-switch"><input type="checkbox" id="bkStats" ${bk.stats?'checked':''} aria-label="לכלול סטטיסטיקות התקדמות"><span class="tgl" aria-hidden="true"></span></label></div>
+    <div class="pa-actions" style="margin-top:0"><button type="button" class="pa-btn" data-pact="bkgen">יצירת קוד</button></div>`;
   if(bk.code){
-    h += `<textarea id="bkCode" class="bkarea" readonly rows="5" dir="ltr" style="margin-top:10px" onfocus="this.select()">${esc(bk.code)}</textarea>
-      <div class="bkinfo">${esc(bk.info)}</div>
-      <div class="bkbtns" style="margin-top:0"><button type="button" class="pbtn main" data-pact="bkcopy">העתקה</button><span class="pbadge" style="align-self:center">${bk.copied?'✓ הועתק':''}</span></div>`;
+    h += `<textarea id="bkCode" class="bkarea" readonly rows="5" dir="ltr" style="margin-top:12px" onfocus="this.select()" aria-label="קוד השמירה">${esc(bk.code)}</textarea>
+      <p class="pa-sub bkinfo" style="margin-top:8px">${esc(bk.info)}</p>
+      <div class="pa-actions" style="margin-top:0"><button type="button" class="pa-btn sm" data-pact="bkcopy">העתקה</button><span class="pbadge" style="align-self:center">${bk.copied?'✓ הועתק':''}</span></div>`;
   }
   if(bk.msg && bk.where==='gen') h += `<div class="bkmsg ${bk.ok?'good':'bad'}">${esc(bk.msg)}</div>`;
-  h += `<div class="bkdiv"></div>` + renderRestoreHTML(false);
+  h += `</section><section class="pa-card">` + renderRestoreHTML(false) + `</section>`;
   return h;
 }
 async function bkGenerate(){
