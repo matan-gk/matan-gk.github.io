@@ -502,6 +502,10 @@ footer{text-align:center; color:var(--muted); font-size:.75rem; margin-top:16px}
 .pa-scope-l{font-weight:800; font-size:.85rem; color:var(--muted)}
 .pa-seg{display:flex; gap:6px; flex-wrap:wrap}
 .pa-chip{min-height:38px; padding:0 14px; border-radius:999px; border:2px solid var(--card2); background:var(--card2); color:var(--text); font:800 .88rem 'Rubik',sans-serif; cursor:pointer}
+.famcode{font-family:'Rubik',sans-serif !important; font-size:.8rem !important; font-weight:700; letter-spacing:0 !important; text-align:center; direction:ltr; padding-inline:6px !important}
+.pa-scope.stack{flex-direction:column; align-items:stretch; gap:8px}
+.pa-scope.stack .pa-seg{flex-wrap:nowrap}
+.pa-scope.stack .pa-chip{flex:1 1 0; padding:0 4px; font-size:.82rem; white-space:nowrap; text-align:center}
 .pa-chip.on{background:linear-gradient(90deg,var(--teal),var(--purple)); color:#fff; border-color:transparent}
 .pa-chip:focus-visible{outline:3px solid var(--purple); outline-offset:2px}
 .pa .bkmsg{margin:10px 0 0}
@@ -1441,7 +1445,7 @@ function cloudProfileFromDoc(C, helpers){
 // ===== CLOUD (Google sign-in, cloud progress, problem reports) =====
 // Local-first: the game always works from this device's storage. The cloud is a mirror, so no internet / no account / no quota never blocks play.
 // Everything here is off while CLOUD_CONFIG is null. See firebase/SETUP.md for how to create the (free) Firebase project and paste its settings below.
-const APP_VERSION = '2026.10.18';
+const APP_VERSION = '2026.10.25';
 const CLOUD_CONFIG = {apiKey:"AIzaSyAlq_TJNGvWPJpUrpbdq_hkAoURydqMzm0", authDomain:"learning-quest-1.firebaseapp.com", projectId:"learning-quest-1", appId:"1:98931179722:web:78fb00084ccba3efb53433"};   // e.g. {apiKey:'...', authDomain:'xxx.firebaseapp.com', projectId:'xxx', appId:'...'}
 const CLOUD_LIMITS = {
   pushDelayMs: 60000,          // at most one upload per profile per minute while playing
@@ -1454,9 +1458,21 @@ const CLOUD_LIMITS = {
 const FB_VER = '10.14.1', FB_BASE = 'https://www.gstatic.com/firebasejs/'+FB_VER+'/';
 const cloud = {
   ad: null, ready: null, user: null, status: CLOUD_CONFIG ? 'signedout' : 'off', msg: '', lastSync: 0, lastPull: 0,
-  busy: false, again: null, timer: null, confirmWipe: false
+  busy: false, again: null, timer: null, confirmWipe: false,
+  mode: 'off', fid: '', joining: false, copied: false        // mode: 'off' (this device only) | 'google' (account) | 'code' (anonymous backup); fid: the family the device syncs with
 };
 function cloudOn(){ return !!(CLOUD_CONFIG || cloud.ad); }
+// A "family" is one cloud folder of profiles. A Google account owns one; an anonymous backup is reached only by its code.
+const FAM_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789', FAM_LEN = 26;     // 32 symbols x 26 = 130 bits: not guessable
+function newFamilyId(){ const b = new Uint8Array(FAM_LEN); (window.crypto||window.msCrypto).getRandomValues(b); let t = ''; for(let i=0;i<FAM_LEN;i++) t += FAM_ALPHABET[b[i]&31]; return t; }
+function famClean(t){ return String(t||'').toUpperCase().replace(/[\s\-_.]/g,''); }
+function famValid(t){ return t.length===FAM_LEN && [...t].every(c=>FAM_ALPHABET.includes(c)); }
+function famShow(t){ return t ? [t.slice(0,5),t.slice(5,10),t.slice(10,15),t.slice(15,20),t.slice(20)].join('-') : ''; }
+function cloudStored(k){ try{ return localStorage.getItem(k)||''; }catch(e){ return ''; } }
+function cloudStore(k,v){ try{ if(v) localStorage.setItem(k,v); else localStorage.removeItem(k); }catch(e){} }
+function cloudModeStored(){ const m = cloudStored('cq_cloud_mode'); return m==='google'||m==='code' ? m : (cloudStored('cq_cloud_on')==='1' ? 'google' : 'off'); }   // devices signed in before anonymous backups existed count as Google
+cloud.mode = cloudModeStored(); cloud.fid = cloud.mode==='code' ? cloudStored('cq_family') : '';
+function cloudActive(){ return !!(cloud.user && cloud.fid && cloud.mode!=='off'); }
 function cloudDay(){ return statsDateKey(Date.now()); }
 function cloudBudget(kind){                // kind 'w' (profile writes) or 'r' (reports); returns true if allowed and counts it
   const max = kind==='w' ? CLOUD_LIMITS.maxWritesPerDay : CLOUD_LIMITS.maxReportsPerDay;
@@ -1476,12 +1492,14 @@ function touchIfChanged(p){
   return false;
 }
 function seedSigs(){ store.profiles.forEach(p=>profSigs.set(p.id, profSig(p))); }   // what is on disk right now counts as 'no change yet'
-function cloudChanged(){ if(cloud.user && !cloud.user.anon) cloudSchedulePush(); }
+function cloudChanged(){ if(cloudActive()) cloudSchedulePush(); }
 function cloudSchedulePush(){ if(cloud.timer) return; cloud.timer = setTimeout(()=>{ cloud.timer = null; cloudPush(); }, CLOUD_LIMITS.pushDelayMs); }
 // ---- adapter: the only code that talks to Firebase ----
 function firebaseAdapter(cfg){
   let M = {}, auth, db;
-  const colRef = uid => M.collection(db,'users',uid,'profiles');
+  const famCol = fid => M.collection(db,'families',fid,'profiles');
+  const oldCol = uid => M.collection(db,'users',uid,'profiles');
+  const wipeCol = async ref => { const sn = await M.getDocs(ref); const bt = M.writeBatch(db); sn.docs.forEach(d=>bt.delete(d.ref)); if(sn.docs.length) await bt.commit(); };
   return {
     async init(){
       const [a,au,fs] = await Promise.all([import(FB_BASE+'firebase-app.js'), import(FB_BASE+'firebase-auth.js'), import(FB_BASE+'firebase-firestore.js')]);
@@ -1491,16 +1509,22 @@ function firebaseAdapter(cfg){
     onAuth(cb){ return M.onAuthStateChanged(auth, u=>cb(u ? {uid:u.uid, email:u.email||'', name:u.displayName||'', anon:u.isAnonymous} : null)); },
     async signIn(){ await M.signInWithPopup(auth, new M.GoogleAuthProvider()); },
     async signOut(){ await M.signOut(auth); },
-    async anon(){ await M.signInAnonymously(auth); },
-    async list(uid){ const s = await M.getDocs(colRef(uid)); return s.docs.map(d=>Object.assign({id:d.id}, d.data())); },
-    async put(uid, id, doc){   // doc.b must equal the stored version (checked by the security rules, no read needed)
-      try{ await M.setDoc(M.doc(db,'users',uid,'profiles',id), doc); return {ok:true}; }
+    async anon(){ const c = await M.signInAnonymously(auth); return {uid:c.user.uid, email:'', name:'', anon:true}; },
+    async deleteAuth(){ try{ await M.deleteUser(auth.currentUser); }catch(e){} },
+    // an account's family id
+    async getFamily(uid){ const sn = await M.getDoc(M.doc(db,'users',uid)); return sn.exists() ? String(sn.data().fid||'') : ''; },
+    async setFamily(uid, fid){ await M.setDoc(M.doc(db,'users',uid), {fid, t:Date.now()}); },
+    async clearFamily(uid){ try{ await M.deleteDoc(M.doc(db,'users',uid)); }catch(e){} },
+    // the family's profiles
+    async list(fid){ const sn = await M.getDocs(famCol(fid)); return sn.docs.map(d=>Object.assign({id:d.id}, d.data())); },
+    async put(fid, id, doc){   // doc.b must equal the stored version (checked by the security rules, no read needed)
+      try{ await M.setDoc(M.doc(db,'families',fid,'profiles',id), doc); return {ok:true}; }
       catch(e){ if(e && e.code==='permission-denied') return {conflict:true}; throw e; }
     },
-    async wipe(uid){
-      const s = await M.getDocs(colRef(uid)); const b = M.writeBatch(db); s.docs.forEach(d=>b.delete(d.ref)); await b.commit();
-      try{ await M.deleteUser(auth.currentUser); }catch(e){}
-    },
+    async wipe(fid){ await wipeCol(famCol(fid)); },
+    // earlier versions kept profiles directly under the account: read once, move, delete
+    async legacyList(uid){ const sn = await M.getDocs(oldCol(uid)); return sn.docs.map(d=>Object.assign({id:d.id}, d.data())); },
+    async legacyDelete(uid){ await wipeCol(oldCol(uid)); },
     async report(o){ await M.addDoc(M.collection(db,'reports'), Object.assign({uid:auth.currentUser.uid}, o)); }
   };
 }
@@ -1515,26 +1539,54 @@ function cloudInit(){
   return cloud.ready;
 }
 function cloudAuthChanged(u){
-  const wasIn = !!(cloud.user && !cloud.user.anon);
   cloud.user = u;
-  if(u && !u.anon){
-    try{ localStorage.setItem('cq_cloud_on','1'); }catch(e){}
-    let last = ''; try{ last = localStorage.getItem('cq_cloud_uid')||''; }catch(e){}
-    if(last !== u.uid){ store.profiles.forEach(p=>{ p.sy = 0; }); persist(); try{ localStorage.setItem('cq_cloud_uid', u.uid); }catch(e){} }  // another account: everything here counts as not yet uploaded
+  if(cloud.joining) return;                                   // a join/start is in progress and handles its own sync
+  if(u && !u.anon){                                           // Google account
+    cloudStore('cq_cloud_on','1'); cloudStore('cq_cloud_mode','google'); cloud.mode = 'google';
     cloud.status = 'syncing'; cloudRefreshUI();
-    cloudSync(wasIn ? 'auth' : 'login');
-  } else { cloud.status = CLOUD_CONFIG||cloud.ad ? 'signedout' : 'off'; cloudRefreshUI(); }
+    cloudAttachGoogle(u);
+  } else if(u && cloudModeStored()==='code' && cloudStored('cq_family')){      // anonymous backup: this device already knows its family code
+    cloud.mode = 'code'; cloud.fid = cloudStored('cq_family'); cloud.status = 'syncing'; cloudRefreshUI();
+    cloudFamilyChanged(cloud.fid); cloudSync('login');
+  } else if(!u && cloudModeStored()==='code' && cloudStored('cq_family') && cloud.ad){   // the browser lost its anonymous identity: the code still gets it back in
+    cloud.status = 'syncing'; cloudRefreshUI();
+    cloud.ad.anon().catch(()=>{ cloud.status = 'offline'; cloudRefreshUI(); });
+  } else {                                                    // signed out, or an anonymous session that only sends problem reports
+    cloud.mode = 'off'; cloud.fid = ''; cloud.status = CLOUD_CONFIG||cloud.ad ? 'signedout' : 'off'; cloudRefreshUI();
+  }
+}
+function cloudFamilyChanged(fid){      // a different family than last time: everything on this device counts as not yet uploaded
+  if(cloudStored('cq_cloud_fid_last') !== fid){ store.profiles.forEach(p=>{ p.sy = 0; }); persist(); cloudStore('cq_cloud_fid_last', fid); }
+}
+async function cloudAttachGoogle(u){   // find (or create) the account's family, then sync
+  try{
+    const local = cloudStored('cq_family');                   // an anonymous backup this device already had
+    let fid = await cloud.ad.getFamily(u.uid), note = '';
+    if(!fid){
+      fid = famValid(local) ? local : newFamilyId();
+      const old = await cloud.ad.legacyList(u.uid);          // profiles saved by the previous version
+      for(const d of old){ const {id, ...doc} = d; await cloud.ad.put(fid, id, doc); }
+      if(old.length) await cloud.ad.legacyDelete(u.uid);
+      await cloud.ad.setFamily(u.uid, fid);
+    } else if(local && local!==fid){
+      note = 'לחשבון הזה כבר הייתה משפחה בענן, ולכן ההתקדמות של המכשיר הזה אוחדה איתה. מכשירים שעדיין מחוברים עם הקוד הישן צריכים להזין את הקוד החדש.';
+    }
+    cloudStore('cq_family','');                               // the account holds the family from now on
+    if(!cloud.user || cloud.user.uid!==u.uid) return;
+    cloud.fid = fid; cloudFamilyChanged(fid);
+    await cloudSync('login');
+    if(note){ cloud.msg = note; cloud.msgOk = true; cloudRefreshUI(); }
+  }catch(e){ cloud.status = cloudErr(e); cloudRefreshUI(); }
 }
 function cloudBoot(){
   if(!cloudOn()) return;
-  let on = ''; try{ on = localStorage.getItem('cq_cloud_on')||''; }catch(e){}
-  if(on==='1'){ cloudInit().catch(()=>{ cloud.status='offline'; cloudRefreshUI(); }); }
+  if(cloudModeStored()!=='off'){ cloudInit().catch(()=>{ cloud.status='offline'; cloudRefreshUI(); }); }
   document.addEventListener('visibilitychange', ()=>{
-    if(!cloud.user || cloud.user.anon) return;
+    if(!cloudActive()) return;
     if(document.hidden){ if(cloud.timer){ clearTimeout(cloud.timer); cloud.timer = null; } cloudPush(); }
     else if(Date.now()-cloud.lastPull > CLOUD_LIMITS.pullGapMs) cloudSync('focus');
   });
-  window.addEventListener('online', ()=>{ if(cloud.user && !cloud.user.anon) cloudSync('online'); });
+  window.addEventListener('online', ()=>{ if(cloudActive()) cloudSync('online'); });
 }
 async function cloudSignIn(){
   try{
@@ -1546,15 +1598,39 @@ async function cloudSignIn(){
     cloudRefreshUI();
   }
 }
-async function cloudSignOut(){
-  try{ cloud.status='signedout'; if(cloud.ad) await cloud.ad.signOut(); }catch(e){}
-  try{ localStorage.removeItem('cq_cloud_on'); }catch(e){}
-  cloud.user = null; cloud.msg = ''; cloudRefreshUI();
+async function cloudDisconnect(){      // stop syncing on this device; what is in the cloud stays there
+  cloudStore('cq_cloud_on',''); cloudStore('cq_cloud_mode',''); cloudStore('cq_family',''); cloudStore('cq_cloud_fid_last','');
+  cloud.mode = 'off'; cloud.fid = ''; cloud.status = 'signedout';
+  try{ if(cloud.ad) await cloud.ad.signOut(); }catch(e){}
+  cloud.user = null; cloud.msg = ''; cloud.confirmWipe = false; cloudRefreshUI();
+}
+// anonymous backup: start a new one from this device, or join one with its code
+async function cloudStartCode(joinCode){
+  const join = !!joinCode, fid = join ? famClean(joinCode) : newFamilyId();
+  if(join && !famValid(fid)){ cloud.msg = 'הקוד לא תקין. הוא אמור להכיל '+FAM_LEN+' תווים (אותיות באנגלית ומספרים).'; cloud.msgOk = false; return cloudRefreshUI(); }
+  cloud.msg = ''; cloud.msgOk = false; cloud.status = 'signingin'; cloud.joining = true; cloudRefreshUI();
+  try{
+    await cloudInit();
+    const u = await cloud.ad.anon();
+    if(join){ const docs = await cloud.ad.list(fid); if(!docs.length){ cloud.joining = false; cloud.status = 'signedout'; cloud.msg = 'לא נמצא גיבוי עם הקוד הזה. כדאי לבדוק שהוא הוזן נכון.'; return cloudRefreshUI(); } }
+    cloudStore('cq_cloud_on','1'); cloudStore('cq_cloud_mode','code'); cloudStore('cq_family',fid);
+    cloud.user = u; cloud.mode = 'code'; cloud.fid = fid; cloud.joining = false; cloud.joinText = ''; cloudFamilyChanged(fid);
+    cloud.status = 'syncing'; cloudRefreshUI(); await cloudSync('login');
+  }catch(e){
+    cloud.joining = false; cloud.status = 'signedout';
+    cloud.msg = (e && e.code==='auth/operation-not-allowed') ? 'הגיבוי האנונימי עדיין לא הופעל בפרויקט ב-Firebase (ראו SETUP.md).' : 'החיבור לענן לא הצליח. כדאי לבדוק חיבור לאינטרנט ולנסות שוב.';
+    cloudRefreshUI();
+  }
 }
 async function cloudWipe(){
-  if(!cloud.user || cloud.user.anon) return;
-  try{ await cloud.ad.wipe(cloud.user.uid); store.profiles.forEach(p=>{ p.sy = 0; }); store.gone = []; persist(); await cloudSignOut(); cloud.msg = 'הנתונים נמחקו מהענן. ההתקדמות נשארה במכשיר הזה.'; cloud.msgOk = true; }
-  catch(e){ cloud.msg = 'המחיקה לא הצליחה. כדאי לנסות שוב.'; }
+  if(!cloudActive()) return;
+  try{
+    await cloud.ad.wipe(cloud.fid);
+    if(cloud.mode==='google') await cloud.ad.clearFamily(cloud.user.uid);
+    store.profiles.forEach(p=>{ p.sy = 0; }); store.gone = []; persist();
+    await cloud.ad.deleteAuth(); await cloudDisconnect();
+    cloud.msg = 'הנתונים נמחקו מהענן. ההתקדמות נשארה במכשיר הזה.'; cloud.msgOk = true;
+  }catch(e){ cloud.msg = 'המחיקה לא הצליחה. כדאי לנסות שוב.'; }
   cloud.confirmWipe = false; cloudRefreshUI();
 }
 function cloudErr(e){
@@ -1567,12 +1643,12 @@ function cloudErr(e){
 async function cloudPutProfile(p, base){
   if(!cloudBudget('w')) { cloud.status = 'budget'; return {budget:true}; }
   const doc = cloudDocFromProfile(p, CLOUD_LIMITS.maxStatsChars, base);
-  const res = await cloud.ad.put(cloud.user.uid, p.id, doc);
+  const res = await cloud.ad.put(cloud.fid, p.id, doc);
   if(res && res.ok){ p.sy = doc.u; }
   return res;
 }
 async function cloudPush(){            // periodic / on leaving: upload what changed (no full sync)
-  if(!cloud.user || cloud.user.anon || cloud.busy) return;
+  if(!cloudActive() || cloud.busy) return;
   saveState();
   const dirty = store.profiles.filter(p=>(p.u||0) > (p.sy||0));
   if(!dirty.length) return;
@@ -1587,13 +1663,13 @@ async function cloudPush(){            // periodic / on leaving: upload what cha
 }
 // ---- full two-way sync ----
 async function cloudSync(reason){
-  if(!cloud.user || cloud.user.anon) return;
+  if(!cloudActive()) return;
   if(cloud.busy){ cloud.again = reason; return; }
   cloud.busy = true; cloud.status = 'syncing'; cloud.msg = ''; cloudRefreshUI();
   let refresh = false, stopBudget = false, retryNeeded = false;
   try{
     saveState(); store.gone = store.gone||[];
-    const docs = await cloud.ad.list(cloud.user.uid);
+    const docs = await cloud.ad.list(cloud.fid);
     const plan = cloudPlan(store.profiles, store.gone||[], docs, MAX_PROFILES);
     const byDoc = {}; docs.forEach(d=>byDoc[d.id]=d);
     if(plan.some(a=>a.op==='pull'||a.op==='removeLocal'||a.conflict)){ try{ localStorage.setItem(SAVE_KEY+'_before_sync', JSON.stringify(store)); }catch(e){} }
@@ -1616,7 +1692,7 @@ async function cloudSync(reason){
         const r = await cloudPutProfile(p, a.base||0); if(r.budget) stopBudget = true; else if(r.conflict) retryNeeded = true;
       } else if(a.op==='tombstone' && !stopBudget){
         if(!cloudBudget('w')){ stopBudget = true; cloud.status = 'budget'; }
-        else { const r = await cloud.ad.put(cloud.user.uid, a.id, {n:'', g:'n', p:'{}', s:'', u:a.u||Date.now(), b:a.base||0, d:true, v:1}); if(r && r.ok) store.gone = store.gone.filter(g=>g.id!==a.id); }
+        else { const r = await cloud.ad.put(cloud.fid, a.id, {n:'', g:'n', p:'{}', s:'', u:a.u||Date.now(), b:a.base||0, d:true, v:1}); if(r && r.ok) store.gone = store.gone.filter(g=>g.id!==a.id); }
       } else if(a.op==='forgetGone'){ store.gone = (store.gone||[]).filter(g=>g.id!==a.id); }
     }
     if(!store.profiles.some(x=>x.id===store.activeId)){ store.activeId = store.profiles[0] && store.profiles[0].id; if(store.activeId) refresh = true; }
@@ -1638,7 +1714,7 @@ async function cloudSendReport(r){
   try{
     await cloudInit();
     if(!cloud.user){
-      await new Promise((res, rej)=>{ const t = setTimeout(()=>rej(new Error('timeout')), 8000); const iv = setInterval(()=>{ if(cloud.user){ clearInterval(iv); clearTimeout(t); res(); } }, 100); cloud.ad.anon().catch(rej); });
+      await new Promise((res, rej)=>{ const t = setTimeout(()=>rej(new Error('timeout')), 8000); const iv = setInterval(()=>{ if(cloud.user){ clearInterval(iv); clearTimeout(t); res(); } }, 100); cloud.ad.anon().then(u=>{ if(!cloud.user) cloud.user = u; }).catch(rej); });
     }
     await cloud.ad.report(r);
     return {ok:true};
@@ -1680,7 +1756,7 @@ async function submitReport(){
 }
 // ---- the "חשבון" tab ----
 function cloudRefreshUI(){
-  if(!document.getElementById('profOverlay').hidden && (profTab==='account' || profMode.first)) renderProfiles();
+  if(!document.getElementById('profOverlay').hidden && (profTab==='backup' || profMode.first)) renderProfiles();
   if(typeof renderProfileChip==='function') renderProfileChip();
 }
 const CLOUD_STATUS_TEXT = {
@@ -1688,31 +1764,70 @@ const CLOUD_STATUS_TEXT = {
   quota:'מכסת השרת היומית הסתיימה. ההתקדמות נשמרת במכשיר ותסונכרן מחר.', budget:'הגענו למגבלת הסנכרון היומית במכשיר הזה. ההתקדמות נשמרת ותסונכרן מחר.',
   denied:'אין הרשאה לשמור בענן. כנראה שחסרים כללי האבטחה ב-Firebase (ראו SETUP.md).', signingin:'מתחברים...'
 };
-function renderAccountHTML(){
-  const u = cloud.user && !cloud.user.anon ? cloud.user : null;
-  let h = `<section class="pa-card"><h2 class="pa-h">שמירה בענן</h2>`;
+// ---- backup tab, parts 2 and 3: Google account / anonymous cloud backup ----
+function cloudStatusLine(){
+  const t = cloud.lastSync ? new Date(cloud.lastSync).toLocaleTimeString('he-IL',{hour:'2-digit',minute:'2-digit'}) : '';
+  return esc(CLOUD_STATUS_TEXT[cloud.status]||'') + (cloud.status==='ok'&&t ? ' · '+esc(t) : '');
+}
+function cloudMsgHTML(){ return cloud.msg ? `<div class="bkmsg ${cloud.msgOk?'good':'bad'}">${esc(cloud.msg)}</div>` : ''; }
+const CLOUD_STORED_TXT = 'נשמרים: שם הפרופיל (אם הוזן), בן/בת/ניטרלי, ההתקדמות והסטטיסטיקות. לא נשמרים: תמונות, מיקום או פרטים נוספים. אפשר למחוק את הכול מהענן בכל רגע.';
+function famCodeCard(){      // the family code, shown on any device that syncs
+  return `<div class="pa-field"><label for="famShown">קוד המשפחה</label><input type="text" id="famShown" class="famcode" dir="ltr" readonly value="${esc(famShow(cloud.fid))}" onfocus="this.select()" aria-label="קוד המשפחה"></div>
+    <div class="pa-actions" style="margin-top:0"><button type="button" class="pa-btn sm" data-pact="famcopy">העתקה</button><span class="pbadge" style="align-self:center">${cloud.copied?'✓ הועתק':''}</span></div>`;
+}
+function cloudDeleteCard(){
+  let h = `<section class="pa-card"><h2 class="pa-h">מחיקת הנתונים מהענן</h2>`;
+  if(cloud.confirmWipe) h += `<p class="pa-sub">למחוק את כל הפרופילים של המשפחה הזאת מהענן ולנתק את המכשיר? ההתקדמות תישאר במכשיר הזה. מכשירים אחרים שעדיין מחוברים ימשיכו לשמור לשם ויצרו אותה מחדש, אז כדאי לנתק גם אותם.</p><div class="pa-actions" style="margin-top:0"><button type="button" class="pa-btn danger" data-pact="cloudwipeyes">כן, למחוק מהענן</button><button type="button" class="pa-btn sec" data-pact="cloudwipeno">ביטול</button></div>`;
+  else h += `<p class="pa-sub">מוחק מהענן את הפרופילים של המשפחה הזאת. ההתקדמות נשארת במכשיר.</p><div class="pa-actions" style="margin-top:0"><button type="button" class="pa-btn sec" data-pact="cloudwipe">מחיקת הנתונים שלי מהענן</button></div>`;
+  return h + `</section>`;
+}
+function renderCloudAccountHTML(){
+  const u = cloud.mode==='google' && cloud.user && !cloud.user.anon ? cloud.user : null;
+  let h = `<section class="pa-card"><h2 class="pa-h">חשבון בענן (Google)</h2>`;
   if(!u){
-    h += `<p class="pa-sub">התחברות עם חשבון Google של ההורה שומרת את ההתקדמות של כל הפרופילים בענן: אפשר להמשיך מכל מכשיר, וההתקדמות לא הולכת לאיבוד אם המכשיר מתחלף. המשחק ממשיך לעבוד גם בלי אינטרנט.</p>
-      <p class="pa-sub">נשמרים: שם הפרופיל (אם הוזן), בן/בת/ניטרלי, ההתקדמות והסטטיסטיקות. לא נשמרים: תמונות, מיקום או פרטים נוספים. אפשר למחוק את הכול מהענן בכל רגע.</p>
-      <div class="pa-actions"><button type="button" class="pa-btn" data-pact="cloudin" ${cloud.status==='signingin'?'disabled':''}>התחברות עם Google</button></div>`;
+    h += `<p class="pa-sub">התחברות עם חשבון Google של ההורה שומרת בענן את כל הפרופילים. כל מכשיר שמתחברים בו עם אותו חשבון מתעדכן אוטומטית, וההתקדמות לא הולכת לאיבוד אם המכשיר מתחלף. המשחק ממשיך לעבוד גם בלי אינטרנט.</p>
+      <p class="pa-sub">${CLOUD_STORED_TXT}</p>`;
+    if(cloud.mode==='code') h += `<p class="pa-sub"><b>במכשיר הזה פעיל גיבוי אנונימי.</b> אם לחשבון עוד אין משפחה בענן, הגיבוי הקיים יקושר אליו והקוד נשאר אותו קוד.</p>`;
+    h += `<div class="pa-actions"><button type="button" class="pa-btn" data-pact="cloudin" ${cloud.status==='signingin'||cloud.status==='syncing'?'disabled':''}>התחברות עם Google</button></div>`;
     if(cloud.status==='signingin') h += `<div class="bkmsg">מתחברים...</div>`;
-  } else {
-    const t = cloud.lastSync ? new Date(cloud.lastSync).toLocaleTimeString('he-IL',{hour:'2-digit',minute:'2-digit'}) : '';
-    h += `<div class="pa-row" style="padding-top:4px"><div class="pa-main-txt"><b>מחוברים כ-<bdi dir="ltr">${esc(u.email||u.name||'')}</bdi></b><small>${esc(CLOUD_STATUS_TEXT[cloud.status]||'')}${cloud.status==='ok'&&t?' · '+esc(t):''}</small></div></div>
-      <div class="pa-actions" style="margin-top:0"><button type="button" class="pa-btn" data-pact="cloudsync" ${cloud.busy?'disabled':''}>סנכרון עכשיו</button><button type="button" class="pa-btn sec" data-pact="cloudout">התנתקות</button></div>
-      <p class="pa-sub" style="margin-top:10px">ההתקדמות נשמרת אוטומטית. אם אותו ילד נוצר בשני מכשירים לפני ההתחברות, יופיעו שני פרופילים, ואפשר למחוק את המיותר בלשונית "פרופילים".</p>`;
+    h += cloudMsgHTML() + `</section>`;
+    return h;
   }
-  if(cloud.msg) h += `<div class="bkmsg ${cloud.msgOk?'good':'bad'}">${esc(cloud.msg)}</div>`;
-  h += `</section>`;
-  if(u){
-    h += `<section class="pa-card"><h2 class="pa-h">מחיקת הנתונים מהענן</h2>`;
-    if(cloud.confirmWipe) h += `<p class="pa-sub">למחוק את כל הפרופילים של החשבון הזה מהענן ולהתנתק? ההתקדמות תישאר במכשיר הזה.</p><div class="pa-actions" style="margin-top:0"><button type="button" class="pa-btn danger" data-pact="cloudwipeyes">כן, למחוק מהענן</button><button type="button" class="pa-btn sec" data-pact="cloudwipeno">ביטול</button></div>`;
-    else h += `<p class="pa-sub">מוחק את הפרופילים של החשבון הזה מהענן. ההתקדמות נשארת במכשיר.</p><div class="pa-actions" style="margin-top:0"><button type="button" class="pa-btn sec" data-pact="cloudwipe">מחיקת הנתונים שלי מהענן</button></div>`;
-    h += `</section>`;
+  h += `<div class="pa-row" style="padding-top:4px"><div class="pa-main-txt"><b>מחוברים כ-<bdi dir="ltr">${esc(u.email||u.name||'')}</bdi></b><small>${cloudStatusLine()}</small></div></div>
+    <div class="pa-actions" style="margin-top:0"><button type="button" class="pa-btn" data-pact="cloudsync" ${cloud.busy?'disabled':''}>סנכרון עכשיו</button><button type="button" class="pa-btn sec" data-pact="cloudout">התנתקות</button></div>
+    <p class="pa-sub" style="margin-top:10px">ההתקדמות נשמרת אוטומטית. אם אותו ילד נוצר בשני מכשירים לפני ההתחברות, יופיעו שני פרופילים, ואפשר למחוק את המיותר בלשונית "פרופילים".</p>${cloudMsgHTML()}</section>`;
+  h += `<section class="pa-card"><h2 class="pa-h">חיבור מכשיר בלי Google</h2>
+    <p class="pa-sub">מכשיר שאי אפשר להתחבר בו עם Google (למשל מכשיר של ילד) מצטרף לאותה משפחה עם הקוד הזה: בחלק "גיבוי אנונימי בענן", "יש לי קוד". מי שמחזיק בקוד יכול לראות ולעדכן את ההתקדמות, אז שומרים אותו אצלכם.</p>
+    ${cloud.fid ? famCodeCard() : '<p class="pa-sub">טוענים את הקוד...</p>'}</section>`;
+  return h + cloudDeleteCard();
+}
+function famJoinForm(first){
+  const hasLocal = store.profiles.length>0 && !first;
+  return `<div class="pa-field"><label for="famCode">קוד משפחה</label><input type="text" id="famCode" class="famcode" dir="ltr" maxlength="40" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="XXXXX-XXXXX-XXXXX-XXXXX-XXXXXX" value="${esc(cloud.joinText||'')}"></div>
+    ${hasLocal?'<p class="pa-sub" style="margin-top:0">הפרופילים שיש עכשיו במכשיר הזה יתווספו למשפחה, והפרופילים של המשפחה יתווספו אליו.</p>':''}
+    <div class="pa-actions" style="margin-top:0"><button type="button" class="pa-btn" data-pact="famjoin" ${cloud.status==='signingin'?'disabled':''}>הצטרפות</button>${first?'<button type="button" class="pa-btn sec" data-pact="restoreback">חזרה</button>':''}</div>
+    ${cloud.status==='signingin'?'<div class="bkmsg">מתחברים...</div>':''}${cloudMsgHTML()}`;
+}
+function renderCloudAnonHTML(){
+  if(cloud.mode==='google') return `<section class="pa-card"><h2 class="pa-h">גיבוי אנונימי בענן</h2><p class="pa-sub">המכשיר הזה מחובר לחשבון Google, וההתקדמות נשמרת דרכו. כדי להשתמש בגיבוי אנונימי צריך להתנתק קודם מהחשבון, בחלק "חשבון בענן". אם רוצים לחבר מכשיר נוסף בלי Google, הקוד שלו מופיע שם.</p></section>`;
+  if(cloud.mode==='code'){
+    return `<section class="pa-card"><h2 class="pa-h">גיבוי אנונימי בענן</h2>
+      <div class="pa-row" style="padding-top:4px"><div class="pa-main-txt"><b>הגיבוי האנונימי פעיל</b><small>${cloudStatusLine()}</small></div></div>
+      <div class="pa-actions" style="margin-top:0"><button type="button" class="pa-btn" data-pact="cloudsync" ${cloud.busy?'disabled':''}>סנכרון עכשיו</button><button type="button" class="pa-btn sec" data-pact="cloudout">ניתוק המכשיר</button></div>
+      <p class="pa-sub" style="margin-top:10px">ההתקדמות נשמרת אוטומטית. כדי לחבר מכשיר נוסף, בוחרים בו "גיבוי אנונימי בענן", "יש לי קוד", ומזינים את הקוד שלמטה.</p>${cloudMsgHTML()}</section>
+      <section class="pa-card"><h2 class="pa-h">קוד המשפחה</h2>
+      <p class="pa-sub">מי שמחזיק בקוד יכול לראות ולעדכן את ההתקדמות. אי אפשר לשחזר את הקוד מהענן, אבל כל מכשיר מחובר מציג אותו כאן. אפשר לקשר את הגיבוי לחשבון Google בחלק "חשבון בענן".</p>
+      ${famCodeCard()}</section>` + cloudDeleteCard();
   }
-  h += `<section class="pa-card"><h2 class="pa-h">דיווח על בעיה</h2><p class="pa-sub">משהו לא עובד, שאלה לא ברורה או שגויה? אפשר לשלוח דיווח.</p><div class="pa-actions" style="margin-top:0"><button type="button" class="pa-btn sec" data-pact="report">דיווח על בעיה</button></div>
+  return `<section class="pa-card"><h2 class="pa-h">גיבוי אנונימי בענן</h2>
+    <p class="pa-sub">שומר את ההתקדמות בענן בלי חשבון ובלי התחברות. המכשיר מקבל קוד משפחה, ומכל מכשיר אחר אפשר להזין אותו ולקבל את אותם פרופילים. המכשירים מתעדכנים ביניהם. המשחק ממשיך לעבוד גם בלי אינטרנט.</p>
+    <p class="pa-sub">${CLOUD_STORED_TXT}</p>
+    <div class="pa-actions"><button type="button" class="pa-btn" data-pact="famnew" ${cloud.status==='signingin'?'disabled':''}>התחלת גיבוי אנונימי</button></div></section>
+    <section class="pa-card"><h2 class="pa-h">יש לי קוד</h2><p class="pa-sub">מצטרפים לגיבוי שכבר נוצר במכשיר אחר.</p>${famJoinForm(false)}</section>`;
+}
+function renderReportHTML(){
+  return `<section class="pa-card"><h2 class="pa-h">דיווח על בעיה</h2><p class="pa-sub">משהו לא עובד, שאלה לא ברורה או שגויה? אפשר לשלוח דיווח.</p><div class="pa-actions" style="margin-top:0"><button type="button" class="pa-btn" data-pact="report">דיווח על בעיה</button></div>
     <p class="pa-sub" style="margin-top:12px">גרסה ${esc(APP_VERSION)}</p></section>`;
-  return h;
 }
 
 
@@ -1756,18 +1871,20 @@ function guideHTML(){
     'החץ (משתפר, יציב, יורד) משווה את 30 התשובות האחרונות ל-30 שלפניהן, ומופיע רק כשההפרש גדול מ-10 נקודות אחוז. הוא נפרד מהתווית ולא משנה אותה.',
     'זה כלי לשיחה ולא ציון. נושא ב"דורש תרגול" הוא הזמנה לתרגל אותו יחד, עם כפתור העזרה.'
   ]));
-  h += S('שמירת ההתקדמות', `<p>ההתקדמות נשמרת בדפדפן של המכשיר. אם מנקים נתוני אתר, גולשים במצב פרטי, מחליפים דפדפן או מכשיר, היא לא תופיע. יש שתי דרכים לשמור אותה:</p>` + li([
-    '<b>קוד שמירה</b> (בתפריט, "גיבוי ושחזור"): יוצרים קוד, מעתיקים אותו למקום בטוח (הודעה לעצמכם או מסמך), ובמכשיר אחר מדביקים אותו ומשחזרים. אפשר לשמור פרופיל אחד או את כולם, עם סטטיסטיקות או בלעדיהן. לפני כל שחזור נשמר עותק של המצב הנוכחי.',
-  ].concat(cloudOn() ? ['<b>חשבון Google</b> (בתפריט, "חשבון"): ההורה מתחבר פעם אחת בכל מכשיר וההתקדמות של כל הפרופילים נשמרת בענן ומתעדכנת אוטומטית. המשחק ממשיך לעבוד גם בלי אינטרנט ומסתנכרן כשחוזרים להיות מחוברים.'] : [])));
+  h += S('שמירת ההתקדמות', `<p>ההתקדמות נשמרת בדפדפן של המכשיר. אם מנקים נתוני אתר, גולשים במצב פרטי, מחליפים דפדפן או מכשיר, היא לא תופיע. בלשונית "גיבוי ושחזור" יש שלוש דרכים לשמור אותה:</p>` + li([
+    '<b>גיבוי מקומי</b> (קוד שמירה): יוצרים קוד, מעתיקים אותו למקום בטוח (הודעה לעצמכם או מסמך), ובמכשיר אחר מדביקים אותו ומשחזרים. אפשר לשמור פרופיל אחד או את כולם, עם סטטיסטיקות או בלעדיהן. לפני כל שחזור נשמר עותק של המצב הנוכחי.',
+  ].concat(cloudOn() ? [
+    '<b>חשבון בענן</b> (Google): ההורה מתחבר פעם אחת בכל מכשיר וההתקדמות של כל הפרופילים נשמרת בענן ומתעדכנת אוטומטית. המשחק ממשיך לעבוד גם בלי אינטרנט ומסתנכרן כשחוזרים להיות מחוברים.',
+    '<b>גיבוי אנונימי בענן</b>: בלי חשבון. המכשיר מקבל קוד משפחה, ומכל מכשיר אחר (למשל מכשיר של ילד שלא מתחברים בו עם Google) מזינים את הקוד ומקבלים את אותם פרופילים, והמכשירים מתעדכנים ביניהם. מי שמחזיק בקוד יכול לראות ולעדכן את ההתקדמות, אז שומרים אותו אצלכם.'] : [])));
   h += S('פרטיות', li([
-    'ההתקדמות נשמרת במכשיר. ' + (cloudOn() ? 'רק אם מתחברים עם חשבון Google היא נשמרת גם בענן, ואפשר למחוק אותה משם בכל רגע ("חשבון", "מחיקת הנתונים שלי מהענן").' : ''),
+    'ההתקדמות נשמרת במכשיר. ' + (cloudOn() ? 'רק אם מתחברים עם חשבון Google או מפעילים גיבוי אנונימי היא נשמרת גם בענן, ואפשר למחוק אותה משם בכל רגע ("גיבוי ושחזור", "מחיקת הנתונים שלי מהענן").' : ''),
     'נשמרים: שם הפרופיל (אם הוזן), בן/בת/ניטרלי, ההתקדמות והסטטיסטיקות. לא נשמרים תמונות, מיקום או פרטי קשר.',
     'במשחק אין פרסומות ואין כלי מעקב.',
     'דיווח על בעיה כולל רק את מה שכתבתם, את גרסת המשחק ואת השאלה (אם דיווחתם מעמוד העזרה). השם וההתקדמות של הילד לא נשלחים.'
   ]));
   h += S('בעיות נפוצות', li([
-    '<b>ההתקדמות נעלמה</b>: כנראה נוקו נתוני האתר או שנפתח דפדפן אחר. אם שמרתם קוד שמירה' + (cloudOn() ? ' או התחברתם לחשבון' : '') + ', אפשר לשחזר.',
-    '<b>ההתקדמות לא מופיעה במכשיר השני</b>: ' + (cloudOn() ? 'מתחברים לאותו חשבון Google בשני המכשירים, או ' : '') + 'משתמשים בקוד שמירה.',
+    '<b>ההתקדמות נעלמה</b>: כנראה נוקו נתוני האתר או שנפתח דפדפן אחר. אם שמרתם קוד שמירה' + (cloudOn() ? ' או הפעלתם גיבוי בענן' : '') + ', אפשר לשחזר.',
+    '<b>ההתקדמות לא מופיעה במכשיר השני</b>: ' + (cloudOn() ? 'מתחברים לאותו חשבון Google בשני המכשירים, מזינים בשני את אותו קוד משפחה (גיבוי אנונימי), או ' : '') + 'משתמשים בקוד שמירה.',
     '<b>שאלה שנראית שגויה</b>: לוחצים על "דיווח" בכרטיס השאלה.'
   ]));
   h += S('דיווח על בעיה', `<p><b>על שאלה מסוימת</b>: כפתור "דיווח" בכרטיס השאלה (או בעמוד העזרה שלה) מצרף את השאלה לדיווח. <b>על בעיה כללית</b>: בתפריט, "דיווח על בעיה". כתבו בכמה מילים מה קרה. אפשר להשאיר פרטי קשר, לא חובה.${cloudOn() ? '' : ' אם המשחק לא מחובר לענן, הדיווח מועתק כטקסט ואפשר לשלוח אותו למי שנתן לכם את המשחק.'}</p><p class="gver">גרסה ${esc(APP_VERSION)}</p>`);
@@ -1776,13 +1893,13 @@ function guideHTML(){
 function openGuide(){ openPanel('guide'); }
 
 // ===== TOP-RIGHT MENU =====
-const PANEL_TITLES = {profiles:'ניהול פרופילים', progress:'התקדמות', settings:'הגדרות', backup:'גיבוי ושחזור', account:'חשבון', guide:'מדריך להורים'};
-const PANEL_NAV = {profiles:'פרופילים', progress:'התקדמות', settings:'הגדרות', backup:'גיבוי ושחזור', account:'חשבון', guide:'מדריך להורים'};
-const PANEL_SHORT = {profiles:'פרופילים', progress:'התקדמות', settings:'הגדרות', backup:'גיבוי', account:'חשבון', guide:'מדריך'};
-const PANEL_ICON = {profiles:'👥', progress:'📊', settings:'⚙️', backup:'💾', account:'☁️', guide:'📖'};
+const PANEL_TITLES = {profiles:'ניהול פרופילים', progress:'התקדמות', settings:'הגדרות', backup:'גיבוי ושחזור', report:'דיווח על בעיה', guide:'מדריך להורים'};
+const PANEL_NAV = {profiles:'פרופילים', progress:'התקדמות', settings:'הגדרות', backup:'גיבוי ושחזור', report:'דיווח על בעיה', guide:'מדריך להורים'};
+const PANEL_SHORT = {profiles:'פרופילים', progress:'התקדמות', settings:'הגדרות', backup:'גיבוי', report:'דיווח', guide:'מדריך'};
+const PANEL_ICON = {profiles:'👥', progress:'📊', settings:'⚙️', backup:'💾', report:'🐞', guide:'📖'};
 function openPanel(tab){
   closeMenu();
-  profTab = (PANEL_TITLES[tab] && (tab!=='account' || cloudOn())) ? tab : 'profiles';
+  profTab = PANEL_TITLES[tab] ? tab : 'profiles';
   profMode = {view:'list', editId:null, first:false, confirmDel:null, error:''};
   statsViewId = store.activeId; bk = bkFresh();
   document.getElementById('profOverlay').hidden = false; renderProfiles();
@@ -1799,7 +1916,7 @@ function renderMenu(){
   if(store.profiles.length>1){
     h += `<div class="msec">החלפת פרופיל</div>` + store.profiles.map((q,i)=>item('switch', `<span class="mav">${GENDER_INFO[q.gender].avatar}</span><span class="mgrow">${esc(profileName(q,i))}</span>${q.id===store.activeId?'<span class="mchk">✓</span>':''}`, q.id, q.id===store.activeId?'cur':'')).join('') + '<div class="mdiv"></div>';
   }
-  h += item('panel:profiles','ניהול פרופילים') + item('panel:progress','התקדמות') + item('panel:settings','הגדרות') + item('panel:backup','גיבוי ושחזור') + (cloudOn() ? item('panel:account','חשבון'+(cloud.user&&!cloud.user.anon?' <span class="mdot" aria-hidden="true"></span>':'')) : '')
+  h += item('panel:profiles','ניהול פרופילים') + item('panel:progress','התקדמות') + item('panel:settings','הגדרות') + item('panel:backup','גיבוי ושחזור'+(cloudActive()?' <span class="mdot" aria-hidden="true"></span>':''))
      + '<div class="mdiv"></div>' + item('guide','מדריך להורים') + item('report','דיווח על בעיה') + `<div class="mver">גרסה ${esc(APP_VERSION)}</div>`;
   m.innerHTML = h;
 }
@@ -4150,7 +4267,7 @@ function checkAnswer(val, btnEl, grid){
 // ===== PROFILE PANEL =====
 let profMode = {view:'list', editId:null, first:false, confirmDel:null, error:''};
 let profTab = 'profiles';          // 'profiles' | 'progress' | 'backup'
-const bkFresh = () => ({sel:'all', stats:true, code:'', info:'', copied:false, restoreText:'', preview:null, choices:{}, msg:'', ok:false});
+const bkFresh = () => ({sub:'', sel:'all', stats:true, code:'', info:'', copied:false, restoreText:'', preview:null, choices:{}, msg:'', ok:false});
 let bk = bkFresh();                 // backup tab state (cleared whenever the panel is opened)
 let statsViewId = null;            // which profile the Progress tab shows
 function renderProfileChip(){
@@ -4210,7 +4327,7 @@ function renderProfiles(){
     paLastTab = null; return;
   }
   const prev = document.getElementById('paMain'), keep = prev && paLastTab===profTab ? prev.scrollTop : 0;
-  const nav = Object.keys(PANEL_NAV).filter(k=>k!=='account'||cloudOn()).map(k=>`<button type="button" role="tab" class="vtab pa-tab ${profTab===k?'on':''}" aria-selected="${profTab===k}" data-pact="tab" data-id="${k}"><span class="pa-ico" aria-hidden="true">${PANEL_ICON[k]}</span><span class="pa-lbl">${PANEL_NAV[k]}</span><span class="pa-lbl-s">${PANEL_SHORT[k]}</span></button>`).join('');
+  const nav = Object.keys(PANEL_NAV).map(k=>`<button type="button" role="tab" class="vtab pa-tab ${profTab===k?'on':''}" aria-selected="${profTab===k}" data-pact="tab" data-id="${k}"><span class="pa-ico" aria-hidden="true">${PANEL_ICON[k]}</span><span class="pa-lbl">${PANEL_NAV[k]}</span><span class="pa-lbl-s">${PANEL_SHORT[k]}</span></button>`).join('');
   body.innerHTML = `<div class="pa-shell"><nav class="pa-nav vtabs" role="tablist" aria-orientation="vertical" aria-label="חלקים">${nav}</nav><main class="pa-main" id="paMain"><div class="pa-page">${content}</div></main></div>`;
   paLastTab = profTab;
   if(keep) document.getElementById('paMain').scrollTop = keep;
@@ -4219,6 +4336,11 @@ function renderProfilesInner(){
   const body = document.getElementById('profBody');
   const closeBtn = document.getElementById('profClose');
   closeBtn.style.visibility = profMode.first ? 'hidden' : 'visible';
+  if(profMode.view==='joinfirst'){
+    document.getElementById('profTitle').textContent = 'קוד משפחה';
+    body.innerHTML = `<section class="pa-card"><h2 class="pa-h">הצטרפות עם קוד משפחה</h2><p class="pa-sub">מזינים את קוד המשפחה מהגיבוי האנונימי או מחשבון הענן. הפרופילים יופיעו כאן.</p>${famJoinForm(true)}</section>`;
+    return;
+  }
   if(profMode.view==='restorefirst'){
     document.getElementById('profTitle').textContent = 'שחזור מקוד שמירה';
     body.innerHTML = `<section class="pa-card">${renderRestoreHTML(true)}</section>`;
@@ -4236,7 +4358,7 @@ function renderProfilesInner(){
       <div class="perr" id="pfErr">${profMode.error||''}</div>
       <div class="pa-actions"><button type="button" class="pa-btn" data-pact="save">שמירה</button>${(profMode.first)?'':'<button type="button" class="pa-btn sec" data-pact="cancel">ביטול</button>'}</div>
       ${profMode.first?'<div class="pa-actions"><button type="button" class="pa-btn sec block" data-pact="restorefirst">יש לי קוד שמירה: שחזור</button></div>':''}
-      ${profMode.first&&cloudOn()?'<div class="pa-actions" style="margin-top:8px"><button type="button" class="pa-btn sec block" data-pact="cloudin">יש לי חשבון: התחברות עם Google</button></div>'+(cloud.msg?'<div class="bkmsg bad">'+esc(cloud.msg)+'</div>':''):''}
+      ${profMode.first&&cloudOn()?'<div class="pa-actions" style="margin-top:8px"><button type="button" class="pa-btn sec block" data-pact="joinfirst">יש לי קוד משפחה: הצטרפות</button></div><div class="pa-actions" style="margin-top:8px"><button type="button" class="pa-btn sec block" data-pact="cloudin">יש לי חשבון: התחברות עם Google</button></div>'+(cloud.msg?'<div class="bkmsg bad">'+esc(cloud.msg)+'</div>':''):''}
     </div>`;
     return;
   }
@@ -4245,7 +4367,7 @@ function renderProfilesInner(){
   if(profTab==='progress'){ body.innerHTML = renderProgressHTML(); return; }
   if(profTab==='settings'){ body.innerHTML = renderSettingsHTML(); return; }
   if(profTab==='backup'){ body.innerHTML = renderBackupHTML(); return; }
-  if(profTab==='account' && cloudOn()){ body.innerHTML = renderAccountHTML(); return; }
+  if(profTab==='report'){ body.innerHTML = renderReportHTML(); return; }
   const multi = store.profiles.length>1;
   const rows = store.profiles.map((p,i)=>{
     const active = p.id===store.activeId, confirming = profMode.confirmDel===p.id;
@@ -4359,7 +4481,7 @@ function renderProgressHTML(){
   if(!act.totalAnswers) return pick + `<div class="sk-empty"><span class="big">🌱</span>עוד אין נתונים עבור ${esc(profileName(prof, store.profiles.indexOf(prof)))}.<br>אחרי כמה שאלות יופיעו כאן החוזקות והנושאים לתרגול.</div>`;
   const ov = R.overall;
   const hero = `<div class="sk-hero"><span class="big">${ov.band.emoji}</span><div><b>${esc(ov.band.label)}${ov.ready?` · ${pctText(ov.accuracy)}`:''}</b><small>${ov.ready?`סיכום כללי לפי התשובות האחרונות · זמן חציוני ${secText(ov.medianSec)}`:'עוד מוקדם לסכם'}</small></div></div>`;
-  const facts = `<div class="sk-facts"><div class="sk-fact"><b>${act.totalAnswers}</b><small>תשובות בסך הכול</small></div><div class="sk-fact"><b>${act.daysPlayed}</b><small>ימי משחק</small></div><div class="sk-fact"><b>${R.skills.filter(x=>x.ready).length}/${R.skills.length}</b><small>נושאים עם רמה</small></div></div>`;
+  const facts = `<div class="sk-facts"><div class="sk-fact"><b>${act.totalAnswers}</b><small>תשובות בסך הכול</small></div><div class="sk-fact"><b>${act.daysPlayed}</b><small>ימי משחק</small></div><div class="sk-fact"><b>${R.skills.filter(x=>x.ready).length}/${R.skills.length}</b><small>נושאים שכבר נבדקו</small></div></div>`;
   const areas = `<h2 class="pa-h">🧭 לפי תחום</h2>` + R.areas.slice().sort((a,b)=>(a.accuracy==null)-(b.accuracy==null) || a.accuracy-b.accuracy).map(a=>`<div class="sk-area"><span>${esc(a.name)}</span>${skBar(a.accuracy,a.band.id)}<span class="sk-pct">${a.ready?pctText(a.accuracy):'–'}</span><span title="${esc(a.band.label)}">${a.band.emoji}</span></div>`).join('');
   // skills grouped by label, weakest group first, then "not enough data"
   const bandsAsc = C.bands.slice().sort((a,b)=>a.min-b.min);
@@ -4405,7 +4527,22 @@ function renderRestoreHTML(first){
   }
   return h;
 }
+function bkSubCur(){
+  if(!cloudOn()) return 'local';
+  return bk.sub || (cloud.mode==='google' ? 'account' : cloud.mode==='code' ? 'anon' : 'local');
+}
 function renderBackupHTML(){
+  const cur = bkSubCur();
+  let h = '';
+  if(cloudOn()){
+    const chip = (id, label, active) => `<button type="button" class="pa-chip ${cur===id?'on':''}" aria-pressed="${cur===id}" data-pact="bksub" data-id="${id}">${label}${active?' ✓':''}</button>`;
+    h += `<div class="pa-scope stack"><span class="pa-scope-l">סוג הגיבוי:</span><div class="pa-seg">${chip('local','גיבוי מקומי',false)}${chip('account','חשבון בענן',cloud.mode==='google')}${chip('anon','גיבוי אנונימי',cloud.mode==='code')}</div></div>`;
+  }
+  if(cur==='account') return h + renderCloudAccountHTML();
+  if(cur==='anon') return h + renderCloudAnonHTML();
+  return h + renderLocalBackupHTML();
+}
+function renderLocalBackupHTML(){
   const profs = store.profiles;
   const opts = `<option value="all" ${bk.sel==='all'?'selected':''}>כל הפרופילים (${profs.length})</option>` +
     profs.map((p,i)=>`<option value="${esc(p.id)}" ${bk.sel===p.id?'selected':''}>${esc(profileName(p,i))}</option>`).join('');
@@ -4432,6 +4569,13 @@ async function bkGenerate(){
   const d = new Date();
   bk.info = `קוד ל-${chosen.length===1?'פרופיל אחד':chosen.length+' פרופילים'}: ${chosen.map((p,i)=>profileName(p,store.profiles.indexOf(p))).join(', ')} · ${bk.code.length.toLocaleString('he-IL')} תווים · ${bk.stats?'עם סטטיסטיקות':'בלי סטטיסטיקות'} · ${d.toLocaleDateString('he-IL')} ${d.toLocaleTimeString('he-IL',{hour:'2-digit',minute:'2-digit'})}`;
   bk.copied = false; bk.msg = ''; renderProfiles();
+}
+async function famCopy(){
+  const text = famShow(cloud.fid); let ok = false;
+  try{ await navigator.clipboard.writeText(text); ok = true; }catch(e){}
+  if(!ok){ const ta = document.getElementById('famShown'); if(ta){ try{ ta.focus(); ta.select(); ok = document.execCommand('copy'); }catch(e){} } }
+  cloud.copied = ok; renderProfiles();
+  if(ok) setTimeout(()=>{ cloud.copied = false; if(!document.getElementById('profOverlay').hidden && profTab==='backup') renderProfiles(); }, 2500);
 }
 async function bkCopy(){
   const ta = document.getElementById('bkCode'); if(!ta) return;
@@ -4469,7 +4613,7 @@ function bkRestore(){
   persist();
   const parts = []; if(res.added) parts.push(res.added===1?'נוסף פרופיל אחד':'נוספו '+res.added+' פרופילים'); if(res.replaced) parts.push(res.replaced===1?'הוחלף פרופיל אחד':'הוחלפו '+res.replaced+' פרופילים'); if(res.skipped) parts.push('דולגו '+res.skipped);
   const msg = 'השחזור הושלם: ' + (parts.join(', ')||'לא בוצעו שינויים') + '.';
-  bk = bkFresh(); bk.msg = msg; bk.ok = true;
+  { const sub = bk.sub; bk = bkFresh(); bk.sub = sub; } bk.msg = msg; bk.ok = true;
   if(wasEmpty || replacedActive){ enterProfile(); refreshAll(); }
   if(wasEmpty){ document.getElementById('profOverlay').hidden = true; profMode = {view:'list', editId:null, first:false, confirmDel:null, error:''}; return; }
   renderProfiles();
@@ -4482,14 +4626,19 @@ function profileAction(act, id){
   if(act==='bkrestore') return bkRestore();
   if(act==='restorefirst'){ bk = bkFresh(); profMode = {view:'restorefirst', editId:null, first:true, confirmDel:null, error:''}; return renderProfiles(); }
   if(act==='restoreback'){ bk = bkFresh(); profMode = {view:'form', editId:null, first:true, confirmDel:null, error:''}; return renderProfiles(); }
-  if(act==='tab'){ profTab = (id==='progress'||id==='settings'||id==='backup'||id==='guide'||(id==='account'&&cloudOn())) ? id : 'profiles'; if(profTab==='progress' && !store.profiles.some(x=>x.id===statsViewId)) statsViewId = store.activeId; return renderProfiles(); }
+  if(act==='tab'){ cloud.msg = ''; cloud.confirmWipe = false; profTab = (id==='progress'||id==='settings'||id==='backup'||id==='guide'||id==='report') ? id : 'profiles'; if(profTab==='progress' && !store.profiles.some(x=>x.id===statsViewId)) statsViewId = store.activeId; return renderProfiles(); }
   if(act==='statsprof'){ statsViewId = id; return renderProfiles(); }
   if(act==='sample'){ return openSample(Number(id)); }
   if(act==='setprof'){ setViewId = id; setMsg = ''; return renderProfiles(); }
   if(act==='new'){ profMode={view:'form',editId:null,first:false,confirmDel:null,error:''}; return renderProfiles(); }
   if(act==='edit'){ profMode={view:'form',editId:id,first:false,confirmDel:null,error:''}; return renderProfiles(); }
   if(act==='cloudin') return cloudSignIn();
-  if(act==='cloudout') return cloudSignOut();
+  if(act==='cloudout') return cloudDisconnect();
+  if(act==='bksub'){ bk.sub = id; cloud.msg = ''; cloud.confirmWipe = false; return renderProfiles(); }
+  if(act==='famnew') return cloudStartCode('');
+  if(act==='famjoin'){ const t = document.getElementById('famCode'); cloud.joinText = t ? t.value : ''; return cloudStartCode(cloud.joinText || ' '); }
+  if(act==='famcopy') return famCopy();
+  if(act==='joinfirst'){ cloud.msg = ''; profMode = {view:'joinfirst', editId:null, first:true, confirmDel:null, error:''}; return renderProfiles(); }
   if(act==='cloudsync') return cloudSync('manual');
   if(act==='cloudwipe'){ cloud.confirmWipe = true; return renderProfiles(); }
   if(act==='cloudwipeno'){ cloud.confirmWipe = false; return renderProfiles(); }
