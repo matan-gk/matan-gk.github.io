@@ -1,0 +1,18 @@
+{
+  "name": "המסע הקסום של קאפקייק",
+  "short_name": "קאפקייק",
+  "description": "משחק תרגול חשבון והיגיון בעברית לילדים",
+  "lang": "he",
+  "dir": "rtl",
+  "start_url": "./math-quest.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#fff0f7",
+  "theme_color": "#7c5cff",
+  "icons": [
+    {"src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
+    {"src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any"},
+    {"src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}
+  ]
+}

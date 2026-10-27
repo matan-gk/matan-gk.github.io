@@ -4,6 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>המסע הקסום של קאפקייק</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#7c5cff">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="קאפקייק">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <style>
 /* Fonts embedded so the game needs no outside requests: Rubik (Hebrew + Latin, weights 400/600/800) and Baloo 2 (Latin, 600/800).
    Both are SIL Open Font License 1.1 (Rubik: The Rubik Project Authors; Baloo 2: The Baloo 2 Project Authors). Source: Fontsource packages. */
@@ -502,6 +509,12 @@ footer{text-align:center; color:var(--muted); font-size:.75rem; margin-top:16px}
 .pa-scope-l{font-weight:800; font-size:.85rem; color:var(--muted)}
 .pa-seg{display:flex; gap:6px; flex-wrap:wrap}
 .pa-chip{min-height:38px; padding:0 14px; border-radius:999px; border:2px solid var(--card2); background:var(--card2); color:var(--text); font:800 .88rem 'Rubik',sans-serif; cursor:pointer}
+#pwaToast{position:fixed; inset-inline:12px; bottom:calc(12px + env(safe-area-inset-bottom)); z-index:60; display:flex; gap:10px; align-items:center; justify-content:center; background:var(--card); color:var(--text); border-radius:16px; padding:10px 14px; box-shadow:0 6px 24px var(--shadow); font-weight:800; max-width:420px; margin-inline:auto}
+#pwaToast button{font:inherit; font-weight:800; border:0; border-radius:12px; padding:6px 12px; cursor:pointer; background:linear-gradient(90deg,var(--teal),var(--purple)); color:#fff; min-height:36px}
+#pwaToast #pwaLater{background:transparent; color:var(--muted); padding:6px 8px}
+.pa-link{background:none; border:0; padding:0; font:inherit; font-weight:800; color:var(--purple); text-decoration:underline; cursor:pointer}
+.pa-link:focus-visible{outline:3px solid var(--purple); outline-offset:2px}
+.gsec h4{margin:12px 0 4px; font-size:.95rem}
 .famcode{font-family:'Rubik',sans-serif !important; font-size:.8rem !important; font-weight:700; letter-spacing:0 !important; text-align:center; direction:ltr; padding-inline:6px !important}
 .pa-scope.stack{flex-direction:column; align-items:stretch; gap:8px}
 .pa-scope.stack .pa-seg{flex-wrap:nowrap}
@@ -1445,7 +1458,7 @@ function cloudProfileFromDoc(C, helpers){
 // ===== CLOUD (Google sign-in, cloud progress, problem reports) =====
 // Local-first: the game always works from this device's storage. The cloud is a mirror, so no internet / no account / no quota never blocks play.
 // Everything here is off while CLOUD_CONFIG is null. See firebase/SETUP.md for how to create the (free) Firebase project and paste its settings below.
-const APP_VERSION = '2026.10.25';
+const APP_VERSION = '2026.10.26';       // keep equal to VERSION in sw.js (a test checks it)
 const CLOUD_CONFIG = {apiKey:"AIzaSyAlq_TJNGvWPJpUrpbdq_hkAoURydqMzm0", authDomain:"learning-quest-1.firebaseapp.com", projectId:"learning-quest-1", appId:"1:98931179722:web:78fb00084ccba3efb53433"};   // e.g. {apiKey:'...', authDomain:'xxx.firebaseapp.com', projectId:'xxx', appId:'...'}
 const CLOUD_LIMITS = {
   pushDelayMs: 60000,          // at most one upload per profile per minute while playing
@@ -1558,7 +1571,13 @@ function cloudAuthChanged(u){
 function cloudFamilyChanged(fid){      // a different family than last time: everything on this device counts as not yet uploaded
   if(cloudStored('cq_cloud_fid_last') !== fid){ store.profiles.forEach(p=>{ p.sy = 0; }); persist(); cloudStore('cq_cloud_fid_last', fid); }
 }
-async function cloudAttachGoogle(u){   // find (or create) the account's family, then sync
+let cloudAttaching = null;
+function cloudAttachGoogle(u){       // one attach at a time per account: two sign-in events in a row must not create two families
+  if(cloudAttaching && cloudAttaching.uid===u.uid) return cloudAttaching.p;
+  const p = cloudAttachRun(u).finally(()=>{ if(cloudAttaching && cloudAttaching.p===p) cloudAttaching = null; });
+  cloudAttaching = {uid:u.uid, p}; return p;
+}
+async function cloudAttachRun(u){   // find (or create) the account's family, then sync
   try{
     const local = cloudStored('cq_family');                   // an anonymous backup this device already had
     let fid = await cloud.ad.getFamily(u.uid), note = '';
@@ -1786,7 +1805,7 @@ function renderCloudAccountHTML(){
   let h = `<section class="pa-card"><h2 class="pa-h">חשבון בענן (Google)</h2>`;
   if(!u){
     h += `<p class="pa-sub">התחברות עם חשבון Google של ההורה שומרת בענן את כל הפרופילים. כל מכשיר שמתחברים בו עם אותו חשבון מתעדכן אוטומטית, וההתקדמות לא הולכת לאיבוד אם המכשיר מתחלף. המשחק ממשיך לעבוד גם בלי אינטרנט.</p>
-      <p class="pa-sub">${CLOUD_STORED_TXT}</p>`;
+      <p class="pa-sub">${CLOUD_STORED_TXT} <button type="button" class="pa-link" data-pact="privacy">הצהרת פרטיות</button></p>`;
     if(cloud.mode==='code') h += `<p class="pa-sub"><b>במכשיר הזה פעיל גיבוי אנונימי.</b> אם לחשבון עוד אין משפחה בענן, הגיבוי הקיים יקושר אליו והקוד נשאר אותו קוד.</p>`;
     h += `<div class="pa-actions"><button type="button" class="pa-btn" data-pact="cloudin" ${cloud.status==='signingin'||cloud.status==='syncing'?'disabled':''}>התחברות עם Google</button></div>`;
     if(cloud.status==='signingin') h += `<div class="bkmsg">מתחברים...</div>`;
@@ -1821,7 +1840,7 @@ function renderCloudAnonHTML(){
   }
   return `<section class="pa-card"><h2 class="pa-h">גיבוי אנונימי בענן</h2>
     <p class="pa-sub">שומר את ההתקדמות בענן בלי חשבון ובלי התחברות. המכשיר מקבל קוד משפחה, ומכל מכשיר אחר אפשר להזין אותו ולקבל את אותם פרופילים. המכשירים מתעדכנים ביניהם. המשחק ממשיך לעבוד גם בלי אינטרנט.</p>
-    <p class="pa-sub">${CLOUD_STORED_TXT}</p>
+    <p class="pa-sub">${CLOUD_STORED_TXT} <button type="button" class="pa-link" data-pact="privacy">הצהרת פרטיות</button></p>
     <div class="pa-actions"><button type="button" class="pa-btn" data-pact="famnew" ${cloud.status==='signingin'?'disabled':''}>התחלת גיבוי אנונימי</button></div></section>
     <section class="pa-card"><h2 class="pa-h">יש לי קוד</h2><p class="pa-sub">מצטרפים לגיבוי שכבר נוצר במכשיר אחר.</p>${famJoinForm(false)}</section>`;
 }
@@ -1834,7 +1853,7 @@ function renderReportHTML(){
 // ===== PARENT GUIDE =====
 function guideHTML(){
   const li = a => '<ul>'+a.map(x=>`<li>${x}</li>`).join('')+'</ul>';
-  const S = (t, body) => `<section class="gsec"><h3>${t}</h3>${body}</section>`;
+  const S = (t, body, id) => `<section class="gsec"${id?` id="${id}"`:''}><h3>${t}</h3>${body}</section>`;
   let h = '';
   h += S('מה זה המשחק', `<p>"המסע הקסום של קאפקייק" הוא משחק תרגול בעברית לילדים בכיתה ב׳. הוא מתרגל חשבון, בעיות מילוליות, סדרות והיגיון, בצורת משחק: כל תשובה נכונה מביאה מתנה לאוסף, ורצף הצלחות מביא פרסים מיוחדים.</p><p>הכי טוב לשחק קצת ולעתים קרובות: 10 עד 15 דקות, כמה פעמים בשבוע, עדיף על שעה אחת בבת אחת.</p>`);
   h += S('איך המשחק עובד', li([
@@ -1876,12 +1895,27 @@ function guideHTML(){
   ].concat(cloudOn() ? [
     '<b>חשבון בענן</b> (Google): ההורה מתחבר פעם אחת בכל מכשיר וההתקדמות של כל הפרופילים נשמרת בענן ומתעדכנת אוטומטית. המשחק ממשיך לעבוד גם בלי אינטרנט ומסתנכרן כשחוזרים להיות מחוברים.',
     '<b>גיבוי אנונימי בענן</b>: בלי חשבון. המכשיר מקבל קוד משפחה, ומכל מכשיר אחר (למשל מכשיר של ילד שלא מתחברים בו עם Google) מזינים את הקוד ומקבלים את אותם פרופילים, והמכשירים מתעדכנים ביניהם. מי שמחזיק בקוד יכול לראות ולעדכן את ההתקדמות, אז שומרים אותו אצלכם.'] : [])));
-  h += S('פרטיות', li([
-    'ההתקדמות נשמרת במכשיר. ' + (cloudOn() ? 'רק אם מתחברים עם חשבון Google או מפעילים גיבוי אנונימי היא נשמרת גם בענן, ואפשר למחוק אותה משם בכל רגע ("גיבוי ושחזור", "מחיקת הנתונים שלי מהענן").' : ''),
-    'נשמרים: שם הפרופיל (אם הוזן), בן/בת/ניטרלי, ההתקדמות והסטטיסטיקות. לא נשמרים תמונות, מיקום או פרטי קשר.',
-    'במשחק אין פרסומות ואין כלי מעקב.',
-    'דיווח על בעיה כולל רק את מה שכתבתם, את גרסת המשחק ואת השאלה (אם דיווחתם מעמוד העזרה). השם וההתקדמות של הילד לא נשלחים.'
-  ]));
+  h += S('הצהרת פרטיות', `<p>עודכן באוקטובר 2026. בקצרה: המשחק שומר רק את מה שנדרש כדי שההתקדמות לא תלך לאיבוד, בלי פרסומות ובלי מעקב.</p>`
+    + `<h4>מה נשמר במכשיר</h4>` + li([
+      'לכל פרופיל: שם (אם הוזן, אפשר להשאיר ריק או להשתמש בכינוי), בן / בת / ניטרלי, ההתקדמות (ניקוד, מתנות, מראות, רמות), הגדרות הקושי, וסטטיסטיקה של התשובות: איזה סוג שאלה, נכון או לא (ובטעות: איזו תשובה נבחרה), כמה שניות, ומתי (עד 2,000 התשובות האחרונות בפרופיל).',
+      'הכול נשמר בדפדפן של המכשיר בלבד. אם לא הפעלתם גיבוי בענן, שום דבר לא נשלח לשום מקום.',
+      'למחיקה: מוחקים פרופיל בלשונית "פרופילים", או מנקים את נתוני האתר בדפדפן.'
+    ])
+    + (cloudOn() ? `<h4>אם מפעילים גיבוי בענן (רק אם אתם בוחרים בכך)</h4>` + li([
+      'אותם נתונים נשמרים בשירות הענן של Google (Firebase), מוצפנים בהעברה (HTTPS). בענן אין שום דבר מלבד: שם הפרופיל, בן / בת / ניטרלי, ההתקדמות והסטטיסטיקה.',
+      '<b>גיבוי אנונימי</b>: בלי חשבון ובלי כתובת דוא״ל. הנתונים שמורים תחת קוד משפחה אקראי וארוך, ומי שמחזיק בקוד יכול לראות ולעדכן אותם. שומרים אותו אצלכם ולא משתפים אותו ברבים.',
+      '<b>חשבון Google</b>: ההתחברות היא של ההורה. הילד לא פותח חשבון ולא מזין פרטים. Google מעבירה לשירות את כתובת הדוא״ל, והיא נשמרת אצל שירות ההתחברות של Firebase. המשחק עצמו לא שומר דוא״ל בנתוני ההתקדמות.',
+      'מי שהפעיל את המשחק ואת שירות הענן יכול לראות את הנתונים השמורים בו (כולל שמות הפרופילים וההתקדמות) בכלי ניהול לקריאה בלבד, ומשתמש בהם רק לתפעול ולתיקון תקלות.',
+      'הנתונים נשמרים עד שמוחקים אותם. מחיקה: בלשונית "גיבוי ושחזור", "מחיקת הנתונים שלי מהענן". אפשר גם לבקש ממי שנתן לכם את המשחק למחוק. ההתקדמות נשארת במכשיר.'
+    ]) : '')
+    + `<h4>דיווח על בעיה</h4>` + li([
+      'נשלח רק מה שכתבתם, פרטי קשר אם בחרתם להזין, גרסת המשחק, ואם דיווחתם מכרטיס השאלה: סוג השאלה, הרמה, הנוסח והתשובה. שם הילד וההתקדמות לא נשלחים.'
+    ])
+    + `<h4>מה לא נאסף</h4>` + li([
+      'אין פרסומות, אין כלי ניתוח או מעקב, אין קבצי עוגיות של צד שלישי, ואין מיקום, תמונות, אנשי קשר או תשלומים.',
+      'הגופנים והתמונות כלולים במשחק, והוא לא טוען תוכן מאתרים אחרים. רק כשמשתמשים בגיבוי בענן הדפדפן מתחבר לשירותי Google.'
+    ])
+    + `<p>המשחק מיועד לילדים בהנחיית הורה. זו הצהרה בשפה פשוטה ולא ייעוץ משפטי. שאלות? אפשר לפנות למי שנתן לכם את המשחק.</p>`, 'gPrivacy');
   h += S('בעיות נפוצות', li([
     '<b>ההתקדמות נעלמה</b>: כנראה נוקו נתוני האתר או שנפתח דפדפן אחר. אם שמרתם קוד שמירה' + (cloudOn() ? ' או הפעלתם גיבוי בענן' : '') + ', אפשר לשחזר.',
     '<b>ההתקדמות לא מופיעה במכשיר השני</b>: ' + (cloudOn() ? 'מתחברים לאותו חשבון Google בשני המכשירים, מזינים בשני את אותו קוד משפחה (גיבוי אנונימי), או ' : '') + 'משתמשים בקוד שמירה.',
@@ -4540,7 +4574,7 @@ function renderBackupHTML(){
   }
   if(cur==='account') return h + renderCloudAccountHTML();
   if(cur==='anon') return h + renderCloudAnonHTML();
-  return h + renderLocalBackupHTML();
+  return h + renderLocalBackupHTML() + renderPwaCard();
 }
 function renderLocalBackupHTML(){
   const profs = store.profiles;
@@ -4634,6 +4668,8 @@ function profileAction(act, id){
   if(act==='edit'){ profMode={view:'form',editId:id,first:false,confirmDel:null,error:''}; return renderProfiles(); }
   if(act==='cloudin') return cloudSignIn();
   if(act==='cloudout') return cloudDisconnect();
+  if(act==='privacy'){ profTab = 'guide'; renderProfiles(); const g = document.getElementById('gPrivacy'); if(g) g.scrollIntoView(); return; }
+  if(act==='pwainstall') return pwaInstall();
   if(act==='bksub'){ bk.sub = id; cloud.msg = ''; cloud.confirmWipe = false; return renderProfiles(); }
   if(act==='famnew') return cloudStartCode('');
   if(act==='famjoin'){ const t = document.getElementById('famCode'); cloud.joinText = t ? t.value : ''; return cloudStartCode(cloud.joinText || ' '); }
@@ -4775,6 +4811,56 @@ document.getElementById('reportCancel').onclick = closeReport;
 document.getElementById('reportSend').onclick = submitReport;
 document.getElementById('reportOverlay').addEventListener('click', e=>{ if(e.target.id==='reportOverlay') closeReport(); });
 if(!store.profiles.length) openProfiles(true);
+// ===== HOME SCREEN + OFFLINE (manifest.webmanifest and sw.js sit next to this file; none of it runs when they are missing, for example inside an embedded preview) =====
+const PWA = {supported:false, ready:false, waiting:null, deferred:null, persisted:null, checked:0};
+function pwaStandalone(){ try{ return (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone===true; }catch(e){ return false; } }
+function pwaIOS(){ const u = navigator.userAgent||''; return /iPad|iPhone|iPod/.test(u) || (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1); }
+function pwaToast(){
+  if(document.getElementById('pwaToast') || !PWA.waiting) return;
+  const d = document.createElement('div'); d.id = 'pwaToast'; d.setAttribute('role','status');
+  d.innerHTML = '<span>יש גרסה חדשה של המשחק</span><button type="button" id="pwaReload">טעינה מחדש</button><button type="button" id="pwaLater" aria-label="לא עכשיו">✕</button>';
+  document.body.appendChild(d);
+  document.getElementById('pwaReload').onclick = ()=>{ try{ saveState(); }catch(e){} PWA.waiting.postMessage({type:'SKIP_WAITING'}); };
+  document.getElementById('pwaLater').onclick = ()=>d.remove();
+}
+function pwaInit(){
+  try{
+    if(!('serviceWorker' in navigator) || !/^https?:$/.test(location.protocol)) return;
+    window.addEventListener('beforeinstallprompt', e=>{ e.preventDefault(); PWA.deferred = e; if(profTabIsBackup()) renderProfiles(); });
+    window.addEventListener('appinstalled', ()=>{ PWA.deferred = null; if(profTabIsBackup()) renderProfiles(); });
+    let reloading = false; navigator.serviceWorker.addEventListener('controllerchange', ()=>{ if(!reloading && PWA.waiting){ reloading = true; location.reload(); } });
+    navigator.serviceWorker.register('sw.js').then(reg=>{
+      PWA.supported = true; PWA.ready = !!navigator.serviceWorker.controller;
+      const watch = w=>w.addEventListener('statechange', ()=>{ if(w.state==='installed' && navigator.serviceWorker.controller){ PWA.waiting = w; pwaToast(); } if(w.state==='activated') PWA.ready = true; });
+      if(reg.waiting && navigator.serviceWorker.controller){ PWA.waiting = reg.waiting; pwaToast(); }
+      if(reg.installing) watch(reg.installing);
+      reg.addEventListener('updatefound', ()=>reg.installing && watch(reg.installing));
+      document.addEventListener('visibilitychange', ()=>{ if(!document.hidden && Date.now()-PWA.checked > 3600000){ PWA.checked = Date.now(); reg.update().catch(()=>{}); } });
+      if(profTabIsBackup()) renderProfiles();
+    }).catch(()=>{});
+    if(navigator.storage && navigator.storage.persist){ navigator.storage.persist().then(ok=>{ PWA.persisted = !!ok; }).catch(()=>{}); }
+  }catch(e){}
+}
+function profTabIsBackup(){ const o = document.getElementById('profOverlay'); return o && !o.hidden && profTab==='backup' && profMode.view==='list'; }
+async function pwaInstall(){
+  if(!PWA.deferred) return;
+  try{ PWA.deferred.prompt(); await PWA.deferred.userChoice; }catch(e){}
+  PWA.deferred = null; renderProfiles();
+}
+function renderPwaCard(){
+  if(!PWA.supported && !pwaStandalone()) return '';
+  const on = pwaStandalone();
+  let h = `<section class="pa-card"><h2 class="pa-h">מסך הבית וגישה בלי אינטרנט</h2>`;
+  h += on ? `<p class="pa-sub"><b>המשחק מותקן ופועל במסך מלא.</b></p>` : `<p class="pa-sub">הוספת המשחק למסך הבית נותנת לו סמל משלו, פותחת אותו במסך מלא בלי סרגל הדפדפן, ושומרת את ההתקדמות בצורה אמינה יותר, במיוחד באייפון ובאייפד.</p>`;
+  if(!on){
+    if(PWA.deferred) h += `<div class="pa-actions"><button type="button" class="pa-btn" data-pact="pwainstall">התקנה במסך הבית</button></div>`;
+    else if(pwaIOS()) h += `<p class="pa-sub"><b>באייפון או באייפד (בספארי):</b> לוחצים על כפתור השיתוף (ריבוע עם חץ למעלה), בוחרים "הוספה למסך הבית" ואז "הוספה".</p>`;
+    else h += `<p class="pa-sub">בכרום ובדפדפנים אחרים: בתפריט הדפדפן בוחרים "התקנה" או "הוספה למסך הבית".</p>`;
+  }
+  h += `<p class="pa-sub" style="margin-bottom:0">${PWA.ready ? 'המשחק שמור במכשיר ויעבוד גם בלי אינטרנט. הגיבוי בענן יתעדכן כשהחיבור יחזור.' : 'אחרי הכניסה הבאה למשחק, הוא יישמר במכשיר ויעבוד גם בלי אינטרנט.'}${PWA.persisted===true ? ' שמירת הנתונים בדפדפן מוגנת.' : ''}</p></section>`;
+  return h;
+}
+pwaInit();
 cloudBoot();
 </script>
 </body>
