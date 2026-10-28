@@ -466,6 +466,35 @@ footer{text-align:center; color:var(--muted); font-size:.75rem; margin-top:16px}
 .pa-tab:focus-visible{outline:2px solid var(--purple); outline-offset:-3px}
 .pa-card{background:var(--card); border-radius:18px; padding:16px; box-shadow:0 2px 10px var(--shadow)}
 .pa-h{font-size:1.02rem; font-weight:800; margin:0 0 4px; color:var(--text)}
+.mxd>summary{cursor:pointer; list-style:none; margin:0}
+.mxd>summary::-webkit-details-marker{display:none}
+.mxtag{font-size:.7rem; font-weight:700; background:var(--card2); color:var(--purple); padding:2px 8px; border-radius:999px; margin-inline-start:6px}
+.mxwrap{overflow-x:auto}
+table.qmx{width:100%; table-layout:fixed; border-collapse:collapse; font-size:.85rem}
+table.qmx th:first-child{width:34%}
+table.qmx th:last-child, table.qmx td:last-child{width:15%}
+table.qmx th, table.qmx td{padding:6px 4px; text-align:center}
+table.qmx th[scope=row]{text-align:start; font-weight:800; font-size:.8rem; line-height:1.3}
+table.qmx thead th{font-size:.78rem; color:var(--muted); font-weight:800}
+table.qmx tbody tr+tr{border-top:1px solid var(--pa-line)}
+.mxrl{display:flex; align-items:center; gap:6px}
+.mxe{flex:none; width:1.4em; text-align:center; font-size:1.05rem}
+.mxnm{flex:1; min-width:0; text-align:start}
+.mxc{display:inline-flex; align-items:center; justify-content:center; width:100%; max-width:44px; height:40px; border-radius:12px; border:2px solid var(--card2); background:var(--card2); color:var(--muted); font:800 1rem 'Rubik',sans-serif; cursor:pointer}
+.mxc.on{background:var(--teal); border-color:var(--teal); color:#fff}
+.mxc.na{border:none; background:none; cursor:default; opacity:.4}
+.mxc:focus-visible{outline:3px solid var(--purple); outline-offset:2px}
+.mxn{color:var(--muted); font-weight:700}
+tr.mxempty th[scope=row]{opacity:.6}
+.mxh{font-size:.95rem; margin:16px 0 4px}
+.mxsec{border-top:1px solid var(--pa-line); padding:6px 0}
+.mxsec>summary{cursor:pointer; font-weight:800; padding:6px 0}
+.mxsec summary small{color:var(--muted); font-weight:600; margin-inline-start:6px}
+.mxtl{display:flex; flex-direction:column; gap:2px; padding:4px 0 8px}
+.mxt{display:flex; align-items:center; gap:10px; padding:8px 2px; min-height:40px; cursor:pointer}
+.mxt input{width:20px; height:20px; accent-color:var(--teal); flex:none}
+.mxt span{flex:1; font-weight:600}
+.mxt small{color:var(--muted); font-weight:700; font-size:.72rem}
 .pa-sub{font-size:.85rem; color:var(--muted); font-weight:600; line-height:1.65; margin:0 0 10px}
 .pa-sub:last-child{margin-bottom:0}
 .pa-rows{display:flex; flex-direction:column}
@@ -768,7 +797,7 @@ const GENDER_INFO = {
 function activeProfile(){ return store.profiles.find(p=>p.id===store.activeId) || null; }
 function profileName(p, i){ return (p.name && p.name.trim()) || ('פרופיל '+((i>=0?i:store.profiles.indexOf(p))+1)); }
 let diffOn = [1,2,3];     // enabled difficulty levels for the active profile (see the Settings tab)
-function captureProgress(){ return {score,streak,collection,lollipops,level,golden,looks,activeLook,lookSrc,diff:diffIdsClean(diffOn)}; }
+function captureProgress(){ return {score,streak,collection,lollipops,level,golden,looks,activeLook,lookSrc,diff:diffIdsClean(diffOn),mx:mxClean(mxState)}; }
 function cleanLookSrc(o, lk){
   const r = {}; if(!o || typeof o!=='object') return r;
   Object.keys(o).forEach(k=>{ const i=Number(k); if(Number.isInteger(i) && lk.includes(i) && typeof o[k]==='string' && (o[k]==='cotton' || STICKERS.includes(o[k]))) r[i]=o[k]; });
@@ -791,12 +820,13 @@ function cleanProgress(d){
     looks: lk,
     activeLook: (Number.isInteger(d.activeLook) && lk.includes(d.activeLook)) ? d.activeLook : -1,
     lookSrc: cleanLookSrc(d.lookSrc, lk),   // which kind of upgraded item paid for each look (so it can be given back)
-    diff: diffIdsClean(d.diff)
+    diff: diffIdsClean(d.diff),
+    mx: mxClean(d.mx)
   };
 }
 function applyProgress(d){
   const c = cleanProgress(d);
-  score=c.score; streak=c.streak; collection=c.collection; lollipops=c.lollipops; golden=c.golden; looks=c.looks; activeLook=c.activeLook; lookSrc=c.lookSrc||{}; level=c.level; diffOn=c.diff;
+  score=c.score; streak=c.streak; collection=c.collection; lollipops=c.lollipops; golden=c.golden; looks=c.looks; activeLook=c.activeLook; lookSrc=c.lookSrc||{}; level=c.level; diffOn=c.diff; mxState=c.mx;
 }
 function persist(){ try{ localStorage.setItem(SAVE_KEY, JSON.stringify(store)); }catch(e){} }
 function saveState(){
@@ -1458,7 +1488,7 @@ function cloudProfileFromDoc(C, helpers){
 // ===== CLOUD (Google sign-in, cloud progress, problem reports) =====
 // Local-first: the game always works from this device's storage. The cloud is a mirror, so no internet / no account / no quota never blocks play.
 // Everything here is off while CLOUD_CONFIG is null. See firebase/SETUP.md for how to create the (free) Firebase project and paste its settings below.
-const APP_VERSION = '2026.10.26';       // keep equal to VERSION in sw.js (a test checks it)
+const APP_VERSION = '2026.10.28';       // keep equal to VERSION in sw.js (a test checks it)
 const CLOUD_CONFIG = {apiKey:"AIzaSyAlq_TJNGvWPJpUrpbdq_hkAoURydqMzm0", authDomain:"learning-quest-1.firebaseapp.com", projectId:"learning-quest-1", appId:"1:98931179722:web:78fb00084ccba3efb53433"};   // e.g. {apiKey:'...', authDomain:'xxx.firebaseapp.com', projectId:'xxx', appId:'...'}
 const CLOUD_LIMITS = {
   pushDelayMs: 60000,          // at most one upload per profile per minute while playing
@@ -1863,7 +1893,7 @@ function guideHTML(){
     '<b>כל 5 תשובות נכונות ברצף</b>: מסיבה ושאלת בונוס קשה יותר. אפשר לדלג עליה. תשובה נכונה בבונוס מזכה בשערות סבתא, מתנה מיוחדת.',
     '<b>איסוף</b>: 10 מתנות זהות מאותו סוג (כולל שערות סבתא) מתחברות לגרסה משודרגת שלהן, ו-10 משודרגות מאותו סוג פותחות מראה חדש לקאפקייק. אפשר גם לפרק: לחיצה על פריט משודרג מחזירה 10 מתנות רגילות, והכפתור "פירוק" ליד מראה מחזיר 10 פריטים משודרגים.'
   ]));
-  h += S('רמת הקושי', `<p>בלשונית "הגדרות" בפאנל ההורים אפשר לבחור לכל פרופיל אילו רמות קושי יופיעו: קל, בינוני וקשה. אפשר להפעיל רמה אחת, שתיים או שלוש (ברירת המחדל: הכול). שאלות בונוס הן תמיד ברמה קשה, בלי קשר להגדרה.</p>`);
+  h += S('רמת הקושי', `<p>בלשונית "הגדרות" בפאנל ההורים אפשר לבחור לכל פרופיל אילו רמות קושי יופיעו: קל, בינוני וקשה. אפשר להפעיל רמה אחת, שתיים או שלוש (ברירת המחדל: הכול). שאלות בונוס הן תמיד ברמה קשה, בלי קשר להגדרה.</p><p>מתחת לרמות יש חלק "התאמה מדויקת" (סגור כברירת מחדל): טבלה של נושא מול רמה, שבה אפשר להסתיר תא אחד, למשל "שעון הקסמים, קשה", ורשימה של סוגי שאלות בודדים להסתרה. נושא שכל התאים שלו מוסתרים נעלם מתפריט הילדה. אי אפשר להסתיר הכול. כל שינוי חל מיד ונשמר לכל פרופיל בנפרד.</p>`);
   h += S('שמונה הרמות', li([
     '<b>ארמון המספרים</b>: ספרות עשרות ואחדות, מספרים במילים, השוואה וסידור, חידות מספרים, וחיבור וחיסור דו-ספרתיים (גם במאונך, עם נשיאה ופריטה).',
     '<b>חנות ההפתעות</b>: בעיות מילוליות: חיבור, חיסור, חלוקה, כפל, הפרש, שארית, וגם כסף: מטבעות, עודף והשוואת מחירים.',
@@ -2222,6 +2252,76 @@ function filterByDifficultySet(gens, ids){
 }
 function activeDifficultyRange(){ return null; }
 function activeDifficultyIds(){ return diffOn; }
+
+// ===== QUESTION MATRIX: which sections, difficulty levels and question types are shown (per profile, parent controls) =====
+// Three layers, from coarse to fine. Each is optional; with nothing set the game behaves exactly as before.
+//  1. diff : enabled difficulty levels (the simple switches, applies to every section)
+//  2. off  : "section:level" cells switched off on top of that, e.g. "7:3" = numbers castle, hard
+//  3. hide : single question types (skill ids) that are never shown
+// Bonus questions ignore all of this (they are always hard, and a bonus type is not in the section pools).
+const MX_SECTIONS = [7,1,2,6,3,4,8];            // the real sections (pool keys); 5 is the mix, which draws from all of them
+let mxState = {off:[], hide:[]};
+let _secOf = null;
+function sectionOfSkill(name){
+  if(!_secOf){ _secOf = {}; MX_SECTIONS.forEach(sec=>pools[sec].forEach(g=>{ _secOf[g.name]=sec; })); }
+  return _secOf[name];
+}
+function mxClean(m){
+  m = (m && typeof m==='object') ? m : {};
+  const ids = difficultyIds().map(String);
+  const off = [...new Set((Array.isArray(m.off)?m.off:[]).filter(k=>typeof k==='string' && /^\d+:\d+$/.test(k) && MX_SECTIONS.includes(+k.split(':')[0]) && ids.includes(k.split(':')[1])))];
+  const hide = [...new Set((Array.isArray(m.hide)?m.hide:[]).filter(k=>typeof k==='string' && SKILL_META[k] && !SKILL_META[k].bonus))];
+  return {off, hide};
+}
+function mxIsDefault(m){ m = mxClean(m); return !m.off.length && !m.hide.length; }
+// the generators of pool `lv` that are shown. Today's difficulty rule comes first (it never leaves a section empty);
+// the cells and the hidden types are then removed on top, so a section CAN become empty: it is then hidden from the child's menu.
+function mxPool(lv, diffIds, m){
+  m = mxClean(m);
+  const base = filterByDifficultySet(pools[lv], diffIds);
+  if(!m.off.length && !m.hide.length) return base;
+  const off = new Set(m.off), hide = new Set(m.hide);
+  return base.filter(g=>{
+    if(hide.has(g.name)) return false;
+    const sec = lv===5 ? sectionOfSkill(g.name) : lv;
+    return !off.has(sec+':'+skillDifficulty(g.name));
+  });
+}
+function poolFor(lv){ return mxPool(lv, diffOn, mxState); }
+// sections that have at least one question to show (in LEVELS order)
+function mxVisibleLevels(diffIds, m){ return LEVELS.filter(l=>mxPool(l.id, diffIds, m).length>0).map(l=>l.id); }
+function mxHasTypes(sec, d){ return pools[sec].some(g=>skillDifficulty(g.name)===d); }
+// keep the three layers consistent: a level that is off has no cell overrides; a level whose every cell is off becomes off itself
+function mxNormalize(diffIds, off){
+  let diff = diffIdsClean(diffIds); const o = new Set(off);
+  difficultyIds().forEach(d=>{
+    const keys = MX_SECTIONS.filter(s=>mxHasTypes(s,d)).map(s=>s+':'+d);
+    if(!diff.includes(d)){ MX_SECTIONS.forEach(s=>o.delete(s+':'+d)); return; }
+    if(keys.length && keys.every(k=>o.has(k))){ diff = diff.filter(x=>x!==d); MX_SECTIONS.forEach(s=>o.delete(s+':'+d)); }
+  });
+  return {diff, off:[...o]};
+}
+// is the cell currently showing questions? (level on and the cell not switched off)
+function mxCellOn(diffIds, m, sec, d){ return diffIdsClean(diffIds).includes(d) && !mxClean(m).off.includes(sec+':'+d); }
+function mxToggleCell(diffIds, m, sec, d){
+  let diff = diffIdsClean(diffIds); const off = new Set(mxClean(m).off), key = sec+':'+d;
+  if(diff.includes(d)){ if(off.has(key)) off.delete(key); else off.add(key); }
+  else { diff = diff.concat(d); MX_SECTIONS.forEach(s=>{ if(s!==sec) off.add(s+':'+d); }); }   // switching on one cell of an off level shows just that cell
+  const n = mxNormalize(diff, [...off]);
+  return {diff:n.diff, mx:{off:n.off, hide:mxClean(m).hide}};
+}
+function mxSetLevel(diffIds, m, d, on){
+  let diff = diffIdsClean(diffIds); const off = mxClean(m).off.filter(k=>k.split(':')[1]!==String(d));   // a whole-column switch clears that column's cells
+  diff = on ? (diff.includes(d)?diff:diff.concat(d)) : diff.filter(x=>x!==d);
+  return {diff, mx:{off, hide:mxClean(m).hide}};
+}
+function mxToggleType(m, skill, hidden){
+  m = mxClean(m); const hide = new Set(m.hide); if(hidden) hide.add(skill); else hide.delete(skill);
+  return {off:m.off, hide:[...hide]};
+}
+// refuses a state in which nothing at all could be shown (the mix draws from every section)
+function mxViable(diffIds, m){ return diffIdsClean(diffIds).length>0 && mxPool(5, diffIds, m).length>0; }
+
 // from the browser console: cqDifficulty() = the ratings grouped by level
 window.cqDifficulty = ()=>{ const out={}; DIFFICULTY.levels.forEach(l=>out[l.he+' ('+l.id+')']=[]); Object.keys(SKILL_META).forEach(id=>{ const l=DIFFICULTY.levels.find(x=>x.id===skillDifficulty(id)); out[l.he+' ('+l.id+')'].push(id); }); return out; };
 
@@ -2355,6 +2455,49 @@ function numericErrorPatterns(stats, skill, k){
     if(r.x!==undefined && r.a!==undefined && r.x!=='' && r.a!=='' && Number.isFinite(x) && Number.isFinite(a)){ const d=x-a; h.set(d,(h.get(d)||0)+1); } else other++;
   }
   return {patterns:[...h.entries()].map(([diff,count])=>({diff,count})).sort((p,q)=>q.count-p.count).slice(0,k||5), other};
+}
+// ---- wrong-answer labels: name the KIND of mistake from what was chosen and what was right ----
+// Works on numbers only (that is all the log keeps), so it also labels history recorded before this existed.
+const WRONG_LABELS = {
+  off1:  'קרוב ב-1 (פספוס קטן)',
+  off10: 'הפרש של עשרה או מאה (שגיאת עשרות)',
+  swap:  'ספרות במקום הלא נכון (למשל 36 במקום 63)',
+  sign:  'היפוך סימן (חיובי במקום שלילי)',
+  dbl:   'כפול או חצי מהנכון',
+  tens:  'האחדות נכונה והעשרות שגויות',
+  ones:  'העשרות נכונות והאחדות שגויה',
+  other: 'טעות אחרת'
+};
+function classifyWrong(x, a){
+  if(x===''||a===''||x==null||a==null) return null;
+  x = Number(x); a = Number(a);
+  if(!Number.isFinite(x) || !Number.isFinite(a) || x===a) return null;
+  const d = Math.abs(x-a), ix = Number.isInteger(x), ia = Number.isInteger(a);
+  if(d===1) return 'off1';
+  if(a!==0 && x===-a) return 'sign';
+  if(d===10 || d===100) return 'off10';
+  if(ix && ia && x>=10 && a>=10){
+    const sx = String(x), sa = String(a);
+    if(sx.length===sa.length && sx.split('').sort().join('')===sa.split('').sort().join('')) return 'swap';
+  }
+  if(a!==0 && x===-a) return 'sign';
+  if(a!==0 && x!==0 && (x===2*a || a===2*x)) return 'dbl';
+  if(ix && ia){
+    if(d%10===0) return 'tens';
+    if(Math.floor(x/10)===Math.floor(a/10)) return 'ones';
+  }
+  return 'other';
+}
+// counts per label for one skill (or all), numeric wrong answers only
+function wrongLabelCounts(stats, skill){
+  const c = {}; let n = 0;
+  for(const r of stats.log){
+    if(r.c || (skill && r.s!==skill) || r.x===undefined || r.a===undefined || r.x==='' || r.a==='') continue;
+    const k = classifyWrong(r.x, r.a); if(!k) continue;
+    c[k] = (c[k]||0)+1; n++;
+  }
+  const list = Object.keys(c).map(k=>({id:k, count:c[k]})).sort((p,q)=>q.count-p.count);
+  return {n, list};
 }
 function statsActivity(stats){
   const days = {};
@@ -3897,8 +4040,10 @@ BONUS_POOLS[5] = [].concat(...Object.values(BONUS_POOLS));
 
 
 function renderLevels(){
-  const el = document.getElementById('levels'); el.innerHTML=''; el.dataset.rem = String(LEVELS.length%3);
-  LEVELS.forEach(l=>{
+  const shown = mxVisibleLevels(diffOn, mxState);
+  if(shown.length && !shown.includes(level)) level = shown.includes(5) ? 5 : shown[0];   // the parent hid the section she was in
+  const el = document.getElementById('levels'); el.innerHTML=''; el.dataset.rem = String(shown.length%3);
+  LEVELS.filter(l=>shown.includes(l.id)).forEach(l=>{
     const b=document.createElement('div');
     b.className='levelbtn'+(l.id===level?' active':'');
     b.innerHTML=`<span class="emoji">${l.emoji}</span>${l.name}`;
@@ -4211,7 +4356,9 @@ function nextQuestion(){
   document.getElementById('nextBtn').style.display='none';
   document.getElementById('feedback').textContent='';
   document.getElementById('feedback').className='feedback';
-  const pool = filterByDifficultySet(pools[level], activeDifficultyIds());
+  let pool = poolFor(level);
+  if(!pool.length){ renderLevels(); pool = poolFor(level); }          // safety: the section was emptied while it was open
+  if(!pool.length) pool = filterByDifficultySet(pools[level], activeDifficultyIds());
   const gen = pool[ri(0,pool.length-1)];
   current = gen(); current.skill = gen.name; current.d = questionDifficulty({d:current.d, skill:gen.name}); current.isBonus = false; startQTimer();
   document.getElementById('qlabel').textContent = current.label;
@@ -4353,6 +4500,7 @@ function paScope(act, curId, label){
   return `<div class="pa-scope"><span class="pa-scope-l">${label}</span><div class="pa-seg">${chips}</div></div>`;
 }
 function renderProfiles(){
+  const prevMain = document.getElementById('paMain'), prevTop = prevMain ? prevMain.scrollTop : 0;   // read before the page is rebuilt, or the position is lost
   renderProfilesInner();
   const body = document.getElementById('profBody');
   const content = body.innerHTML;
@@ -4360,7 +4508,7 @@ function renderProfiles(){
     body.innerHTML = `<div class="pa-shell"><main class="pa-main"><div class="pa-page narrow">${content}</div></main></div>`;
     paLastTab = null; return;
   }
-  const prev = document.getElementById('paMain'), keep = prev && paLastTab===profTab ? prev.scrollTop : 0;
+  const keep = paLastTab===profTab ? prevTop : 0;
   const nav = Object.keys(PANEL_NAV).map(k=>`<button type="button" role="tab" class="vtab pa-tab ${profTab===k?'on':''}" aria-selected="${profTab===k}" data-pact="tab" data-id="${k}"><span class="pa-ico" aria-hidden="true">${PANEL_ICON[k]}</span><span class="pa-lbl">${PANEL_NAV[k]}</span><span class="pa-lbl-s">${PANEL_SHORT[k]}</span></button>`).join('');
   body.innerHTML = `<div class="pa-shell"><nav class="pa-nav vtabs" role="tablist" aria-orientation="vertical" aria-label="חלקים">${nav}</nav><main class="pa-main" id="paMain"><div class="pa-page">${content}</div></main></div>`;
   paLastTab = profTab;
@@ -4437,6 +4585,11 @@ function skDetail(sk, stats){
   rows.push(`<div><span class="m">מגמה:</span> ${tr.ready ? `${tr.emoji} ${tr.label} (${pctText(tr.previous.accuracy)} ← ${pctText(tr.recent.accuracy)})` : `אין עדיין מספיק נתונים (צריך ${C.trend.minPerWindow} תשובות בכל אחת משתי התקופות)`}</div>`);
   const ep = numericErrorPatterns(stats, sk.skill, 3);
   if(ep.patterns.length) rows.push(`<div><span class="m">טעויות מספריות נפוצות (טעות ביחס לנכון):</span> ${ep.patterns.map(p=>`<bdi dir="ltr">${p.diff>0?'+':'−'}${Math.abs(p.diff)} ×${p.count}</bdi>`).join(' · ')}</div>`);
+  const wl = wrongLabelCounts(stats, sk.skill);
+  if(wl.n>=3){
+    const top = wl.list.filter(e=>e.id!=='other').slice(0,2).filter(e=>e.count>=2 && e.count/wl.n>=0.3);
+    if(top.length) rows.push(`<div><span class="m">סוג הטעות הנפוץ:</span> ${top.map(e=>`${esc(WRONG_LABELS[e.id])} (${e.count} מתוך ${wl.n})`).join(' · ')}</div>`);
+  }
   return `<div class="sk-det">${rows.join('')}</div>`;
 }
 function skSkillRow(sk, stats){
@@ -4453,10 +4606,49 @@ function skLegend(){
 }
 let setViewId = null;              // which profile the Settings tab shows
 function profileDiff(p){ return diffIdsClean(p && p.id===store.activeId ? diffOn : cleanProgress(p && p.progress).diff); }
-function setProfileDiff(p, ids){
+function setProfileDiff(p, ids, mx){
   ids = diffIdsClean(ids);
-  if(p.id===store.activeId){ diffOn = ids; saveState(); }
-  else { p.progress = Object.assign({}, cleanProgress(p.progress), {diff:ids}); p.u = Date.now(); persist(); cloudChanged(); }
+  if(p.id===store.activeId){ diffOn = ids; if(mx) mxState = mxClean(mx); saveState(); }
+  else { const c = cleanProgress(p.progress); p.progress = Object.assign({}, c, {diff:ids, mx: mx ? mxClean(mx) : c.mx}); p.u = Date.now(); persist(); cloudChanged(); }
+}
+function profileMx(p){ return mxClean(p && p.id===store.activeId ? mxState : cleanProgress(p && p.progress).mx); }
+// one entry point for every change in the question controls: refuses an empty game, saves, and updates the game behind the panel at once
+function mxCommit(prof, diff, mx){
+  if(!mxViable(diff, mx)){ setMsg = 'אי אפשר: לא יישארו שאלות להצגה. חייבת להישאר לפחות רמה אחת עם סוג שאלה אחד.'; return renderProfiles(); }
+  setMsg = ''; setProfileDiff(prof, diff, mx);
+  if(prof.id===store.activeId){ const before = level; renderLevels(); if(level!==before) nextQuestion(); }
+  renderProfiles();
+}
+const MX_OPEN = {};      // which fine-tuning panels are open (kept across re-renders)
+function renderMatrixHTML(prof, on, m){
+  const L = DIFFICULTY.levels, custom = !mxIsDefault(m);
+  const head = L.map(l=>`<th scope="col">${esc(l.he)}</th>`).join('');
+  const rows = MX_SECTIONS.map(sec=>{
+    const lv = LEVELS.find(x=>x.id===sec), n = mxPool(sec, on, m).length;
+    const cells = L.map(l=>{
+      if(!mxHasTypes(sec, l.id)) return `<td><span class="mxc na" aria-label="אין סוגי שאלות ברמה הזאת">·</span></td>`;
+      const c = mxCellOn(on, m, sec, l.id);
+      return `<td><button type="button" class="mxc ${c?'on':'off'}" data-pact="mxcell" data-id="${sec}:${l.id}" aria-pressed="${c}" aria-label="${esc(lv.name)}, ${esc(l.he)}: ${c?'מוצג':'מוסתר'}">${c?'✓':'✕'}</button></td>`;
+    }).join('');
+    return `<tr${n?'':' class="mxempty"'}><th scope="row"><span class="mxrl"><span class="mxe" aria-hidden="true">${lv.emoji}</span><span class="mxnm">${esc(lv.name)}</span></span></th>${cells}<td class="mxn">${n?n:'<small>מוסתר</small>'}</td></tr>`;
+  }).join('');
+  const types = MX_SECTIONS.map(sec=>{
+    const lv = LEVELS.find(x=>x.id===sec), hid = m.hide.filter(k=>sectionOfSkill(k)===sec).length;
+    const items = pools[sec].slice().sort((a,b)=>skillDifficulty(a.name)-skillDifficulty(b.name)).map(g=>{
+      const sh = !m.hide.includes(g.name), d = DIFFICULTY.levels.find(x=>x.id===skillDifficulty(g.name));
+      return `<label class="mxt"><input type="checkbox" data-mxtype="${esc(g.name)}" ${sh?'checked':''}><span>${esc(skillInfo(g.name).he)}</span><small>${esc(d?d.he:'')}</small></label>`;
+    }).join('');
+    return `<details class="mxsec" data-mxk="t${sec}" ${MX_OPEN['t'+sec]?'open':''}><summary>${lv.emoji} ${esc(lv.name)} <small>${pools[sec].length} סוגים${hid?` · ${hid} מוסתרים`:''}</small></summary><div class="mxtl">${items}</div></details>`;
+  }).join('');
+  const hidAll = m.hide.length;
+  return `<details class="pa-card mxd" data-mxk="main" ${(MX_OPEN.main||custom)?'open':''}><summary class="pa-h">🎛️ התאמה מדויקת${custom?' <small class="mxtag">מותאם אישית</small>':''}</summary>
+    <p class="pa-sub">לבחור אילו שילובים של נושא ורמה יופיעו. ✓ מוצג, ✕ מוסתר. הרמות למעלה קובעות את העמודות כולן; כאן אפשר לשנות תא אחד. נושא שכל התאים שלו מוסתרים נעלם מהתפריט של הילדה. ההגדרה חלה מיד.</p>
+    <div class="mxwrap"><table class="qmx"><thead><tr><th></th>${head}<th>סוגים</th></tr></thead><tbody>${rows}</tbody></table></div>
+    <h3 class="mxh">סוגי שאלות בודדים${hidAll?` <small class="mxtag">${hidAll} מוסתרים</small>`:''}</h3>
+    <p class="pa-sub">אפשר להסתיר סוג שאלה מסוים, בלי קשר לרמה. ההסתרה לא משפיעה על שאלות בונוס.</p>
+    ${types}
+    ${custom?`<div class="pa-actions"><button type="button" class="pa-btn sec" data-pact="mxreset">איפוס ההתאמה המדויקת</button></div>`:''}
+  </details>`;
 }
 function renderSettingsHTML(){
   const prof = store.profiles.find(x=>x.id===setViewId) || activeProfile();
@@ -4469,7 +4661,7 @@ function renderSettingsHTML(){
     <p class="pa-sub">בוחרים אילו רמות יופיעו ב${esc(profileName(prof, store.profiles.indexOf(prof)))}. אפשר להפעיל רמה אחת, שתיים או שלוש. ברירת המחדל: כל הרמות.</p>
     <div class="pa-rows">${rows}</div>
     <div class="perr" id="dswErr">${setMsg?esc(setMsg):''}</div>
-    <p class="pa-sub" style="margin-top:10px">שאלות בונוס הן תמיד ברמה קשה, ולכן ההגדרה הזאת לא משפיעה עליהן.</p></section>`;
+    <p class="pa-sub" style="margin-top:10px">שאלות בונוס הן תמיד ברמה קשה, ולכן ההגדרה הזאת לא משפיעה עליהן.</p></section>` + renderMatrixHTML(prof, on, profileMx(prof));
 }
 let setMsg = '';
 // ---- sample questions for a difficulty level (modal) ----
@@ -4663,6 +4855,9 @@ function profileAction(act, id){
   if(act==='tab'){ cloud.msg = ''; cloud.confirmWipe = false; profTab = (id==='progress'||id==='settings'||id==='backup'||id==='guide'||id==='report') ? id : 'profiles'; if(profTab==='progress' && !store.profiles.some(x=>x.id===statsViewId)) statsViewId = store.activeId; return renderProfiles(); }
   if(act==='statsprof'){ statsViewId = id; return renderProfiles(); }
   if(act==='sample'){ return openSample(Number(id)); }
+  if(act==='mxcell'){ const prof = store.profiles.find(x=>x.id===setViewId) || activeProfile(); if(!prof) return; const [sec,d] = id.split(':').map(Number);
+    const r = mxToggleCell(profileDiff(prof), profileMx(prof), sec, d); return mxCommit(prof, r.diff, r.mx); }
+  if(act==='mxreset'){ const prof = store.profiles.find(x=>x.id===setViewId) || activeProfile(); if(!prof) return; return mxCommit(prof, profileDiff(prof), {off:[],hide:[]}); }
   if(act==='setprof'){ setViewId = id; setMsg = ''; return renderProfiles(); }
   if(act==='new'){ profMode={view:'form',editId:null,first:false,confirmDel:null,error:''}; return renderProfiles(); }
   if(act==='edit'){ profMode={view:'form',editId:id,first:false,confirmDel:null,error:''}; return renderProfiles(); }
@@ -4784,14 +4979,19 @@ document.getElementById('profOverlay').addEventListener('change', e=>{
   if(e.target.dataset && e.target.dataset.dlvl){
     const prof = store.profiles.find(x=>x.id===setViewId) || activeProfile(); if(!prof) return;
     const id = Number(e.target.dataset.dlvl), cur = profileDiff(prof);
-    const next = e.target.checked ? cur.concat(id) : cur.filter(x=>x!==id);
-    if(!next.length){ setMsg = 'חייבת להיות לפחות רמה אחת פעילה.'; return renderProfiles(); }
-    setMsg = ''; setProfileDiff(prof, next); return renderProfiles();
+    const r = mxSetLevel(cur, profileMx(prof), id, e.target.checked);
+    if(!r.diff.length){ setMsg = 'חייבת להיות לפחות רמה אחת פעילה.'; return renderProfiles(); }
+    return mxCommit(prof, r.diff, r.mx);
+  }
+  if(e.target.dataset && e.target.dataset.mxtype){
+    const prof = store.profiles.find(x=>x.id===setViewId) || activeProfile(); if(!prof) return;
+    return mxCommit(prof, profileDiff(prof), mxToggleType(profileMx(prof), e.target.dataset.mxtype, !e.target.checked));
   }
   if(e.target.id==='bkSel') bk.sel = e.target.value;
   else if(e.target.id==='bkStats') bk.stats = e.target.checked;
   else if(e.target.classList && e.target.classList.contains('bkchoice')) bk.choices[e.target.dataset.id] = e.target.value;
 });
+document.getElementById('profOverlay').addEventListener('toggle', e=>{ const k = e.target.dataset && e.target.dataset.mxk; if(k) MX_OPEN[k] = e.target.open; }, true);
 document.getElementById('profOverlay').addEventListener('click', e=>{
   if(e.target.id==='profOverlay') closeProfiles();
   const t = e.target.closest('[data-pact]'); if(t) profileAction(t.dataset.pact, t.dataset.id);

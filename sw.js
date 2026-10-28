@@ -1,6 +1,6 @@
 // Cupcake Quest service worker: lets the game open with no internet and tells the page when a new version is ready.
 // VERSION must equal APP_VERSION in math-quest.html (a test checks it): changing this file is what makes browsers notice a new release.
-const VERSION = '2026.10.26';
+const VERSION = '2026.10.28';
 const CACHE = 'cq-' + VERSION;
 const PAGE = './math-quest.html';
 const CORE = [PAGE, './manifest.webmanifest', './icon-192.png', './icon-512.png', './icon-maskable-512.png', './apple-touch-icon.png'];
