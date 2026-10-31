@@ -391,7 +391,7 @@ body[data-view="home"] .wrap > .sub{margin-bottom:12px}
 .levelbtn{grid-column:span 2}
 .levels[data-rem="1"] .levelbtn:last-child{grid-column:1/-1}
 .levels[data-rem="2"] .levelbtn:nth-last-child(-n+2){grid-column:span 3}
-.levelbtn .emoji{font-size:1.4rem; display:block; margin-bottom:2px}
+.levelbtn .emoji{font-size:3.1rem; line-height:1.15; display:block; margin-bottom:2px}
 .levelbtn .lvimg{display:block; width:64px; height:64px; margin:0 auto 4px; border-radius:14px; object-fit:cover; box-shadow:0 2px 6px var(--shadow)}
 .levelbtn.active{border-color:var(--yellow); transform:translateY(-2px)}
 .card{
@@ -503,7 +503,7 @@ body[data-view="home"] .wrap > .sub{margin-bottom:12px}
 @media (min-width:720px){ .wrap{max-width:720px} .levels{grid-template-columns:repeat(4,minmax(0,1fr))} .levels .levelbtn, .levels[data-rem] .levelbtn:last-child, .levels[data-rem] .levelbtn:nth-last-child(-n+2){grid-column:auto} }
 @media (min-width:1100px){ .wrap{max-width:880px} .levels{grid-template-columns:repeat(8,minmax(0,1fr))} .levelbtn{font-size:.95rem; padding:12px 8px} .card{padding:28px 28px} }
 /* selection screen: the game grid is the main control, so it grows with the room available */
-@media (min-width:480px){ body[data-view="home"] .levelbtn .lvimg{width:84px; height:84px} body[data-view="home"] .levelbtn .lvimg.cut{width:72px; height:72px} body[data-view="home"] .levelbtn{font-size:.95rem; padding:12px 8px} body[data-view="home"] .levelbtn .emoji{font-size:2rem} }
+@media (min-width:480px){ body[data-view="home"] .levelbtn .lvimg{width:84px; height:84px} body[data-view="home"] .levelbtn .lvimg.cut{width:72px; height:72px} body[data-view="home"] .levelbtn{font-size:.95rem; padding:12px 8px} body[data-view="home"] .levelbtn .emoji{font-size:3.6rem} }
 @media (min-width:720px){ body[data-view="home"] .wrap{max-width:860px} body[data-view="home"] .levels{gap:14px} body[data-view="home"] .levelbtn .lvimg{width:120px; height:120px; border-radius:20px} body[data-view="home"] .levelbtn{font-size:1.1rem; padding:16px 10px; border-radius:20px} body[data-view="home"] .levelbtn .emoji{font-size:3.6rem} body[data-view="home"] .levelbtn .lvimg.cut{width:96px; height:96px} body[data-view="home"] .charimg{width:110px} body[data-view="home"] .levelbtn{padding:12px 10px} }
 @media (min-width:1100px){ body[data-view="home"] .wrap{max-width:1040px} body[data-view="home"] .levels{grid-template-columns:repeat(4,minmax(0,1fr)); gap:18px} body[data-view="home"] .levelbtn .lvimg{width:150px; height:150px} body[data-view="home"] .levelbtn .lvimg.cut{width:112px; height:112px} body[data-view="home"] .levelbtn .emoji{font-size:4.2rem} body[data-view="home"] .levelbtn{font-size:1.25rem; padding:14px 12px} }
 /* location view: slightly see-through question card, so more of the backdrop shows */
@@ -1707,7 +1707,7 @@ function cloudProfileFromDoc(C, helpers){
 // ===== CLOUD (Google sign-in, cloud progress, problem reports) =====
 // Local-first: the game always works from this device's storage. The cloud is a mirror, so no internet / no account / no quota never blocks play.
 // Everything here is off while CLOUD_CONFIG is null. See firebase/SETUP.md for how to create the (free) Firebase project and paste its settings below.
-const APP_VERSION = '2026.10.31f';       // keep equal to VERSION in sw.js (a test checks it)
+const APP_VERSION = '2026.10.31g';       // keep equal to VERSION in sw.js (a test checks it)
 const CLOUD_CONFIG = {apiKey:"AIzaSyAlq_TJNGvWPJpUrpbdq_hkAoURydqMzm0", authDomain:"learning-quest-1.firebaseapp.com", projectId:"learning-quest-1", appId:"1:98931179722:web:78fb00084ccba3efb53433"};   // e.g. {apiKey:'...', authDomain:'xxx.firebaseapp.com', projectId:'xxx', appId:'...'}
 const CLOUD_LIMITS = {
   pushDelayMs: 60000,          // at most one upload per profile per minute while playing
