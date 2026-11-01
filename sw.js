@@ -1,6 +1,6 @@
 // Cupcake Quest service worker: lets the game open with no internet and tells the page when a new version is ready.
 // VERSION must equal APP_VERSION in math-quest.html (a test checks it): changing this file is what makes browsers notice a new release.
-const VERSION = '2026.10.31g';
+const VERSION = '2026.11.01c';
 const CACHE = 'cq-' + VERSION;
 const PAGE = './math-quest.html';
 const CORE = [PAGE, './manifest.webmanifest', './icon-192.png', './icon-512.png', './icon-maskable-512.png', './apple-touch-icon.png'];
@@ -10,6 +10,10 @@ self.addEventListener('install', e => {
     const c = await caches.open(CACHE);
     await c.add(new Request(PAGE, {cache: 'reload'}));                                   // the game itself must be cached, or the install fails
     await Promise.all(CORE.slice(1).map(u => c.add(new Request(u, {cache: 'reload'})).catch(() => {})));   // icons are nice to have
+    try{                                                                                  // split build only: keep every picture for offline use
+      const list = await (await fetch('./assets.json', {cache: 'reload'})).json();
+      await Promise.all(list.map(n => c.add(new Request('./assets/' + n)).catch(() => {})));
+    }catch(_){}                                                                           // the single-file build has no assets.json: nothing to do
   })());
 });
 self.addEventListener('activate', e => {
