@@ -175,6 +175,7 @@ h1{
 .cbig{min-height:calc(110px*var(--rz)); display:flex; align-items:center; justify-content:center; animation:cpop .6s}
 .cbig img{height:calc(110px*var(--rz)); width:auto; max-width:100%}
 .cbig.look img{height:190px}
+.ritem.tap{cursor:pointer}
 @keyframes cpop{0%{transform:scale(.2) rotate(-12deg)} 60%{transform:scale(1.2) rotate(4deg)} 100%{transform:scale(1) rotate(0)}}
 .ctitle{font-family:'Baloo 2',sans-serif; font-weight:800; font-size:1.35rem; color:var(--purple)}
 .csub{font-size:.95rem; color:var(--text); font-weight:600}
@@ -656,6 +657,9 @@ tr.mxempty th[scope=row]{opacity:.6}
 .pa-scope.stack .pa-seg{flex-wrap:nowrap}
 .pa-scope.stack .pa-chip{flex:1 1 0; padding:0 4px; font-size:.82rem; white-space:nowrap; text-align:center}
 .pa-chip.on{background:linear-gradient(90deg,var(--teal),var(--purple)); color:#fff; border-color:transparent}
+.dbg-msg{border-radius:10px; padding:8px 10px; animation:dbgflash 1.4s ease-out}
+@keyframes dbgflash{0%{background:#bff0d4; transform:scale(1.03)} 100%{background:transparent; transform:none}}
+@media (prefers-reduced-motion:reduce){.dbg-msg{animation:none}}
 .pa-chip:focus-visible{outline:3px solid var(--purple); outline-offset:2px}
 .pa .bkmsg{margin:10px 0 0}
 .pa .perr{min-height:0; margin-top:4px}
@@ -706,7 +710,6 @@ tr.mxempty th[scope=row]{opacity:.6}
     <span class="rs-top">
       <span class="rs-title">🎁 חדר המתנות</span>
       <span class="rs-ready" id="rsReady" style="display:none"></span>
-      <span class="rs-cotton" id="rsCotton" style="display:none"><img id="rsCottonImg" alt="שערות סבתא"><b id="rsCottonN"></b></span>
       <span class="rs-gold" id="rsGold" style="display:none">⭐<b id="rsGoldN"></b></span>
       <span class="rs-count">סה"כ <b id="rsTotal">0</b> ›</span>
     </span>
@@ -860,6 +863,7 @@ const UPGRADE_IMG = {
   "🎀": "assets/ce4df27b7c30.webp",
   "🧋": "assets/f9e6cd794a8d.webp",
 };
+UPGRADE_IMG['☁️'] = UPGRADE_IMG.cotton;   // the upgraded cotton candy is the golden one
 const LOOKS = [
   {name:"עוגת הזהב", img:"assets/a974cf840f18.webp"},
   {name:"שרביט הכוכבים", img:"assets/9c72e7a0ea18.webp"},
@@ -879,7 +883,7 @@ const LOOKS = [
   {name:"קאפקייק עם כתר", img:"assets/b95423a30d53.webp"},
 ];
 const MERGE_COST = 10;   // identical items needed to merge into an upgraded one, and upgraded items needed for a new look
-const STICKERS = ["🦄","🧁","🍦","🍩","🌈","🍓","🍒","🎀","🍬","🍨","🩷","✨","🍭","🧋"];
+const STICKERS = ["🦄","🧁","🍦","🍩","🌈","🍓","🎀","🍬","🍨","🩷","✨","🍭","🧋","☁️"];
 
 // ---- layered rewards: a reward kind drawn from stacked transparent parts (base, frosting, topping) ----
 // An item is "kind" (old, one picture) or "kind:b.f.t" (part numbers). An upgraded item is "kind" or "kind#c1,c2,...,c10" (the 10 combos it was merged from, so un-merging gives the same ones back).
@@ -888,9 +892,17 @@ const LAYERS = {'🧁': {"bw":280,"fbot":0.24,"sink":0.42,"sprsink":0.62,"bases"
 const LAYERS_DONUT = {"ring":1,"ox":18,"oy":22,"bases":[{"w":300,"h":301,"r":"c","s":"assets/db19894a4385.webp"},{"w":300,"h":300,"r":"c","s":"assets/1fba9994fd03.webp"},{"w":300,"h":299,"r":"u","s":"assets/fc926d7f413b.webp"},{"w":300,"h":299,"r":"r","s":"assets/276016974e0d.webp"}],"fros":[{"w":264,"h":259,"r":"c","s":"assets/c6ce63d5dfaa.webp"},{"w":264,"h":259,"r":"c","s":"assets/249b1f3d7717.webp"},{"w":264,"h":259,"r":"c","s":"assets/38e2bb676800.webp"},{"w":264,"h":259,"r":"c","s":"assets/124858383be8.webp"},{"w":264,"h":259,"r":"c","s":"assets/5edcfb7b2521.webp"},{"w":264,"h":259,"r":"u","s":"assets/5ec7f3098213.webp"},{"w":264,"h":259,"r":"c","s":"assets/93fd014bfd65.webp"},{"w":264,"h":259,"r":"r","s":"assets/69ec5c7e86d5.webp"}],"tops":[{"w":264,"h":259,"r":"c","s":"assets/c3f69b3c7c41.webp"},{"w":264,"h":259,"r":"c","s":"assets/5c9323d7f81a.webp"},{"w":264,"h":259,"r":"c","s":"assets/e3e0d34c3e83.webp"},{"w":264,"h":259,"r":"u","s":"assets/54be773ee3a4.webp"},{"w":264,"h":259,"r":"u","s":"assets/21b95318ace8.webp"},{"w":264,"h":259,"r":"r","s":"assets/381271afa3b6.webp"}]};
 LAYERS['🍩'] = LAYERS_DONUT;
 LAYERS['🍨'] = {"bw":300,"fbot":0.385,"cover":1,"bases":[{"w":300,"h":208,"r":"c","s":"assets/1d342bec29e3.webp"},{"w":300,"h":208,"r":"c","s":"assets/8f83fc1dd753.webp"},{"w":300,"h":209,"r":"u","s":"assets/a1e32837d389.webp"},{"w":300,"h":209,"r":"r","s":"assets/c85d57e851d2.webp"}],"fros":[{"w":271,"h":122,"r":"c","s":"assets/1be652541b8c.webp","c":["assets/7cd37dfa6334.webp","assets/27b987e8ab68.webp","assets/f048a0e78898.webp","assets/b9cad321ae59.webp","assets/bd07bb4c77ef.webp","assets/03e2df0ec363.webp","assets/33324fc30be3.webp","assets/8034a77ae0dd.webp","assets/1402ecf077c2.webp"]},{"w":276,"h":167,"r":"c","s":"assets/d4c803225ab7.webp","c":["assets/ce78347dcca8.webp","assets/2ba3bb153685.webp","assets/f96b7501ba0c.webp","assets/3b5d04d0e1c0.webp","assets/a6527f354919.webp","assets/399e975bd231.webp","assets/25c310b3b450.webp","assets/7f1533f6ed48.webp","assets/56637ad95e21.webp"]},{"w":277,"h":177,"r":"u","s":"assets/3588d7721ce6.webp","c":["assets/3317b5ddab7a.webp","assets/5b7674f76666.webp","assets/26067e72ec6e.webp","assets/b58b1f7060f1.webp","assets/1a4cfadb9c4c.webp","assets/d64e30427e61.webp","assets/22c7655b36cc.webp","assets/fe808bf450e2.webp","assets/cd337745cd61.webp"]},{"w":284,"h":195,"r":"r","s":"assets/56d2364317f0.webp","c":["assets/2fe954ac74d2.webp","assets/8fc2cad4c7d1.webp","assets/2a7a4a7f1f8c.webp","assets/92727e618407.webp","assets/77408e92e99e.webp","assets/875e882b4b9f.webp","assets/30b86fde9d76.webp","assets/75ea6554d632.webp","assets/5b9e828f3a3a.webp"]},{"w":288,"h":239,"r":"c","s":"assets/8468506a7b4e.webp","c":["assets/564938835e3f.webp","assets/85d60fc0ed80.webp","assets/d54e6082ed21.webp","assets/3c6a4df28564.webp","assets/f41f23e9f0bd.webp","assets/76ccdb7e71a3.webp","assets/dda09a9bdafc.webp","assets/502c3e7fe2bd.webp","assets/1b9c1f7f2a80.webp"]},{"w":288,"h":244,"r":"c","s":"assets/fae6b5e54782.webp","c":["assets/85c6f43e5c1b.webp","assets/9bf5087c9ec1.webp","assets/3b3f2227e01b.webp","assets/580e59f35c77.webp","assets/00be515e1e3a.webp","assets/9ba25958ea6a.webp","assets/0f496685189d.webp","assets/b184504b1180.webp","assets/a97c96be69c3.webp"]},{"w":234,"h":114,"r":"u","s":"assets/86891b375a67.webp","c":["assets/5df67394521d.webp","assets/f877385a09a5.webp","assets/d9c140117472.webp","assets/426b3f5b5e68.webp","assets/427350073e53.webp","assets/08109b81ae79.webp","assets/1263c07e1d7b.webp","assets/0ee6a10e48ec.webp","assets/6e353349e278.webp"]},{"w":234,"h":147,"r":"c","s":"assets/05964f18380b.webp","c":["assets/4ca97c9f4d6a.webp","assets/9ce65d26394c.webp","assets/9dbd3d43a281.webp","assets/6941ddf71d5b.webp","assets/59173462d440.webp","assets/8c7d154f1d60.webp","assets/20a69d4928fd.webp","assets/2a87771ff1df.webp","assets/8486041a7703.webp"]},{"w":234,"h":152,"r":"u","s":"assets/4a6f2af65c71.webp","c":["assets/0c221d963b27.webp","assets/9bb7fb8cbcb0.webp","assets/3951ccad2f13.webp","assets/3cdd7aa31940.webp","assets/73b782b11e48.webp","assets/b2388b86eeb0.webp","assets/a523c29a112e.webp","assets/f80f74ea84af.webp","assets/b75db779d1de.webp"]},{"w":233,"h":169,"r":"u","s":"assets/b6bb0407080c.webp","c":["assets/216d481129af.webp","assets/64d1e2542d34.webp","assets/6f2b92be8129.webp","assets/5c2032e88b0f.webp","assets/d028eef65db4.webp","assets/1133b3ee1de2.webp","assets/873f74d87df3.webp","assets/7acc07af5406.webp","assets/91c72dfa2842.webp"]},{"w":236,"h":185,"r":"r","s":"assets/2bf9271ac13d.webp","c":["assets/b4a1e19cc82e.webp","assets/d5cd707a6d92.webp","assets/9fd12ce6141c.webp","assets/8c233a03617c.webp","assets/9cf5cddcbd4f.webp","assets/34eb1e9533bd.webp","assets/cee69fc792f4.webp","assets/46cc217a9114.webp","assets/400659e8b341.webp"]},{"w":240,"h":195,"r":"c","s":"assets/c8997516d8ef.webp","c":["assets/8287bb415026.webp","assets/5bba6ff28f58.webp","assets/aecfd3fb23a9.webp","assets/f189f279a6db.webp","assets/e434e08f3974.webp","assets/5fa1ff63cec0.webp","assets/1549e19d46d5.webp","assets/d85d3dbe536d.webp","assets/2fcd1df7cf8a.webp"]},{"w":186,"h":153,"r":"c","s":"assets/1e0bf1dfb05c.webp","c":["assets/a53365ae47f9.webp","assets/2f11203728d0.webp","assets/56ec036541a3.webp","assets/d27e4c8ba5a3.webp","assets/194644e299bf.webp","assets/6a38107973a7.webp","assets/257db00b50b4.webp","assets/a3d89767e9ee.webp","assets/891a90767581.webp"]},{"w":234,"h":119,"r":"c","s":"assets/44cb9ca32f1d.webp","c":["assets/fd419565ad6d.webp","assets/6e727990abcb.webp","assets/aa2ef0937796.webp","assets/3c7c40b3a31c.webp","assets/5169c67bd9fb.webp","assets/af5801516762.webp","assets/0cc701d4fa33.webp","assets/fbf4d4427dc5.webp","assets/e90dcd1a5f07.webp"]},{"w":239,"h":169,"r":"u","s":"assets/ab97803d5c3e.webp","c":["assets/91055fc6c46b.webp","assets/1601d3e94e7e.webp","assets/6b25ab2a1cf0.webp","assets/7228c11a0771.webp","assets/e2574e9a2339.webp","assets/897c3003636c.webp","assets/5c43c187bc19.webp","assets/c59ded038b46.webp","assets/3f8c62b8d132.webp"]}],"tops":[{"r":"c"},{"r":"c"},{"r":"c"},{"r":"c"},{"r":"u"},{"r":"u"},{"r":"u"},{"r":"c"},{"r":"r"}]};
-LAYERS['🍭'] = {"bw":300,"fbot":0.14,"cover":1,"bases":[{"w":31,"h":230,"r":"c","s":"assets/50aec2f477fc.webp"},{"w":42,"h":230,"r":"c","s":"assets/ac2ba7a6f829.webp"},{"w":50,"h":230,"r":"u","s":"assets/5c5dcaef3e7a.webp"},{"w":38,"h":230,"r":"r","s":"assets/3cbb4d9327d9.webp"}],"fros":[{"w":316,"h":300,"r":"c","s":"assets/ab627d879d22.webp","c":["assets/de0f550949d6.webp","assets/e9d26a804079.webp","assets/c11450d59629.webp","assets/15d25f332310.webp","assets/dc316d90035e.webp","assets/63bed0ee3b9b.webp","assets/93b478a5df52.webp","assets/96d5884aa984.webp","assets/347b92f73802.webp"]},{"w":315,"h":300,"r":"c","s":"assets/83479632489f.webp","c":["assets/47da6385dd13.webp","assets/640a946316da.webp","assets/c992f1135fd6.webp","assets/ea0f0cbbfb71.webp","assets/bbc63801f5f2.webp","assets/8e3353655eac.webp","assets/15bc342e2d69.webp","assets/b957a289c41a.webp","assets/faf26fa151aa.webp"]},{"w":316,"h":300,"r":"c","s":"assets/98a83433747d.webp","c":["assets/20a4d19efdf6.webp","assets/5e055866f9a1.webp","assets/c6c33693357d.webp","assets/fe2d3c757aed.webp","assets/fc0b6ecf6457.webp","assets/0f415300908b.webp","assets/5212622ce537.webp","assets/f2292c2255e8.webp","assets/5e46cf9b89a8.webp"]},{"w":301,"h":300,"r":"u","s":"assets/a6704213b3d3.webp","c":["assets/65431bdf8230.webp","assets/4d8b5d45162d.webp","assets/dcbe5cc4364a.webp","assets/44a6b64ed881.webp","assets/0893de852807.webp","assets/07aa0eead4e6.webp","assets/5fbc92fba0a5.webp","assets/161cd9e5f732.webp","assets/80c5aa5bea57.webp"]},{"w":301,"h":300,"r":"u","s":"assets/ed15dc62e5f0.webp","c":["assets/06462f536932.webp","assets/cdfee24e371c.webp","assets/dcbe5cc4364a.webp","assets/44a6b64ed881.webp","assets/0893de852807.webp","assets/724d7bc32d7a.webp","assets/98c16d62261a.webp","assets/5516e02e8360.webp","assets/7ecc3dbf8192.webp"]},{"w":301,"h":300,"r":"c","s":"assets/29f36bf1fde8.webp","c":["assets/c49d40b69f97.webp","assets/460cb47a0248.webp","assets/dcbe5cc4364a.webp","assets/44a6b64ed881.webp","assets/0893de852807.webp","assets/867c8768fd74.webp","assets/d749ddc13a58.webp","assets/251d201986d2.webp","assets/df924277de0c.webp"]},{"w":301,"h":300,"r":"u","s":"assets/49cd0d80e22b.webp","c":["assets/69ca3d2e448a.webp","assets/98bd91f70aa5.webp","assets/dcbe5cc4364a.webp","assets/44a6b64ed881.webp","assets/0893de852807.webp","assets/3049375bda5a.webp","assets/dcfc5fcb41da.webp","assets/5ce95775aefa.webp","assets/4617422c99c1.webp"]},{"w":302,"h":300,"r":"u","s":"assets/f3a4320d5398.webp","c":["assets/72d5ad2bc1e6.webp","assets/7e72ee5c0bfe.webp","assets/c83ee119001b.webp","assets/452637c9e78a.webp","assets/0d381b469e15.webp","assets/f7665eda8e4f.webp","assets/f43ee58a6602.webp","assets/72b9e74f4992.webp","assets/6e2e465f56f9.webp"]},{"w":301,"h":300,"r":"r","s":"assets/b40bf6e35d7a.webp","c":["assets/ba6f3b25bc99.webp","assets/76b64ff864bf.webp","assets/dcbe5cc4364a.webp","assets/44a6b64ed881.webp","assets/0893de852807.webp","assets/ea8d800600da.webp","assets/e179004fff70.webp","assets/a5fde274b24f.webp","assets/a2cd568a0d31.webp"]}],"tops":[{"r":"c","w":0,"h":0},{"r":"c","w":0,"h":0},{"r":"c","w":0,"h":0},{"r":"c","w":0,"h":0},{"r":"u","w":0,"h":0},{"r":"u","w":0,"h":0},{"r":"u","w":0,"h":0},{"r":"u","w":0,"h":0},{"r":"r","w":0,"h":0},{"r":"c","w":0,"h":0,"n":1}]};
+LAYERS['🍭'] = {"bw":300,"fbot":0.14,"cover":1,"bases":[{"w":31,"h":230,"r":"c","s":"assets/50aec2f477fc.webp"},{"w":42,"h":230,"r":"c","s":"assets/ac2ba7a6f829.webp"},{"w":50,"h":230,"r":"u","s":"assets/5c5dcaef3e7a.webp"},{"w":38,"h":230,"r":"r","s":"assets/3cbb4d9327d9.webp"},{"w":30,"h":230,"r":"c","s":"assets/121d3b2a4965.webp"},{"w":30,"h":230,"r":"c","s":"assets/9a48aa803d93.webp"},{"w":30,"h":230,"r":"c","s":"assets/2aaccc111620.webp"},{"w":30,"h":230,"r":"c","s":"assets/2fd2a257f254.webp"},{"w":30,"h":230,"r":"u","s":"assets/02663dd660d8.webp"},{"w":63,"h":230,"r":"u","s":"assets/aa8544a90c7d.webp"},{"w":68,"h":230,"r":"u","s":"assets/67a485a42d53.webp"},{"w":34,"h":230,"r":"r","s":"assets/f29115b699b1.webp"},{"w":41,"h":230,"r":"r","s":"assets/f963fe91a398.webp"}],"fros":[{"w":316,"h":300,"r":"c","s":"assets/ab627d879d22.webp","c":["assets/de0f550949d6.webp","assets/e9d26a804079.webp","assets/c11450d59629.webp","assets/15d25f332310.webp","assets/dc316d90035e.webp","assets/63bed0ee3b9b.webp","assets/93b478a5df52.webp","assets/96d5884aa984.webp","assets/347b92f73802.webp"]},{"w":315,"h":300,"r":"c","s":"assets/83479632489f.webp","c":["assets/47da6385dd13.webp","assets/640a946316da.webp","assets/c992f1135fd6.webp","assets/ea0f0cbbfb71.webp","assets/bbc63801f5f2.webp","assets/8e3353655eac.webp","assets/15bc342e2d69.webp","assets/b957a289c41a.webp","assets/faf26fa151aa.webp"]},{"w":316,"h":300,"r":"c","s":"assets/98a83433747d.webp","c":["assets/20a4d19efdf6.webp","assets/5e055866f9a1.webp","assets/c6c33693357d.webp","assets/fe2d3c757aed.webp","assets/fc0b6ecf6457.webp","assets/0f415300908b.webp","assets/5212622ce537.webp","assets/f2292c2255e8.webp","assets/5e46cf9b89a8.webp"]},{"w":301,"h":300,"r":"u","s":"assets/a6704213b3d3.webp","c":["assets/65431bdf8230.webp","assets/4d8b5d45162d.webp","assets/dcbe5cc4364a.webp","assets/44a6b64ed881.webp","assets/0893de852807.webp","assets/07aa0eead4e6.webp","assets/5fbc92fba0a5.webp","assets/161cd9e5f732.webp","assets/80c5aa5bea57.webp"]},{"w":301,"h":300,"r":"u","s":"assets/ed15dc62e5f0.webp","c":["assets/06462f536932.webp","assets/cdfee24e371c.webp","assets/dcbe5cc4364a.webp","assets/44a6b64ed881.webp","assets/0893de852807.webp","assets/724d7bc32d7a.webp","assets/98c16d62261a.webp","assets/5516e02e8360.webp","assets/7ecc3dbf8192.webp"]},{"w":301,"h":300,"r":"c","s":"assets/29f36bf1fde8.webp","c":["assets/c49d40b69f97.webp","assets/460cb47a0248.webp","assets/dcbe5cc4364a.webp","assets/44a6b64ed881.webp","assets/0893de852807.webp","assets/867c8768fd74.webp","assets/d749ddc13a58.webp","assets/251d201986d2.webp","assets/df924277de0c.webp"]},{"w":301,"h":300,"r":"u","s":"assets/49cd0d80e22b.webp","c":["assets/69ca3d2e448a.webp","assets/98bd91f70aa5.webp","assets/dcbe5cc4364a.webp","assets/44a6b64ed881.webp","assets/0893de852807.webp","assets/3049375bda5a.webp","assets/dcfc5fcb41da.webp","assets/5ce95775aefa.webp","assets/4617422c99c1.webp"]},{"w":302,"h":300,"r":"u","s":"assets/f3a4320d5398.webp","c":["assets/72d5ad2bc1e6.webp","assets/7e72ee5c0bfe.webp","assets/c83ee119001b.webp","assets/452637c9e78a.webp","assets/0d381b469e15.webp","assets/f7665eda8e4f.webp","assets/f43ee58a6602.webp","assets/72b9e74f4992.webp","assets/6e2e465f56f9.webp"]},{"w":301,"h":300,"r":"r","s":"assets/b40bf6e35d7a.webp","c":["assets/ba6f3b25bc99.webp","assets/76b64ff864bf.webp","assets/dcbe5cc4364a.webp","assets/44a6b64ed881.webp","assets/0893de852807.webp","assets/ea8d800600da.webp","assets/e179004fff70.webp","assets/a5fde274b24f.webp","assets/a2cd568a0d31.webp"]}],"tops":[{"r":"c","w":0,"h":0},{"r":"c","w":0,"h":0},{"r":"c","w":0,"h":0},{"r":"c","w":0,"h":0},{"r":"u","w":0,"h":0},{"r":"u","w":0,"h":0},{"r":"u","w":0,"h":0},{"r":"u","w":0,"h":0},{"r":"r","w":0,"h":0},{"r":"c","w":0,"h":0,"n":1}]};
 LAYERS['🧋'] = {"tea":1,"bw":300,"rim":0.09,"bases":[{"w":301,"h":336,"r":"c","s":"assets/83702acf61a1.webp"},{"w":301,"h":336,"r":"c","s":"assets/51f115911ade.webp"},{"w":301,"h":336,"r":"c","s":"assets/60e4e8dc8b22.webp"},{"w":301,"h":336,"r":"u","s":"assets/5d95cc5aed1a.webp"},{"w":301,"h":336,"r":"c","s":"assets/0260c5d521ba.webp"},{"w":301,"h":336,"r":"c","s":"assets/8011426959af.webp"},{"w":301,"h":336,"r":"u","s":"assets/283dd4f53cf0.webp"},{"w":301,"h":336,"r":"u","s":"assets/0eed2f45be44.webp"},{"w":301,"h":336,"r":"r","s":"assets/450b7ddb8b14.webp"}],"fros":[{"w":311,"h":247,"ay":177.0,"r":"c","s":"assets/b48e8c665da8.webp"},{"w":311,"h":246,"ay":177.0,"r":"c","s":"assets/82f467091a33.webp"},{"w":311,"h":247,"ay":177.0,"r":"u","s":"assets/1286aca56755.webp"},{"w":312,"h":288,"ay":228.0,"r":"u","s":"assets/12977cca6f43.webp"},{"w":312,"h":289,"ay":228.9,"r":"u","s":"assets/b8ca1a68414e.webp"},{"w":311,"h":257,"ay":185.9,"r":"r","s":"assets/707e588f50f6.webp"},{"w":311,"h":247,"ay":177.6,"r":"c","s":"assets/64993ed47827.webp"},{"w":311,"h":247,"ay":177.6,"r":"c","s":"assets/c07c931bb41e.webp"},{"w":311,"h":246,"ay":176.3,"r":"r","s":"assets/c7d27a82f5a1.webp"}],"tops":[{"w":301,"h":336,"r":"c","s":"assets/7e10de987d15.webp"},{"w":301,"h":336,"r":"u","s":"assets/15748a78ce92.webp"},{"w":301,"h":336,"r":"c","s":"assets/b5c12482827e.webp"},{"w":301,"h":336,"r":"c","s":"assets/285abf4b8777.webp"},{"w":301,"h":336,"r":"c","s":"assets/d2e07a7161c0.webp"},{"w":301,"h":336,"r":"r","s":"assets/e0116058a937.webp"},{"w":301,"h":336,"r":"c","s":"assets/771bf18bfcac.webp"},{"w":301,"h":336,"r":"u","s":"assets/75bce64f92d9.webp"},{"w":301,"h":336,"r":"c","s":"assets/f0c3a4c5b13e.webp"},{"r":"c","w":0,"h":0,"n":1}]};
-const LAYER_DEFAULT = {'🧁':'0.0.0','🍩':'0.0.0','🍨':'0.0.0','🍭':'0.0.0','🧋':'0.0.0'};   // the fixed look old rewards get when the game first upgrades them
+LAYERS['🎀'] = {"flat":1,"bases":[{"w":281,"h":235,"r":"c","s":"assets/fa5e72cf76aa.webp"},{"w":281,"h":235,"r":"c","s":"assets/e4af69aba5e4.webp"},{"w":281,"h":235,"r":"c","s":"assets/2d336a641589.webp"},{"w":281,"h":235,"r":"u","s":"assets/46b421548274.webp"},{"w":281,"h":235,"r":"c","s":"assets/148862c96c7a.webp"},{"w":281,"h":235,"r":"c","s":"assets/43e712929bc9.webp"},{"w":281,"h":235,"r":"u","s":"assets/3b793482db99.webp"},{"w":281,"h":235,"r":"u","s":"assets/7b1f8e938485.webp"},{"w":281,"h":235,"r":"r","s":"assets/74f078ec63ff.webp"},{"w":281,"h":235,"r":"u","s":"assets/794bec486ed2.webp"},{"w":281,"h":235,"r":"c","s":"assets/c4381b8266ca.webp"},{"w":281,"h":235,"r":"u","s":"assets/1aece84bdcc5.webp"},{"w":281,"h":235,"r":"u","s":"assets/adf8e9a73fad.webp"},{"w":281,"h":235,"r":"c","s":"assets/77f92771649c.webp"},{"w":281,"h":235,"r":"c","s":"assets/9ea8416c385d.webp"},{"w":281,"h":235,"r":"c","s":"assets/60606c83ca4b.webp"},{"w":281,"h":235,"r":"u","s":"assets/bd9dbb7613ce.webp"}],"fros":[{"r":"c","w":0,"h":0}],"tops":[{"w":281,"h":235,"r":"c","s":"assets/81f06014a7e9.webp"},{"w":281,"h":235,"r":"c","s":"assets/39e9c957dd10.webp"},{"w":281,"h":235,"r":"r","s":"assets/6b6bb837e335.webp"},{"w":281,"h":235,"r":"c","s":"assets/971621976904.webp"},{"w":281,"h":235,"r":"u","s":"assets/a1ce30b6a560.webp"},{"w":281,"h":235,"r":"u","s":"assets/d17e3a71941f.webp"},{"w":281,"h":235,"r":"c","s":"assets/65a53d1fc3e1.webp"},{"w":281,"h":235,"r":"r","s":"assets/5749674a013b.webp"},{"w":281,"h":235,"r":"u","s":"assets/fd2dc4a1bfd1.webp"},{"r":"c","w":0,"h":0,"n":1}]};
+LAYERS['🍦'] = {"bw":300,"fbot":0.15,"cover":1,"mask":1,"bases":[{"w":334,"h":404,"r":"c","s":"assets/cf9750996d3b.webp"},{"w":334,"h":404,"r":"c","s":"assets/02194d255257.webp"},{"w":334,"h":404,"r":"u","s":"assets/bbc22c249293.webp"},{"w":334,"h":404,"r":"r","s":"assets/7cf44e9ea8fa.webp"}],"fros":[{"w":319,"h":359,"r":"c","s":"assets/003e57340db2.webp"},{"w":319,"h":359,"r":"c","s":"assets/9c66cb8ba6f9.webp"},{"w":319,"h":359,"r":"c","s":"assets/f78b25a19b87.webp"},{"w":319,"h":359,"r":"u","s":"assets/dfdfe96f2fff.webp"},{"w":319,"h":359,"r":"u","s":"assets/eb633aa6ee69.webp"},{"w":319,"h":359,"r":"c","s":"assets/e66a31966da8.webp"},{"w":319,"h":359,"r":"u","s":"assets/c979da3deb3b.webp"},{"w":319,"h":359,"r":"u","s":"assets/f808309d9e94.webp"},{"w":319,"h":359,"r":"r","s":"assets/35e612f28e67.webp"}],"tops":[{"r":"c","w":319,"h":359,"s":"assets/3a4469e21647.webp"},{"r":"c","w":319,"h":359,"s":"assets/0d24893197a2.webp"},{"r":"c","w":319,"h":359,"s":"assets/adbde9486229.webp"},{"r":"c","w":319,"h":359,"s":"assets/259480bfdd51.webp"},{"r":"u","w":319,"h":359,"s":"assets/b2539af54726.webp"},{"r":"r","w":319,"h":359,"s":"assets/1e12e3f71484.webp"},{"r":"u","w":319,"h":359,"s":"assets/93ec4c322e08.webp"},{"r":"u","w":319,"h":359,"s":"assets/7cb0ecf4adf3.webp"},{"r":"u","w":319,"h":359,"s":"assets/6261a7e23bf5.webp"},{"r":"c","w":0,"h":0,"n":1}]};
+LAYERS['🍓'] = {"fruit":1,"bases":[{"w":275,"h":256,"ty":0.12,"r":"c","s":"assets/1374f2e90ddc.webp"},{"w":276,"h":258,"ty":0.12,"r":"u","s":"assets/9e3e16454a3e.webp"},{"w":282,"h":258,"ty":0.06,"r":"c","s":"assets/0beeabe8cb92.webp"},{"w":263,"h":267,"ty":0.1,"r":"c","s":"assets/fe71ba6583c3.webp"},{"w":246,"h":303,"ty":0.28,"r":"u","s":"assets/92594451d2e9.webp"},{"w":256,"h":261,"ty":0.06,"r":"c","s":"assets/6550c15d87c3.webp"},{"w":261,"h":261,"ty":0.08,"r":"c","s":"assets/3a92b9e81825.webp"},{"w":266,"h":246,"ty":0.12,"r":"r","s":"assets/cbaffc36d7af.webp"},{"w":265,"h":246,"ty":0.12,"r":"r","s":"assets/2ab5bbec1226.webp"}],"fros":[{"w":177,"h":161,"ay":80.5,"r":"c","s":"assets/6e4f91741bc7.webp"},{"w":177,"h":149,"ay":134.1,"r":"u","s":"assets/17b083300e07.webp"},{"w":181,"h":159,"ay":143.1,"r":"u","s":"assets/e94b78a14d16.webp"},{"w":182,"h":162,"ay":145.8,"r":"c","s":"assets/3a9dbc110b06.webp"},{"w":136,"h":179,"ay":164.7,"r":"c","s":"assets/fec30b0cb060.webp"},{"w":174,"h":144,"ay":129.6,"r":"u","s":"assets/a7516526378c.webp"},{"w":174,"h":158,"ay":142.2,"r":"r","s":"assets/ad90de61ebcf.webp"},{"w":150,"h":170,"ay":156.4,"r":"c","s":"assets/57d1a4d2bf91.webp"},{"w":169,"h":140,"ay":126.0,"r":"u","s":"assets/cc78d362a775.webp"}],"tops":[{"r":"c","w":0,"h":0,"s":"assets/e9e1ea6de42d.webp"},{"r":"c","w":0,"h":0,"s":"assets/6e8e1e681e67.webp"},{"r":"c","w":0,"h":0,"s":"assets/0b3875616629.webp"},{"r":"u","w":0,"h":0,"s":"assets/5a78adbf260c.webp"},{"r":"r","w":0,"h":0,"s":"assets/cdd00c7d915e.webp"},{"r":"c","w":0,"h":0,"n":1}]};
+LAYERS['🩷'] = {"heart":1,"bases":[{"w":233,"h":203,"r":"c","s":"assets/150ad935bea7.webp"},{"w":233,"h":203,"r":"c","s":"assets/a80a67bd8706.webp"},{"w":233,"h":203,"r":"c","s":"assets/150e0540f174.webp"},{"w":233,"h":203,"r":"c","s":"assets/90eddfc236cd.webp"},{"w":233,"h":203,"r":"c","s":"assets/b2bbd7c50b7f.webp"},{"w":233,"h":203,"r":"u","s":"assets/97743951b6ff.webp"},{"w":233,"h":203,"r":"c","s":"assets/1ba9a99e0f25.webp"},{"w":233,"h":203,"r":"c","s":"assets/31329ece3837.webp"},{"w":233,"h":203,"r":"c","s":"assets/94406e4fe59c.webp"},{"w":233,"h":203,"r":"c","s":"assets/c7b6ea592d6b.webp"},{"w":233,"h":203,"r":"c","s":"assets/fdb4509271dc.webp"},{"w":233,"h":203,"r":"c","s":"assets/7759abb50d54.webp"},{"w":233,"h":203,"r":"c","s":"assets/8c2b7375cbde.webp"},{"w":233,"h":203,"r":"u","s":"assets/cb3307131927.webp"},{"w":233,"h":203,"r":"c","s":"assets/ad6520a34ebb.webp"},{"w":233,"h":203,"r":"c","s":"assets/8e3b97b06de3.webp"},{"w":233,"h":203,"r":"c","s":"assets/a98481384f5b.webp"},{"w":233,"h":203,"r":"u","s":"assets/2e0f37ec0483.webp"},{"w":233,"h":203,"r":"u","s":"assets/98270e09c137.webp"},{"w":233,"h":203,"r":"u","s":"assets/efc0a420d2c7.webp"},{"w":233,"h":203,"r":"u","s":"assets/f6f82159a87d.webp"},{"w":233,"h":203,"r":"u","s":"assets/e7424abedb6c.webp"}],"fros":[{"w":355,"h":264,"x":-65.6,"y":-19.2,"back":1,"r":"u","s":"assets/08a2e6c5b0eb.webp"},{"w":226,"h":233,"x":3.6,"y":-28.2,"back":1,"r":"c","s":"assets/dcbdb7697754.webp"},{"w":235,"h":225,"x":0.1,"y":-16.5,"back":0,"r":"c","s":"assets/a4043f5583ee.webp"},{"w":316,"h":245,"x":-41.5,"y":1.5,"back":1,"r":"u","s":"assets/1837d5bd49fb.webp"},{"w":237,"h":214,"x":-2.8,"y":-2.7,"back":0,"r":"u","s":"assets/3b577eb40af9.webp"},{"w":237,"h":214,"x":-2.8,"y":-2.5,"back":0,"r":"r","s":"assets/0503bb9306be.webp"},{"w":239,"h":206,"x":-2.8,"y":-2.4,"back":0,"r":"u","s":"assets/765dc533c1f2.webp"},{"w":15,"h":12,"x":175.1,"y":141.3,"back":0,"r":"c","s":"assets/8101c0c0cdcc.webp"},{"w":424,"h":261,"x":-99.7,"y":-54.5,"back":1,"r":"r","s":"assets/09b6f8ed8e18.webp"},{"w":225,"h":203,"x":9.1,"y":-2.5,"back":0,"r":"r","s":"assets/ecc10051a92f.webp"},{"w":251,"h":213,"x":-6.9,"y":-1.6,"back":0,"r":"c","s":"assets/8baf6478a1f6.webp"},{"w":237,"h":215,"x":-0.9,"y":-2.4,"back":0,"r":"r","s":"assets/f8de4bb944e1.webp"},{"r":"c","w":0,"h":0,"n":1}],"tops":[{"r":"u","w":0,"h":0,"s":"assets/cff5f889824b.webp"},{"r":"c","w":0,"h":0,"s":"assets/7e92c2bae7c6.webp"},{"r":"c","w":0,"h":0,"s":"assets/5b5565b8e37c.webp"},{"r":"u","w":0,"h":0,"s":"assets/a6e106ffdde3.webp"},{"r":"c","w":0,"h":0,"s":"assets/56da8b659695.webp"},{"r":"c","w":0,"h":0,"s":"assets/5489b4ed6b71.webp"},{"r":"c","w":0,"h":0,"s":"assets/7e5e4c61c461.webp"},{"r":"u","w":0,"h":0,"s":"assets/724497572ffa.webp"},{"r":"c","w":0,"h":0,"s":"assets/790b5007365d.webp"},{"r":"c","w":0,"h":0,"s":"assets/d5dd788b0568.webp"},{"r":"u","w":0,"h":0,"s":"assets/91f25480f14f.webp"},{"r":"r","w":0,"h":0,"s":"assets/349092c90ce8.webp"},{"r":"r","w":0,"h":0,"s":"assets/aecebf4d4421.webp"},{"r":"r","w":0,"h":0,"s":"assets/893dbdf171a6.webp"},{"r":"c","w":0,"h":0,"n":1}]};
+LAYERS['☁️'] = {"bw":300,"fbot":0.2,"cover":1,"mask":1,"bases":[{"w":31,"h":230,"r":"c","s":"assets/50aec2f477fc.webp"},{"w":42,"h":230,"r":"c","s":"assets/ac2ba7a6f829.webp"},{"w":50,"h":230,"r":"u","s":"assets/5c5dcaef3e7a.webp"},{"w":38,"h":230,"r":"r","s":"assets/3cbb4d9327d9.webp"},{"w":30,"h":230,"r":"c","s":"assets/121d3b2a4965.webp"},{"w":30,"h":230,"r":"c","s":"assets/9a48aa803d93.webp"},{"w":30,"h":230,"r":"c","s":"assets/2aaccc111620.webp"},{"w":30,"h":230,"r":"c","s":"assets/2fd2a257f254.webp"},{"w":30,"h":230,"r":"u","s":"assets/02663dd660d8.webp"},{"w":63,"h":230,"r":"u","s":"assets/aa8544a90c7d.webp"},{"w":68,"h":230,"r":"u","s":"assets/67a485a42d53.webp"},{"w":34,"h":230,"r":"r","s":"assets/f29115b699b1.webp"},{"w":41,"h":230,"r":"r","s":"assets/f963fe91a398.webp"}],"fros":[{"w":250,"h":260,"r":"c","s":"assets/f6bf176fc117.webp"},{"w":250,"h":260,"r":"c","s":"assets/85323f39a4c8.webp"},{"w":250,"h":260,"r":"c","s":"assets/9156e89aea19.webp"},{"w":250,"h":260,"r":"c","s":"assets/8a6212615c36.webp"},{"w":250,"h":260,"r":"c","s":"assets/0e0083c06eb4.webp"},{"w":250,"h":260,"r":"u","s":"assets/97a6a7e98607.webp"},{"w":250,"h":260,"r":"u","s":"assets/e24e356e90dd.webp"},{"w":250,"h":260,"r":"u","s":"assets/d59800203a10.webp"},{"w":250,"h":260,"r":"u","s":"assets/76e2a314f36d.webp"},{"w":250,"h":260,"r":"u","s":"assets/d265d9c614fe.webp"},{"w":250,"h":260,"r":"r","s":"assets/ff7311156444.webp"},{"w":250,"h":260,"r":"r","s":"assets/6f06935b2488.webp"},{"w":250,"h":260,"r":"r","s":"assets/5bcc0b43c967.webp"},{"w":250,"h":260,"r":"r","s":"assets/0598916df992.webp"},{"w":250,"h":260,"r":"r","s":"assets/6dbd578ab55c.webp"},{"w":250,"h":260,"r":"r","s":"assets/9f77055fdc0b.webp"},{"w":250,"h":260,"r":"c","s":"assets/5857efec42d2.webp"},{"w":250,"h":260,"r":"u","s":"assets/0946c4e9708e.webp"},{"w":250,"h":260,"r":"u","s":"assets/44c2f14d7c16.webp"}],"tops":[{"r":"c","w":250,"h":260,"s":"assets/fbc769cb2686.webp"},{"r":"c","w":250,"h":260,"s":"assets/aa7bd9843fd5.webp"},{"r":"c","w":250,"h":260,"s":"assets/4c74b69c3783.webp"},{"r":"u","w":250,"h":260,"s":"assets/31e8e237c3cc.webp"},{"r":"u","w":250,"h":260,"s":"assets/5137f84b77c4.webp"},{"r":"r","w":250,"h":260,"s":"assets/b812283809d8.webp"},{"r":"c","w":0,"h":0,"n":1}]};
+LAYERS['🌈'] = {"rainbow":1,"bw":300,"bases":[{"w":300,"h":193,"r":"c","s":"assets/3f54cdc3d573.webp","lx":0.169,"rx":0.829},{"w":286,"h":240,"r":"c","s":"assets/4326eb5d7f41.webp","lx":0.158,"rx":0.835},{"w":300,"h":210,"r":"u","s":"assets/947cec633f9d.webp","lx":0.171,"rx":0.822},{"w":295,"h":246,"r":"u","s":"assets/1f5edbca295c.webp","lx":0.184,"rx":0.808},{"w":293,"h":215,"r":"r","s":"assets/7c6e0591f507.webp","lx":0.287,"rx":0.71},{"w":293,"h":193,"r":"u","s":"assets/a0f5ec162f6c.webp","lx":0.169,"rx":0.841}],"fros":[{"w":114,"h":79,"r":"c","s":"assets/7f038685e35b.webp","s2":"assets/0187e95d27fa.webp"},{"w":100,"h":90,"r":"c","s":"assets/471f171f2174.webp","s2":"assets/cfdce7f3498c.webp"},{"w":96,"h":94,"r":"u","s":"assets/453e4a1f58ca.webp","s2":"assets/285a2c1817b7.webp"},{"w":112,"h":81,"r":"c","s":"assets/9b749ef75c49.webp","s2":"assets/604438e3e920.webp"},{"w":104,"h":87,"r":"u","s":"assets/44f89423bb1a.webp","s2":"assets/97d6510b8569.webp"},{"w":105,"h":86,"r":"c","s":"assets/8759f745f3a5.webp","s2":"assets/1ddfa397bb6e.webp"},{"w":98,"h":92,"r":"u","s":"assets/6c125d2dad3a.webp","s2":"assets/8c91f9899403.webp"},{"w":84,"h":108,"r":"r","s":"assets/23586a2bb2a9.webp","s2":"assets/91b140f91990.webp"},{"w":78,"h":115,"r":"r","s":"assets/727d5e0f8cfb.webp","s2":"assets/1d729ba5a9a1.webp"},{"w":88,"h":103,"r":"r","s":"assets/7a7590ea4181.webp","s2":"assets/abe733384439.webp"},{"r":"c","w":0,"h":0,"n":1}],"tops":[{"r":"u","w":300,"h":193,"s":"assets/486f04ee4e4b.webp"},{"r":"u","w":300,"h":193,"s":"assets/e924ceae917e.webp"},{"r":"c","w":300,"h":193,"s":"assets/90aa271c59fd.webp"},{"r":"c","w":300,"h":193,"s":"assets/9c0965b2cfbd.webp"},{"r":"c","w":300,"h":193,"s":"assets/76bd691b3071.webp"},{"r":"u","w":300,"h":193,"s":"assets/1deee7249342.webp"},{"r":"c","w":0,"h":0,"n":1}]};
+LAYERS['🍬'] = {"wrap":1,"bw":300,"ov":12,"rot":-30,"bases":[{"w":151,"h":149,"r":"c","s":"assets/5713d4df22ec.webp"},{"w":151,"h":149,"r":"c","s":"assets/a73b1832c281.webp"},{"w":180,"h":125,"r":"c","s":"assets/904fabdf8a7f.webp"},{"w":180,"h":125,"r":"c","s":"assets/52a28c697020.webp"},{"w":180,"h":125,"r":"c","s":"assets/70f597d33aef.webp"},{"w":152,"h":148,"r":"u","s":"assets/19f1086fa275.webp"},{"w":151,"h":149,"r":"c","s":"assets/ce512efb326a.webp"},{"w":151,"h":149,"r":"u","s":"assets/954c92dc4963.webp"},{"w":151,"h":149,"r":"r","s":"assets/9781b3d51dfe.webp"},{"w":151,"h":149,"r":"r","s":"assets/b051d0d8de08.webp"},{"w":177,"h":127,"r":"c","s":"assets/581e5de4499b.webp"},{"w":130,"h":173,"r":"u","s":"assets/e226c182a821.webp"},{"w":151,"h":149,"r":"u","s":"assets/b2c4a2b6bab1.webp"},{"w":131,"h":171,"r":"c","s":"assets/18aab3141783.webp"},{"w":178,"h":126,"r":"u","s":"assets/01c6bb702e3d.webp"},{"w":178,"h":127,"r":"c","s":"assets/1a740328e1b2.webp"}],"fros":[{"w":94,"h":100,"r":"c","s":"assets/de8428330037.webp","s2":"assets/e068aa647e22.webp"},{"w":91,"h":100,"r":"c","s":"assets/0dd65c26394d.webp","s2":"assets/6bf22dd15dfc.webp"},{"w":89,"h":100,"r":"c","s":"assets/ea1dc4f91db5.webp","s2":"assets/dc0e6dfeac20.webp"},{"w":87,"h":100,"r":"u","s":"assets/0345c43f6c5a.webp","s2":"assets/7204ff013b0f.webp"},{"w":87,"h":100,"r":"c","s":"assets/0b9683c5b90d.webp","s2":"assets/937779ab95ab.webp"},{"w":87,"h":100,"r":"c","s":"assets/5defee220676.webp","s2":"assets/7f39a3d23025.webp"},{"w":87,"h":100,"r":"u","s":"assets/a4ff3c9f5e4a.webp","s2":"assets/7d9df9777de1.webp"},{"w":87,"h":100,"r":"r","s":"assets/e0fe251986a1.webp","s2":"assets/33309c47a471.webp"}],"tops":[{"r":"c","w":0,"h":0,"n":1}]};
+LAYERS['🦄'] = {"uni":1,"bw":300,"bases":[{"w":271,"h":390,"r":"c","s":"assets/407db8f63080.webp"},{"w":271,"h":390,"r":"c","s":"assets/37792d3c1940.webp"},{"w":271,"h":390,"r":"u","s":"assets/9b602a8df9b7.webp"},{"w":271,"h":390,"r":"c","s":"assets/5b614c48b0be.webp"},{"w":271,"h":390,"r":"c","s":"assets/6ff3ff64d1d7.webp"},{"w":271,"h":390,"r":"c","s":"assets/300bf1598084.webp"},{"w":271,"h":390,"r":"c","s":"assets/f4709f88d204.webp"},{"w":271,"h":390,"r":"c","s":"assets/3a8fa6b772c3.webp"},{"w":271,"h":390,"r":"r","s":"assets/565f68a44147.webp"}],"fros":[{"w":271,"h":390,"r":"c","s":"assets/4ea252c8e568.webp"},{"w":271,"h":390,"r":"c","s":"assets/445a96cbca67.webp"},{"w":271,"h":390,"r":"u","s":"assets/656dc8dd56a8.webp"},{"w":271,"h":390,"r":"c","s":"assets/a32cd4b7cfd2.webp"},{"w":271,"h":390,"r":"c","s":"assets/79a26f9c4b21.webp"},{"w":271,"h":390,"r":"c","s":"assets/209b62302607.webp"},{"w":271,"h":390,"r":"c","s":"assets/6d60dcd97102.webp"},{"w":271,"h":390,"r":"c","s":"assets/d76c807533cb.webp"},{"w":271,"h":390,"r":"u","s":"assets/7dbc62938f3b.webp"},{"w":271,"h":390,"r":"u","s":"assets/b2ab4c5c21ec.webp"},{"w":271,"h":390,"r":"u","s":"assets/31b2fe585f0d.webp"},{"w":271,"h":390,"r":"r","s":"assets/d7fa106e0433.webp"}],"tops":[{"r":"c","w":271,"h":390,"s":"assets/ab594bc48dd6.webp"},{"r":"c","w":271,"h":390,"s":"assets/1c25c81db185.webp"},{"r":"u","w":271,"h":390,"s":"assets/45194365c15a.webp"},{"r":"c","w":271,"h":390,"s":"assets/cd1d120b3586.webp"},{"r":"c","w":271,"h":390,"s":"assets/76ab58f7d9ab.webp"},{"r":"c","w":271,"h":390,"s":"assets/caf73bf842bf.webp"},{"r":"u","w":271,"h":390,"s":"assets/ef0fdd5f9dc6.webp"},{"r":"c","w":271,"h":390,"s":"assets/ecd37799245d.webp"},{"r":"c","w":271,"h":390,"s":"assets/2b3bc16f0323.webp"},{"r":"c","w":271,"h":390,"s":"assets/162aeb076e7e.webp"},{"r":"u","w":271,"h":390,"s":"assets/768d3b1b1c83.webp"},{"r":"u","w":271,"h":390,"s":"assets/e22a70748c11.webp"},{"r":"c","w":271,"h":390,"s":"assets/e171148a2f80.webp"},{"r":"u","w":271,"h":390,"s":"assets/be427b565935.webp"},{"r":"u","w":271,"h":390,"s":"assets/47f5f8d4316e.webp"},{"r":"r","w":271,"h":390,"s":"assets/d7c9e805dc37.webp"}]};
+const LAYER_DEFAULT = {'🧁':'0.0.0','🍩':'0.0.0','🍨':'0.0.0','🍭':'0.0.0','🧋':'0.0.0','🎀':'0.0.0','🍦':'0.0.0','🍓':'0.0.0','🩷':'0.12.14','☁️':'0.0.0','🌈':'0.10.6','🍬':'0.0.0','🦄':'0.0.0'};   // the fixed look old rewards get when the game first upgrades them
 // "no topping" is a valid choice for every kind: the last entry of each kind's toppings
 for(const k in LAYERS){ const L=LAYERS[k]; if(!L.tops.some(t=>t.n)) L.tops.push({r:'c',n:1,w:0,h:0}); }
 const kOf = x => String(x).split(/[:#]/)[0];
@@ -928,11 +940,49 @@ function layerBoxes(kind, combo){
     const P=(x,y,w,h)=>`left:${(((x-cx)*k+.5)*100).toFixed(2)}%;top:${((y*k+.97)*100).toFixed(2)}%;width:${(w*k*100).toFixed(2)}%;height:${(h*k*100).toFixed(2)}%`;
     return layoutCache[key] = [[B.s,P(bx,by,B.w,B.h)],...(T.n?[]:[[T.s,P(bx,by,B.w,B.h)]]),[F.s,P(lx,ly,F.w,F.h)]];
   }
+  if(L.uni){   // a unicorn: the head, the mane over it and the horn on top; all pictures share one canvas
+    const k=0.94/Math.max(B.w,B.h), w=B.w*k*100, h=B.h*k*100, st=`left:${((1-B.w*k)*50).toFixed(2)}%;top:${((1-B.h*k)*50).toFixed(2)}%;width:${w.toFixed(2)}%;height:${h.toFixed(2)}%`;
+    return layoutCache[key] = [[B.s,st],[F.s,st],...(T.n?[]:[[T.s,st]])];
+  }
+  if(L.wrap){   // a candy body with the wrapper's two twisted ends behind its left and right edges (left picture, right picture); the whole candy is turned by L.rot degrees
+    const bw=B.w, bh=B.h, th=L.rot*Math.PI/180, co=Math.cos(th), si=Math.sin(th);
+    const raw=[[F.s,L.ov-F.w,(bh-F.h)/2,F.w,F.h],[F.s2,bw-L.ov,(bh-F.h)/2,F.w,F.h],[B.s,0,0,bw,bh]];
+    const items=raw.map(([src,x,y,w,h])=>{ const dx=x+w/2-bw/2, dy=y+h/2-bh/2; return {src,w,h,cx:dx*co-dy*si,cy:dx*si+dy*co,hx:Math.abs(w/2*co)+Math.abs(h/2*si),hy:Math.abs(w/2*si)+Math.abs(h/2*co)}; });
+    const x0=Math.min(...items.map(i=>i.cx-i.hx)), x1=Math.max(...items.map(i=>i.cx+i.hx)), y0=Math.min(...items.map(i=>i.cy-i.hy)), y1=Math.max(...items.map(i=>i.cy+i.hy)), k=0.94/Math.max(x1-x0,y1-y0), mx=(x0+x1)/2, my=(y0+y1)/2;
+    return layoutCache[key] = items.map(i=>[i.src,`left:${(((i.cx-mx-i.w/2)*k+.5)*100).toFixed(2)}%;top:${(((i.cy-my-i.h/2)*k+.5)*100).toFixed(2)}%;width:${(i.w*k*100).toFixed(2)}%;height:${(i.h*k*100).toFixed(2)}%;transform:rotate(${L.rot}deg)`]);
+  }
+  if(L.rainbow){   // a rainbow shape, a pattern clipped to it (CSS mask), and the same item standing at both ends (the left picture at the left foot, the right picture at the right foot)
+    const bw=B.w, bh=B.h, pat=T.n?null:T, it=F.n?null:F;
+    const items=[[B.s,0,0,bw,bh,'']]; if(pat) items.push([pat.s,0,0,bw,bh,`;-webkit-mask:url(${B.s}) center/100% 100% no-repeat;mask:url(${B.s}) center/100% 100% no-repeat`]);
+    if(it){ items.push([it.s,B.lx*bw-it.w/2,bh-it.h,it.w,it.h,'']); items.push([it.s2,B.rx*bw-it.w/2,bh-it.h,it.w,it.h,'']); }
+    const x0=Math.min(...items.map(i=>i[1])), x1=Math.max(...items.map(i=>i[1]+i[3])), y0=Math.min(...items.map(i=>i[2])), y1=Math.max(...items.map(i=>i[2]+i[4])), k=0.94/Math.max(x1-x0,y1-y0), cx=(x0+x1)/2, cy=(y0+y1)/2;
+    const P=(x,y,w,h)=>`left:${(((x-cx)*k+.5)*100).toFixed(2)}%;top:${(((y-cy)*k+.5)*100).toFixed(2)}%;width:${(w*k*100).toFixed(2)}%;height:${(h*k*100).toFixed(2)}%`;
+    return layoutCache[key] = items.map(i=>[i[0],P(i[1],i[2],i[3],i[4])+i[5]]);
+  }
+  if(L.heart){   // a colored heart, a pattern clipped to it (CSS mask), and a frame decoration placed relative to the heart, behind it (wings, halo, laurel) or in front
+    const hw=B.w, hh=B.h, fr=F.n?null:F, pat=T.n?null:T;
+    const items=[]; if(fr&&fr.back) items.push([fr.s,fr.x,fr.y,fr.w,fr.h,'']);
+    items.push([B.s,0,0,hw,hh,'']); if(pat) items.push([pat.s,0,0,hw,hh,`;-webkit-mask:url(${B.s}) center/100% 100% no-repeat;mask:url(${B.s}) center/100% 100% no-repeat`]);
+    if(fr&&!fr.back) items.push([fr.s,fr.x,fr.y,fr.w,fr.h,'']);
+    const x0=Math.min(...items.map(i=>i[1])), x1=Math.max(...items.map(i=>i[1]+i[3])), y0=Math.min(...items.map(i=>i[2])), y1=Math.max(...items.map(i=>i[2]+i[4])), k=0.94/Math.max(x1-x0,y1-y0), cx=(x0+x1)/2, cy=(y0+y1)/2;
+    const P=(x,y,w,h)=>`left:${(((x-cx)*k+.5)*100).toFixed(2)}%;top:${(((y-cy)*k+.5)*100).toFixed(2)}%;width:${(w*k*100).toFixed(2)}%;height:${(h*k*100).toFixed(2)}%`;
+    return layoutCache[key] = items.map(i=>[i[0],P(i[1],i[2],i[3],i[4])+i[5]]);
+  }
+  if(L.fruit){   // a fruit, its shine layer (clipped to the fruit by a CSS mask), and the leaves on top, attached near the fruit's top
+    const bx=-B.w/2, by=-B.h, lx=-F.w/2, ly=by+B.ty*B.h-F.ay;
+    const x0=Math.min(bx,lx), x1=Math.max(bx+B.w,lx+F.w), y0=Math.min(by,ly), y1=Math.max(0,ly+F.h), k=0.94/Math.max(x1-x0,y1-y0), cx=(x0+x1)/2, cy=(y0+y1)/2;
+    const P=(x,y,w,h)=>`left:${(((x-cx)*k+.5)*100).toFixed(2)}%;top:${(((y-cy)*k+.5)*100).toFixed(2)}%;width:${(w*k*100).toFixed(2)}%;height:${(h*k*100).toFixed(2)}%`;
+    return layoutCache[key] = [[B.s,P(bx,by,B.w,B.h)],...(T.n?[]:[[T.s,P(bx,by,B.w,B.h)+`;-webkit-mask:url(${B.s}) center/100% 100% no-repeat;mask:url(${B.s}) center/100% 100% no-repeat`]]),[F.s,P(lx,ly,F.w,F.h)]];
+  }
+  if(L.flat){   // a flat picture (ribbon): the colored bow and its pattern share one box, centred
+    const k=0.94/Math.max(B.w,B.h), w=B.w*k*100, h=B.h*k*100, st=`left:${((100-w)/2).toFixed(2)}%;top:${((100-h)/2).toFixed(2)}%;width:${w.toFixed(2)}%;height:${h.toFixed(2)}%`;
+    return layoutCache[key] = [[B.s,st],...(T.n?[]:[[T.s,st]])];
+  }
   if(L.cover){   // topping drawn over the top layer's own shape (same box as the scoops)
     const by=-B.h, fy=by+L.fbot*B.h-F.h, fx=-F.w/2, bx=-B.w/2;
     const x0=Math.min(bx,fx), x1=Math.max(bx+B.w,fx+F.w), y0=Math.min(by,fy), k=0.94/Math.max(x1-x0,-y0), cx=(x0+x1)/2;
     const P=(x,y,w,h)=>`left:${(((x-cx)*k+.5)*100).toFixed(2)}%;top:${((y*k+.97)*100).toFixed(2)}%;width:${(w*k*100).toFixed(2)}%;height:${(h*k*100).toFixed(2)}%`;
-    return layoutCache[key] = [[B.s,P(bx,by,B.w,B.h)],[F.s,P(fx,fy,F.w,F.h)],...(T.n?[]:[[F.c[t],P(fx,fy,F.w,F.h)]])];
+    return layoutCache[key] = [[B.s,P(bx,by,B.w,B.h)],[F.s,P(fx,fy,F.w,F.h)],...(T.n?[]:[L.mask?[T.s,P(fx,fy,F.w,F.h)+`;-webkit-mask:url(${F.s}) center/100% 100% no-repeat;mask:url(${F.s}) center/100% 100% no-repeat`]:[F.c[t],P(fx,fy,F.w,F.h)]])];
   }
   if(L.ring){   // round reward: dough, glaze and a topping field clipped to the glaze, all centred on the dough
     const bx=-B.w/2, by=-B.h/2, fx=bx+L.ox, fy=by+L.oy;
@@ -1036,6 +1086,7 @@ const THEME_ITEMS = {
     '🎀':{s:'מצפן אור כוכבים',       p:'מצפני אור כוכבים',       u:'מקרן מפות הולוגרפי'},
     '🍬':{s:'גאודת מנסרה חייזרית',   p:'גאודות מנסרה חייזריות',  u:'אבן מנסרה על-ממדית'},
     '🍨':{s:'דיסק ריחוף',            p:'דיסקי ריחוף',            u:'פלטפורמת קרב משוריינת'},
+    '☁️':{s:'ענן אנרגיה',           p:'עננים של אנרגיה',        u:'סופת אנרגיה קוסמית'},
     '🩷':{s:'מערך סולארי',           p:'מערכים סולאריים',        u:'פאנל סולארי מסלולי ענק'},
     '✨':{s:'מודול קסדת רובוט',      p:'מודולי קסדת רובוט',      u:'קסדת גיבור סייברנטית'},
     '🍭':{s:'מודול בלסטר לייזר',     p:'מודולי בלסטר לייזר',     u:'משגר טילי פלזמה כבד'},
@@ -1096,12 +1147,12 @@ let diffOn = [1,2,3];     // enabled difficulty levels for the active profile (s
 function captureProgress(){ return {score,streak,collection,lollipops,level,golden,looks,activeLook,lookSrc,lookGold,rv:LAYER_V,diff:diffIdsClean(diffOn),mx:mxClean(mxState),focus:focusOn,warm:warmOn,theme:themeId}; }
 function cleanLookSrc(o, lk){
   const r = {}; if(!o || typeof o!=='object') return r;
-  Object.keys(o).forEach(k=>{ const i=Number(k); if(Number.isInteger(i) && lk.includes(i) && typeof o[k]==='string' && (o[k]==='cotton' || STICKERS.includes(o[k]))) r[i]=o[k]; });
+  Object.keys(o).forEach(k=>{ const i=Number(k); if(Number.isInteger(i) && lk.includes(i) && typeof o[k]==='string' && (o[k]==='🍒'?(o[k]='🍓'):o[k]==='cotton'?(o[k]='☁️'):1) && STICKERS.includes(o[k])) r[i]=o[k]; });
   return r;
 }
 function cleanLookGold(o, lk){   // the 10 upgraded items that paid for each look, so un-merging a look gives the same ones back
   const r = {}; if(!o || typeof o!=='object') return r;
-  Object.keys(o).forEach(k=>{ const i=Number(k); if(Number.isInteger(i) && lk.includes(i) && Array.isArray(o[k]) && o[k].length===MERGE_COST && o[k].every(g=>typeof g==='string' && (g==='cotton' || STICKERS.includes(kOf(g))))) r[i]=o[k].map(g=>{ const k2=kOf(g); if(!LAYERS[k2]) return g; const cs=goldCombos(g); return cs.length===MERGE_COST ? k2+'#'+cs.join(',') : k2; }); });
+  Object.keys(o).forEach(k=>{ const i=Number(k); if(Number.isInteger(i) && lk.includes(i) && Array.isArray(o[k]) && o[k].length===MERGE_COST && (o[k]=o[k].map(g=>g==='🍒'?'🍓':g==='cotton'?'☁️':g)).every(g=>typeof g==='string' && STICKERS.includes(kOf(g)))) r[i]=o[k].map(g=>{ if(g==='🍒') g='🍓'; const k2=kOf(g); if(!LAYERS[k2]) return g; const cs=goldCombos(g); return cs.length===MERGE_COST ? k2+'#'+cs.join(',') : k2; }); });
   return r;
 }
 function cleanProgress(d){
@@ -1110,6 +1161,12 @@ function cleanProgress(d){
   let gold = Array.isArray(d.golden) ? d.golden.filter(x=>typeof x==='string') : [];
   // the swirl 🍥 was replaced by the lollipop 🍭: carry old saves over
   col = col.map(x=>x==='🍥'?'🍭':x); gold = gold.map(x=>x==='🍥'?'🍭':x);
+  // the cherries 🍒 were folded into the new strawberry 🍓 (a fruit with many looks): old and upgraded cherries become strawberries
+  col = col.map(x=>x==='🍒'?'🍓':x); gold = gold.map(x=>x==='🍒'?'🍓':x);
+  // the special bonus cotton candy ("שערות סבתא") became a regular reward, the modular cotton candy ☁️: old bonus ones and upgraded ones carry over
+  const nCot = (Array.isArray(d.lollipops) ? d.lollipops.filter(x=>typeof x==='number' && isFinite(x)).length : 0);
+  col = col.map(x=>x==='cotton'?'☁️':x); gold = gold.map(x=>x==='cotton'?'☁️':x);
+  for(let i=0;i<nCot;i++) col.push('☁️');
   // layered kinds: an old single-picture item gets the same fixed parts every time (LAYER_DEFAULT); broken ones are fixed the same way
   col = col.map((x,i)=>{ const k=kOf(x); if(!LAYERS[k]) return x; if(comboOfItem(x)) return k+':'+comboOfItem(x); return k+':'+LAYER_DEFAULT[k]; });
   gold = gold.map(g=>{ const k=kOf(g); if(!LAYERS[k]) return g; const cs=goldCombos(g); return cs.length===MERGE_COST ? k+'#'+cs.join(',') : k; });
@@ -1118,7 +1175,7 @@ function cleanProgress(d){
     score:  (typeof d.score==='number' && isFinite(d.score)) ? d.score : 0,
     streak: (typeof d.streak==='number' && isFinite(d.streak)) ? d.streak : 0,
     collection: col,
-    lollipops: Array.isArray(d.lollipops) ? d.lollipops.filter(x=>typeof x==='number' && isFinite(x)) : [],
+    lollipops: [],
     level: (typeof d.level==='number' && d.level>=1 && d.level<=8) ? d.level : 1,
     golden: gold,
     looks: lk,
@@ -1797,7 +1854,7 @@ function cloudProfileFromDoc(C, helpers){
 // ===== CLOUD (Google sign-in, cloud progress, problem reports) =====
 // Local-first: the game always works from this device's storage. The cloud is a mirror, so no internet / no account / no quota never blocks play.
 // Everything here is off while CLOUD_CONFIG is null. See firebase/SETUP.md for how to create the (free) Firebase project and paste its settings below.
-const APP_VERSION = '2026.11.02f';       // keep equal to VERSION in sw.js (a test checks it)
+const APP_VERSION = '2026.11.04b';       // keep equal to VERSION in sw.js (a test checks it)
 const CLOUD_CONFIG = {apiKey:"AIzaSyAlq_TJNGvWPJpUrpbdq_hkAoURydqMzm0", authDomain:"learning-quest-1.firebaseapp.com", projectId:"learning-quest-1", appId:"1:98931179722:web:78fb00084ccba3efb53433"};   // e.g. {apiKey:'...', authDomain:'xxx.firebaseapp.com', projectId:'xxx', appId:'...'}
 const CLOUD_LIMITS = {
   pushDelayMs: 60000,          // at most one upload per profile per minute while playing
@@ -2268,15 +2325,15 @@ function guideHTML(){
 function openGuide(){ openPanel('guide'); }
 
 // ===== TOP-RIGHT MENU =====
-const PANEL_TITLES = {profiles:'ניהול פרופילים', progress:'התקדמות', settings:'הגדרות', backup:'גיבוי ושחזור', report:'דיווח על בעיה', guide:'מדריך להורים'};
-const PANEL_NAV = {profiles:'פרופילים', progress:'התקדמות', settings:'הגדרות', backup:'גיבוי ושחזור', report:'דיווח על בעיה', guide:'מדריך להורים'};
-const PANEL_SHORT = {profiles:'פרופילים', progress:'התקדמות', settings:'הגדרות', backup:'גיבוי', report:'דיווח', guide:'מדריך'};
-const PANEL_ICON = {profiles:'👥', progress:'📊', settings:'⚙️', backup:'💾', report:'🐞', guide:'📖'};
+const PANEL_TITLES = {debug:'דיבאג', profiles:'ניהול פרופילים', progress:'התקדמות', settings:'הגדרות', backup:'גיבוי ושחזור', report:'דיווח על בעיה', guide:'מדריך להורים'};
+const PANEL_NAV = {profiles:'פרופילים', progress:'התקדמות', settings:'הגדרות', backup:'גיבוי ושחזור', report:'דיווח על בעיה', guide:'מדריך להורים', debug:'דיבאג'};
+const PANEL_SHORT = {profiles:'פרופילים', progress:'התקדמות', settings:'הגדרות', backup:'גיבוי', report:'דיווח', guide:'מדריך', debug:'דיבאג'};
+const PANEL_ICON = {profiles:'👥', progress:'📊', settings:'⚙️', backup:'💾', report:'🐞', guide:'📖', debug:'🛠️'};
 function openPanel(tab){
   closeMenu();
   profTab = PANEL_TITLES[tab] ? tab : 'profiles';
   profMode = {view:'list', editId:null, first:false, confirmDel:null, error:''};
-  statsViewId = store.activeId; bk = bkFresh();
+  statsViewId = store.activeId; bk = bkFresh(); dbg.ok = false; dbg.bad = false; dbg.msg = '';
   document.getElementById('profOverlay').hidden = false; renderProfiles();
 }
 function closeMenu(){
@@ -4512,17 +4569,17 @@ function renderLevels(){
 }
 
 let lastRewardCount = -1;
-const baseCount = k => k==='cotton' ? lollipops.length : collection.filter(x=>kOf(x)===k).length;
+const baseCount = k => collection.filter(x=>kOf(x)===k).length;
 const goldenCount = k => golden.filter(x=>kOf(x)===k).length;
 function removeBase(k,n){   // returns the items taken out
-  const out=[]; if(k==='cotton'){ lollipops.splice(0,n); return out; }
+  const out=[];
   collection = collection.filter(x=>{ if(out.length<n && kOf(x)===k){ out.push(x); return false; } return true; }); return out;
 }
 function removeGolden(k,n,exact){   // returns the upgraded items taken out (the exact one first, when given)
   const out=[]; if(exact!=null){ const i=golden.indexOf(exact); if(i>=0){ out.push(golden[i]); golden.splice(i,1); } }
   golden = golden.filter(x=>{ if(out.length<n && kOf(x)===k){ out.push(x); return false; } return true; }); return out;
 }
-function allKinds(){ return [...new Set([...STICKERS, ...collection.map(kOf), 'cotton'])]; }
+function allKinds(){ return [...new Set([...STICKERS, ...collection.map(kOf)])]; }
 function readyList(){
   const r=[];
   allKinds().forEach(k=>{ const n=Math.floor(baseCount(k)/MERGE_COST); if(n) r.push({type:'merge',kind:k,n}); });
@@ -4543,7 +4600,7 @@ function itemHTML(item, isGold, px){
   return `<span style="font-size:${Math.round(px*0.85)}px;line-height:1">${kind}</span>`;
 }
 function renderRewards(){
-  const total = collection.length + lollipops.length + golden.length;
+  const total = collection.length + golden.length;
   document.getElementById('rsTotal').textContent = total;
   const recent = document.getElementById('rsRecent');
   const counts = {}; collection.forEach(x=>{ const k=kOf(x); counts[k]=(counts[k]||0)+1; });
@@ -4551,9 +4608,6 @@ function renderRewards(){
   const fresh = lastRewardCount>=0 && collection.length>lastRewardCount;
   recent.innerHTML = types.length ? types.map((x,i)=>`<span class="rs-item ${fresh&&i===0?'new':''}"><span class="e">${rewardGlyph(x,26)}</span><b>×${counts[kOf(x)]}</b></span>`).join('') : `<span class="rs-empty">${TX('emptyStrip','עוד אין מתנות 🎀')}</span>`;
   lastRewardCount = collection.length;
-  const cot = document.getElementById('rsCotton');
-  if(lollipops.length){ cot.style.display='flex'; document.getElementById('rsCottonImg').src=rewardImg('cotton',false); document.getElementById('rsCottonImg').alt=rewardName('cotton','one')||'שערות סבתא'; document.getElementById('rsCottonN').textContent='×'+lollipops.length; }
-  else cot.style.display='none';
   const g = document.getElementById('rsGold');
   if(golden.length){ g.style.display='flex'; document.getElementById('rsGoldN').textContent='×'+golden.length; } else g.style.display='none';
   const ready = readyList().reduce((a,x)=>a+x.n,0);
@@ -4563,7 +4617,7 @@ function renderRewards(){
 }
 function renderRoom(){
   const body = document.getElementById('roomBody');
-  if(!collection.length && !lollipops.length && !golden.length){ body.innerHTML=`<div class="roomempty">${TX('roomEmpty', ()=>`עוד אין מתנות. ${G('פתרי','פתור','פתרו')} שאלה כדי לקבל את הראשונה! 🎀`)}</div>`; return; }
+  if(!collection.length && !golden.length){ body.innerHTML=`<div class="roomempty">${TX('roomEmpty', ()=>`עוד אין מתנות. ${G('פתרי','פתור','פתרו')} שאלה כדי לקבל את הראשונה! 🎀`)}</div>`; return; }
   const rank = x=>{ const i=STICKERS.indexOf(kOf(x)); return i<0?999:i; };
   let h = '';
   const ready = readyList();
@@ -4583,15 +4637,12 @@ function renderRoom(){
     h += `<div class="roomhint">עוד לא נפתחו לוקים. כל ${MERGE_COST} ${TX('upUnits','פריטים משודרגים')} מאותו סוג פותחים לוק חדש!</div>`;
   }
   if(golden.length){
-    const gs = golden.slice().sort((p,q)=>(p==='cotton'?-1:rank(p))-(q==='cotton'?-1:rank(q)));
+    const gs = golden.slice().sort((p,q)=>rank(p)-rank(q));
     h += `<div class="roomsec">${TX('upSec','פריטים משודרגים')} · ${gs.length}</div><div class="roomhint">${TX('upHint', ()=>`${G('לחצי','לחץ','לחצו')} על פריט משודרג כדי לפרק אותו בחזרה ל-${MERGE_COST} מתנות רגילות.`)}</div><div class="roomgrid">` + gs.map(k=>`<div class="ritem gold" data-act="ungold" data-kind="${kOf(k)}" data-g="${k}" role="button">${itemHTML(k,true,40)}</div>`).join('') + '</div>';
   }
-  if(lollipops.length){
-    h += `<div class="roomsec">${rewardName('cotton','many')||'שערות סבתא'} (פרסי בונוס) · ${lollipops.length}</div><div class="roomgrid">` + lollipops.map(()=>`<div class="ritem"><img class="cot" src="${rewardImg('cotton',false)}" alt="${esc(rewardName('cotton','one')||'שערות סבתא')}"></div>`).join('') + '</div>';
-  }
   if(collection.length){
-    const sorted = collection.slice().sort((p,q)=>rank(p)-rank(q));
-    h += `<div class="roomsec">${TX('baseSec','מתנות קסומות')} · ${sorted.length}</div><div class="roomgrid">` + sorted.map(x=>`<div class="ritem" title="${esc(rewardName(x,'one')||'')}"><span class="remoji">${rewardGlyph(x,38)}</span></div>`).join('') + '</div>';
+    const sorted = collection.map((x,i)=>[x,i]).reverse();   // newest first: the order they were received
+    h += `<div class="roomsec">${TX('baseSec','מתנות קסומות')} · ${sorted.length}</div><div class="roomgrid">` + sorted.map(([x,i])=>`<div class="ritem tap" data-act="view" data-i="${i}" role="button" title="${esc(rewardName(x,'one')||'')}"><span class="remoji">${rewardGlyph(x,38)}</span></div>`).join('') + '</div>';
   }
   body.innerHTML = h;
 }
@@ -4600,7 +4651,7 @@ function closeRoom(){ document.getElementById('roomOverlay').hidden=true; }
 
 // ---- celebrations & merging ----
 let celebQueue = [], celebOpen = false;
-const kindName = k => rewardName(k,'many') || (k==='cotton' ? 'שערות סבתא' : k);
+const kindName = k => rewardName(k,'many') || k;
 function queueCeleb(ev){ if(!celebQueue.some(x=>x.type===ev.type && x.kind===ev.kind)) celebQueue.push(ev); }
 function flushCelebs(){
   if(celebOpen) return;
@@ -4609,6 +4660,13 @@ function flushCelebs(){
     if(ev.type==='merge' && baseCount(ev.kind)>=MERGE_COST){ showReadyCeleb(ev.kind); return; }
     if(ev.type==='look' && goldenCount(ev.kind)>=MERGE_COST && looks.length<LOOKS.length){ showLookReady(ev.kind); return; }
   }
+}
+// tap a reward in the gift room: it opens as a large picture
+function viewReward(i){
+  const it = collection[i]; if(it==null) return;
+  const px = Math.min(320, Math.round(Math.min(innerWidth,innerHeight)*0.7));
+  const nm = rewardName(it,'one');
+  showCeleb(`<div class="cbig view" style="min-height:${px}px"><span id="viewPic">${itemHTML(it,false,px)}</span></div>${nm?`<div class="ctitle">${esc(nm)}</div>`:''}`, [{label:'סגירה', fn:closeCeleb}]);
 }
 function showCeleb(bodyHTML, buttons){
   celebOpen = true;
@@ -4677,8 +4735,7 @@ function goldItems(kind, g){
 function doUnmergeGold(kind, g){
   if(goldenCount(kind)<1){ closeCeleb(); return; }
   const gone = removeGolden(kind, 1, g); const items = goldItems(kind, gone[0]);
-  if(kind==='cotton'){ for(let i=0;i<MERGE_COST;i++) lollipops.push(1); }
-  else { collection.unshift(...items); if(lastRewardCount>=0) lastRewardCount += MERGE_COST; }
+  { collection.unshift(...items); if(lastRewardCount>=0) lastRewardCount += MERGE_COST; }
   saveState(); renderRewards();
   showCeleb(`<div class="cmerge">${smallItems(kind,false,items)}</div><div class="ctitle">הפריט פורק</div><div class="csub">חזרו ${MERGE_COST} ${TX('baseUnits','מתנות רגילות')} ${TX('toRoom','לחדר המתנות')}.</div>`, [{label:'סגירה', fn:closeCeleb}]);
 }
@@ -4694,7 +4751,7 @@ function askUnmergeLook(i){
   // an older look: the game did not record which items paid for it, so the player picks the kind to get back
   let pick = null;
   showCeleb(head + `<div class="csub">איזה סוג של ${TX('upUnits','פריטים משודרגים')} להחזיר? (${MERGE_COST} פריטים)</div><div class="kgrid">` +
-    [...STICKERS,'cotton'].map(k=>`<button type="button" class="kpick" data-k="${k}">${itemHTML(k,true,30)}</button>`).join('') + '</div>',
+    STICKERS.map(k=>`<button type="button" class="kpick" data-k="${k}">${itemHTML(k,true,30)}</button>`).join('') + '</div>',
     [{label:'פירוק', fn:()=>{ if(!pick){ document.getElementById('celebBody').classList.add('need'); return; } doUnmergeLook(i,pick); }}, {label:'ביטול', ghost:true, fn:closeCeleb}]);
   document.querySelectorAll('#celebBody .kpick').forEach(b=>b.onclick=()=>{
     pick = b.dataset.k; document.getElementById('celebBody').classList.remove('need');
@@ -4895,12 +4952,12 @@ function checkAnswer(val, btnEl, grid){
     const skipBtn = document.getElementById('bonusSkipBtn');
     if(skipBtn) skipBtn.style.display='none';
     if(ok){
-      lollipops.push(1);
-      if(lollipops.length%MERGE_COST===0) queueCeleb({type:'merge',kind:'cotton'});
-      renderLolli();
+      const got=[newItem(STICKERS[ri(0,STICKERS.length-1)]), newItem(STICKERS[ri(0,STICKERS.length-1)])];   // a bonus question is worth two regular rewards
+      got.forEach(it=>{ collection.push(it); if(baseCount(kOf(it))%MERGE_COST===0) queueCeleb({type:'merge',kind:kOf(it)}); });
+      renderStickerbook(); renderRewards();
       burstConfetti(20);
-      peekMascot(`<img src="${rewardImg('cotton',false)}" alt="" style="width:46px;height:auto">`);
-      fb.innerHTML = `וואו${childName()?', '+esc(childName()):''}! ${G('זכית','זכית','זכיתם')} ב${rewardName('cotton','one')||'שערות סבתא'}! <img src="${rewardImg('cotton',false)}" alt="${esc(rewardName('cotton','one')||'שערות סבתא')}" class="inline-cotton"> 🎉`;
+      peekMascot(got.map(it=>rewardGlyph(it,40)).join(''));
+      fb.innerHTML = `וואו${childName()?', '+esc(childName()):''}! ${G('זכית','זכית','זכיתם')} ב-2 מתנות: ` + got.map(it=>{ const n=rewardName(it,'one'); return (n?esc(n)+' ':'')+rewardGlyph(it,26); }).join(' ') + ' 🎉';
       fb.className='feedback good';
     } else {
       fb.textContent = `הפעם לא, אבל אין דבר! התשובה הייתה ${current.answerText||current.answer}.${current.explain?' '+current.explain:''}`;
@@ -4979,12 +5036,12 @@ function switchProfile(id){
 function openProfiles(first){
   const empty = !store.profiles.length;
   profMode = {view:(first||empty)?'form':'list', editId:null, first:!!(first||empty), confirmDel:null, error:''};
-  profTab = 'profiles'; statsViewId = store.activeId; bk = bkFresh();
+  profTab = 'profiles'; statsViewId = store.activeId; bk = bkFresh(); dbg.ok = false; dbg.msg = '';
   document.getElementById('profOverlay').hidden = false; renderProfiles();
 }
 function closeProfiles(){
   if(!store.profiles.length) return;          // the first profile must be created before the game can be used
-  document.getElementById('profOverlay').hidden = true;
+  document.getElementById('profOverlay').hidden = true; dbg.ok = false;
 }
 function profileStats(p){
   const pr = (p.id===store.activeId) ? captureProgress() : (p.progress||{});
@@ -5048,6 +5105,7 @@ function renderProfilesInner(){
   if(profTab==='settings'){ body.innerHTML = renderSettingsHTML(); return; }
   if(profTab==='backup'){ body.innerHTML = renderBackupHTML(); return; }
   if(profTab==='report'){ body.innerHTML = renderReportHTML(); return; }
+  if(profTab==='debug'){ body.innerHTML = renderDebugHTML(); return; }
   const multi = store.profiles.length>1;
   const rows = store.profiles.map((p,i)=>{
     const active = p.id===store.activeId, confirming = profMode.confirmDel===p.id;
@@ -5400,14 +5458,55 @@ function bkRestore(){
   renderProfiles();
 }
 
+// ===== DEBUG (parent area, password) =====
+const DBG_HASH = 2113604388352968;       // hash of the debug password (a light gate for testing tools, not real security)
+function dbgHash(s,seed=0){ let h1=0xdeadbeef^seed,h2=0x41c6ce57^seed; for(let i=0;i<s.length;i++){ const c=s.charCodeAt(i); h1=Math.imul(h1^c,2654435761); h2=Math.imul(h2^c,1597334677); } h1=Math.imul(h1^(h1>>>16),2246822507)^Math.imul(h2^(h2>>>13),3266489909); h2=Math.imul(h2^(h2>>>16),2246822507)^Math.imul(h1^(h1>>>13),3266489909); return 4294967296*(2097151&h2)+(h1>>>0); }
+let dbg = {ok:false, msg:'', pid:null, kind:'all', n:5, bad:false, seq:0};
+function dbgSync(){ const n = document.getElementById('dbgN'); if(n){ const v = parseInt(n.value,10); dbg.n = Math.max(1, Math.min(200, isFinite(v)?v:1)); } }
+function renderDebugHTML(){
+  if(!dbg.ok) return `<section class="pa-card"><h2 class="pa-h">דיבאג</h2><p class="pa-sub">כלי בדיקה. נדרשת סיסמה.</p>
+    <input id="dbgPw" type="password" class="pa-input" autocomplete="off" aria-label="סיסמה" style="width:100%;box-sizing:border-box;min-height:44px;font:inherit;padding:0 12px;border-radius:12px;border:2px solid var(--card2)">
+    ${dbg.bad?'<p class="pa-sub" style="color:#c0392b">סיסמה שגויה.</p>':''}
+    <div class="pa-actions"><button type="button" class="pa-btn" data-pact="dbgunlock">פתיחה</button></div></section>`;
+  if(!store.profiles.some(p=>p.id===dbg.pid)) dbg.pid = store.activeId || (store.profiles[0] && store.profiles[0].id);
+  const sel = store.profiles.find(p=>p.id===dbg.pid), keepTheme = themeId; let kinds;
+  themeId = profileTheme(sel);        // the pictures look the way they do for the chosen profile (its theme), and always show the regular reward, not the upgraded one
+  try{ kinds = ['all',...STICKERS].map(k=>`<button type="button" class="pa-chip ${dbg.kind===k?'on':''}" aria-pressed="${dbg.kind===k}" data-pact="dbgkind" data-id="${k}">${k==='all'?'הכול':itemHTML(LAYERS[k]?k+':'+LAYER_DEFAULT[k]:k,false,22)}</button>`).join(''); }
+  finally{ themeId = keepTheme; }
+  const selName = esc(profileName(sel, store.profiles.indexOf(sel)));
+  return `<section class="pa-card"><h2 class="pa-h">הוספת מתנות לבדיקה</h2><p class="pa-sub">מוסיף כמות נבחרת של מתנה נבחרת (או של כולן) לפרופיל. כל מתנה מקבלת מראה אקראי, כמו מתנה רגילה.</p>
+    ${paScope('dbgprof', dbg.pid, 'פרופיל')}
+    <div class="pa-scope"><span class="pa-scope-l">מתנה</span><div class="pa-seg">${kinds}</div></div>
+    <div class="pa-scope"><span class="pa-scope-l">כמות (לכל מתנה)</span><input id="dbgN" type="number" min="1" max="200" value="${dbg.n}" style="width:90px;min-height:44px;font:inherit;padding:0 10px;border-radius:12px;border:2px solid var(--card2)"></div>
+    <div class="pa-actions"><button type="button" class="pa-btn" data-pact="dbgadd">הוספה ל${selName}</button></div>
+    ${dbg.msg?`<p class="pa-sub dbg-msg" id="dbgMsg" role="status">${esc(dbg.msg)}</p>`:''}</section>`;
+}
+function dbgGive(p, kinds, n){
+  const active = p.id===store.activeId, sv = {collection, golden};
+  if(!active){ const c = cleanProgress(p.progress); collection = c.collection.slice(); golden = c.golden.slice(); }
+  try{
+    for(const k of kinds) for(let i=0;i<n;i++) collection.push(newItem(k));
+    if(active){ saveState(); renderRewards(); }
+    else { p.progress = Object.assign({}, cleanProgress(p.progress), {collection:collection.slice()}); p.u = Date.now(); persist(); cloudChanged(); }
+  } finally { if(!active){ collection = sv.collection; golden = sv.golden; } }
+}
+function dbgAdd(){
+  dbgSync(); const p = store.profiles.find(x=>x.id===dbg.pid); if(!p){ dbg.msg='אין פרופיל'; return renderProfiles(); }
+  const kinds = dbg.kind==='all' ? STICKERS.slice() : [dbg.kind]; dbgGive(p, kinds, dbg.n);
+  dbg.seq++; dbg.msg = `✓ נוספו ${dbg.n*kinds.length} מתנות ל${profileName(p, store.profiles.indexOf(p))} (${dbg.n} מכל סוג, ${kinds.length} סוגים) · לחיצה מספר ${dbg.seq}`; renderProfiles();
+}
 function profileAction(act, id){
+  if(act==='dbgunlock'){ const el = document.getElementById('dbgPw'); dbg.ok = !!el && dbgHash(el.value)===DBG_HASH; dbg.bad = !dbg.ok; dbg.msg=''; return renderProfiles(); }
+  if(act==='dbgprof'){ dbgSync(); dbg.pid = id; dbg.msg=''; dbg.seq=0; return renderProfiles(); }
+  if(act==='dbgkind'){ dbgSync(); dbg.kind = id; dbg.msg=''; dbg.seq=0; return renderProfiles(); }
+  if(act==='dbgadd') return dbgAdd();
   if(act==='bkgen') return bkGenerate();
   if(act==='bkcopy') return bkCopy();
   if(act==='bkcheck') return bkCheck();
   if(act==='bkrestore') return bkRestore();
   if(act==='restorefirst'){ bk = bkFresh(); profMode = {view:'restorefirst', editId:null, first:true, confirmDel:null, error:''}; return renderProfiles(); }
   if(act==='restoreback'){ bk = bkFresh(); profMode = {view:'form', editId:null, first:true, confirmDel:null, error:''}; return renderProfiles(); }
-  if(act==='tab'){ cloud.msg = ''; cloud.confirmWipe = false; profTab = (id==='progress'||id==='settings'||id==='backup'||id==='guide'||id==='report') ? id : 'profiles'; if(profTab==='progress' && !store.profiles.some(x=>x.id===statsViewId)) statsViewId = store.activeId; return renderProfiles(); }
+  if(act==='tab'){ cloud.msg = ''; cloud.confirmWipe = false; profTab = (id==='progress'||id==='settings'||id==='backup'||id==='guide'||id==='report'||id==='debug') ? id : 'profiles'; if(profTab==='progress' && !store.profiles.some(x=>x.id===statsViewId)) statsViewId = store.activeId; return renderProfiles(); }
   if(act==='statsprof'){ statsViewId = id; return renderProfiles(); }
   if(act==='sample'){ return openSample(Number(id)); }
   if(act==='mxcell'){ const prof = store.profiles.find(x=>x.id===setViewId) || activeProfile(); if(!prof) return; const [sec,d] = id.split(':').map(Number);
@@ -5520,6 +5619,7 @@ Object.assign(THEME_ASSETS.space.level, {7: "assets/3cdbd8d5b4fb.webp",
 Object.assign(THEME_ASSETS.space.sticker, {"🦄": "assets/1b12301d401f.webp", "🧁": "assets/2ff219165a95.webp", "🍦": "assets/1e662d3ed526.webp", "🍩": "assets/9dac9ad73e3d.webp", "🌈": "assets/1047b5d2c969.webp", "🍓": "assets/75a4b9770dd7.webp", "🍒": "assets/ce8529c765f0.webp", "🎀": "assets/117f3817d14d.webp", "🍬": "assets/3a9e02efc682.webp", "🍨": "assets/98a2a95fcd54.webp", "🩷": "assets/a0a70948f67b.webp", "✨": "assets/24e086fa80a7.webp", "🍭": "assets/183ba952dfd6.webp", "🧋": "assets/1eea58095cdb.webp"});
 Object.assign(THEME_ASSETS.space.upgraded, {"🦄": "assets/cebc1c8259bc.webp", "🧁": "assets/241cbcf0acea.webp", "🍦": "assets/045ef323cbab.webp", "🍩": "assets/2b9ebb3f95eb.webp", "🌈": "assets/92fb299c746a.webp", "🍓": "assets/2bec26601729.webp", "🍒": "assets/3b237cfe0afc.webp", "🎀": "assets/edd19670d8c9.webp", "🍬": "assets/d63dee68815e.webp", "🍨": "assets/47a163ecad52.webp", "🩷": "assets/ecc84ce1dc0f.webp", "✨": "assets/2bbe2bc4d8b2.webp", "🍭": "assets/af15d3bd5cef.webp", "🧋": "assets/a9a6d09e9ce2.webp"});
 Object.assign(THEME_ASSETS.space.currency, {"base": "assets/c62fb1bb5479.webp", "upgraded": "assets/4286a2b5654d.webp"});
+THEME_ASSETS.space.sticker["☁️"] = THEME_ASSETS.space.currency.base; THEME_ASSETS.space.upgraded["☁️"] = THEME_ASSETS.space.currency.upgraded;   // the space theme has no separate art for the modular cotton candy: it uses the bonus-reward pictures
 let peekTimer = null;
 function peekMascot(rewardHTML){
   const w = document.querySelector('.charwrap'), r = document.getElementById('charReward');
@@ -5553,6 +5653,7 @@ document.getElementById('roomBody').addEventListener('click', e=>{
   if(act==='merge') showReadyCeleb(t.dataset.kind);
   else if(act==='look') showLookReady(t.dataset.kind);
   else if(act==='wear') wearLook(Number(t.dataset.i));
+  else if(act==='view') viewReward(Number(t.dataset.i));
   else if(act==='ungold') askUnmergeGold(t.dataset.kind, t.dataset.g);
   else if(act==='unlook') askUnmergeLook(Number(t.dataset.i));
 });
