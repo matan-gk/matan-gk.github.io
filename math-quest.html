@@ -196,6 +196,8 @@ h1{
 .ritem img.cot{height:calc(40px*var(--rz)); width:auto}
 .gfall{position:relative; display:inline-flex; align-items:center; justify-content:center; filter:drop-shadow(0 0 5px #ffc93c)}
 .gfall::after{content:'✨'; position:absolute; top:-6px; right:-8px; font-size:.55em}
+.vault{display:grid; grid-template-columns:repeat(5,1fr); gap:6px; margin-top:10px; justify-items:center}
+.vitem{display:flex; align-items:center; justify-content:center}
 .wardrobe{display:grid; grid-template-columns:repeat(auto-fill,minmax(64px,1fr)); gap:8px}
 .look{height:72px; border-radius:14px; background:var(--card2); display:flex; align-items:center; justify-content:center; border:3px solid transparent; cursor:pointer; position:relative; padding:3px}
 .look img{max-height:100%; max-width:100%; object-fit:contain}
@@ -832,7 +834,8 @@ const PARTY_THEMES = [
 ];
 const MOOD_POOL = ["excited","happy","loving","cheerful","proud","delighted","joyful"];
 // the happy moods a correct answer picks from: the default ones, plus any extra poses the active theme has pictures for
-function moodPool(){ const t = THEME_ASSETS[themeId]; const extra = t && t.mood ? Object.keys(t.mood).filter(k=>!(k in UNICORN_IMG)) : []; return MOOD_POOL.concat(extra); }
+// the mascot's pictures after an answer: the 7 moods and (sweets theme) the 16 former looks, picked at random
+function moodPool(){ const t = THEME_ASSETS[themeId]; const extra = t && t.mood ? Object.keys(t.mood).filter(k=>!(k in UNICORN_IMG)) : []; return MOOD_POOL.concat(extra, themeId===THEME_DEFAULT ? LOOKS.map((_,i)=>'look'+i) : []); }
 let lastMood = "happy";
 const LEVELS = [
   // The display order is the order of this list. Ids never change (saved progress and stats refer to them), only names and contents.
@@ -901,8 +904,9 @@ LAYERS['🩷'] = {"heart":1,"bases":[{"w":233,"h":203,"r":"c","s":"assets/150ad9
 LAYERS['☁️'] = {"bw":300,"fbot":0.2,"cover":1,"mask":1,"bases":[{"w":31,"h":230,"r":"c","s":"assets/50aec2f477fc.webp"},{"w":42,"h":230,"r":"c","s":"assets/ac2ba7a6f829.webp"},{"w":50,"h":230,"r":"u","s":"assets/5c5dcaef3e7a.webp"},{"w":38,"h":230,"r":"r","s":"assets/3cbb4d9327d9.webp"},{"w":30,"h":230,"r":"c","s":"assets/121d3b2a4965.webp"},{"w":30,"h":230,"r":"c","s":"assets/9a48aa803d93.webp"},{"w":30,"h":230,"r":"c","s":"assets/2aaccc111620.webp"},{"w":30,"h":230,"r":"c","s":"assets/2fd2a257f254.webp"},{"w":30,"h":230,"r":"u","s":"assets/02663dd660d8.webp"},{"w":63,"h":230,"r":"u","s":"assets/aa8544a90c7d.webp"},{"w":68,"h":230,"r":"u","s":"assets/67a485a42d53.webp"},{"w":34,"h":230,"r":"r","s":"assets/f29115b699b1.webp"},{"w":41,"h":230,"r":"r","s":"assets/f963fe91a398.webp"}],"fros":[{"w":250,"h":260,"r":"c","s":"assets/f6bf176fc117.webp"},{"w":250,"h":260,"r":"c","s":"assets/85323f39a4c8.webp"},{"w":250,"h":260,"r":"c","s":"assets/9156e89aea19.webp"},{"w":250,"h":260,"r":"c","s":"assets/8a6212615c36.webp"},{"w":250,"h":260,"r":"c","s":"assets/0e0083c06eb4.webp"},{"w":250,"h":260,"r":"u","s":"assets/97a6a7e98607.webp"},{"w":250,"h":260,"r":"u","s":"assets/e24e356e90dd.webp"},{"w":250,"h":260,"r":"u","s":"assets/d59800203a10.webp"},{"w":250,"h":260,"r":"u","s":"assets/76e2a314f36d.webp"},{"w":250,"h":260,"r":"u","s":"assets/d265d9c614fe.webp"},{"w":250,"h":260,"r":"r","s":"assets/ff7311156444.webp"},{"w":250,"h":260,"r":"r","s":"assets/6f06935b2488.webp"},{"w":250,"h":260,"r":"r","s":"assets/5bcc0b43c967.webp"},{"w":250,"h":260,"r":"r","s":"assets/0598916df992.webp"},{"w":250,"h":260,"r":"r","s":"assets/6dbd578ab55c.webp"},{"w":250,"h":260,"r":"r","s":"assets/9f77055fdc0b.webp"},{"w":250,"h":260,"r":"c","s":"assets/5857efec42d2.webp"},{"w":250,"h":260,"r":"u","s":"assets/0946c4e9708e.webp"},{"w":250,"h":260,"r":"u","s":"assets/44c2f14d7c16.webp"}],"tops":[{"r":"c","w":250,"h":260,"s":"assets/fbc769cb2686.webp"},{"r":"c","w":250,"h":260,"s":"assets/aa7bd9843fd5.webp"},{"r":"c","w":250,"h":260,"s":"assets/4c74b69c3783.webp"},{"r":"u","w":250,"h":260,"s":"assets/31e8e237c3cc.webp"},{"r":"u","w":250,"h":260,"s":"assets/5137f84b77c4.webp"},{"r":"r","w":250,"h":260,"s":"assets/b812283809d8.webp"},{"r":"c","w":0,"h":0,"n":1}]};
 LAYERS['🌈'] = {"rainbow":1,"bw":300,"bases":[{"w":300,"h":193,"r":"c","s":"assets/3f54cdc3d573.webp","lx":0.169,"rx":0.829},{"w":286,"h":240,"r":"c","s":"assets/4326eb5d7f41.webp","lx":0.158,"rx":0.835},{"w":300,"h":210,"r":"u","s":"assets/947cec633f9d.webp","lx":0.171,"rx":0.822},{"w":295,"h":246,"r":"u","s":"assets/1f5edbca295c.webp","lx":0.184,"rx":0.808},{"w":293,"h":215,"r":"r","s":"assets/7c6e0591f507.webp","lx":0.287,"rx":0.71},{"w":293,"h":193,"r":"u","s":"assets/a0f5ec162f6c.webp","lx":0.169,"rx":0.841}],"fros":[{"w":114,"h":79,"r":"c","s":"assets/7f038685e35b.webp","s2":"assets/0187e95d27fa.webp"},{"w":100,"h":90,"r":"c","s":"assets/471f171f2174.webp","s2":"assets/cfdce7f3498c.webp"},{"w":96,"h":94,"r":"u","s":"assets/453e4a1f58ca.webp","s2":"assets/285a2c1817b7.webp"},{"w":112,"h":81,"r":"c","s":"assets/9b749ef75c49.webp","s2":"assets/604438e3e920.webp"},{"w":104,"h":87,"r":"u","s":"assets/44f89423bb1a.webp","s2":"assets/97d6510b8569.webp"},{"w":105,"h":86,"r":"c","s":"assets/8759f745f3a5.webp","s2":"assets/1ddfa397bb6e.webp"},{"w":98,"h":92,"r":"u","s":"assets/6c125d2dad3a.webp","s2":"assets/8c91f9899403.webp"},{"w":84,"h":108,"r":"r","s":"assets/23586a2bb2a9.webp","s2":"assets/91b140f91990.webp"},{"w":78,"h":115,"r":"r","s":"assets/727d5e0f8cfb.webp","s2":"assets/1d729ba5a9a1.webp"},{"w":88,"h":103,"r":"r","s":"assets/7a7590ea4181.webp","s2":"assets/abe733384439.webp"},{"r":"c","w":0,"h":0,"n":1}],"tops":[{"r":"u","w":300,"h":193,"s":"assets/486f04ee4e4b.webp"},{"r":"u","w":300,"h":193,"s":"assets/e924ceae917e.webp"},{"r":"c","w":300,"h":193,"s":"assets/90aa271c59fd.webp"},{"r":"c","w":300,"h":193,"s":"assets/9c0965b2cfbd.webp"},{"r":"c","w":300,"h":193,"s":"assets/76bd691b3071.webp"},{"r":"u","w":300,"h":193,"s":"assets/1deee7249342.webp"},{"r":"c","w":0,"h":0,"n":1}]};
 LAYERS['🍬'] = {"wrap":1,"bw":300,"ov":12,"rot":-30,"bases":[{"w":151,"h":149,"r":"c","s":"assets/5713d4df22ec.webp"},{"w":151,"h":149,"r":"c","s":"assets/a73b1832c281.webp"},{"w":180,"h":125,"r":"c","s":"assets/904fabdf8a7f.webp"},{"w":180,"h":125,"r":"c","s":"assets/52a28c697020.webp"},{"w":180,"h":125,"r":"c","s":"assets/70f597d33aef.webp"},{"w":152,"h":148,"r":"u","s":"assets/19f1086fa275.webp"},{"w":151,"h":149,"r":"c","s":"assets/ce512efb326a.webp"},{"w":151,"h":149,"r":"u","s":"assets/954c92dc4963.webp"},{"w":151,"h":149,"r":"r","s":"assets/9781b3d51dfe.webp"},{"w":151,"h":149,"r":"r","s":"assets/b051d0d8de08.webp"},{"w":177,"h":127,"r":"c","s":"assets/581e5de4499b.webp"},{"w":130,"h":173,"r":"u","s":"assets/e226c182a821.webp"},{"w":151,"h":149,"r":"u","s":"assets/b2c4a2b6bab1.webp"},{"w":131,"h":171,"r":"c","s":"assets/18aab3141783.webp"},{"w":178,"h":126,"r":"u","s":"assets/01c6bb702e3d.webp"},{"w":178,"h":127,"r":"c","s":"assets/1a740328e1b2.webp"}],"fros":[{"w":94,"h":100,"r":"c","s":"assets/de8428330037.webp","s2":"assets/e068aa647e22.webp"},{"w":91,"h":100,"r":"c","s":"assets/0dd65c26394d.webp","s2":"assets/6bf22dd15dfc.webp"},{"w":89,"h":100,"r":"c","s":"assets/ea1dc4f91db5.webp","s2":"assets/dc0e6dfeac20.webp"},{"w":87,"h":100,"r":"u","s":"assets/0345c43f6c5a.webp","s2":"assets/7204ff013b0f.webp"},{"w":87,"h":100,"r":"c","s":"assets/0b9683c5b90d.webp","s2":"assets/937779ab95ab.webp"},{"w":87,"h":100,"r":"c","s":"assets/5defee220676.webp","s2":"assets/7f39a3d23025.webp"},{"w":87,"h":100,"r":"u","s":"assets/a4ff3c9f5e4a.webp","s2":"assets/7d9df9777de1.webp"},{"w":87,"h":100,"r":"r","s":"assets/e0fe251986a1.webp","s2":"assets/33309c47a471.webp"}],"tops":[{"r":"c","w":0,"h":0,"n":1}]};
-LAYERS['🦄'] = {"uni":1,"bw":300,"bases":[{"w":271,"h":390,"r":"c","s":"assets/407db8f63080.webp"},{"w":271,"h":390,"r":"c","s":"assets/37792d3c1940.webp"},{"w":271,"h":390,"r":"u","s":"assets/9b602a8df9b7.webp"},{"w":271,"h":390,"r":"c","s":"assets/5b614c48b0be.webp"},{"w":271,"h":390,"r":"c","s":"assets/6ff3ff64d1d7.webp"},{"w":271,"h":390,"r":"c","s":"assets/300bf1598084.webp"},{"w":271,"h":390,"r":"c","s":"assets/f4709f88d204.webp"},{"w":271,"h":390,"r":"c","s":"assets/3a8fa6b772c3.webp"},{"w":271,"h":390,"r":"r","s":"assets/565f68a44147.webp"}],"fros":[{"w":271,"h":390,"r":"c","s":"assets/4ea252c8e568.webp"},{"w":271,"h":390,"r":"c","s":"assets/445a96cbca67.webp"},{"w":271,"h":390,"r":"u","s":"assets/656dc8dd56a8.webp"},{"w":271,"h":390,"r":"c","s":"assets/a32cd4b7cfd2.webp"},{"w":271,"h":390,"r":"c","s":"assets/79a26f9c4b21.webp"},{"w":271,"h":390,"r":"c","s":"assets/209b62302607.webp"},{"w":271,"h":390,"r":"c","s":"assets/6d60dcd97102.webp"},{"w":271,"h":390,"r":"c","s":"assets/d76c807533cb.webp"},{"w":271,"h":390,"r":"u","s":"assets/7dbc62938f3b.webp"},{"w":271,"h":390,"r":"u","s":"assets/b2ab4c5c21ec.webp"},{"w":271,"h":390,"r":"u","s":"assets/31b2fe585f0d.webp"},{"w":271,"h":390,"r":"r","s":"assets/d7fa106e0433.webp"}],"tops":[{"r":"c","w":271,"h":390,"s":"assets/ab594bc48dd6.webp"},{"r":"c","w":271,"h":390,"s":"assets/1c25c81db185.webp"},{"r":"u","w":271,"h":390,"s":"assets/45194365c15a.webp"},{"r":"c","w":271,"h":390,"s":"assets/cd1d120b3586.webp"},{"r":"c","w":271,"h":390,"s":"assets/76ab58f7d9ab.webp"},{"r":"c","w":271,"h":390,"s":"assets/caf73bf842bf.webp"},{"r":"u","w":271,"h":390,"s":"assets/ef0fdd5f9dc6.webp"},{"r":"c","w":271,"h":390,"s":"assets/ecd37799245d.webp"},{"r":"c","w":271,"h":390,"s":"assets/2b3bc16f0323.webp"},{"r":"c","w":271,"h":390,"s":"assets/162aeb076e7e.webp"},{"r":"u","w":271,"h":390,"s":"assets/768d3b1b1c83.webp"},{"r":"u","w":271,"h":390,"s":"assets/e22a70748c11.webp"},{"r":"c","w":271,"h":390,"s":"assets/e171148a2f80.webp"},{"r":"u","w":271,"h":390,"s":"assets/be427b565935.webp"},{"r":"u","w":271,"h":390,"s":"assets/47f5f8d4316e.webp"},{"r":"r","w":271,"h":390,"s":"assets/d7c9e805dc37.webp"}]};
-const LAYER_DEFAULT = {'🧁':'0.0.0','🍩':'0.0.0','🍨':'0.0.0','🍭':'0.0.0','🧋':'0.0.0','🎀':'0.0.0','🍦':'0.0.0','🍓':'0.0.0','🩷':'0.12.14','☁️':'0.0.0','🌈':'0.10.6','🍬':'0.0.0','🦄':'0.0.0'};   // the fixed look old rewards get when the game first upgrades them
+LAYERS['🦄'] = {"uni":1,"bw":300,"bases":[{"w":270,"h":405,"r":"c","s":"assets/62765184e7b6.webp"},{"w":270,"h":405,"r":"c","s":"assets/32c5aac07a0d.webp"},{"w":270,"h":405,"r":"u","s":"assets/6e0c8ca4dbea.webp"},{"w":270,"h":405,"r":"c","s":"assets/1730bf441ec9.webp"},{"w":270,"h":405,"r":"c","s":"assets/df521bb2eea6.webp"},{"w":270,"h":405,"r":"c","s":"assets/eb5d20d1ab12.webp"},{"w":270,"h":405,"r":"c","s":"assets/6fd1cb7fc9f7.webp"},{"w":270,"h":405,"r":"c","s":"assets/cd6e232ef8cb.webp"},{"w":270,"h":405,"r":"r","s":"assets/e4b7cbd4483b.webp"}],"fros":[{"w":270,"h":405,"r":"c","s":"assets/436a9844c6bc.webp"},{"w":270,"h":405,"r":"c","s":"assets/af8261a61116.webp"},{"w":270,"h":405,"r":"u","s":"assets/308c080db315.webp"},{"w":270,"h":405,"r":"c","s":"assets/2a628b88eeb7.webp"},{"w":270,"h":405,"r":"c","s":"assets/92be8dd08b66.webp"},{"w":270,"h":405,"r":"c","s":"assets/b5322889a034.webp"},{"w":270,"h":405,"r":"c","s":"assets/12612ca094b6.webp"},{"w":270,"h":405,"r":"c","s":"assets/73f52b2955d0.webp"},{"w":270,"h":405,"r":"u","s":"assets/95982f2b73bf.webp"},{"w":270,"h":405,"r":"u","s":"assets/b40a5d21e203.webp"},{"w":270,"h":405,"r":"u","s":"assets/be4624ce2caf.webp"},{"w":270,"h":405,"r":"r","s":"assets/4eaaedcbbbca.webp"}],"tops":[{"r":"c","w":270,"h":405,"s":"assets/840fdbec23d9.webp"},{"r":"c","w":270,"h":405,"s":"assets/a4387a9c6c6e.webp"},{"r":"u","w":270,"h":405,"s":"assets/01a1bdc319f6.webp"},{"r":"c","w":270,"h":405,"s":"assets/4c1c828f6885.webp"},{"r":"c","w":270,"h":405,"s":"assets/d942d2c72634.webp"},{"r":"c","w":270,"h":405,"s":"assets/7d63443612bf.webp"},{"r":"u","w":270,"h":405,"s":"assets/0468e315fded.webp"},{"r":"c","w":270,"h":405,"s":"assets/65c66a380de3.webp"},{"r":"c","w":270,"h":405,"s":"assets/48fce9afe6e0.webp"},{"r":"c","w":270,"h":405,"s":"assets/9e37cf2b20b3.webp"},{"r":"u","w":270,"h":405,"s":"assets/31616cda336c.webp"},{"r":"u","w":270,"h":405,"s":"assets/56a726c64778.webp"},{"r":"c","w":270,"h":405,"s":"assets/a575bf4d035e.webp"},{"r":"u","w":270,"h":405,"s":"assets/0c3f8b5d7be9.webp"},{"r":"u","w":270,"h":405,"s":"assets/cabe27462586.webp"},{"r":"r","w":270,"h":405,"s":"assets/9dd92a30068e.webp"}]};
+LAYERS['✨'] = {"uni":1,"bw":300,"bases":[{"w":298,"h":241,"r":"c","s":"assets/f383e896c8c5.webp"},{"w":298,"h":241,"r":"c","s":"assets/af6118006520.webp"},{"w":298,"h":241,"r":"c","s":"assets/c71cf9ac9653.webp"},{"w":298,"h":241,"r":"c","s":"assets/c0290d82480f.webp"},{"w":298,"h":241,"r":"c","s":"assets/61d84ed953b5.webp"},{"w":298,"h":241,"r":"c","s":"assets/fceafff7d53f.webp"},{"w":298,"h":241,"r":"r","s":"assets/1759067744e9.webp"},{"w":298,"h":241,"r":"u","s":"assets/6693af74cc29.webp"},{"w":298,"h":241,"r":"u","s":"assets/172922da9af8.webp"},{"w":298,"h":241,"r":"u","s":"assets/3452dbaf7e97.webp"},{"w":298,"h":241,"r":"u","s":"assets/215b305235a8.webp"},{"w":298,"h":241,"r":"u","s":"assets/3db5ef2667e5.webp"},{"w":298,"h":241,"r":"u","s":"assets/7ac939c7d3ce.webp"}],"fros":[{"w":298,"h":241,"r":"c","s":"assets/ea2f5a67f84b.webp"},{"w":298,"h":241,"r":"c","s":"assets/6f9b108d0caa.webp"},{"w":298,"h":241,"r":"c","s":"assets/ba988fc3e099.webp"},{"w":298,"h":241,"r":"c","s":"assets/a29a075e8cd2.webp"},{"w":298,"h":241,"r":"c","s":"assets/729a5437d194.webp"},{"w":298,"h":241,"r":"c","s":"assets/c6814b580a37.webp"},{"w":298,"h":241,"r":"r","s":"assets/981b8b9e4487.webp"},{"w":298,"h":241,"r":"u","s":"assets/2a0093393e77.webp"},{"w":298,"h":241,"r":"u","s":"assets/6535e815b1d9.webp"},{"w":298,"h":241,"r":"u","s":"assets/0e2e311035b6.webp"},{"w":298,"h":241,"r":"u","s":"assets/57e91c534f17.webp"},{"w":298,"h":241,"r":"u","s":"assets/449b79b99503.webp"},{"w":298,"h":241,"r":"u","s":"assets/a7b02ddf1e03.webp"}],"tops":[{"w":298,"h":241,"r":"c","s":"assets/d3eb80e48a52.webp"},{"w":298,"h":241,"r":"c","s":"assets/fcbf21efb8bc.webp"},{"w":298,"h":241,"r":"c","s":"assets/c651024afce5.webp"},{"w":298,"h":241,"r":"c","s":"assets/8f038a453e09.webp"},{"w":298,"h":241,"r":"c","s":"assets/4c129804c821.webp"},{"w":298,"h":241,"r":"c","s":"assets/8688dd9afc5e.webp"},{"w":298,"h":241,"r":"r","s":"assets/a00caf0af0d9.webp"},{"w":298,"h":241,"r":"u","s":"assets/93174b77cb18.webp"},{"w":298,"h":241,"r":"u","s":"assets/7eca87e86c29.webp"},{"w":298,"h":241,"r":"u","s":"assets/52390efdb050.webp"},{"w":298,"h":241,"r":"u","s":"assets/d2928670cd8a.webp"},{"w":298,"h":241,"r":"u","s":"assets/73f51d097b9f.webp"},{"w":298,"h":241,"r":"u","s":"assets/e5220d7f9a05.webp"},{"w":298,"h":241,"r":"c","s":"assets/0d7de6fd3eb4.webp"},{"w":298,"h":241,"r":"c","s":"assets/30f98354f178.webp"},{"w":298,"h":241,"r":"c","s":"assets/3264a194bca9.webp"},{"w":298,"h":241,"r":"c","s":"assets/1ea5e6917d02.webp"},{"w":298,"h":241,"r":"c","s":"assets/8120e870ac43.webp"},{"w":298,"h":241,"r":"c","s":"assets/f77160b5b494.webp"},{"w":298,"h":241,"r":"r","s":"assets/d73a0242929e.webp"},{"w":298,"h":241,"r":"u","s":"assets/eaae8e5aa73d.webp"},{"w":298,"h":241,"r":"u","s":"assets/a22143e39f2e.webp"},{"w":298,"h":241,"r":"u","s":"assets/d6b47dfbfa85.webp"},{"w":298,"h":241,"r":"u","s":"assets/16b2fbb4ecf8.webp"},{"w":298,"h":241,"r":"u","s":"assets/67f5e09a307a.webp"},{"w":298,"h":241,"r":"u","s":"assets/f1b14061e8d4.webp"},{"w":298,"h":241,"r":"u","s":"assets/c4f3c7af0350.webp"},{"w":298,"h":241,"r":"u","s":"assets/25c73e880745.webp"},{"w":298,"h":241,"r":"u","s":"assets/4f9c50234804.webp"},{"w":298,"h":241,"r":"u","s":"assets/58fb4d30fa80.webp"},{"w":298,"h":241,"r":"u","s":"assets/57bf824b396b.webp"},{"w":298,"h":241,"r":"u","s":"assets/916f4b5de695.webp"},{"w":298,"h":241,"r":"r","s":"assets/79b069236e54.webp"},{"w":298,"h":241,"r":"u","s":"assets/b6dfa9dfffc4.webp"},{"w":298,"h":241,"r":"u","s":"assets/8909877d05b6.webp"},{"w":298,"h":241,"r":"u","s":"assets/2f84257b90ba.webp"},{"w":298,"h":241,"r":"u","s":"assets/515fb4729cef.webp"},{"w":298,"h":241,"r":"u","s":"assets/4559d2a7c624.webp"},{"w":298,"h":241,"r":"u","s":"assets/36d4a46652ab.webp"},{"w":298,"h":241,"r":"r","s":"assets/42b096aa31e4.webp"},{"w":298,"h":241,"r":"r","s":"assets/9a5b51f74e3d.webp"},{"w":298,"h":241,"r":"r","s":"assets/b93a35bb3fed.webp"},{"w":298,"h":241,"r":"r","s":"assets/d517d833d68d.webp"},{"w":298,"h":241,"r":"u","s":"assets/7a071fa4f4c9.webp"},{"w":298,"h":241,"r":"u","s":"assets/22d05f939b1a.webp"},{"w":298,"h":241,"r":"u","s":"assets/9b76e07fe77b.webp"},{"w":298,"h":241,"r":"u","s":"assets/34cf567fcab5.webp"},{"w":298,"h":241,"r":"u","s":"assets/2f44c3f5564c.webp"},{"r":"c","w":0,"h":0,"n":1}]};
+const LAYER_DEFAULT = {'🧁':'0.0.0','🍩':'0.0.0','🍨':'0.0.0','🍭':'0.0.0','🧋':'0.0.0','🎀':'0.0.0','🍦':'0.0.0','🍓':'0.0.0','🩷':'0.12.14','☁️':'0.0.0','🌈':'0.10.6','🍬':'0.0.0','🦄':'0.0.0','✨':'1.1.14'};   // the fixed look old rewards get when the game first upgrades them
 // "no topping" is a valid choice for every kind: the last entry of each kind's toppings
 for(const k in LAYERS){ const L=LAYERS[k]; if(!L.tops.some(t=>t.n)) L.tops.push({r:'c',n:1,w:0,h:0}); }
 const kOf = x => String(x).split(/[:#]/)[0];
@@ -940,9 +944,9 @@ function layerBoxes(kind, combo){
     const P=(x,y,w,h)=>`left:${(((x-cx)*k+.5)*100).toFixed(2)}%;top:${((y*k+.97)*100).toFixed(2)}%;width:${(w*k*100).toFixed(2)}%;height:${(h*k*100).toFixed(2)}%`;
     return layoutCache[key] = [[B.s,P(bx,by,B.w,B.h)],...(T.n?[]:[[T.s,P(bx,by,B.w,B.h)]]),[F.s,P(lx,ly,F.w,F.h)]];
   }
-  if(L.uni){   // a unicorn: the head, the mane over it and the horn on top; all pictures share one canvas
+  if(L.uni){   // a unicorn: the head, the horn rising from its forehead, and the mane over both (the forelock covers the horn's foot); all pictures share one canvas
     const k=0.94/Math.max(B.w,B.h), w=B.w*k*100, h=B.h*k*100, st=`left:${((1-B.w*k)*50).toFixed(2)}%;top:${((1-B.h*k)*50).toFixed(2)}%;width:${w.toFixed(2)}%;height:${h.toFixed(2)}%`;
-    return layoutCache[key] = [[B.s,st],[F.s,st],...(T.n?[]:[[T.s,st]])];
+    return layoutCache[key] = [[B.s,st],...(T.n?[]:[[T.s,st]]),[F.s,st]];
   }
   if(L.wrap){   // a candy body with the wrapper's two twisted ends behind its left and right edges (left picture, right picture); the whole candy is turned by L.rot degrees
     const bw=B.w, bh=B.h, th=L.rot*Math.PI/180, co=Math.cos(th), si=Math.sin(th);
@@ -1013,7 +1017,7 @@ function praise(){
   return t; }
 const PRAISE = ["מעולה! 🌟","כל הכבוד!","@@MASCOT@@","פגיעה מדויקת! 🎯","@@GENIUS@@","@@NAME1@@","@@NAME2@@"];
 let level = 1, score = 0, streak = 0, current = null, collection = [], lollipops = [], bonusActive = false;
-let golden = [], looks = [], activeLook = -1, lookSrc = {}, lookGold = {};   // upgraded rewards, unlocked look indexes, currently worn look (-1 = automatic moods)
+let golden = [], legacyLooks = 0;   // upgraded rewards (each remembers the 10 rewards it was made from); how many looks the player had opened before the looks were retired (used by the token true-up)
 const COTTON_CANDY_IMG = "assets/32c4bd427e57.webp";
 // ===== ICON IMAGES (replace the device's emoji font; each name is a file in ICONS.md) =====
 const ICON_IMG = {"store":"assets/6854a90828fd.webp","garden":"assets/7e7f07768529.webp","castle":"assets/57b765137baf.webp","clock":"assets/d6d23908f734.webp","avatar_boy":"assets/2e728068f1b5.webp","avatar_girl":"assets/dd5f1c1c9a36.webp","avatar_neutral":"assets/9d799d4ca43e.webp","bar_chart":"assets/69a1beb345d4.webp","bubble_tea":"assets/0b614ec9ad59.webp","bullseye":"assets/c6fb6367d8e0.webp","cake_slice":"assets/5b9391707456.webp","calendar":"assets/f7806ac45ede.webp","candy":"assets/c2e8b346e407.webp","cherries":"assets/339a806c1d7f.webp","compass":"assets/ce38a6d4a857.webp","confetti_ball":"assets/09ef3568b393.webp","cupcake":"assets/2b088ea532ec.webp","dizzy_star":"assets/66dac4e236ef.webp","donut":"assets/137f86476836.webp","fire":"assets/8d30b067c603.webp","gear":"assets/df73973c731d.webp","gift":"assets/ef1a3bc72a57.webp","glowing_star":"assets/cbc77302312d.webp","herb":"assets/b3f0b4da05f5.webp","ice_cream":"assets/9010f39db33a.webp","lock":"assets/f82019dad248.webp","lollipop":"assets/cca5cb562807.webp","magic_wand":"assets/2f165dbbdcd5.webp","magnifier":"assets/79a32fdc8c5c.webp","party_popper":"assets/85de52f066a4.webp","pencil":"assets/344466930063.webp","pink_heart":"assets/4eaa42bb418f.webp","plus":"assets/f2aa9566f529.webp","profile":"assets/14514edaf2ba.webp","question_mark":"assets/d52c64264c09.webp","rainbow":"assets/73dd5e2f1335.webp","ribbon":"assets/09f13da8f9a7.webp","seedling":"assets/1c1d5188af4b.webp","smile":"assets/7925e17f6381.webp","soft_serve":"assets/9a42d5e801be.webp","sparkles":"assets/c94a7756866d.webp","sparkling_heart":"assets/261fb2b1dca3.webp","star":"assets/c01cc5f52567.webp","strawberry":"assets/ccc9fc97d12d.webp","trash":"assets/e21a26a1590d.webp","trend_down":"assets/5750a37f44fa.webp","trend_flat":"assets/f3750bcc6de0.webp","trend_up":"assets/5fe3f9da260d.webp","unicorn":"assets/2c913d7614e9.webp","waving_hand":"assets/9cd7ce899e36.webp"};
@@ -1058,8 +1062,7 @@ const THEME_GROUPS = [
   {id:'backdrop', he:'רקעי המקומות',      need:()=>LEVELS.length},
   {id:'sticker',  he:'פרטי האוסף',        need:()=>STICKERS.length},
   {id:'upgraded', he:'פרטי אוסף משודרגים', need:()=>STICKERS.length},
-  {id:'currency', he:'פרס הבונוס',         need:()=>2},
-  {id:'look',     he:'לוקים',              need:()=>LOOKS.length}
+  {id:'currency', he:'פרס הבונוס',         need:()=>2}
 ];
 let themeId = THEME_DEFAULT;
 function themeClean(id){ return (typeof id==='string' && Object.prototype.hasOwnProperty.call(THEMES, id)) ? id : THEME_DEFAULT; }
@@ -1144,17 +1147,7 @@ function applyTheme(){
 }
 let warmOn = false, sessionDraws = 0;   // warm-up first (parent switch) and how many questions this session has drawn (resets when the game opens or the profile changes)
 let diffOn = [1,2,3];     // enabled difficulty levels for the active profile (see the Settings tab)
-function captureProgress(){ return {score,streak,collection,lollipops,level,golden,looks,activeLook,lookSrc,lookGold,rv:LAYER_V,diff:diffIdsClean(diffOn),mx:mxClean(mxState),focus:focusOn,warm:warmOn,theme:themeId}; }
-function cleanLookSrc(o, lk){
-  const r = {}; if(!o || typeof o!=='object') return r;
-  Object.keys(o).forEach(k=>{ const i=Number(k); if(Number.isInteger(i) && lk.includes(i) && typeof o[k]==='string' && (o[k]==='🍒'?(o[k]='🍓'):o[k]==='cotton'?(o[k]='☁️'):1) && STICKERS.includes(o[k])) r[i]=o[k]; });
-  return r;
-}
-function cleanLookGold(o, lk){   // the 10 upgraded items that paid for each look, so un-merging a look gives the same ones back
-  const r = {}; if(!o || typeof o!=='object') return r;
-  Object.keys(o).forEach(k=>{ const i=Number(k); if(Number.isInteger(i) && lk.includes(i) && Array.isArray(o[k]) && o[k].length===MERGE_COST && (o[k]=o[k].map(g=>g==='🍒'?'🍓':g==='cotton'?'☁️':g)).every(g=>typeof g==='string' && STICKERS.includes(kOf(g)))) r[i]=o[k].map(g=>{ if(g==='🍒') g='🍓'; const k2=kOf(g); if(!LAYERS[k2]) return g; const cs=goldCombos(g); return cs.length===MERGE_COST ? k2+'#'+cs.join(',') : k2; }); });
-  return r;
-}
+function captureProgress(){ return {score,streak,collection,lollipops,level,golden,legacyLooks,rv:LAYER_V,diff:diffIdsClean(diffOn),mx:mxClean(mxState),focus:focusOn,warm:warmOn,theme:themeId}; }
 function cleanProgress(d){
   d = (d && typeof d==='object') ? d : {};
   let col = Array.isArray(d.collection) ? d.collection.filter(x=>typeof x==='string') : [];
@@ -1170,7 +1163,9 @@ function cleanProgress(d){
   // layered kinds: an old single-picture item gets the same fixed parts every time (LAYER_DEFAULT); broken ones are fixed the same way
   col = col.map((x,i)=>{ const k=kOf(x); if(!LAYERS[k]) return x; if(comboOfItem(x)) return k+':'+comboOfItem(x); return k+':'+LAYER_DEFAULT[k]; });
   gold = gold.map(g=>{ const k=kOf(g); if(!LAYERS[k]) return g; const cs=goldCombos(g); return cs.length===MERGE_COST ? k+'#'+cs.join(',') : k; });
-  const lk = Array.isArray(d.looks) ? d.looks.filter(i=>Number.isInteger(i)&&i>=0&&i<LOOKS.length) : [];
+  // the looks were retired (their 16 pictures joined the mascot's pictures): only the number opened is kept, for the token true-up
+  const oldLooks = Array.isArray(d.looks) ? new Set(d.looks.filter(i=>Number.isInteger(i)&&i>=0&&i<LOOKS.length)).size : 0;
+  const legacy = Math.max(oldLooks, (Number.isInteger(d.legacyLooks)&&d.legacyLooks>0) ? Math.min(d.legacyLooks,LOOKS.length) : 0);
   return {
     score:  (typeof d.score==='number' && isFinite(d.score)) ? d.score : 0,
     streak: (typeof d.streak==='number' && isFinite(d.streak)) ? d.streak : 0,
@@ -1178,11 +1173,8 @@ function cleanProgress(d){
     lollipops: [],
     level: (typeof d.level==='number' && d.level>=1 && d.level<=8) ? d.level : 1,
     golden: gold,
-    looks: lk,
-    activeLook: (Number.isInteger(d.activeLook) && lk.includes(d.activeLook)) ? d.activeLook : -1,
-    lookGold: cleanLookGold(d.lookGold, lk),
+    legacyLooks: legacy,
     rv: LAYER_V,
-    lookSrc: cleanLookSrc(d.lookSrc, lk),   // which kind of upgraded item paid for each look (so it can be given back)
     diff: diffIdsClean(d.diff),
     mx: mxClean(d.mx),
     focus: d.focus===true,
@@ -1192,7 +1184,7 @@ function cleanProgress(d){
 }
 function applyProgress(d){
   const c = cleanProgress(d);
-  score=c.score; streak=c.streak; collection=c.collection; lollipops=c.lollipops; golden=c.golden; looks=c.looks; activeLook=c.activeLook; lookSrc=c.lookSrc||{}; lookGold=c.lookGold||{}; level=c.level; diffOn=c.diff; mxState=c.mx; focusOn=c.focus; warmOn=c.warm; themeId=c.theme; applyTheme();
+  score=c.score; streak=c.streak; collection=c.collection; lollipops=c.lollipops; golden=c.golden; legacyLooks=c.legacyLooks; level=c.level; diffOn=c.diff; mxState=c.mx; focusOn=c.focus; warmOn=c.warm; themeId=c.theme; applyTheme();
 }
 function persist(){ try{ localStorage.setItem(SAVE_KEY, JSON.stringify(store)); }catch(e){} }
 function saveState(){
@@ -1854,7 +1846,7 @@ function cloudProfileFromDoc(C, helpers){
 // ===== CLOUD (Google sign-in, cloud progress, problem reports) =====
 // Local-first: the game always works from this device's storage. The cloud is a mirror, so no internet / no account / no quota never blocks play.
 // Everything here is off while CLOUD_CONFIG is null. See firebase/SETUP.md for how to create the (free) Firebase project and paste its settings below.
-const APP_VERSION = '2026.11.04b';       // keep equal to VERSION in sw.js (a test checks it)
+const APP_VERSION = '2026.11.05a';       // keep equal to VERSION in sw.js (a test checks it)
 const CLOUD_CONFIG = {apiKey:"AIzaSyAlq_TJNGvWPJpUrpbdq_hkAoURydqMzm0", authDomain:"learning-quest-1.firebaseapp.com", projectId:"learning-quest-1", appId:"1:98931179722:web:78fb00084ccba3efb53433"};   // e.g. {apiKey:'...', authDomain:'xxx.firebaseapp.com', projectId:'xxx', appId:'...'}
 const CLOUD_LIMITS = {
   pushDelayMs: 60000,          // at most one upload per profile per minute while playing
@@ -4583,7 +4575,6 @@ function allKinds(){ return [...new Set([...STICKERS, ...collection.map(kOf)])];
 function readyList(){
   const r=[];
   allKinds().forEach(k=>{ const n=Math.floor(baseCount(k)/MERGE_COST); if(n) r.push({type:'merge',kind:k,n}); });
-  if(looks.length<LOOKS.length) allKinds().forEach(k=>{ const n=Math.floor(goldenCount(k)/MERGE_COST); if(n) r.push({type:'look',kind:k,n}); });
   return r;
 }
 function itemHTML(item, isGold, px){
@@ -4625,20 +4616,11 @@ function renderRoom(){
     h += `<div class="roomsec">✨ מוכנים לשדרוג</div>`;
     ready.forEach(r=>{
       if(r.type==='merge') h += `<div class="mcard"><span class="mfrom">${itemHTML(collection.find(x=>kOf(x)===r.kind)||r.kind,false,34)}<b>×${MERGE_COST}</b></span><span class="marrow">›</span><span class="mto">${itemHTML(r.kind,true,38)}</span><button class="mbtn" data-act="merge" data-kind="${r.kind}">${TX('mergeBtn', ()=>`${G('מזגי','מזג','מזגו')} ✨`)}</button></div>`;
-      else h += `<div class="mcard"><span class="mfrom">${itemHTML(r.kind,true,34)}<b>×${MERGE_COST}</b></span><span class="marrow">›</span><span class="mto">${TX('lookIcon','🎀')} לוק חדש</span><button class="mbtn" data-act="look" data-kind="${r.kind}">${G('פתחי','פתח','פתחו')} לוק</button></div>`;
     });
-  }
-  h += `<div class="roomsec">${TX('lookSec','הלוקים של קאפקייק')} · ${looks.length}/${LOOKS.length}</div>`;
-  if(looks.length){
-    h += `<div class="roomhint">${G('לחצי','לחץ','לחצו')} על לוק כדי ללבוש אותו, ושוב כדי לחזור לרגיל.</div><div class="wardrobe">` +
-      looks.map(i=>`<div class="look ${activeLook===i?'active':''}" data-act="wear" data-i="${i}"><img src="${LOOKS[i].img}" alt="${LOOKS[i].name}"><button type="button" class="lookx" data-act="unlook" data-i="${i}" aria-label="פירוק לוק">פירוק</button></div>`).join('') + '</div>' +
-      `<div class="roomhint" style="margin-top:6px">הכפתור "פירוק" מחזיר לוק ל-${MERGE_COST} ${TX('upUnits','פריטים משודרגים')}.</div>`;
-  } else {
-    h += `<div class="roomhint">עוד לא נפתחו לוקים. כל ${MERGE_COST} ${TX('upUnits','פריטים משודרגים')} מאותו סוג פותחים לוק חדש!</div>`;
   }
   if(golden.length){
     const gs = golden.slice().sort((p,q)=>rank(p)-rank(q));
-    h += `<div class="roomsec">${TX('upSec','פריטים משודרגים')} · ${gs.length}</div><div class="roomhint">${TX('upHint', ()=>`${G('לחצי','לחץ','לחצו')} על פריט משודרג כדי לפרק אותו בחזרה ל-${MERGE_COST} מתנות רגילות.`)}</div><div class="roomgrid">` + gs.map(k=>`<div class="ritem gold" data-act="ungold" data-kind="${kOf(k)}" data-g="${k}" role="button">${itemHTML(k,true,40)}</div>`).join('') + '</div>';
+    h += `<div class="roomsec">${TX('upSec','פריטים משודרגים')} · ${gs.length}</div><div class="roomhint">${TX('upHint', ()=>`${G('לחצי','לחץ','לחצו')} על פריט משודרג כדי לראות את ${MERGE_COST} המתנות שמהן הוא נוצר.`)}</div><div class="roomgrid">` + gs.map(k=>`<div class="ritem gold" data-act="vault" data-kind="${kOf(k)}" data-g="${k}" role="button">${itemHTML(k,true,40)}</div>`).join('') + '</div>';
   }
   if(collection.length){
     const sorted = collection.map((x,i)=>[x,i]).reverse();   // newest first: the order they were received
@@ -4658,7 +4640,6 @@ function flushCelebs(){
   while(celebQueue.length){
     const ev = celebQueue.shift();
     if(ev.type==='merge' && baseCount(ev.kind)>=MERGE_COST){ showReadyCeleb(ev.kind); return; }
-    if(ev.type==='look' && goldenCount(ev.kind)>=MERGE_COST && looks.length<LOOKS.length){ showLookReady(ev.kind); return; }
   }
 }
 // tap a reward in the gift room: it opens as a large picture
@@ -4695,7 +4676,6 @@ function doMerge(kind){
   setTimeout(()=>{ const m=document.getElementById('cmerge'); if(m) m.classList.add('go'); }, 60);
   setTimeout(()=>{
     burstConfetti(24);
-    if(goldenCount(kind)%MERGE_COST===0 && looks.length<LOOKS.length) queueCeleb({type:'look',kind});
     const more = baseCount(kind)>=MERGE_COST;
     const btns = [];
     if(more) btns.push({label:TX('mergeMore', ()=>`✨ ${G('מזגי','מזג','מזגו')} עוד`), fn:()=>doMerge(kind)});
@@ -4703,71 +4683,18 @@ function doMerge(kind){
     showCeleb(`<div class="cbig">${itemHTML(kind,true,110)}</div><div class="ctitle">${rewardName(kind,'up') ? `${G('קיבלת','קיבלת','קיבלתם')} שדרוג: ${esc(rewardName(kind,'up'))}!` : `${G('קיבלת','קיבלת','קיבלתם')} גרסה משודרגת!`}</div><div class="csub">${TX('gotUpSub','היא נשמרת בחדר המתנות.')}</div>`, btns);
   }, 1050);
 }
-function showLookReady(kind){
-  burstConfetti(26);
-  showCeleb(`<div class="cbig">${itemHTML(kind,true,100)}</div><div class="ctitle">${MERGE_COST} ${TX('upUnits','משודרגים')} מאותו סוג!</div><div class="csub">${TX('lookReadySub','זה מספיק כדי לפתוח לוק חדש לקאפקייק.')}</div>`,
-    [{label:`${TX('lookIcon','🎀')} ${G('פתחי','פתח','פתחו')} לוק חדש`, fn:()=>doUnlockLook(kind)}, {label:'אחר כך', ghost:true, fn:closeCeleb}]);
-}
-function nextLookIdx(){ for(let i=0;i<LOOKS.length;i++) if(!looks.includes(i)) return i; return looks.length; }
-function doUnlockLook(kind){
-  if(looks.length>=LOOKS.length || goldenCount(kind)<MERGE_COST){ closeCeleb(); return; }
-  const paid = removeGolden(kind, MERGE_COST);
-  const idx = nextLookIdx(); looks.push(idx); lookSrc[idx] = kind; lookGold[idx] = paid; activeLook = idx;
-  saveState(); renderRewards(); setMood(lastMood||'happy');
-  burstConfetti(30);
-  if(goldenCount(kind)>=MERGE_COST && looks.length<LOOKS.length) queueCeleb({type:'look',kind});
-  showCeleb(`<div class="cbig look"><img src="${LOOKS[idx].img}" alt="${LOOKS[idx].name}"></div><div class="ctitle">לוק חדש: ${LOOKS[idx].name}!</div><div class="csub">${TX('lookWorn','קאפקייק כבר לובשת אותו.')} (${looks.length}/${LOOKS.length})</div>`,
-    [{label:'איזה יופי! 💖', fn:closeCeleb}]);
-}
-// ---- UNMERGE: give back what a merge used (an upgraded item -> 10 originals, a look -> 10 upgraded items) ----
-function smallItems(kind, isGold, items){ return Array.from({length:MERGE_COST},(_,i)=>`<span>${itemHTML((items&&items[i])||kind,isGold,32)}</span>`).join(''); }
-function askUnmergeGold(kind, g){
-  if(goldenCount(kind)<1) return;
-  const items = goldItems(kind, g);
-  showCeleb(`<div class="cbig">${itemHTML(kind,true,90)}</div><div class="ctitle">לפרק ל-${MERGE_COST} ${TX('baseUnits','מתנות רגילות')}?</div><div class="csub">${TX('upItem','הפריט המשודרג')} ייעלם, ויוחזרו ${MERGE_COST} ${TX('baseUnits','מתנות רגילות')} מאותו סוג. אפשר ${TX('mergeInf','למזג')} שוב בכל רגע.</div>`,
-    [{label:'פירוק', fn:()=>doUnmergeGold(kind,g)}, {label:'ביטול', ghost:true, fn:closeCeleb}]);
-}
+// ---- MEMORY VAULT: an upgraded item keeps the 10 rewards it was made from, for good (there is no un-merge) ----
 // the 10 items inside an upgraded item: the remembered ones, or the fixed default look for an old upgraded item that did not remember
 function goldItems(kind, g){
   const cs = (g!=null && goldCombos(g)) || [];
   return Array.from({length:MERGE_COST},(_,i)=> LAYERS[kind] ? kind+':'+(cs[i]||LAYER_DEFAULT[kind]) : kind);
 }
-function doUnmergeGold(kind, g){
-  if(goldenCount(kind)<1){ closeCeleb(); return; }
-  const gone = removeGolden(kind, 1, g); const items = goldItems(kind, gone[0]);
-  { collection.unshift(...items); if(lastRewardCount>=0) lastRewardCount += MERGE_COST; }
-  saveState(); renderRewards();
-  showCeleb(`<div class="cmerge">${smallItems(kind,false,items)}</div><div class="ctitle">הפריט פורק</div><div class="csub">חזרו ${MERGE_COST} ${TX('baseUnits','מתנות רגילות')} ${TX('toRoom','לחדר המתנות')}.</div>`, [{label:'סגירה', fn:closeCeleb}]);
+// tap an upgraded item in the gift room: the 10 rewards inside it
+function viewGold(kind, g){
+  const items = goldItems(kind, g);
+  const small = items.map(x=>`<span class="vitem">${itemHTML(x,false,Math.min(64,Math.round(innerWidth/6)))}</span>`).join('');
+  showCeleb(`<div class="cbig">${itemHTML(kind,true,90)}</div><div class="ctitle">${esc(rewardName(kind,'up')||TX('upItem','הפריט המשודרג'))}</div><div class="csub">${MERGE_COST} ${TX('baseUnits','המתנות')} שמהן הוא נוצר, שמורות כאן לתמיד:</div><div class="vault">${small}</div>`, [{label:'סגירה', fn:closeCeleb}]);
 }
-function askUnmergeLook(i){
-  if(!looks.includes(i) || !LOOKS[i]) return;
-  const src = lookSrc[i];
-  const head = `<div class="cbig look"><img src="${LOOKS[i].img}" alt="${LOOKS[i].name}"></div><div class="ctitle">לפרק את הלוק "${LOOKS[i].name}"?</div>`;
-  if(src){
-    showCeleb(head + `<div class="csub">הלוק ייעלם, ויוחזרו ${MERGE_COST} ${TX('upUnits','פריטים משודרגים')}: <span class="inl">${itemHTML(src,true,26)}</span>. אפשר לפתוח לוק שוב בכל רגע.</div>`,
-      [{label:'פירוק', fn:()=>doUnmergeLook(i,src)}, {label:'ביטול', ghost:true, fn:closeCeleb}]);
-    return;
-  }
-  // an older look: the game did not record which items paid for it, so the player picks the kind to get back
-  let pick = null;
-  showCeleb(head + `<div class="csub">איזה סוג של ${TX('upUnits','פריטים משודרגים')} להחזיר? (${MERGE_COST} פריטים)</div><div class="kgrid">` +
-    STICKERS.map(k=>`<button type="button" class="kpick" data-k="${k}">${itemHTML(k,true,30)}</button>`).join('') + '</div>',
-    [{label:'פירוק', fn:()=>{ if(!pick){ document.getElementById('celebBody').classList.add('need'); return; } doUnmergeLook(i,pick); }}, {label:'ביטול', ghost:true, fn:closeCeleb}]);
-  document.querySelectorAll('#celebBody .kpick').forEach(b=>b.onclick=()=>{
-    pick = b.dataset.k; document.getElementById('celebBody').classList.remove('need');
-    document.querySelectorAll('#celebBody .kpick').forEach(x=>x.classList.toggle('on', x===b));
-  });
-}
-function doUnmergeLook(i, kind){
-  if(!looks.includes(i)){ closeCeleb(); return; }
-  const back = (lookGold[i]||[]).filter(g=>kOf(g)===kind);
-  looks = looks.filter(x=>x!==i); delete lookSrc[i]; delete lookGold[i];
-  if(activeLook===i) activeLook = -1;
-  for(let n=0;n<MERGE_COST;n++) golden.push(back[n]||kind);
-  saveState(); renderRewards(); setMood(lastMood||'happy');
-  showCeleb(`<div class="cmerge">${smallItems(kind,true)}</div><div class="ctitle">הלוק פורק</div><div class="csub">חזרו ${MERGE_COST} ${TX('upUnits','פריטים משודרגים')} ${TX('toRoom','לחדר המתנות')}.</div>`, [{label:'סגירה', fn:closeCeleb}]);
-}
-function wearLook(i){ activeLook = (activeLook===i) ? -1 : i; saveState(); setMood(lastMood||'happy'); renderRoom(); }
 function renderStickerbook(){ renderRewards(); }
 function renderLolli(){ renderRewards(); }
 
@@ -5636,9 +5563,10 @@ function peekClear(){
 function setMood(name){
   lastMood = name;
   const img = document.getElementById('charImg');
-  // a worn look is one of the default theme's pictures; until the other themes have their own looks they show the mascot instead
-  const lookSrc = (activeLook>=0 && LOOKS[activeLook]) ? skinImg('look', activeLook, themeId===THEME_DEFAULT ? LOOKS[activeLook].img : null) : null;
-  img.src = lookSrc || (name==='puzzled' ? skinImg('react', name, null) : null) || skinImg('mood', name, UNICORN_IMG[name] || UNICORN_IMG.happy);
+  // 'look0'..'look15' are the former looks: more pictures of the mascot, shown like the moods (sweets theme only)
+  const lk = /^look(\d+)$/.exec(name); const lookImg = (lk && LOOKS[+lk[1]] && themeId===THEME_DEFAULT) ? LOOKS[+lk[1]].img : null;
+  if(lk && !lookImg) name = 'happy';
+  img.src = lookImg || (name==='puzzled' ? skinImg('react', name, null) : null) || skinImg('mood', name, UNICORN_IMG[name] || UNICORN_IMG.happy);
   img.classList.remove('bounce'); void img.offsetWidth; img.classList.add('bounce');
 }
 
@@ -5651,11 +5579,8 @@ document.getElementById('roomBody').addEventListener('click', e=>{
   const t = e.target.closest('[data-act]'); if(!t) return;
   const act = t.dataset.act;
   if(act==='merge') showReadyCeleb(t.dataset.kind);
-  else if(act==='look') showLookReady(t.dataset.kind);
-  else if(act==='wear') wearLook(Number(t.dataset.i));
   else if(act==='view') viewReward(Number(t.dataset.i));
-  else if(act==='ungold') askUnmergeGold(t.dataset.kind, t.dataset.g);
-  else if(act==='unlook') askUnmergeLook(Number(t.dataset.i));
+  else if(act==='vault') viewGold(t.dataset.kind, t.dataset.g);
 });
 document.getElementById('roomOverlay').addEventListener('click', e=>{ if(e.target.id==='roomOverlay') closeRoom(); });
 menuInit();
