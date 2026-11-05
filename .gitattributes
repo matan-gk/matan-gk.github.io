@@ -1,0 +1,6 @@
+# Text files are stored with LF line endings (the game page used to be stored with CRLF; this keeps diffs readable)
+* text=auto eol=lf
+*.webp binary
+*.png binary
+*.woff2 binary
+*.jpg binary
