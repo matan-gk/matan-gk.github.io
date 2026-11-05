@@ -510,7 +510,7 @@ body[data-view="home"] .wrap > .sub{margin-bottom:12px}
 @keyframes bounce{ 0%{transform:scale(1)} 30%{transform:scale(1.18) rotate(-4deg)} 60%{transform:scale(.96) rotate(3deg)} 100%{transform:scale(1)} }
 .milestone .box img{width:150px; margin-bottom:6px}
 [data-skin="space"] .milestone .box img{width:auto; height:190px; max-width:210px; object-fit:contain}
-@media (min-width:720px){ .wrap{max-width:720px} .levels{grid-template-columns:repeat(4,minmax(0,1fr))} .levels .levelbtn, .levels[data-rem] .levelbtn:last-child, .levels[data-rem] .levelbtn:nth-last-child(-n+2){grid-column:auto} }
+@media (min-width:720px){ .wrap{max-width:720px} .levels{grid-template-columns:repeat(4,minmax(0,1fr))} .levels .levelbtn, .levels .roombtn, .levels[data-rem] .roombtn, .levels[data-rem] .levelbtn:last-child, .levels[data-rem] .levelbtn:nth-last-child(-n+2){grid-column:auto} }
 @media (min-width:1100px){ .wrap{max-width:880px} .levels{grid-template-columns:repeat(8,minmax(0,1fr))} .levelbtn{font-size:.95rem; padding:12px 8px} .card{padding:28px 28px} }
 /* selection screen: the game grid is the main control, so it grows with the room available */
 @media (min-width:480px){ body[data-view="home"] .levelbtn .lvimg{width:84px; height:84px} body[data-view="home"] .levelbtn .lvimg.cut{width:72px; height:72px} body[data-view="home"] .levelbtn{font-size:.95rem; padding:12px 8px} body[data-view="home"] .levelbtn .emoji{font-size:3.6rem} }
@@ -701,6 +701,57 @@ tr.mxempty th[scope=row]{opacity:.6}
 @media (min-width:1200px) and (min-height:760px){:root{--rz:1.8}}
 .cup{position:relative;display:inline-block;vertical-align:middle;flex:none;width:calc(var(--n)*var(--rz));height:calc(var(--n)*var(--rz))}
 .cup img{position:absolute !important;max-width:none !important;display:block;pointer-events:none}
+
+/* ===== personal space ===== */
+.roombtn,.levelbtn{}
+.roombtn{grid-column:span 2; position:relative; min-width:0; display:flex; flex-direction:column; align-items:center; justify-content:center; background:var(--card); border:2px solid var(--yellow); border-radius:16px; padding:10px 8px; text-align:center; cursor:pointer; color:var(--text); font-family:'Baloo 2',sans-serif; font-weight:600; font-size:.82rem; box-shadow:0 4px 10px var(--shadow)}
+.roombtn .rb-in{display:flex; flex-direction:column; align-items:center}
+.roombtn.locked{border-color:transparent}
+.roombtn.locked .rbimg{filter:grayscale(.85) brightness(.9); opacity:.75}
+.rbmedal{position:relative; display:block; width:64px; height:64px; margin:0 auto 4px}
+.rbimg{width:64px; height:64px; object-fit:contain; display:block}
+.rbring{position:absolute; inset:-6px; width:calc(100% + 12px); height:calc(100% + 12px)}
+.rbtrack{fill:none; stroke:rgba(0,0,0,.12); stroke-width:5}
+.rbfill{fill:none; stroke:var(--yellow,#ffc83d); stroke-width:6; stroke-linecap:round}
+.rblock{position:absolute; width:26px; height:auto; right:-6px; bottom:-4px; filter:drop-shadow(0 1px 2px rgba(0,0,0,.3))}
+.rbsub{font-size:.75rem; opacity:.8}
+.roombtn .cl{position:absolute; left:50%; top:45%; width:90%; opacity:0; pointer-events:none; transform:translate(-50%,-50%) scale(.3); z-index:2}
+.roombtn.poof .rb-in{animation:rbin .55s 1.15s both}
+.roombtn.poof .c1{animation:cl1 .5s 0s both} .roombtn.poof .c2{animation:cl1 .5s .45s both} .roombtn.poof .c3{animation:cl3 .9s .9s both}
+@keyframes rbin{from{opacity:0; transform:scale(.3)} 70%{transform:scale(1.12)} to{opacity:1; transform:none}}
+@keyframes cl1{0%{opacity:0; transform:translate(-50%,-50%) scale(.3)} 45%{opacity:1; transform:translate(-50%,-50%) scale(.8)} 100%{opacity:0; transform:translate(-50%,-50%) scale(1)}}
+@keyframes cl3{0%{opacity:0; transform:translate(-50%,-50%) scale(.5)} 35%{opacity:1; transform:translate(-50%,-50%) scale(1.3)} 100%{opacity:0; transform:translate(-50%,-50%) scale(1.8)}}
+.levels[data-rem="1"] .roombtn{grid-column:1/-1}
+.levels[data-rem="2"] .roombtn{grid-column:span 3}
+.levels[data-rem="2"] .levelbtn:nth-last-child(-n+2){grid-column:span 2}
+.levels[data-rem="2"] .levelbtn:nth-last-child(2){grid-column:span 3}
+.levels[data-rem="1"] .levelbtn:last-child{grid-column:span 2}
+.ucere{gap:6px; min-height:170px}
+.ufr{width:auto; animation:cpop .5s}
+.ukey{animation:ukey .9s both}
+@keyframes ukey{from{transform:translateX(90px) rotate(40deg); opacity:0} to{transform:none; opacity:1}}
+.csub.small{font-size:.8rem; opacity:.75}
+.tokgo{margin-inline-start:auto; padding:8px 14px}
+.spaceov{z-index:55}
+.spaceroom{max-width:900px; max-height:92vh; height:92vh}
+.spaceroom .roombody{display:flex; flex-direction:column; flex:1; min-height:0; padding:4px 12px 12px; overflow:hidden}
+.rmtop{display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:6px}
+.rmtop .tokchip{margin:0}
+.rmzoom{display:flex; gap:6px}
+.rmz{border:0; background:var(--card2); color:var(--text); width:38px; height:38px; border-radius:50%; font-size:1.1rem; font-weight:800; cursor:pointer}
+.rmview{flex:1; min-height:0; border-radius:16px; background:linear-gradient(#fdf2fb,#e6f1ff); overflow:hidden; touch-action:none; cursor:grab}
+.rmview svg{width:100%; height:100%; display:block; user-select:none; -webkit-user-select:none}
+.rmsheet{background:var(--card2); border-radius:16px; padding:12px; margin-top:8px; display:flex; flex-direction:column; gap:8px; text-align:center}
+.rmsheet[hidden]{display:none}
+.rmsh-t{font-family:'Baloo 2',sans-serif; font-weight:800; color:var(--purple)}
+.rmsh-s{font-size:.85rem; opacity:.85}
+.rmmax{font-weight:800}
+.rmsheet .btn.ghost{background:var(--card); color:var(--text)}
+.swrow{display:grid; grid-template-columns:repeat(8,1fr); gap:6px}
+.swatch{aspect-ratio:1; border-radius:50%; border:3px solid rgba(0,0,0,.18); background:var(--c); font-size:.7rem; font-weight:800; cursor:pointer; padding:0; display:flex; align-items:center; justify-content:center; color:#4a3a5a}
+.swatch.cur{border-color:var(--purple); box-shadow:0 0 0 3px #fff inset}
+.swatch.new{border-style:dashed}
+.rmpick{display:inline-block; width:90px; height:90px; border-radius:50%; border:3px solid rgba(0,0,0,.2); font-size:2.6rem; line-height:90px}
 </style>
 </head>
 <body data-view="home">
@@ -784,6 +835,16 @@ tr.mxempty th[scope=row]{opacity:.6}
         <button type="button" class="roomclose" id="roomClose" aria-label="סגירה">✕</button>
       </div>
       <div class="roombody" id="roomBody"></div>
+    </div>
+  </div>
+
+  <div class="roomoverlay spaceov" id="spaceOverlay" hidden>
+    <div class="room spaceroom" role="dialog" aria-label="החדר של קאפקייק">
+      <div class="roomhead">
+        <div class="roomtitle">🏰 החדר של קאפקייק</div>
+        <button type="button" class="roomclose" id="spaceClose" aria-label="סגירה">✕</button>
+      </div>
+      <div class="roombody" id="spaceBody"></div>
     </div>
   </div>
 
@@ -1023,7 +1084,38 @@ function praise(){
   return t; }
 const PRAISE = ["מעולה! 🌟","כל הכבוד!","@@MASCOT@@","פגיעה מדויקת! 🎯","@@GENIUS@@","@@NAME1@@","@@NAME2@@"];
 let level = 1, score = 0, streak = 0, current = null, collection = [], lollipops = [], bonusActive = false;
-let space = {earned:0, spent:0, trued:false};   // personal-space tokens: earned once per upgrade (stored, never derived), spent in the shop later; trued = the one-time true-up for old players was done
+// ===== PERSONAL SPACE (room v0) =====
+const SPACE_UNLOCK = 10;                                   // tokens earned to open the room
+const ROOM_COLORS = [{n:'לבן',h:'#ffffff'},{n:'ורוד',h:'#ffc2dc'},{n:'סגול',h:'#cdb0f2'},{n:'תכלת',h:'#a9d9f6'},{n:'מנטה',h:'#b6edca'},{n:'צהוב',h:'#fff1a3'},{n:'אפרסק',h:'#ffd0a3'},{n:'עץ',h:'#dcb78c'}];
+const ROOM_DEFAULT = {wl:2, wr:2, fl:7};                    // wall left, wall right, floor: the color each starts with (free)
+const ROOM_SURF = {wl:'הקיר השמאלי', wr:'הקיר הימני', fl:'הרצפה'};
+const ROOM_ITEMS = {bed:{n:'מיטה', up:[0,3,6]}, window:{n:'חלון', up:[0,2,4]}};   // up[i] = tokens to reach level i+1 (index 0 unused)
+const ROOM_MAXLV = 3, COLOR_COST = 1;
+const ROOM_ENTRY = {};   // placeholder for future per-item art
+function roomMaxCost(){   // everything buyable in the room today (the catalog grows in later steps)
+  let t = 0; for(const id in ROOM_ITEMS) t += ROOM_ITEMS[id].up.reduce((a,b)=>a+b,0);
+  return t + Object.keys(ROOM_DEFAULT).length * (ROOM_COLORS.length-1) * COLOR_COST;
+}
+function spaceClean(sp, gold, legacy){
+  sp = (sp && typeof sp==='object') ? sp : {};
+  const nn = v => (Number.isInteger(v) && v>0) ? Math.min(v,1e6) : 0;
+  let earned = nn(sp.earned); const spent = nn(sp.spent), trued = sp.trued===true;
+  // one-time true-up for old players: what they already upgraded (and 10 per look opened before) counts
+  if(!trued) earned = Math.max(earned, gold.length + legacy*MERGE_COST);
+  const surf = {}, own = {};
+  for(const k in ROOM_DEFAULT){
+    const okc = v => Number.isInteger(v) && v>=0 && v<ROOM_COLORS.length;
+    const c = okc(sp.surf && sp.surf[k]) ? sp.surf[k] : ROOM_DEFAULT[k];
+    const o = (Array.isArray(sp.own && sp.own[k]) ? sp.own[k] : []).filter(okc);
+    [ROOM_DEFAULT[k], c].forEach(v=>{ if(!o.includes(v)) o.push(v); });
+    surf[k] = c; own[k] = [...new Set(o)].sort((a,b)=>a-b);
+  }
+  const lv = {};
+  for(const id in ROOM_ITEMS){ const v = sp.lv && sp.lv[id]; lv[id] = (Number.isInteger(v) && v>=1 && v<=ROOM_MAXLV) ? v : 1; }
+  return {earned, spent:Math.min(spent,earned), trued:true, unlocked:sp.unlocked===true, surf, own, lv};
+}
+function spaceSnap(){ return JSON.parse(JSON.stringify(space)); }
+let space = spaceClean({},[],0);   // personal-space tokens: earned once per upgrade (stored, never derived), spent in the shop later; trued = the one-time true-up for old players was done
 let golden = [], legacyLooks = 0;   // upgraded rewards (each remembers the 10 rewards it was made from); how many looks the player had opened before the looks were retired (used by the token true-up)
 const COTTON_CANDY_IMG = "assets/32c4bd427e57.webp";
 // ===== ICON IMAGES (replace the device's emoji font; each name is a file in ICONS.md) =====
@@ -1154,7 +1246,7 @@ function applyTheme(){
 }
 let warmOn = false, sessionDraws = 0;   // warm-up first (parent switch) and how many questions this session has drawn (resets when the game opens or the profile changes)
 let diffOn = [1,2,3];     // enabled difficulty levels for the active profile (see the Settings tab)
-function captureProgress(){ return {score,streak,collection,lollipops,level,golden,legacyLooks,space:{earned:space.earned,spent:space.spent,trued:space.trued},rv:LAYER_V,diff:diffIdsClean(diffOn),mx:mxClean(mxState),focus:focusOn,warm:warmOn,theme:themeId}; }
+function captureProgress(){ return {score,streak,collection,lollipops,level,golden,legacyLooks,space:spaceSnap(),rv:LAYER_V,diff:diffIdsClean(diffOn),mx:mxClean(mxState),focus:focusOn,warm:warmOn,theme:themeId}; }
 function cleanProgress(d){
   d = (d && typeof d==='object') ? d : {};
   let col = Array.isArray(d.collection) ? d.collection.filter(x=>typeof x==='string') : [];
@@ -1173,11 +1265,7 @@ function cleanProgress(d){
   // the looks were retired (their 16 pictures joined the mascot's pictures): only the number opened is kept, for the token true-up
   const oldLooks = Array.isArray(d.looks) ? new Set(d.looks.filter(i=>Number.isInteger(i)&&i>=0&&i<LOOKS.length)).size : 0;
   const legacy = Math.max(oldLooks, (Number.isInteger(d.legacyLooks)&&d.legacyLooks>0) ? Math.min(d.legacyLooks,LOOKS.length) : 0);
-  // tokens: one per upgrade ever made. Old players get a one-time true-up: what they already upgraded (and 10 per look they had opened) counts
-  const sp = (d.space && typeof d.space==='object') ? d.space : {};
-  const nn = v => (Number.isInteger(v) && v>0) ? Math.min(v,1e6) : 0;
-  let earned = nn(sp.earned); const spent = nn(sp.spent), trued = sp.trued===true;
-  if(!trued) earned = Math.max(earned, gold.length + legacy*MERGE_COST);
+  const sp2 = spaceClean(d.space, gold, legacy);   // tokens + the room; old players get a one-time true-up inside
   return {
     score:  (typeof d.score==='number' && isFinite(d.score)) ? d.score : 0,
     streak: (typeof d.streak==='number' && isFinite(d.streak)) ? d.streak : 0,
@@ -1186,7 +1274,7 @@ function cleanProgress(d){
     level: (typeof d.level==='number' && d.level>=1 && d.level<=8) ? d.level : 1,
     golden: gold,
     legacyLooks: legacy,
-    space: {earned, spent:Math.min(spent,earned), trued:true},
+    space: sp2,
     rv: LAYER_V,
     diff: diffIdsClean(d.diff),
     mx: mxClean(d.mx),
@@ -1859,7 +1947,7 @@ function cloudProfileFromDoc(C, helpers){
 // ===== CLOUD (Google sign-in, cloud progress, problem reports) =====
 // Local-first: the game always works from this device's storage. The cloud is a mirror, so no internet / no account / no quota never blocks play.
 // Everything here is off while CLOUD_CONFIG is null. See firebase/SETUP.md for how to create the (free) Firebase project and paste its settings below.
-const APP_VERSION = '2026.11.05b';       // keep equal to VERSION in sw.js (a test checks it)
+const APP_VERSION = '2026.11.05c';       // keep equal to VERSION in sw.js (a test checks it)
 const CLOUD_CONFIG = {apiKey:"AIzaSyAlq_TJNGvWPJpUrpbdq_hkAoURydqMzm0", authDomain:"learning-quest-1.firebaseapp.com", projectId:"learning-quest-1", appId:"1:98931179722:web:78fb00084ccba3efb53433"};   // e.g. {apiKey:'...', authDomain:'xxx.firebaseapp.com', projectId:'xxx', appId:'...'}
 const CLOUD_LIMITS = {
   pushDelayMs: 60000,          // at most one upload per profile per minute while playing
@@ -2472,6 +2560,7 @@ function enterProfile(){
   const p = activeProfile(); if(!p) return;
   curGender = GENDER_INFO[p.gender] ? p.gender : 'f';
   applyProgress(p.progress);
+  setTimeout(()=>{ if(!celebOpen) flushCelebs(); }, 900);   // a profile that is already above 10 tokens gets the unlock ceremony
   sessionDraws = 0;                                  // a new session: the warm-up starts again
 }
 
@@ -4561,7 +4650,7 @@ function openGame(id){
 function renderLevels(){
   const shown = mxVisibleLevels(diffOn, mxState);
   if(shown.length && !shown.includes(level)) level = shown.includes(5) ? 5 : shown[0];   // the parent hid the section she was in
-  const el = document.getElementById('levels'); el.innerHTML=''; el.dataset.rem = String(shown.length%3);
+  const el = document.getElementById('levels'); el.innerHTML=''; el.dataset.rem = String((shown.length+1)%3);
   LEVELS.filter(l=>shown.includes(l.id)).forEach(l=>{
     const b=document.createElement('div');
     b.className='levelbtn'+(l.id===level?' active':'');
@@ -4571,6 +4660,7 @@ function renderLevels(){
     b.onclick=()=>openGame(l.id);
     el.appendChild(b);
   });
+  addRoomBtn(el);
 }
 
 let lastRewardCount = -1;
@@ -4625,12 +4715,193 @@ const TOKEN_TIERS = [[300,'chest'],[100,'bag'],[50,'pile'],[10,'stack'],[1,'coin
 const tokenBalance = () => Math.max(0, space.earned - space.spent);
 function tokenTier(n){ const t = TOKEN_TIERS.find(x=>n>=x[0]); return t ? t[1] : null; }
 function tokenHTML(n, px){ const t = tokenTier(n); return t ? `<img class="tokimg" src="${TOKEN_IMG[t]}" alt="" data-tier="${t}" style="height:${px}px">` : ''; }
+const spaceLocked = () => !space.unlocked;
+
+// ---- ceremony art (cut from the Gemini sheets) ----
+const UNLOCK_IMG = {lock:'assets/5f98cda1e76a.webp',lockopen:'assets/adf87e4640f8.webp',key:'assets/17e84594a25c.webp',chestlock:'assets/1dcef59e334c.webp',chestajar:'assets/b5dcea537c0b.webp',chestglow:'assets/dad37d8665a2.webp',doorshut:'assets/9474ada24b1f.webp',doorajar:'assets/8dfd75bc73c2.webp',dooropen:'assets/1787a120cdb2.webp',cloud1:'assets/36ff43363ad7.webp',cloud2:'assets/b17aa147f5c5.webp',cloud3:'assets/ed30fb21e306.webp',medal:'assets/81b51c114164.webp'};
+const uimg = (k,h,cls) => `<img class="${cls||''}" src="${UNLOCK_IMG[k]}" alt="" style="height:${h}px">`;
+
+// ---- the button on the game-selection screen ----
+let poofNext = false;
+function roomBtnHTML(){
+  const locked = spaceLocked(), n = Math.min(space.earned, SPACE_UNLOCK), R = 46, C = 2*Math.PI*R;
+  const ring = locked ? `<svg class="rbring" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="${R}" class="rbtrack"/><circle cx="50" cy="50" r="${R}" class="rbfill" stroke-dasharray="${(C*n/SPACE_UNLOCK).toFixed(1)} ${C.toFixed(1)}" transform="rotate(-90 50 50)"/></svg>` : '';
+  return `<span class="rb-in"><span class="emoji"><span class="rbmedal">${ring}<img class="rbimg" src="${UNLOCK_IMG.medal}" alt="">${locked?`<img class="rblock" src="${UNLOCK_IMG.lock}" alt="">`:''}</span></span>${esc(TX('spaceName','החדר של קאפקייק'))}${locked?`<span class="rbsub">${n}/${SPACE_UNLOCK} 🪙</span>`:''}</span>`
+    + (poofNext && !locked ? `<img class="cl c1" src="${UNLOCK_IMG.cloud1}" alt=""><img class="cl c2" src="${UNLOCK_IMG.cloud2}" alt=""><img class="cl c3" src="${UNLOCK_IMG.cloud3}" alt="">` : '');
+}
+function addRoomBtn(el){
+  const b = document.createElement('div');
+  b.className = 'roombtn' + (spaceLocked() ? ' locked' : '') + (poofNext && !spaceLocked() ? ' poof' : '');
+  b.id = 'spaceBtn'; b.setAttribute('role','button'); b.tabIndex = 0;
+  b.innerHTML = roomBtnHTML();
+  b.onclick = () => openSpace();
+  b.onkeydown = e => { if(e.key==='Enter'||e.key===' '){ e.preventDefault(); openSpace(); } };
+  el.appendChild(b);
+  if(poofNext && !spaceLocked()){ poofNext = false; setTimeout(()=>b.classList.remove('poof'), 2200); }
+}
+function openSpace(){
+  if(spaceLocked()) return showTeaser();
+  document.getElementById('spaceOverlay').hidden = false; renderSpace();
+}
+function closeSpace(){ document.getElementById('spaceOverlay').hidden = true; spaceSheet(''); }
+function showTeaser(){
+  const need = SPACE_UNLOCK - space.earned;
+  showCeleb(`<div class="cbig">${uimg('chestlock',120)}</div><div class="ctitle">${esc(TX('spaceName','החדר של קאפקייק'))}</div><div class="csub">${need>0 ? `כל שדרוג של מתנה נותן מטבע אחד. עוד <b>${need}</b> ${need===1?'מטבע':'מטבעות'} והחדר ייפתח! (${space.earned}/${SPACE_UNLOCK})` : 'החדר מוכן להיפתח!'}</div>`,
+    [{label:'סגירה', fn:closeCeleb}]);
+}
+
+// ---- the unlock ceremony ----
+let uTimers = [];
+function setCelebBtns(buttons){
+  const bt = document.getElementById('celebBtns'); bt.innerHTML='';
+  buttons.forEach(b=>{ const el=document.createElement('button'); el.type='button'; el.className='btn'+(b.ghost?' ghost':''); el.textContent=b.label; el.onclick=b.fn; bt.appendChild(el); });
+}
+function showUnlock(){
+  space.unlocked = true; saveState();            // unlocking spends nothing; the flag is saved at once so it plays once
+  burstConfetti(18);
+  const frames = [
+    [0,    'lock',      `${G('הגעת','הגעת','הגעתם')} ל־${SPACE_UNLOCK} מטבעות!`, 'משהו קסום מחכה מאחורי המנעול…'],
+    [1100, 'lock+key',  `${G('מצאת','מצאת','מצאתם')} מפתח!`, 'הוא נראה בדיוק במידה'],
+    [2300, 'lockopen',  'קליק! המנעול נפתח', ''],
+    [3200, 'chestajar', 'תיבת האוצר נפתחת…', ''],
+    [4100, 'chestglow', 'איזה אור קסום!', ''],
+    [5100, 'doorshut',  'ומאחורי האור… דלת', ''],
+    [6000, 'doorajar',  'היא נפתחת…', ''],
+    [6900, 'dooropen',  `החדר של קאפקייק ${G('שלך','שלך','שלכם')}!`, 'מקשטים אותו במטבעות שמרוויחים משדרוג מתנות.'],
+  ];
+  showCeleb(`<div class="cbig ucere" id="uStage"></div><div class="ctitle" id="uTitle"></div><div class="csub" id="uSub"></div>`, []);
+  uTimers.forEach(clearTimeout); uTimers = [];
+  const done = (enter) => { uTimers.forEach(clearTimeout); uTimers = []; poofNext = true; closeCeleb(); renderLevels(); if(enter) setTimeout(openSpace, 1800); };
+  const fin = () => setCelebBtns([{label:`🚪 ${G('היכנסי','היכנס','היכנסו')} לחדר`, fn:()=>done(true)}, {label:'אחר כך', ghost:true, fn:()=>done(false)}]);
+  setCelebBtns([{label:'דילוג', ghost:true, fn:()=>done(false)}]);
+  frames.forEach((f,i)=>uTimers.push(setTimeout(()=>{
+    const st = document.getElementById('uStage'); if(!st) return;
+    const [k1,k2] = f[1].split('+');
+    st.innerHTML = uimg(k1,150,'ufr') + (k2 ? uimg(k2,120,'ufr ukey') : '');
+    document.getElementById('uTitle').textContent = f[2]; document.getElementById('uSub').textContent = f[3];
+    if(i>=2) burstConfetti(i===frames.length-1 ? 24 : 6);
+    if(i===frames.length-1) fin();
+  }, f[0])));
+}
+
+// ---- the room ----
+const RM = {W:1000, H:900, k:1, tx:0, ty:0};
+const gx2s = (x,y) => [500+(x-y)*50, 400+(x+y)*25];
+const pts = a => a.map(p=>p.join(',')).join(' ');
+function shade(hex, f){   // f<0 darker, f>0 lighter
+  const n = parseInt(hex.slice(1),16); let r=n>>16, g=(n>>8)&255, b=n&255;
+  const m = v => Math.max(0,Math.min(255, Math.round(f<0 ? v*(1+f) : v+(255-v)*f)));
+  return '#'+[m(r),m(g),m(b)].map(v=>v.toString(16).padStart(2,'0')).join('');
+}
+function isoBox(gx,gy,w,d,h,z,col){   // box on the floor grid; z = height of its bottom above the floor
+  const A=gx2s(gx,gy),B=gx2s(gx+w,gy),C=gx2s(gx+w,gy+d),D=gx2s(gx,gy+d), up=(p,v)=>[p[0],p[1]-v];
+  return `<polygon points="${pts([up(D,z),up(C,z),up(C,z+h),up(D,z+h)])}" fill="${shade(col,-.08)}" stroke="#5b3a2a" stroke-width="3" stroke-linejoin="round"/>`
+       + `<polygon points="${pts([up(C,z),up(B,z),up(B,z+h),up(C,z+h)])}" fill="${shade(col,-.22)}" stroke="#5b3a2a" stroke-width="3" stroke-linejoin="round"/>`
+       + `<polygon points="${pts([up(A,z+h),up(B,z+h),up(C,z+h),up(D,z+h)])}" fill="${shade(col,.12)}" stroke="#5b3a2a" stroke-width="3" stroke-linejoin="round"/>`;
+}
+function bedSVG(lv){   // stand-in drawing until the real bed art arrives (3 levels)
+  let s = isoBox(1,1,4,4,36,0,'#c89a6a');                              // frame
+  s += isoBox(1.15,1.15,3.7,3.7,34,36,lv===3?'#ffd6ec':'#bfe3ff');        // mattress + blanket
+  if(lv>=2) s += isoBox(1,1,4,0.35,120,0,'#c89a6a') + isoBox(1.5,1.2,1.2,0.9,16,70,'#fff') + isoBox(3.3,1.2,1.2,0.9,16,70,'#fff');   // headboard + pillows
+  if(lv===3){
+    [[1,1],[5,1],[1,5],[5,5]].forEach(([x,y])=>{ s += isoBox(x-.12,y-.12,.24,.24,230,0,'#f4cf6a'); });
+    const T=[gx2s(1,1),gx2s(5,1),gx2s(5,5),gx2s(1,5)].map(p=>[p[0],p[1]-230]);
+    ['#ff9ec7','#ffd36e','#9fe3b5','#8fd0ff'].forEach((c,i)=>{ const a=T[i],b=T[(i+1)%4]; s += `<line x1="${a[0]}" y1="${a[1]}" x2="${b[0]}" y2="${b[1]}" stroke="${c}" stroke-width="9" stroke-linecap="round"/>`; });
+    s += `<polygon points="${pts(T)}" fill="#ffffff" opacity=".28"/>`;
+    s += [[2,3.2],[3.5,2.6],[3,4.4]].map(([x,y])=>{ const p=gx2s(x,y); return `<text x="${p[0]}" y="${p[1]-48}" font-size="34" text-anchor="middle">⭐</text>`; }).join('');
+  }
+  return s;
+}
+function windowSVG(lv){   // drawn flat in wall units (x along the wall, y up is negative), skewed onto the right wall by the caller
+  const x0=150, y0=-350, w=200, h=200;
+  let s = `<rect x="${x0-14}" y="${y0-14}" width="${w+28}" height="${h+28}" rx="14" fill="#c89a6a" stroke="#5b3a2a" stroke-width="4"/>`;
+  s += `<rect x="${x0}" y="${y0}" width="${w}" height="${h}" rx="6" fill="${lv===3?'url(#rmRainbow)':'#bfe6ff'}" stroke="#5b3a2a" stroke-width="3"/>`;
+  s += `<path d="M${x0+w/2} ${y0} V${y0+h} M${x0} ${y0+h/2} H${x0+w}" stroke="#5b3a2a" stroke-width="5"/>`;
+  s += `<ellipse cx="${x0+55}" cy="${y0+55}" rx="30" ry="16" fill="#fff" opacity=".9"/>`;
+  if(lv>=2){ s += `<path d="M${x0-26} ${y0-20} h46 q-8 120 12 230 h-58z" fill="#ffb3d6" stroke="#5b3a2a" stroke-width="3"/><path d="M${x0+w+26} ${y0-20} h-46 q8 120 -12 230 h58z" fill="#ffb3d6" stroke="#5b3a2a" stroke-width="3"/>`; }
+  if(lv===3){ s += `<text x="${x0+150}" y="${y0+60}" font-size="34" text-anchor="middle">⭐</text><text x="${x0+100}" y="${y0+150}" font-size="26" text-anchor="middle">✨</text>`; }
+  return s;
+}
+function roomSVG(){
+  const cl = ROOM_COLORS[space.surf.wl].h, cr = ROOM_COLORS[space.surf.wr].h, cf = ROOM_COLORS[space.surf.fl].h;
+  let s = `<defs><linearGradient id="rmRainbow" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffb3d6"/><stop offset=".33" stop-color="#fff2a8"/><stop offset=".66" stop-color="#b8f0c8"/><stop offset="1" stop-color="#a9d9f6"/></linearGradient></defs><g id="rmG" transform="translate(${RM.tx} ${RM.ty}) scale(${RM.k})">`;
+  s += `<g data-hit="surf:wl"><polygon points="0,250 500,0 500,400 0,650" fill="${cl}" stroke="#5b3a2a" stroke-width="4" stroke-linejoin="round"/><polygon points="0,610 500,360 500,400 0,650" fill="#000" opacity=".08"/></g>`;
+  s += `<g data-hit="surf:wr"><polygon points="500,0 1000,250 1000,650 500,400" fill="${shade(cr,-.10)}" stroke="#5b3a2a" stroke-width="4" stroke-linejoin="round"/><polygon points="500,360 1000,610 1000,650 500,400" fill="#000" opacity=".08"/></g>`;
+  let grid = ''; for(let i=1;i<10;i++){ const a=gx2s(i,0),b=gx2s(i,10),c=gx2s(0,i),d=gx2s(10,i); grid += `M${a} L${b} M${c} L${d} `; }
+  s += `<g data-hit="surf:fl"><polygon points="500,400 1000,650 500,900 0,650" fill="${cf}" stroke="#5b3a2a" stroke-width="4" stroke-linejoin="round"/><path d="${grid}" stroke="#5b3a2a" stroke-opacity=".16" stroke-width="2" fill="none"/></g>`;
+  s += `<g data-hit="item:window" transform="matrix(1 .5 0 1 500 400)">${windowSVG(space.lv.window)}</g>`;
+  s += `<g data-hit="item:bed">${bedSVG(space.lv.bed)}</g></g>`;
+  return `<svg id="rmSvg" viewBox="0 0 ${RM.W} ${RM.H}" role="img" aria-label="החדר">${s}</svg>`;
+}
+function renderSpace(){
+  const n = tokenBalance();
+  document.getElementById('spaceBody').innerHTML =
+    `<div class="rmtop"><div class="tokchip" id="rmChip">${tokenHTML(n,36)||'<span class="tokzero">🪙</span>'}<div><b id="rmTokN">${n}</b> ${n===1?'מטבע':'מטבעות'}</div></div>
+     <div class="rmzoom"><button type="button" class="rmz" data-z="1" aria-label="הגדלה">＋</button><button type="button" class="rmz" data-z="-1" aria-label="הקטנה">－</button><button type="button" class="rmz" data-z="0" aria-label="איפוס">⤢</button></div></div>
+     <div class="rmview" id="rmView">${roomSVG()}</div><div class="rmsheet" id="rmSheet" hidden></div>`;
+}
+function rmRedraw(){ const v=document.getElementById('rmView'); if(v) v.innerHTML = roomSVG(); const t=document.getElementById('rmTokN'); if(t){ const n=tokenBalance(); t.textContent=n; } }
+function spaceSheet(html){ const s=document.getElementById('rmSheet'); if(!s) return; s.innerHTML = html||''; s.hidden = !html; }
+function rmPan(dx,dy){ RM.tx += dx; RM.ty += dy; rmClamp(); rmApply(); }
+function rmClamp(){ RM.k = Math.max(1, Math.min(3, RM.k)); RM.tx = Math.min(0, Math.max((1-RM.k)*RM.W, RM.tx)); RM.ty = Math.min(0, Math.max((1-RM.k)*RM.H, RM.ty)); }
+function rmApply(){ const g=document.getElementById('rmG'); if(g) g.setAttribute('transform',`translate(${RM.tx} ${RM.ty}) scale(${RM.k})`); }
+function rmZoomAt(nk, px, py){ nk = Math.max(1,Math.min(3,nk)); RM.tx = px-(px-RM.tx)*nk/RM.k; RM.ty = py-(py-RM.ty)*nk/RM.k; RM.k = nk; rmClamp(); rmApply(); }
+function rmVB(e){ const svg=document.getElementById('rmSvg'); const r=svg.getBoundingClientRect(); const s=Math.max(RM.W/r.width, RM.H/r.height); return [(e.clientX-r.left-r.width/2)*s+RM.W/2, (e.clientY-r.top-r.height/2)*s+RM.H/2, s]; }
+
+// ---- spending ----
+const needMsg = c => { const m = c - tokenBalance(); return `חסרים עוד ${m} ${m===1?'מטבע':'מטבעות'}. כל שדרוג של מתנה נותן מטבע.`; };
+function spaceConfirm(title, picHTML, cost, doIt){
+  const bal = tokenBalance();
+  showCeleb(`<div class="cbig">${picHTML}</div><div class="ctitle">${title}</div><div class="csub">${cost} ${cost===1?'מטבע':'מטבעות'} · ${tokenHTML(bal,22)} יש ${bal}, יישארו ${bal-cost}</div><div class="csub small">אי אפשר להחזיר או למכור אחר כך</div>`,
+    [{label:`קונים (${cost} 🪙)`, fn:()=>{ if(tokenBalance()<cost){ closeCeleb(); return; } space.spent += cost; doIt(); saveState(); closeCeleb(); rmRedraw(); spaceSheet(''); burstConfetti(10); }}, {label:'ביטול', ghost:true, fn:closeCeleb}]);
+}
+function upgradeCost(id){ const lv = space.lv[id]; return lv>=ROOM_MAXLV ? null : ROOM_ITEMS[id].up[lv]; }
+function openItemSheet(id){
+  const it = ROOM_ITEMS[id], lv = space.lv[id], c = upgradeCost(id), bal = tokenBalance();
+  const btn = c==null ? `<div class="rmmax">רמה מקסימלית ✨</div>` : `<button type="button" class="btn" data-up="${id}"${bal<c?' data-poor="1"':''}>${bal<c?'🔒':'⬆️'} שדרוג לרמה ${lv+1} ב־${c} 🪙</button>`;
+  spaceSheet(`<div class="rmsh-t">${it.n} · רמה ${lv} מתוך ${ROOM_MAXLV}</div>${btn}${c!=null&&bal<c?`<div class="rmsh-s">${needMsg(c)}</div>`:''}<button type="button" class="btn ghost" data-close="1">סגירה</button>`);
+}
+function openSurfSheet(k){
+  const sw = ROOM_COLORS.map((c,i)=>{ const own = space.own[k].includes(i), cur = space.surf[k]===i;
+    return `<button type="button" class="swatch${cur?' cur':''}${own?'':' new'}" data-col="${k}:${i}" style="--c:${c.h}" aria-label="${c.n}${own?'':' · '+COLOR_COST+' מטבע'}"><span>${cur?'✓':own?'':COLOR_COST+'🪙'}</span></button>`; }).join('');
+  spaceSheet(`<div class="rmsh-t">צבע ל${ROOM_SURF[k]}</div><div class="swrow">${sw}</div><div class="rmsh-s">צבע שכבר נקנה אפשר להחליף בחינם. צבע חדש עולה מטבע אחד.</div><button type="button" class="btn ghost" data-close="1">סגירה</button>`);
+}
+function onRoomTap(hit){
+  const [kind,id] = hit.split(':');
+  if(kind==='item') openItemSheet(id); else if(kind==='surf') openSurfSheet(id);
+}
+function onSheetClick(e){
+  const t = e.target.closest('button'); if(!t) return;
+  if(t.dataset.close) return spaceSheet('');
+  if(t.dataset.up){ const id=t.dataset.up, c=upgradeCost(id); if(c==null) return;
+    if(tokenBalance()<c) return;   // the sheet already says how many tokens are missing
+    return spaceConfirm(`שדרוג ${ROOM_ITEMS[id].n} לרמה ${space.lv[id]+1}`, `<span class="rmpick">⬆️</span>`, c, ()=>{ space.lv[id]++; }); }
+  if(t.dataset.col){ const [k,i] = t.dataset.col.split(':'), idx = +i;
+    if(space.own[k].includes(idx)){ space.surf[k]=idx; saveState(); rmRedraw(); return openSurfSheet(k); }
+    if(tokenBalance()<COLOR_COST) { spaceSheet(`<div class="rmsh-t">${ROOM_COLORS[idx].n}</div><div class="rmsh-s">${needMsg(COLOR_COST)}</div><button type="button" class="btn ghost" data-close="1">סגירה</button>`); return; }
+    return spaceConfirm(`צבע ${ROOM_COLORS[idx].n} ל${ROOM_SURF[k]}`, `<span class="rmpick" style="background:${ROOM_COLORS[idx].h}"></span>`, COLOR_COST, ()=>{ space.own[k].push(idx); space.surf[k]=idx; }); }
+}
+function spaceInit(){
+  const ov = document.getElementById('spaceOverlay');
+  document.getElementById('spaceClose').onclick = closeSpace;
+  ov.addEventListener('click', e=>{ if(e.target.id==='spaceOverlay') closeSpace(); });
+  document.getElementById('rmSheet') ;
+  ov.addEventListener('click', e=>{ if(e.target.closest('#rmSheet')) onSheetClick(e); const z=e.target.closest('.rmz'); if(z){ const d=+z.dataset.z; if(d===0){RM.k=1;RM.tx=0;RM.ty=0;rmApply();} else rmZoomAt(RM.k*(d>0?1.4:1/1.4), RM.W/2, RM.H/2); } });
+  const ptr = new Map(); let moved = false, last = null, pinch = 0, startHit = null;
+  ov.addEventListener('pointerdown', e=>{ const v=e.target.closest('#rmView'); if(!v) return; v.setPointerCapture && v.setPointerCapture(e.pointerId); ptr.set(e.pointerId,[e.clientX,e.clientY]); moved=false; startHit=(e.target.closest('[data-hit]')||{dataset:{}}).dataset.hit||null; if(ptr.size===2){ const [a,b]=[...ptr.values()]; pinch=Math.hypot(a[0]-b[0],a[1]-b[1]); } last=[e.clientX,e.clientY]; });
+  ov.addEventListener('pointermove', e=>{ if(!ptr.has(e.pointerId)) return; const old=ptr.get(e.pointerId); ptr.set(e.pointerId,[e.clientX,e.clientY]);
+    if(ptr.size===2){ const [a,b]=[...ptr.values()], d=Math.hypot(a[0]-b[0],a[1]-b[1]); if(pinch){ const m=rmVB({clientX:(a[0]+b[0])/2,clientY:(a[1]+b[1])/2}); rmZoomAt(RM.k*d/pinch, m[0], m[1]); } pinch=d; moved=true; return; }
+    const dx=e.clientX-old[0], dy=e.clientY-old[1]; if(!moved && Math.hypot(e.clientX-last[0],e.clientY-last[1])<8) return; moved=true; const s=rmVB(e)[2]; rmPan(dx*s, dy*s); });
+  const up = e=>{ if(!ptr.has(e.pointerId)) return; ptr.delete(e.pointerId); if(ptr.size<2) pinch=0; if(!moved && ptr.size===0 && startHit) onRoomTap(startHit); };
+  ov.addEventListener('pointerup', up); ov.addEventListener('pointercancel', e=>{ ptr.delete(e.pointerId); pinch=0; });
+  ov.addEventListener('wheel', e=>{ if(!e.target.closest('#rmView')) return; e.preventDefault(); const m=rmVB(e); rmZoomAt(RM.k*(e.deltaY<0?1.15:1/1.15), m[0], m[1]); }, {passive:false});
+}
 function renderRoom(){
   const body = document.getElementById('roomBody');
   if(!collection.length && !golden.length){ body.innerHTML=`<div class="roomempty">${TX('roomEmpty', ()=>`עוד אין מתנות. ${G('פתרי','פתור','פתרו')} שאלה כדי לקבל את הראשונה! 🎀`)}</div>`; return; }
   const rank = x=>{ const i=STICKERS.indexOf(kOf(x)); return i<0?999:i; };
   let h = '';
-  { const n = tokenBalance(); h += `<div class="tokchip" id="tokChip">${tokenHTML(n,44)||'<span class="tokzero">🪙</span>'}<div><b id="tokN">${n}</b> ${n===1?'מטבע':'מטבעות'}<div class="roomhint">מטבע אחד על כל שדרוג · בקרוב: חדר אישי</div></div></div>`; }
+  { const n = tokenBalance(); h += `<div class="tokchip" id="tokChip">${tokenHTML(n,44)||'<span class="tokzero">🪙</span>'}<div><b id="tokN">${n}</b> ${n===1?'מטבע':'מטבעות'}<div class="roomhint">מטבע אחד על כל שדרוג</div></div>${space.unlocked?'<button type="button" class="btn tokgo" data-act="space">🏰 לחדר</button>':''}</div>`; }
   const ready = readyList();
   if(ready.length){
     h += `<div class="roomsec">✨ מוכנים לשדרוג</div>`;
@@ -4657,6 +4928,7 @@ const kindName = k => rewardName(k,'many') || k;
 function queueCeleb(ev){ if(!celebQueue.some(x=>x.type===ev.type && x.kind===ev.kind)) celebQueue.push(ev); }
 function flushCelebs(){
   if(celebOpen) return;
+  if(space.earned>=SPACE_UNLOCK && !space.unlocked && !document.querySelector('.roomoverlay.profs:not([hidden])')){ showUnlock(); return; }
   while(celebQueue.length){
     const ev = celebQueue.shift();
     if(ev.type==='merge' && baseCount(ev.kind)>=MERGE_COST){ showReadyCeleb(ev.kind); return; }
@@ -5596,12 +5868,14 @@ document.getElementById('nextBtn').onclick = nextQuestion;
 document.getElementById('rewardsStrip').onclick = openRoom;
 document.getElementById('backBtn').onclick = showHome;
 document.getElementById('roomClose').onclick = closeRoom;
+spaceInit();
 document.getElementById('roomBody').addEventListener('click', e=>{
   const t = e.target.closest('[data-act]'); if(!t) return;
   const act = t.dataset.act;
   if(act==='merge') showReadyCeleb(t.dataset.kind);
   else if(act==='view') viewReward(Number(t.dataset.i));
   else if(act==='vault') viewGold(t.dataset.kind, t.dataset.g);
+  else if(act==='space'){ closeRoom(); openSpace(); }
 });
 document.getElementById('roomOverlay').addEventListener('click', e=>{ if(e.target.id==='roomOverlay') closeRoom(); });
 menuInit();
