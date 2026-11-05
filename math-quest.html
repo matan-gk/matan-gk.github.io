@@ -212,6 +212,12 @@ h1{
 .look.locked img{filter:brightness(0); opacity:.12}
 .look.locked::after{content:''; position:absolute; width:1.3rem; height:1.3rem; background:var(--ic-lock) center/contain no-repeat}
 .look.active{border-color:var(--pink); box-shadow:0 0 10px rgba(255,111,176,.5)}
+.toknew{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:8px;font-weight:800}
+.toknew .tokimg{width:auto}
+.tokchip{display:flex;align-items:center;gap:10px;background:var(--card,#fff);border-radius:14px;padding:8px 12px;margin:0 0 10px;box-shadow:0 1px 4px rgba(0,0,0,.12);font-weight:800}
+.tokchip .tokimg{width:auto;flex:none}
+.tokchip .tokzero{font-size:1.8rem;opacity:.4}
+.tokchip .roomhint{margin:0}
 .roomhint{font-size:.75rem; color:var(--muted); margin:2px 0 8px; font-weight:600}
 
 /* emoji that have an image: the emoji stays in the page as invisible text (so copy, screen readers and the game logic still see it) and the image is its background */
@@ -1017,6 +1023,7 @@ function praise(){
   return t; }
 const PRAISE = ["מעולה! 🌟","כל הכבוד!","@@MASCOT@@","פגיעה מדויקת! 🎯","@@GENIUS@@","@@NAME1@@","@@NAME2@@"];
 let level = 1, score = 0, streak = 0, current = null, collection = [], lollipops = [], bonusActive = false;
+let space = {earned:0, spent:0, trued:false};   // personal-space tokens: earned once per upgrade (stored, never derived), spent in the shop later; trued = the one-time true-up for old players was done
 let golden = [], legacyLooks = 0;   // upgraded rewards (each remembers the 10 rewards it was made from); how many looks the player had opened before the looks were retired (used by the token true-up)
 const COTTON_CANDY_IMG = "assets/32c4bd427e57.webp";
 // ===== ICON IMAGES (replace the device's emoji font; each name is a file in ICONS.md) =====
@@ -1147,7 +1154,7 @@ function applyTheme(){
 }
 let warmOn = false, sessionDraws = 0;   // warm-up first (parent switch) and how many questions this session has drawn (resets when the game opens or the profile changes)
 let diffOn = [1,2,3];     // enabled difficulty levels for the active profile (see the Settings tab)
-function captureProgress(){ return {score,streak,collection,lollipops,level,golden,legacyLooks,rv:LAYER_V,diff:diffIdsClean(diffOn),mx:mxClean(mxState),focus:focusOn,warm:warmOn,theme:themeId}; }
+function captureProgress(){ return {score,streak,collection,lollipops,level,golden,legacyLooks,space:{earned:space.earned,spent:space.spent,trued:space.trued},rv:LAYER_V,diff:diffIdsClean(diffOn),mx:mxClean(mxState),focus:focusOn,warm:warmOn,theme:themeId}; }
 function cleanProgress(d){
   d = (d && typeof d==='object') ? d : {};
   let col = Array.isArray(d.collection) ? d.collection.filter(x=>typeof x==='string') : [];
@@ -1166,6 +1173,11 @@ function cleanProgress(d){
   // the looks were retired (their 16 pictures joined the mascot's pictures): only the number opened is kept, for the token true-up
   const oldLooks = Array.isArray(d.looks) ? new Set(d.looks.filter(i=>Number.isInteger(i)&&i>=0&&i<LOOKS.length)).size : 0;
   const legacy = Math.max(oldLooks, (Number.isInteger(d.legacyLooks)&&d.legacyLooks>0) ? Math.min(d.legacyLooks,LOOKS.length) : 0);
+  // tokens: one per upgrade ever made. Old players get a one-time true-up: what they already upgraded (and 10 per look they had opened) counts
+  const sp = (d.space && typeof d.space==='object') ? d.space : {};
+  const nn = v => (Number.isInteger(v) && v>0) ? Math.min(v,1e6) : 0;
+  let earned = nn(sp.earned); const spent = nn(sp.spent), trued = sp.trued===true;
+  if(!trued) earned = Math.max(earned, gold.length + legacy*MERGE_COST);
   return {
     score:  (typeof d.score==='number' && isFinite(d.score)) ? d.score : 0,
     streak: (typeof d.streak==='number' && isFinite(d.streak)) ? d.streak : 0,
@@ -1174,6 +1186,7 @@ function cleanProgress(d){
     level: (typeof d.level==='number' && d.level>=1 && d.level<=8) ? d.level : 1,
     golden: gold,
     legacyLooks: legacy,
+    space: {earned, spent:Math.min(spent,earned), trued:true},
     rv: LAYER_V,
     diff: diffIdsClean(d.diff),
     mx: mxClean(d.mx),
@@ -1184,7 +1197,7 @@ function cleanProgress(d){
 }
 function applyProgress(d){
   const c = cleanProgress(d);
-  score=c.score; streak=c.streak; collection=c.collection; lollipops=c.lollipops; golden=c.golden; legacyLooks=c.legacyLooks; level=c.level; diffOn=c.diff; mxState=c.mx; focusOn=c.focus; warmOn=c.warm; themeId=c.theme; applyTheme();
+  score=c.score; streak=c.streak; collection=c.collection; lollipops=c.lollipops; golden=c.golden; legacyLooks=c.legacyLooks; space=c.space; level=c.level; diffOn=c.diff; mxState=c.mx; focusOn=c.focus; warmOn=c.warm; themeId=c.theme; applyTheme();
 }
 function persist(){ try{ localStorage.setItem(SAVE_KEY, JSON.stringify(store)); }catch(e){} }
 function saveState(){
@@ -1846,7 +1859,7 @@ function cloudProfileFromDoc(C, helpers){
 // ===== CLOUD (Google sign-in, cloud progress, problem reports) =====
 // Local-first: the game always works from this device's storage. The cloud is a mirror, so no internet / no account / no quota never blocks play.
 // Everything here is off while CLOUD_CONFIG is null. See firebase/SETUP.md for how to create the (free) Firebase project and paste its settings below.
-const APP_VERSION = '2026.11.05a';       // keep equal to VERSION in sw.js (a test checks it)
+const APP_VERSION = '2026.11.05b';       // keep equal to VERSION in sw.js (a test checks it)
 const CLOUD_CONFIG = {apiKey:"AIzaSyAlq_TJNGvWPJpUrpbdq_hkAoURydqMzm0", authDomain:"learning-quest-1.firebaseapp.com", projectId:"learning-quest-1", appId:"1:98931179722:web:78fb00084ccba3efb53433"};   // e.g. {apiKey:'...', authDomain:'xxx.firebaseapp.com', projectId:'xxx', appId:'...'}
 const CLOUD_LIMITS = {
   pushDelayMs: 60000,          // at most one upload per profile per minute while playing
@@ -4606,11 +4619,18 @@ function renderRewards(){
   if(ready){ rb.style.display='inline-block'; rb.textContent = `✨ ${ready} לשדרוג`; } else rb.style.display='none';
   if(!document.getElementById('roomOverlay').hidden) renderRoom();
 }
+// token pictures by how many you have: 1 coin, 10 stack, 50 pile, 100 bag, 300+ chest
+const TOKEN_IMG = {coin:'assets/c11632e9fafc.webp',stack:'assets/13d29fbd09bc.webp',pile:'assets/f7b1a0d5481a.webp',bag:'assets/e0932e2c7fbe.webp',chest:'assets/789aa2ef5cdb.webp'};
+const TOKEN_TIERS = [[300,'chest'],[100,'bag'],[50,'pile'],[10,'stack'],[1,'coin']];
+const tokenBalance = () => Math.max(0, space.earned - space.spent);
+function tokenTier(n){ const t = TOKEN_TIERS.find(x=>n>=x[0]); return t ? t[1] : null; }
+function tokenHTML(n, px){ const t = tokenTier(n); return t ? `<img class="tokimg" src="${TOKEN_IMG[t]}" alt="" data-tier="${t}" style="height:${px}px">` : ''; }
 function renderRoom(){
   const body = document.getElementById('roomBody');
   if(!collection.length && !golden.length){ body.innerHTML=`<div class="roomempty">${TX('roomEmpty', ()=>`עוד אין מתנות. ${G('פתרי','פתור','פתרו')} שאלה כדי לקבל את הראשונה! 🎀`)}</div>`; return; }
   const rank = x=>{ const i=STICKERS.indexOf(kOf(x)); return i<0?999:i; };
   let h = '';
+  { const n = tokenBalance(); h += `<div class="tokchip" id="tokChip">${tokenHTML(n,44)||'<span class="tokzero">🪙</span>'}<div><b id="tokN">${n}</b> ${n===1?'מטבע':'מטבעות'}<div class="roomhint">מטבע אחד על כל שדרוג · בקרוב: חדר אישי</div></div></div>`; }
   const ready = readyList();
   if(ready.length){
     h += `<div class="roomsec">✨ מוכנים לשדרוג</div>`;
@@ -4669,6 +4689,7 @@ function showReadyCeleb(kind){
 function doMerge(kind){
   const used = removeBase(kind, MERGE_COST);
   // an upgraded item remembers the combinations it was made from
+  space.earned++;   // one token per upgrade
   golden.push(LAYERS[kind] ? kind+'#'+used.map(x=>comboOfItem(x)||LAYER_DEFAULT[kind]).join(',') : kind);
   saveState(); renderRewards();
   const small = Array.from({length:MERGE_COST},(_,i)=>`<span>${itemHTML(used[i]||kind,false,32)}</span>`).join('');
@@ -4680,7 +4701,7 @@ function doMerge(kind){
     const btns = [];
     if(more) btns.push({label:TX('mergeMore', ()=>`✨ ${G('מזגי','מזג','מזגו')} עוד`), fn:()=>doMerge(kind)});
     btns.push({label:'סגירה', ghost:more, fn:closeCeleb});
-    showCeleb(`<div class="cbig">${itemHTML(kind,true,110)}</div><div class="ctitle">${rewardName(kind,'up') ? `${G('קיבלת','קיבלת','קיבלתם')} שדרוג: ${esc(rewardName(kind,'up'))}!` : `${G('קיבלת','קיבלת','קיבלתם')} גרסה משודרגת!`}</div><div class="csub">${TX('gotUpSub','היא נשמרת בחדר המתנות.')}</div>`, btns);
+    showCeleb(`<div class="cbig">${itemHTML(kind,true,110)}</div><div class="ctitle">${rewardName(kind,'up') ? `${G('קיבלת','קיבלת','קיבלתם')} שדרוג: ${esc(rewardName(kind,'up'))}!` : `${G('קיבלת','קיבלת','קיבלתם')} גרסה משודרגת!`}</div><div class="csub">${TX('gotUpSub','היא נשמרת בחדר המתנות.')}</div><div class="toknew" id="tokNew">${tokenHTML(tokenBalance(),34)} <b>+1</b> מטבע · ${tokenBalance()} בסך הכול</div>`, btns);
   }, 1050);
 }
 // ---- MEMORY VAULT: an upgraded item keeps the 10 rewards it was made from, for good (there is no un-merge) ----
