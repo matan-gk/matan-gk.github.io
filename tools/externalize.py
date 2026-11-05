@@ -6,7 +6,7 @@ Run it after any change that pastes new art into the page (for example a reward 
     python3 tools/externalize.py            # from the repository root
 
 What it does (safe to run any number of times):
-  1. every embedded picture or font (a data: URI) of at least MIN_BYTES is written to assets/<sha1-12>.<ext>
+  1. every embedded picture or font (a data: URI) of at least MIN_BYTES (default 0: all of them) is written to assets/<sha1-12>.<ext>
      and replaced in the page by that relative path (the same content always gets the same name);
   2. asset files that the page (or another page of the repository) no longer mentions are deleted;
   3. assets.json (the list the service worker caches for offline use) is rewritten.
@@ -17,7 +17,7 @@ import base64, hashlib, json, os, re, sys
 ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
 PAGE = os.path.join(ROOT, 'math-quest.html')
 ASSETS = os.path.join(ROOT, 'assets')
-MIN_BYTES = int(os.environ.get('MIN_BYTES', '2000'))      # smaller pictures stay inside the page (a request costs more than they weigh)
+MIN_BYTES = int(os.environ.get('MIN_BYTES', '0'))      # 0 = every picture and font becomes a file (the rule on main too)
 EXT = {'webp':'webp','png':'png','jpeg':'jpg','jpg':'jpg','gif':'gif','svg+xml':'svg','woff2':'woff2','woff':'woff'}
 RX = re.compile(r'data:(image|font)/([a-z0-9+.-]+);base64,([A-Za-z0-9+/=]+)')
 

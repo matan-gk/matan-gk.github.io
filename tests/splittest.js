@@ -10,7 +10,7 @@ ok(res.page_bytes<900000&&res.assets>100&&res.assets<2500,'the page is small ('+
 ok(JSON.stringify(listed)===JSON.stringify(onDisk),'assets.json lists exactly the files in assets/ (run tools/externalize.py after changing art)');
 const page=fs.readFileSync(game,'utf8');
 ok(onDisk.every(f=>page.includes('assets/'+f)),'every file in assets/ is used by the page (no stale files)');
-ok(!/data:(image|font)\/[a-z0-9+.-]+;base64,[A-Za-z0-9+\/]{2800}/.test(page),'no embedded picture over 2 KB left in the page (smaller ones stay inline)');
+ok(!/data:(image|font)\/[a-z0-9+.-]+;base64,/.test(page),'no embedded picture or font left in the page (run tools/externalize.py)');
 const refs=[...new Set([...page.matchAll(/assets\/[0-9a-f]{12}\.[a-z0-9]+/g)].map(m=>m[0]))];
 ok(refs.length>0&&refs.every(r=>fs.existsSync(path.join(out,r))),'every link in the page points to an existing file ('+refs.length+')');
 ok(['manifest.webmanifest','apple-touch-icon.png','assets.json'].every(f=>fs.existsSync(path.join(out,f))),'manifest, home-screen icon and asset list are included');

@@ -5,7 +5,7 @@ This repository **is** the site (GitHub Pages) and **is** the source of the game
 ## Layout
 | Path | What it is |
 |---|---|
-| `math-quest.html` | the game: code, styles, texts, data. About 550 KB. Pictures are links to `assets/`; only pictures under 2 KB stay inside |
+| `math-quest.html` | the game: code, styles, texts, data. About 550 KB. Every picture and font is a link to `assets/` |
 | `assets/<hash>.<ext>` | every picture and font (content-hashed names: the same picture always has the same name) |
 | `assets.json` | the list of asset files, written by `tools/externalize.py`; the service worker caches it for offline use |
 | `sw.js`, `manifest.webmanifest`, icons | offline support and home-screen install; `VERSION` in `sw.js` must equal `APP_VERSION` in the page (a test checks it) |
