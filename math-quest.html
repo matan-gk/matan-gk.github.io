@@ -141,6 +141,14 @@ h1{
 .rs-count{font-weight:800; font-size:.9rem; white-space:nowrap; color:var(--pink)}
 .roomoverlay{position:fixed; inset:0; background:rgba(30,15,50,.6); z-index:50; display:flex; align-items:center; justify-content:center; padding:16px}
 .roomoverlay[hidden]{display:none}
+.adultcheck{max-width:420px; width:100%; text-align:center}
+.adultcheck h2{font-family:'Baloo 2',sans-serif; font-weight:800; font-size:1.4rem; color:var(--purple); margin:0 0 8px}
+.adultcheck .ac-sub{font-size:.9rem; color:var(--muted); margin-bottom:16px; line-height:1.4}
+.adultcheck .ac-inputwrap{display:flex; gap:8px; justify-content:center; margin-bottom:16px}
+.adultcheck input[type=number]{width:120px; min-height:48px; font-size:1.2rem; text-align:center; border:2px solid var(--card2); border-radius:12px; background:var(--card2); color:var(--text); font-family:'Rubik',sans-serif; font-weight:600}
+.adultcheck .ac-error{color:var(--bad); font-weight:600; font-size:.85rem; min-height:1.2em; margin-bottom:8px}
+.adultcheck .ac-actions{display:flex; gap:8px; justify-content:center}
+.adultcheck .pa-btn{min-width:120px}
 .room{
   background:var(--card); width:100%; max-width:560px; max-height:85vh; border-radius:22px;
   display:flex; flex-direction:column; box-shadow:0 20px 50px rgba(0,0,0,.4); animation:roomup .22s ease-out;
@@ -731,6 +739,20 @@ tr.mxempty th[scope=row]{opacity:.6}
         <button type="button" class="roomclose" id="profClose" aria-label="חזרה למשחק"><span class="pa-close-t">חזרה למשחק</span><span aria-hidden="true">✕</span></button>
       </div>
       <div class="roombody" id="profBody"></div>
+    </div>
+  </div>
+  <div class="roomoverlay" id="adultOverlay" hidden>
+    <div class="room adultcheck" role="dialog" aria-label="אימות הורה">
+      <h2>אימות הורה</h2>
+      <p class="ac-sub">כדי להיכנס לאזור הורים, אנא הקלד את שנת הלידה שלך.</p>
+      <div class="ac-inputwrap">
+        <input type="number" id="adultYear" min="1900" max="2026" placeholder="שנת לידה" autocomplete="off" aria-label="שנת לידה" onfocus="this.max=new Date().getFullYear()">
+      </div>
+      <p class="ac-error" id="adultError" aria-live="polite"></p>
+      <div class="ac-actions">
+        <button type="button" class="pa-btn" id="adultSubmit">אישור</button>
+        <button type="button" class="pa-btn ghost" id="adultCancel">ביטול</button>
+      </div>
     </div>
   </div>
   <div class="roomoverlay smp" id="sampleOverlay" hidden>
@@ -2322,6 +2344,11 @@ const PANEL_NAV = {profiles:'פרופילים', progress:'התקדמות', setti
 const PANEL_SHORT = {profiles:'פרופילים', progress:'התקדמות', settings:'הגדרות', backup:'גיבוי', report:'דיווח', guide:'מדריך', debug:'דיבאג'};
 const PANEL_ICON = {profiles:'👥', progress:'📊', settings:'⚙️', backup:'💾', report:'🐞', guide:'📖', debug:'🛠️'};
 function openPanel(tab){
+  // Adult check gate for parent area (profiles tab)
+  if(tab === 'profiles' && !adult.ok){
+    openAdultCheck();
+    return;
+  }
   closeMenu();
   profTab = PANEL_TITLES[tab] ? tab : 'profiles';
   profMode = {view:'list', editId:null, first:false, confirmDel:null, error:''};
@@ -5390,6 +5417,48 @@ const DBG_HASH = 2113604388352968;       // hash of the debug password (a light 
 function dbgHash(s,seed=0){ let h1=0xdeadbeef^seed,h2=0x41c6ce57^seed; for(let i=0;i<s.length;i++){ const c=s.charCodeAt(i); h1=Math.imul(h1^c,2654435761); h2=Math.imul(h2^c,1597334677); } h1=Math.imul(h1^(h1>>>16),2246822507)^Math.imul(h2^(h2>>>13),3266489909); h2=Math.imul(h2^(h2>>>16),2246822507)^Math.imul(h1^(h1>>>13),3266489909); return 4294967296*(2097151&h2)+(h1>>>0); }
 let dbg = {ok:false, msg:'', pid:null, kind:'all', n:5, bad:false, seq:0};
 function dbgSync(){ const n = document.getElementById('dbgN'); if(n){ const v = parseInt(n.value,10); dbg.n = Math.max(1, Math.min(200, isFinite(v)?v:1)); } }
+
+// ===== ADULT CHECK (parent area gate) =====
+// Ask for birth year, verify age >= 18. State is per-session (not saved), so closing the parent area resets it.
+let adult = {ok:false, bad:false};
+function adultCheck(year){
+  const currentYear = new Date().getFullYear();
+  const age = currentYear - year;
+  return age >= 18 && year >= 1900 && year <= currentYear;
+}
+function openAdultCheck(){
+  adult.ok = false; adult.bad = false;
+  document.getElementById('adultOverlay').hidden = false;
+  const input = document.getElementById('adultYear');
+  if(input){ input.value = ''; input.max = new Date().getFullYear(); input.focus(); }
+}
+function closeAdultCheck(){
+  document.getElementById('adultOverlay').hidden = true;
+  adult.ok = false; adult.bad = false;
+}
+function submitAdultCheck(){
+  const input = document.getElementById('adultYear');
+  if(!input) return;
+  const year = parseInt(input.value, 10);
+  const errEl = document.getElementById('adultError');
+  if(isNaN(year)){
+    adult.bad = true;
+    if(errEl) errEl.textContent = 'נא להקליד שנת לידה תקינה';
+    return;
+  }
+  if(adultCheck(year)){
+    adult.ok = true;
+    adult.bad = false;
+    if(errEl) errEl.textContent = '';
+    // Hide overlay but KEEP adult.ok=true (closeAdultCheck resets it)
+    document.getElementById('adultOverlay').hidden = true;
+    // Open the parent area after successful verification
+    openPanel('profiles');
+  } else {
+    adult.bad = true;
+    if(errEl) errEl.textContent = 'הגישה לאזור הורים מותרת מגיל 18 ומעלה';
+  }
+}
 function renderDebugHTML(){
   if(!dbg.ok) return `<section class="pa-card"><h2 class="pa-h">דיבאג</h2><p class="pa-sub">כלי בדיקה. נדרשת סיסמה.</p>
     <input id="dbgPw" type="password" class="pa-input" autocomplete="off" aria-label="סיסמה" style="width:100%;box-sizing:border-box;min-height:44px;font:inherit;padding:0 12px;border-radius:12px;border:2px solid var(--card2)">
@@ -5616,7 +5685,15 @@ document.getElementById('profOverlay').addEventListener('click', e=>{
   if(e.target.id==='profOverlay') closeProfiles();
   const t = e.target.closest('[data-pact]'); if(t) profileAction(t.dataset.pact, t.dataset.id);
 });
-document.addEventListener('keydown', e=>{ if(e.key==='Escape' && document.getElementById('celebOverlay').hidden){ if(!document.getElementById('reportOverlay').hidden){ closeReport(); return; } if(!document.getElementById('helpOverlay').hidden){ closeHelp(); return; } if(!document.getElementById('profOverlay').hidden) closeProfiles(); else closeRoom(); } });
+document.getElementById('adultSubmit').addEventListener('click', submitAdultCheck);
+document.getElementById('adultCancel').addEventListener('click', closeAdultCheck);
+document.getElementById('adultYear').addEventListener('keydown', e=>{
+  if(e.key==='Enter') submitAdultCheck();
+});
+document.getElementById('adultOverlay').addEventListener('click', e=>{
+  if(e.target.id==='adultOverlay') closeAdultCheck();
+});
+document.addEventListener('keydown', e=>{ if(e.key==='Escape' && document.getElementById('celebOverlay').hidden){ if(!document.getElementById('reportOverlay').hidden){ closeReport(); return; } if(!document.getElementById('helpOverlay').hidden){ closeHelp(); return; } if(!document.getElementById('adultOverlay').hidden){ closeAdultCheck(); return; } if(!document.getElementById('profOverlay').hidden) closeProfiles(); else closeRoom(); } });
 renderLevels();
 renderStickerbook();
 renderLolli();
