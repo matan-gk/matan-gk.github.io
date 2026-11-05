@@ -1,0 +1,14 @@
+const T=require('./lib.js');
+const {chromium}=require('playwright');
+(async()=>{const b=await chromium.launch({...T.launchOpts});
+const p=await (await b.newContext({viewport:{width:390,height:844}})).newPage();const errs=[];p.on('pageerror',e=>errs.push(e.message));
+await p.goto(T.URL);await p.evaluate(()=>localStorage.clear());await p.reload();
+await p.fill('#pfName','X');await p.click('.gopt:has(input[value=n])');await p.click('[data-pact=save]');await p.waitForTimeout(300);
+await p.evaluate(()=>{golden=[...STICKERS];collection=[...STICKERS];saveState();renderRewards&&renderRewards();});
+await p.screenshot({path:'s_levels.png',clip:{x:0,y:200,width:390,height:150}});
+await p.click('#rewardsStrip');await p.waitForTimeout(500);
+await p.screenshot({path:'s_room.png'});
+const broken=await p.evaluate(()=>[...document.images].filter(i=>i.complete&&i.naturalWidth===0).length); console.log('imgs broken:',broken,errs);
+if(broken||errs.length){ console.log('FAIL broken images or page errors'); process.exitCode=1; } else console.log('ALL PASS');
+const ic=await p.evaluate(()=>document.querySelectorAll('.levelbtn')[2].innerHTML.slice(0,200));console.log(ic);
+await b.close();})();

@@ -1,0 +1,86 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // >>> Replace with the Google account (email) that should be allowed to READ the problem reports.
+    function isAdmin() {
+      return request.auth != null
+          && request.auth.token.email_verified == true
+          && request.auth.token.email == 'REPLACE_WITH_YOUR_EMAIL@example.com';
+    }
+    // A real (Google) sign-in, not an anonymous one.
+    function isGoogle(uid) {
+      return request.auth != null
+          && request.auth.uid == uid
+          && request.auth.token.firebase.sign_in_provider != 'anonymous';
+    }
+    // A family id is 26 random characters (130 bits). Knowing it is what grants access, so it must never be guessable or listable.
+    function validFam(fid) {
+      return fid.size() == 26 && fid.matches('[A-Z2-9]+');
+    }
+    function validProfile(pid) {
+      return pid.size() <= 40
+        && request.resource.data.keys().hasOnly(['n','g','p','s','u','b','d','v'])
+        && request.resource.data.keys().hasAll(['n','g','p','s','u','b','d','v'])
+        && request.resource.data.n is string && request.resource.data.n.size() <= 20
+        && request.resource.data.g in ['f','m','n']
+        && request.resource.data.p is string && request.resource.data.p.size() <= 100000
+        && request.resource.data.s is string && request.resource.data.s.size() <= 700000
+        && request.resource.data.u is number
+        && request.resource.data.b is number
+        // optimistic concurrency: an update must build on the version that is stored (a stale device is refused and re-syncs)
+        && (resource == null || resource.data.u == request.resource.data.b)
+        && request.resource.data.d is bool
+        && request.resource.data.v == 1;
+    }
+
+    // ---- Progress: families/{familyId}/profiles/{profileId}. Any signed-in user (Google or anonymous) who knows the family id can reach it.
+    // The families collection itself cannot be listed, so ids cannot be discovered. ----
+    match /families/{fid}/profiles/{pid} {
+      allow read, delete: if request.auth != null && validFam(fid);
+      allow create, update: if request.auth != null && validFam(fid) && validProfile(pid);
+    }
+
+    // ---- A Google account remembers which family it owns: users/{uid} = { fid, t }. ----
+    match /users/{uid} {
+      allow read: if isGoogle(uid) || isAdmin();      // the admin page lists all accounts (read only)
+      allow delete: if isGoogle(uid);
+      allow create, update: if isGoogle(uid)
+        && request.resource.data.keys().hasOnly(['fid','t'])
+        && request.resource.data.keys().hasAll(['fid','t'])
+        && request.resource.data.fid is string && validFam(request.resource.data.fid)
+        && request.resource.data.t is number;
+    }
+    // Profiles that the previous version kept under the account: read and delete only, so the game can move them into the family once.
+    match /users/{uid}/profiles/{pid} {
+      allow read, delete: if isGoogle(uid);
+    }
+
+    // ---- Problem reports: anyone signed in (including anonymous) may add one; only the admin can read them. ----
+    match /reports/{rid} {
+      allow create: if request.auth != null
+        && request.resource.data.keys().hasOnly(['uid','ts','ver','msg','contact','ctx'])
+        && request.resource.data.keys().hasAll(['uid','ts','ver','msg'])
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.ts is number
+        && request.resource.data.ver is string && request.resource.data.ver.size() <= 20
+        && request.resource.data.msg is string && request.resource.data.msg.size() >= 1 && request.resource.data.msg.size() <= 1000
+        && (!('contact' in request.resource.data) || (request.resource.data.contact is string && request.resource.data.contact.size() <= 100))
+        && (!('ctx' in request.resource.data) || request.resource.data.ctx == null
+            || (request.resource.data.ctx is map
+                && request.resource.data.ctx.keys().hasOnly(['skill','level','q','ans'])
+                && request.resource.data.ctx.get('q','').size() <= 600
+                && request.resource.data.ctx.get('ans','').size() <= 60));
+      allow read: if isAdmin();
+      allow update, delete: if false;
+    }
+
+    // ---- Admin page (admin.html): read-only access to every profile, in any family, via a collection-group query. ----
+    match /{path=**}/profiles/{pid} {
+      allow read: if isAdmin();
+    }
+
+    // everything else is closed
+    match /{document=**} { allow read, write: if false; }
+  }
+}
