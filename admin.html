@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>ניהול קאפקייק</title>
+<style>
+:root{--bg:#f4f1fb;--card:#fff;--card2:#efe9fb;--text:#2a2140;--muted:#6f6688;--line:#ddd5ee;--purple:#7c5cff;--teal:#19b5a5;--bad:#d9455f;--good:#1a9b6c;--shadow:rgba(60,40,120,.12)}
+@media (prefers-color-scheme:dark){:root{--bg:#1b1530;--card:#2b2347;--card2:#3a3060;--text:#f2eeff;--muted:#b3a9d1;--line:#473d70;--purple:#9d86ff;--teal:#2fd7c4;--bad:#ff7a90;--good:#46d7a0;--shadow:rgba(0,0,0,.35)}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.5 system-ui,-apple-system,'Segoe UI',Arial,sans-serif}
+header{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:12px 16px;background:linear-gradient(90deg,var(--purple),#a45cff);color:#fff;position:sticky;top:0;z-index:5}
+header h1{margin:0;font-size:1.1rem;flex:1}
+header .who{font-size:.85rem;opacity:.95}
+.badge{background:rgba(255,255,255,.22);border-radius:999px;padding:2px 10px;font-size:.78rem;font-weight:700}
+main{max-width:980px;margin:0 auto;padding:16px}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+button{font:inherit;cursor:pointer}
+.tab{border:2px solid var(--card2);background:var(--card2);color:var(--text);border-radius:999px;padding:6px 16px;font-weight:700}
+.tab.on{background:linear-gradient(90deg,var(--teal),var(--purple));color:#fff;border-color:transparent}
+.btn{border:0;border-radius:12px;padding:8px 16px;font-weight:800;background:linear-gradient(90deg,var(--purple),#d460ff);color:#fff}
+.btn.sec{background:transparent;color:var(--purple);border:2px solid var(--purple)}
+.btn:disabled{opacity:.5;cursor:default}
+.card{background:var(--card);border-radius:16px;padding:14px 16px;margin-bottom:12px;box-shadow:0 2px 10px var(--shadow)}
+.card h2{margin:0 0 8px;font-size:1rem}
+.muted{color:var(--muted);font-size:.85rem}
+.bad{color:var(--bad);font-weight:700}.good{color:var(--good);font-weight:700}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.stat{background:var(--card2);border-radius:12px;padding:10px 12px}.stat b{display:block;font-size:1.4rem}.stat span{font-size:.8rem;color:var(--muted)}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:8px 0;border-top:1px solid var(--line)}
+.row:first-of-type{border-top:0}
+.grow{flex:1;min-width:160px}
+.tag{display:inline-block;border-radius:999px;padding:1px 9px;font-size:.75rem;font-weight:800;background:var(--card2);margin-inline-end:4px}
+.tag.warn{background:rgba(255,160,40,.25)}.tag.g{background:rgba(26,155,108,.2)}
+code,.mono{font-family:ui-monospace,Menlo,Consolas,monospace;direction:ltr;unicode-bidi:isolate;font-size:.82rem}
+details{margin-top:6px}summary{cursor:pointer;color:var(--purple);font-weight:700;font-size:.85rem}
+pre{direction:ltr;text-align:left;white-space:pre-wrap;word-break:break-all;background:var(--card2);border-radius:10px;padding:10px;max-height:320px;overflow:auto;font-size:.75rem;margin:6px 0 0}
+input[type=search]{font:inherit;padding:8px 12px;border-radius:12px;border:2px solid var(--line);background:var(--card);color:var(--text);min-width:220px}
+.pcard{background:var(--card2);border-radius:12px;padding:10px 12px;margin-top:8px}
+.kv{display:flex;gap:6px 16px;flex-wrap:wrap;font-size:.85rem;margin-top:4px}.kv span b{font-weight:800}
+.center{text-align:center;padding:40px 16px}
+</style>
+</head>
+<body>
+<header><h1>🧁 ניהול קאפקייק <span class="badge">קריאה בלבד</span></h1><span class="who" id="who"></span><button class="btn sec" id="out" hidden style="color:#fff;border-color:#fff">התנתקות</button></header>
+<main id="app"><div class="center muted">טוענים...</div></main>
+<script type="module">
+const CFG = {apiKey:"AIzaSyAlq_TJNGvWPJpUrpbdq_hkAoURydqMzm0", authDomain:"learning-quest-1.firebaseapp.com", projectId:"learning-quest-1", appId:"1:98931179722:web:78fb00084ccba3efb53433"};
+const FB = 'https://www.gstatic.com/firebasejs/10.14.1/';
+const esc = t => String(t==null?'':t).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+// ---- data access: the only code that talks to Firebase (replaced by a fake in tests) ----
+function realApi(){
+  let M = {}, auth, db;
+  return {
+    async init(){
+      const [a,au,fs] = await Promise.all([import(FB+'firebase-app.js'), import(FB+'firebase-auth.js'), import(FB+'firebase-firestore.js')]);
+      M = Object.assign({}, a, au, fs); const app = M.initializeApp(CFG); auth = M.getAuth(app); db = M.getFirestore(app);
+    },
+    onAuth(cb){ return M.onAuthStateChanged(auth, u=>cb(u ? {uid:u.uid, email:u.email||'', anon:u.isAnonymous} : null)); },
+    async signIn(){ await M.signInWithPopup(auth, new M.GoogleAuthProvider()); },
+    async signOut(){ await M.signOut(auth); },
+    async profiles(){ const s = await M.getDocs(M.collectionGroup(db,'profiles')); return s.docs.map(d=>({path:d.ref.path, doc:d.data()})); },
+    async users(){ const s = await M.getDocs(M.collection(db,'users')); return s.docs.map(d=>({uid:d.id, doc:d.data()})); },
+    async reports(){ const s = await M.getDocs(M.query(M.collection(db,'reports'), M.orderBy('ts','desc'), M.limit(300))); return s.docs.map(d=>Object.assign({id:d.id}, d.data())); }
+  };
+}
+const api = window.__adminApi || realApi();
+
+// ---- state ----
+const S = {user:null, tab:'overview', err:'', busy:false, reads:0, profiles:null, users:null, reports:null, open:{}, q:''};
+const app = document.getElementById('app');
+
+// ---- decoding ----
+const jparse = t => { try{ return JSON.parse(t); }catch(e){ return null; } };
+const iso = t => '\u2066'+t+'\u2069';      // keep dates and sizes in one piece inside right-to-left text
+const when = ms => ms ? iso(new Date(ms).toLocaleString('he-IL',{dateStyle:'short',timeStyle:'short'})) : '–';
+const kb = n => iso((n/1024).toFixed(n<10240?1:0)+' KB');
+const ago = ms => { if(!ms) return '–'; const d = Math.floor((Date.now()-ms)/86400000); return d<=0?'היום':d===1?'אתמול':'לפני '+d+' ימים'; };
+function decodeProfile(p){
+  const d = p.doc, prog = jparse(d.p)||{}, st = jparse(d.s)||{}, log = Array.isArray(st.log)?st.log:[];
+  const days = new Set(log.map(r=>new Date(r.t).toDateString())).size;
+  const correct = log.filter(r=>r.c===1).length, last = log.length ? log[log.length-1].t : 0;
+  const parts = p.path.split('/');
+  return {path:p.path, scope:parts[0], owner:parts[1], pid:parts[3], name:d.n||'', gender:d.g, deleted:!!d.d, updated:d.u||0, size:String(d.p||'').length+String(d.s||'').length+String(d.n||'').length,
+    score:prog.score||0, streak:prog.streak||0, level:prog.level||1, gifts:(prog.collection||[]).length, looks:(prog.looks||[]).length,
+    answers:log.length, acc:log.length?Math.round(100*correct/log.length):null, days, last, raw:d};
+}
+function families(){
+  const profs = (S.profiles||[]).map(decodeProfile), byOwner = {};
+  profs.forEach(p=>{ const k = p.scope+'/'+p.owner; (byOwner[k]=byOwner[k]||{key:k, scope:p.scope, id:p.owner, profiles:[]}).profiles.push(p); });
+  const acct = {}; (S.users||[]).forEach(u=>{ if(u.doc&&u.doc.fid) acct[u.doc.fid]=u.uid; });
+  Object.keys(acct).forEach(fid=>{ if(!byOwner['families/'+fid]) byOwner['families/'+fid] = {key:'families/'+fid, scope:'families', id:fid, profiles:[]}; });
+  return Object.values(byOwner).map(f=>{
+    const live = f.profiles.filter(p=>!p.deleted), names = live.map(p=>p.name||'ללא שם'), dup = names.length!==new Set(names).size;
+    return Object.assign(f, {live, deletedN:f.profiles.length-live.length, acct:f.scope==='families' ? (acct[f.id]||'') : f.id, legacy:f.scope==='users',
+      updated:Math.max(0,...f.profiles.map(p=>p.updated)), size:f.profiles.reduce((a,p)=>a+p.size,0), dup});
+  }).sort((a,b)=>b.updated-a.updated);
+}
+
+// ---- actions ----
+async function load(what){
+  S.busy = true; S.err = ''; render();
+  try{
+    if(what==='all'||what==='profiles'){ S.profiles = await api.profiles(); S.reads += S.profiles.length; }
+    if(what==='all'||what==='users'||what==='profiles'){ S.users = await api.users(); S.reads += S.users.length; }
+    if(what==='all'||what==='reports'){ S.reports = await api.reports(); S.reads += S.reports.length; }
+  }catch(e){
+    S.err = (e && e.code==='permission-denied') ? 'אין הרשאה. ודאו שנכנסתם עם חשבון המנהל, ושכללי האבטחה המעודכנים מ-firestore.rules פורסמו ב-Firebase.' : 'הטעינה לא הצליחה: '+(e && (e.code||e.message)||e);
+  }
+  S.busy = false; render();
+}
+function download(){
+  const data = {exported:new Date().toISOString(), note:'read-only export of what was loaded in the admin page', profiles:(S.profiles||[]), users:(S.users||[]), reports:(S.reports||[])};
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(data,null,1)],{type:'application/json'}));
+  a.download = 'cupcake-quest-'+new Date().toISOString().slice(0,10)+'.json'; document.body.appendChild(a); a.click(); a.remove();
+}
+
+// ---- views ----
+function loaders(){
+  return `<div class="card"><div class="row" style="border:0;padding:0"><div class="grow"><b>טעינת נתונים</b><div class="muted">כל מסמך שנטען נספר כקריאה אחת במכסה החינמית (50,000 ביום). נקראו בביקור הזה: <b>${S.reads}</b>.</div></div>
+    <button class="btn" data-a="load" data-w="all" ${S.busy?'disabled':''}>טעינת הכול</button>
+    <button class="btn sec" data-a="export" ${S.profiles||S.reports?'':'disabled'}>הורדת גיבוי JSON</button></div>${S.err?`<div class="bad" style="margin-top:8px">${esc(S.err)}</div>`:''}${S.busy?'<div class="muted" style="margin-top:8px">טוענים...</div>':''}</div>`;
+}
+function overview(){
+  if(!S.profiles && !S.reports) return `<div class="card muted">עוד לא נטענו נתונים. לחצו על "טעינת הכול".</div>`;
+  const F = families(), live = F.reduce((a,f)=>a+f.live.length,0), size = F.reduce((a,f)=>a+f.size,0), answers = F.reduce((a,f)=>a+f.live.reduce((x,p)=>x+p.answers,0),0);
+  const recent = F.filter(f=>Date.now()-f.updated<7*86400000).length, stale = F.filter(f=>f.updated && Date.now()-f.updated>90*86400000).length;
+  const empty = F.filter(f=>!f.live.length).length, legacy = F.filter(f=>f.legacy).length, dups = F.filter(f=>f.dup).length;
+  const st = (n,l)=>`<div class="stat"><b>${n}</b><span>${l}</span></div>`;
+  let h = `<div class="card"><h2>סיכום</h2><div class="grid">${st(F.length,'משפחות')}${st(live,'פרופילים פעילים')}${st(answers.toLocaleString('he-IL'),'תשובות מתועדות')}${st(kb(size),'נפח משוער')}${st(recent,'פעילות ב-7 ימים')}${S.reports?st(S.reports.length,'דיווחים'):''}</div></div>`;
+  const hints = [];
+  if(empty) hints.push(`<span class="tag warn">${empty}</span> משפחות בלי פרופילים פעילים`);
+  if(stale) hints.push(`<span class="tag warn">${stale}</span> משפחות בלי פעילות מעל 90 יום`);
+  if(dups) hints.push(`<span class="tag warn">${dups}</span> משפחות עם שני פרופילים באותו שם`);
+  if(legacy) hints.push(`<span class="tag warn">${legacy}</span> חשבונות במבנה הישן (עוד לא נכנסו עם הגרסה החדשה)`);
+  h += `<div class="card"><h2>דברים שכדאי לבדוק</h2>${hints.length?hints.map(x=>`<div class="row">${x}</div>`).join(''):'<span class="good">לא נמצא דבר חריג.</span>'}</div>`;
+  return h;
+}
+function profileCard(p){
+  const g = {f:'בת',m:'בן',n:'ניטרלי'}[p.gender]||p.gender;
+  return `<div class="pcard"><b>${esc(p.name||'ללא שם')}</b> <span class="tag">${esc(g)}</span>${p.deleted?'<span class="tag warn">נמחק</span>':''}
+    <div class="kv"><span>ניקוד <b>${p.score}</b></span><span>רמה <b>${p.level}</b></span><span>רצף <b>${p.streak}</b></span><span>מתנות <b>${p.gifts}</b></span><span>מראות <b>${p.looks}</b></span><span>תשובות <b>${p.answers}</b></span><span>דיוק <b>${p.acc==null?'–':p.acc+'%'}</b></span><span>ימי משחק <b>${p.days}</b></span><span>שיחק לאחרונה <b>${esc(when(p.last))}</b></span><span>עודכן <b>${esc(when(p.updated))}</b></span><span>נפח <b>${kb(p.size)}</b></span></div>
+    <details><summary>נתונים גולמיים</summary><div class="muted mono">${esc(p.path)}</div><pre>${esc(JSON.stringify(p.raw,(k,v)=>typeof v==='string'&&v.length>4000?v.slice(0,4000)+'… ('+v.length+' תווים)':v,1))}</pre></details></div>`;
+}
+function familiesView(){
+  if(!S.profiles) return `<div class="card muted">עוד לא נטענו נתונים. לחצו על "טעינת הכול".</div>`;
+  const F = families(), q = S.q.trim().toLowerCase();
+  const shown = q ? F.filter(f=>f.id.toLowerCase().includes(q) || f.profiles.some(p=>(p.name||'').toLowerCase().includes(q))) : F;
+  let h = `<div class="card"><input type="search" id="q" placeholder="חיפוש לפי קוד משפחה או שם פרופיל" value="${esc(S.q)}"> <span class="muted">${shown.length} מתוך ${F.length}</span></div>`;
+  h += shown.map(f=>{
+    const key = f.key, open = S.open[key];
+    const names = f.live.map(p=>esc(p.name||'ללא שם')).join(', ') || '<span class="muted">אין פרופילים פעילים</span>';
+    const tags = (f.legacy?'<span class="tag warn">מבנה ישן (חשבון)</span>':f.acct?'<span class="tag g">חשבון Google</span>':'<span class="tag">אנונימי</span>') + (f.dup?'<span class="tag warn">שם כפול</span>':'') + (!f.live.length?'<span class="tag warn">ריקה</span>':'') + (f.deletedN?`<span class="tag">${f.deletedN} נמחקו</span>`:'');
+    return `<div class="card"><div class="row" style="border:0;padding:0"><div class="grow"><div class="mono">${esc(f.id.slice(0,5))}…${esc(f.id.slice(-3))} <span class="muted">${f.acct&&!f.legacy?'חשבון '+esc(f.acct.slice(0,6))+'…':''}</span></div><div>${names}</div><div>${tags}</div></div>
+      <div class="muted" style="text-align:end">${f.live.length} פרופילים · ${kb(f.size)}<br>עודכן ${esc(ago(f.updated))}</div><button class="btn sec" data-a="open" data-k="${esc(key)}">${open?'סגירה':'פתיחה'}</button></div>
+      ${open?`<div class="muted mono" style="margin-top:8px" title="קוד המשפחה המלא">${esc(f.id)}</div>`+f.profiles.map(profileCard).join(''):''}</div>`;
+  }).join('') || '<div class="card muted">לא נמצאו משפחות.</div>';
+  return h;
+}
+function reportsView(){
+  if(!S.reports) return `<div class="card muted">עוד לא נטענו נתונים. לחצו על "טעינת הכול".</div>`;
+  const q = S.q.trim().toLowerCase();
+  const list = q ? S.reports.filter(r=>JSON.stringify(r).toLowerCase().includes(q)) : S.reports;
+  return `<div class="card"><input type="search" id="q" placeholder="חיפוש בדיווחים" value="${esc(S.q)}"> <span class="muted">${list.length} מתוך ${S.reports.length} (עד 300 אחרונים)</span></div>` +
+    (list.map(r=>{ const c = r.ctx||null;
+      return `<div class="card"><div class="muted">${esc(when(r.ts))} · גרסה ${esc(r.ver||'')} · <span class="mono">${esc(String(r.uid||'').slice(0,8))}</span></div>
+        <div style="margin:6px 0;white-space:pre-wrap">${esc(r.msg)}</div>${r.contact?`<div class="muted">ליצירת קשר: ${esc(r.contact)}</div>`:''}
+        ${c?`<div class="pcard"><div class="kv"><span>סוג שאלה <b class="mono">${esc(c.skill||'')}</b></span><span>רמה <b>${esc(c.level)}</b></span></div><div style="margin-top:4px">${esc(c.q||'')}</div><div class="muted">התשובה במשחק: <b>${esc(c.ans)}</b></div></div>`:''}</div>`; }).join('') || '<div class="card muted">אין דיווחים.</div>');
+}
+function render(){
+  const who = document.getElementById('who'), out = document.getElementById('out');
+  if(!S.user){ who.textContent=''; out.hidden=true;
+    app.innerHTML = `<div class="card center"><h2>כניסת מנהל</h2><p class="muted">הכניסה היא עם חשבון Google של המנהל. בלי הרשאה בכללי האבטחה לא יוצג כאן שום מידע.</p><button class="btn" data-a="signin">התחברות עם Google</button>${S.err?`<p class="bad">${esc(S.err)}</p>`:''}</div>`; return; }
+  who.textContent = S.user.email||''; out.hidden = false;
+  if(S.user.anon){ app.innerHTML = '<div class="card center bad">מחוברים באופן אנונימי. יש להתחבר עם חשבון Google.</div>'; return; }
+  const tabs = [['overview','סיכום'],['families','משפחות'],['reports','דיווחים']];
+  app.innerHTML = `<div class="tabs">${tabs.map(t=>`<button class="tab ${S.tab===t[0]?'on':''}" data-a="tab" data-t="${t[0]}">${t[1]}${t[0]==='families'&&S.profiles?' ('+families().length+')':''}${t[0]==='reports'&&S.reports?' ('+S.reports.length+')':''}</button>`).join('')}</div>` + loaders() +
+    (S.tab==='overview'?overview():S.tab==='families'?familiesView():reportsView());
+  const q = document.getElementById('q'); if(q){ q.addEventListener('input', e=>{ S.q = e.target.value; const pos = e.target.selectionStart; render(); const n = document.getElementById('q'); n.focus(); n.setSelectionRange(pos,pos); }); }
+}
+app.addEventListener('click', async e=>{
+  const b = e.target.closest('[data-a]'); if(!b) return; const a = b.dataset.a;
+  if(a==='signin'){ try{ S.err=''; await api.signIn(); }catch(x){ S.err = (x&&x.code==='auth/unauthorized-domain') ? 'הכתובת הזאת לא מורשית להתחברות. הוסיפו אותה ב-Firebase, או הריצו מ-localhost (ראו SETUP.md).' : (x&&x.code==='auth/popup-closed-by-user') ? '' : 'ההתחברות לא הצליחה.'; render(); } }
+  else if(a==='tab'){ S.tab = b.dataset.t; S.q = ''; render(); }
+  else if(a==='load') load(b.dataset.w);
+  else if(a==='open'){ S.open[b.dataset.k] = !S.open[b.dataset.k]; render(); }
+  else if(a==='export') download();
+});
+document.getElementById('out').addEventListener('click', ()=>{ S.profiles=S.users=S.reports=null; S.reads=0; api.signOut(); });
+(async()=>{
+  try{ await api.init(); api.onAuth(u=>{ S.user = u; S.err = ''; render(); }); }
+  catch(e){ app.innerHTML = '<div class="card center bad">לא ניתן לטעון את Firebase. בדקו חיבור לאינטרנט.</div>'; }
+})();
+window.__adminState = S;
+</script>
+</body>
+</html>

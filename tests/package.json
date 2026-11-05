@@ -1,0 +1,7 @@
+{
+  "name": "cupcake-quest-tests",
+  "private": true,
+  "description": "Regression tests for the Cupcake Quest game (math-quest.html) and its admin page",
+  "scripts": { "test": "node run.js", "quick": "node run.js --quick" },
+  "dependencies": { "playwright": "^1.40.0" }
+}

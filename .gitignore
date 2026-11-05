@@ -1,0 +1,5 @@
+tests/_build/
+tests/_out/
+tests/_t/
+tests/*.png
+node_modules/
