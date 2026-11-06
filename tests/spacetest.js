@@ -88,7 +88,7 @@ ok(await ev(()=>!document.getElementById('rmChip')&&!document.querySelector('#sp
 await ev(()=>{space.lv.bed=2;onRoomTap('item:bed');});
 const th=await ev(()=>[...document.querySelectorAll('#rmDrawer .lvthumb')].map(b=>({locked:b.classList.contains('locked'),dis:b.disabled,img:!!b.querySelector('img[src^="assets/"]'),t:b.textContent})));
 ok(th.length===3&&!th[0].locked&&th[1].locked&&th[2].locked&&th[1].dis&&th[2].dis&&th.every(x=>x.img),'bed at level 2 shows levels 3, 4, 5 as small pictures: 3 open, 4 and 5 locked '+JSON.stringify(th.map(x=>x.t)));
-ok(await ev(()=>/6 🪙/.test(document.querySelector('#rmDrawer .lvthumb:not(.locked)').textContent)&&/🔒/.test(document.querySelectorAll('#rmDrawer .lvthumb')[1].textContent)),'the open one shows its price, the locked ones a lock');
+ok(await ev(()=>/4 🪙/.test(document.querySelector('#rmDrawer .lvthumb:not(.locked)').textContent)&&/🔒/.test(document.querySelectorAll('#rmDrawer .lvthumb')[1].textContent)),'the open one shows its price, the locked ones a lock');
 await ev(()=>document.querySelectorAll('#rmDrawer .lvthumb')[1].click());
 ok(await ev(()=>!RM.pv),'tapping a locked level does nothing');
 await ev(()=>document.querySelector('#rmDrawer .lvthumb:not(.locked)').click());
@@ -143,7 +143,9 @@ ok(await ev(()=>space.unlocked&&space.lv.bed===2&&space.surf.wl===2&&space.spent
 const cl=await ev(()=>cleanProgress({space:{earned:50,spent:2,trued:true,unlocked:true,surf:{wl:99,wr:'x',fl:5},own:{fl:[5,5,77,1]},lv:{bed:9,window:2,ghost:3}}}).space);
 ok(cl.surf.wl===3&&cl.surf.wr===3&&cl.surf.fl===5&&cl.lv.bed===1&&cl.lv.window===2&&!('ghost' in cl.lv)&&JSON.stringify(cl.own.fl)==='[1,5,12]','bad colors and levels fall back; current and starting colors are always owned: '+JSON.stringify(cl.own));
 const mc=await ev(()=>roomMaxCost());
-ok(mc===(3+6+10+15)+(2+4+7+10)+3*(13+6-1)+54,'room max-out cost = bed 34 + window 23 + 3 surfaces x (13 + 3 premium x2 - 1 start) + one of each of the 21 plants (54) = 165, got '+mc);
+ok(mc===(3+4+5+6)+(2+3+4+5)+3*(13+6-1)+40,'room max-out cost = bed 18 + window 14 + 3 surfaces x (13 + 3 premium x2 - 1 start) + one of each of the 21 plants (40) = 126, got '+mc);
+ok(await ev(()=>JSON.stringify(ROOM_ITEMS.bed.up)==='[0,3,4,5,6]'&&JSON.stringify(ROOM_ITEMS.window.up)==='[0,2,3,4,5]'),'upgrade prices: bed 3,4,5,6 and window 2,3,4,5');
+ok(await ev(()=>{onRoomTap(null);space.surf.wl=15;rmRedraw();const st=[...document.querySelectorAll('#rmRainbow stop')];return st.length>=6&&document.querySelector('[data-hit="surf:wl"] polygon').getAttribute('fill')==='url(#rmRainbow)'&&new Set(st.map(x=>x.getAttribute('stop-color'))).size===st.length;}),'the rainbow is a real rainbow: 6+ different color stops on every surface');
 // a profile already above 10 tokens: ceremony gate on first start
 await ev(()=>{activeProfile().progress=Object.assign(captureProgress(),{space:{earned:25,spent:0,trued:true,unlocked:false}});persist();});
 await p.reload();await p.waitForTimeout(1800);

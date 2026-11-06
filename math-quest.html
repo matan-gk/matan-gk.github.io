@@ -1175,7 +1175,7 @@ const ROOM_COLORS = [
 const ROOM_DEFAULT = {wl:3, wr:3, fl:12};                    // wall left, wall right, floor start purple / purple / brown
 const ROOM_SURF = {wl:'הקיר השמאלי', wr:'הקיר הימני', fl:'הרצפה'};
 const ROOM_SURF_TO = {wl:'לקיר השמאלי', wr:'לקיר הימני', fl:'לרצפה'};
-const ROOM_ITEMS = {bed:{n:'מיטה', up:[0,3,6,10,15]}, window:{n:'חלון', up:[0,2,4,7,10]}};   // up[i] = tokens to reach level i+1 (index 0 unused); 5 levels each
+const ROOM_ITEMS = {bed:{n:'מיטה', up:[0,3,4,5,6]}, window:{n:'חלון', up:[0,2,3,4,5]}};   // up[i] = tokens to reach level i+1 (index 0 unused); 5 levels each
 const roomMax = id => ROOM_ITEMS[id].up.length;
 // floor items: each is bought once per copy and stands on one cell of the 10x10 floor (or waits in the stock). Plants first (1x1, face front-right).
 // src = the pot painted brown (what the room shows); base = the original with a magenta pot (step 4 recolors from it: pixels that differ from src are the pot).
@@ -1187,11 +1187,11 @@ const ROOM_CATALOG = [
   {id:"pl03",n:"פוטוס",p:1,src:"assets/72dd8eb735a8.webp",base:"assets/e321b07c82a3.webp",w:118.3,h:120.2,ax:60.1,ay:118.3,ref:0.9118},
   {id:"pl04",n:"שושנת עלים בהירים",p:2,src:"assets/544492ea6bf7.webp",base:"assets/90804f88b040.webp",w:109.7,h:133.6,ax:52.0,ay:131.5,ref:0.9},
   {id:"pl05",n:"אלוקסיה",p:2,src:"assets/ff281ec59fea.webp",base:"assets/990f27a9e267.webp",w:101.9,h:132.6,ax:50.0,ay:130.6,ref:0.8922},
-  {id:"pl06",n:"פרח אמטיסט",p:3,src:"assets/360f2ce6aa51.webp",base:"assets/eb347c43c813.webp",w:99.0,h:134.6,ax:50.1,ay:132.6,ref:0.8941},
-  {id:"pl07",n:"פרח כחול זוהר",p:4,src:"assets/dc93e9be3d5b.webp",base:"assets/20d95612cec0.webp",w:100.9,h:150.4,ax:49.5,ay:147.8,ref:0.8667},
-  {id:"pl08",n:"בועות ורודות",p:5,src:"assets/5814ca1cd9c9.webp",base:"assets/7fee712dc272.webp",w:97.6,h:146.5,ax:48.8,ay:143.8,ref:0.8843},
-  {id:"pl09",n:"גביש סגול",p:3,src:"assets/ab9d1d977a85.webp",base:"assets/eece0d43fe8b.webp",w:87.9,h:128.0,ax:46.7,ay:125.6,ref:0.8725},
-  {id:"pl10",n:"פרח זהב נוצץ",p:4,src:"assets/9b2cfc06664d.webp",base:"assets/0d649ba85b35.webp",w:103.6,h:141.9,ax:52.1,ay:139.2,ref:0.9039},
+  {id:"pl06",n:"פרח אמטיסט",p:2,src:"assets/360f2ce6aa51.webp",base:"assets/eb347c43c813.webp",w:99.0,h:134.6,ax:50.1,ay:132.6,ref:0.8941},
+  {id:"pl07",n:"פרח כחול זוהר",p:3,src:"assets/dc93e9be3d5b.webp",base:"assets/20d95612cec0.webp",w:100.9,h:150.4,ax:49.5,ay:147.8,ref:0.8667},
+  {id:"pl08",n:"בועות ורודות",p:3,src:"assets/5814ca1cd9c9.webp",base:"assets/7fee712dc272.webp",w:97.6,h:146.5,ax:48.8,ay:143.8,ref:0.8843},
+  {id:"pl09",n:"גביש סגול",p:2,src:"assets/ab9d1d977a85.webp",base:"assets/eece0d43fe8b.webp",w:87.9,h:128.0,ax:46.7,ay:125.6,ref:0.8725},
+  {id:"pl10",n:"פרח זהב נוצץ",p:3,src:"assets/9b2cfc06664d.webp",base:"assets/0d649ba85b35.webp",w:103.6,h:141.9,ax:52.1,ay:139.2,ref:0.9039},
   {id:"pl11",n:"קקטוס",p:1,src:"assets/ac69bdaf9f2c.webp",base:"assets/153a8ec543b6.webp",w:71.9,h:128.7,ax:35.6,ay:126.0,ref:0.8824},
   {id:"pl12",n:"שושנת השלום",p:1,src:"assets/74381f28d7ee.webp",base:"assets/a38dd10019be.webp",w:81.0,h:141.1,ax:39.5,ay:138.4,ref:0.8824},
   {id:"pl13",n:"פיקוס כינורי",p:1,src:"assets/dbf2a861e663.webp",base:"assets/903934241afd.webp",w:81.2,h:145.2,ax:37.6,ay:142.5,ref:0.8647},
@@ -1199,15 +1199,16 @@ const ROOM_CATALOG = [
   {id:"pl15",n:"קלה לבנה",p:2,src:"assets/8a584f3b39b1.webp",base:"assets/5fe3794d08c4.webp",w:85.6,h:146.3,ax:42.1,ay:144.3,ref:0.8784},
   {id:"pl16",n:"פיקוס גדול",p:2,src:"assets/fa0be3c5862b.webp",base:"assets/a7a98bb58038.webp",w:80.2,h:151.3,ax:40.7,ay:149.3,ref:0.8588},
   {id:"pl17",n:"סוקולנטים",p:2,src:"assets/4176a5facadb.webp",base:"assets/ea9847e2b8ff.webp",w:88.8,h:120.8,ax:45.4,ay:118.9,ref:0.8961},
-  {id:"pl18",n:"ערבת גבישים",p:5,src:"assets/51189de144a4.webp",base:"assets/f857d337a7f7.webp",w:125.9,h:158.3,ax:62.6,ay:156.2,ref:0.902},
-  {id:"pl19",n:"צמח הלב",p:6,src:"assets/930d1b578640.webp",base:"assets/81b34c47c90c.webp",w:100.9,h:143.8,ax:50.1,ay:141.9,ref:0.8922},
-  {id:"pl20",n:"צמח הקשת",p:6,src:"assets/53c7b56432cb.webp",base:"assets/b4e8493a3b79.webp",w:102.8,h:149.3,ax:49.8,ay:147.4,ref:0.9}
+  {id:"pl18",n:"ערבת גבישים",p:3,src:"assets/51189de144a4.webp",base:"assets/f857d337a7f7.webp",w:125.9,h:158.3,ax:62.6,ay:156.2,ref:0.902},
+  {id:"pl19",n:"צמח הלב",p:3,src:"assets/930d1b578640.webp",base:"assets/81b34c47c90c.webp",w:100.9,h:143.8,ax:50.1,ay:141.9,ref:0.8922},
+  {id:"pl20",n:"צמח הקשת",p:3,src:"assets/53c7b56432cb.webp",base:"assets/b4e8493a3b79.webp",w:102.8,h:149.3,ax:49.8,ay:147.4,ref:0.9}
 ];
 const ROOM_GROUPS = {plants:'צמחים'};
 const catGroup = c => 'plants';
 const catOf = k => ROOM_CATALOG.find(c=>c.id===k);
 const ROOM_CELLS = 10;
-const roomBlocked = (x,y) => x<=2 && y<=3;   // the bed stands on these cells
+const BED_CELLS = {w:3, d:4};   // the bed covers 3 x 4 cells of the floor, from the back corner (x 0-2, y 0-3)
+const roomBlocked = (x,y) => x<BED_CELLS.w && y<BED_CELLS.d;
 function roomMaxCost(){   // everything buyable in the room today (the catalog grows in later steps)
   let t = 0; for(const id in ROOM_ITEMS) t += ROOM_ITEMS[id].up.reduce((a,b)=>a+b,0);
   t += ROOM_CATALOG.reduce((a,c)=>a+c.p,0);   // one copy of each floor item
@@ -2073,7 +2074,7 @@ function cloudProfileFromDoc(C, helpers){
 // ===== CLOUD (Google sign-in, cloud progress, problem reports) =====
 // Local-first: the game always works from this device's storage. The cloud is a mirror, so no internet / no account / no quota never blocks play.
 // Everything here is off while CLOUD_CONFIG is null. See firebase/SETUP.md for how to create the (free) Firebase project and paste its settings below.
-const APP_VERSION = '2026.11.06d';       // keep equal to VERSION in sw.js (a test checks it)
+const APP_VERSION = '2026.11.06e';       // keep equal to VERSION in sw.js (a test checks it)
 const CLOUD_CONFIG = {apiKey:"AIzaSyAlq_TJNGvWPJpUrpbdq_hkAoURydqMzm0", authDomain:"learning-quest-1.firebaseapp.com", projectId:"learning-quest-1", appId:"1:98931179722:web:78fb00084ccba3efb53433"};   // e.g. {apiKey:'...', authDomain:'xxx.firebaseapp.com', projectId:'xxx', appId:'...'}
 const CLOUD_LIMITS = {
   pushDelayMs: 60000,          // at most one upload per profile per minute while playing
@@ -4958,8 +4959,8 @@ const surfFill = idx => ROOM_COLORS[idx].h==='rainbow' ? 'url(#rmRainbow)' : ROO
 // room item pictures: w,h in room units, (ax,ay) = the point of the picture that sits on the floor corner (bed) or the sill centre (window)
 const ROOM_ART = {bed:[{src:'assets/f079c2224879.webp',w:286.5,h:325.5,ax:122.6,ay:325.5},{src:'assets/8c9bc6b7b540.webp',w:286.5,h:324.0,ax:125.0,ay:324.0},{src:'assets/fc72ab74c218.webp',w:285.0,h:387.0,ax:127.7,ay:387.0},{src:'assets/4312fd9e048e.webp',w:294.0,h:492.0,ax:137.4,ay:492.0},{src:'assets/a0f555cc03e3.webp',w:306.0,h:522.0,ax:138.0,ay:522.0}],
   window:[{src:'assets/ab4b2e4250e6.webp',w:210.7,h:214.9,ax:105.0,ay:210.0},{src:'assets/a725113aac4b.webp',w:226.2,h:229.1,ax:113.9,ay:224.1},{src:'assets/ea204b751610.webp',w:217.8,h:270.1,ax:109.0,ay:264.4},{src:'assets/eb3fe20bb9dd.webp',w:225.5,h:294.8,ax:112.7,ay:289.9},{src:'assets/eb13d2dccaf9.webp',w:253.1,h:311.1,ax:126.6,ay:306.1}]};
-const BED_FOOT = [[0,0],[2.2,0],[2.2,3.3],[0,3.3]];   // where the bed's feet stand: a soft shadow on the floor keeps it from looking afloat
-const BED_AT = gx2s(2.16,3.24), WIN_U = 250, WIN_SILL = 85;   // bed: its front corner on the floor grid; window: centre along the wall and sill height above the floor
+const BED_FOOT = [[-.05,.3],[1.45,.95],[2.25,3.35],[.75,2.7]];   // the four feet (back, right, front, left) measured on the art, a little wider   // where the bed's feet stand: a soft shadow on the floor keeps it from looking afloat
+const BED_AT = gx2s(2.16,3.24).map((v,i)=>i?v+7:v), WIN_U = 250, WIN_SILL = 85;   // bed: its front corner on the floor grid; window: centre along the wall and sill height above the floor
 function bedSVG(lv){ const a = ROOM_ART.bed[lv-1], f = BED_FOOT.map(q=>gx2s(q[0],q[1]).join(',')).join(' '); return `<polygon points="${f}" fill="#3b1d10" opacity=".3" filter="url(#rmBlur)"/><image href="${a.src}" x="${(BED_AT[0]-a.ax).toFixed(1)}" y="${(BED_AT[1]-a.ay).toFixed(1)}" width="${a.w}" height="${a.h}"/>`; }
 function windowSVG(lv){ const a = ROOM_ART.window[lv-1]; return `<image href="${a.src}" x="${(WIN_U-a.ax).toFixed(1)}" y="${(-WIN_SILL-a.ay).toFixed(1)}" width="${a.w}" height="${a.h}"/>`; }   // flat in wall units: it grows up the wall with each level
 function thingSVG(c, x, y){
@@ -5003,7 +5004,7 @@ function recolorSprite(c, hex){
 function roomSVG(){
   const cl = effCol('wl'), cr = effCol('wr'), cf = effCol('fl');
   const sel = (t,id) => RM.sel && RM.sel.t===t && (RM.sel.id||RM.sel.k)===id ? ' sel' : '';
-  let s = `<defs><filter id="rmBlur" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="6"/></filter><linearGradient id="rmRainbow" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffb3d6"/><stop offset=".33" stop-color="#fff2a8"/><stop offset=".66" stop-color="#b8f0c8"/><stop offset="1" stop-color="#a9d9f6"/></linearGradient></defs><g id="rmG" transform="translate(${RM.tx} ${RM.ty}) scale(${RM.k})">`;
+  let s = `<defs><filter id="rmBlur" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="6"/></filter><linearGradient id="rmRainbow" x1="0" y1="0" x2="1" y2="0.35"><stop offset="0" stop-color="#ff8f9c"/><stop offset=".17" stop-color="#ffae6e"/><stop offset=".34" stop-color="#ffe46b"/><stop offset=".5" stop-color="#8fe08a"/><stop offset=".67" stop-color="#6cc6f5"/><stop offset=".84" stop-color="#8f8cf0"/><stop offset="1" stop-color="#d48cf0"/></linearGradient></defs><g id="rmG" transform="translate(${RM.tx} ${RM.ty}) scale(${RM.k})">`;
   s += `<g data-hit="surf:wl" class="rmh${sel('surf','wl')}"><polygon points="0,250 500,0 500,400 0,650" fill="${surfFill(cl)}" stroke="#5b3a2a" stroke-width="4" stroke-linejoin="round"/><polygon points="0,610 500,360 500,400 0,650" fill="#000" opacity=".08"/></g>`;
   s += `<g data-hit="surf:wr" class="rmh${sel('surf','wr')}"><polygon points="500,0 1000,250 1000,650 500,400" fill="${surfFill(cr)}" stroke="#5b3a2a" stroke-width="4" stroke-linejoin="round"/><polygon points="500,0 1000,250 1000,650 500,400" fill="#000" opacity=".10"/><polygon points="500,360 1000,610 1000,650 500,400" fill="#000" opacity=".08"/></g>`;
   let grid = ''; for(let i=1;i<10;i++){ const a=gx2s(i,0),b=gx2s(i,10),c=gx2s(0,i),d=gx2s(10,i); grid += `M${a} L${b} M${c} L${d} `; }
@@ -5066,11 +5067,11 @@ function renderDrawer(){
       cards = stock.map(([t,i])=>{ const c = catOf(t.k); return `<button type="button" class="catcard" data-unstow="${i}" aria-label="${c.n}"><img src="${c.src}" alt=""><span class="cname">${c.n}</span></button>`; }).join('') || `<div class="rmsh-s">אין פריטים במלאי</div>`;
     }
     const chips = inCat ? `<div class="catchips">${[['all','הכל'],...Object.entries(ROOM_GROUPS)].map(([k,n])=>`<button type="button" class="chip${(RM.filter||'all')===k?' on':''}" data-filter="${k}">${n}</button>`).join('')}</div>` : '';
-    d.innerHTML = head(inCat?'קטלוג':`מלאי · ${stock.length}`) + chips + `<div class="catgrid">${cards}</div><button type="button" class="btn ghost" data-close="1">סגירה</button>`;
+    d.innerHTML = head(inCat?'פריטים חדשים':`מלאי · ${stock.length}`) + chips + `<div class="catgrid">${cards}</div><button type="button" class="btn ghost" data-close="1">סגירה</button>`;
     return;
   }
   if(!sel){ d.classList.remove('idle'); d.hidden = false;
-    d.innerHTML = head('החדר') + `<div class="rmsh-s">בחרו משהו בחדר כדי לשנות אותו</div><div class="rmsh-btns"><button type="button" class="btn" data-list="cat">🛍️ קטלוג</button>${stock.length?`<button type="button" class="btn ghost" data-list="stock">🎒 מלאי · ${stock.length}</button>`:''}</div>`; return; }
+    d.innerHTML = head('החדר') + `<div class="rmsh-s">בחרו משהו בחדר כדי לשנות אותו</div><div class="rmsh-btns"><button type="button" class="btn" data-list="cat">➕ הוספת פריטים חדשים</button>${stock.length?`<button type="button" class="btn ghost" data-list="stock">🎒 מלאי · ${stock.length}</button>`:''}</div>`; return; }
   d.classList.remove('idle'); d.hidden = false;
   if(sel.t==='thing'){
     const t = space.things[sel.i], c = t && catOf(t.k); if(!c){ RM.sel = null; return renderDrawer(); }
@@ -5100,7 +5101,7 @@ function onRoomTap(hit, e){
     const c = e && cellAt(e); if(c && cellFree(c[0],c[1],RM.pl.i)){ RM.pl.x = c[0]; RM.pl.y = c[1]; rmRedraw(); }
     return;
   }
-  if(RM.list) return;
+  RM.list = null;   // the catalog closes when something in the room is tapped; only placing a floor item is a mode of its own
   RM.pv = null;
   if(!hit){ RM.sel = null; } else { const [kind,id] = hit.split(':'); RM.sel = kind==='item' ? {t:'item',id} : kind==='thing' ? {t:'thing',i:+id} : {t:'surf',k:id}; }
   rmRedraw(); renderDrawer();

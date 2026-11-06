@@ -13,7 +13,7 @@ const click=async sel=>{await ev(s=>document.querySelector(s).click(),sel);};
 const tapCell=async(x,y)=>{const pt=await ev(([x,y])=>{const g=document.getElementById('rmG'),m=g.getScreenCTM(),sx=500+(x+.5-(y+.5))*50,sy=400+(x+.5+y+.5)*25;return [m.a*sx+m.c*sy+m.e,m.b*sx+m.d*sy+m.f];},[x,y]);await p.mouse.click(pt[0],pt[1]);};
 
 // catalog data
-ok(await ev(()=>ROOM_CATALOG.length===21&&ROOM_CATALOG.every(c=>c.n&&c.p>=1&&c.p<=6&&/^assets\//.test(c.src)&&/^assets\//.test(c.base)&&c.src!==c.base&&c.w>0&&c.ay>0&&c.ref>0)&&new Set(ROOM_CATALOG.map(c=>c.id)).size===21),'catalog: 21 plants, each with a name, a price of 1-6 tokens, a brown-pot picture and a magenta-pot original');
+ok(await ev(()=>ROOM_CATALOG.length===21&&ROOM_CATALOG.every(c=>c.n&&c.p>=1&&c.p<=3&&/^assets\//.test(c.src)&&/^assets\//.test(c.base)&&c.src!==c.base&&c.w>0&&c.ay>0&&c.ref>0)&&new Set(ROOM_CATALOG.map(c=>c.id)).size===21),'catalog: 21 plants, each with a name, a price of 1-3 tokens, a brown-pot picture and a magenta-pot original');
 ok(await ev(()=>/^pl/.test(ROOM_CATALOG[0].id)&&Object.keys(ROOM_GROUPS).includes('plants')),'plants are the first group');
 // default pot is brown, original magenta
 const px=await ev(async()=>{const get=src=>new Promise(r=>{const i=new Image();i.onload=()=>{const c=document.createElement('canvas');c.width=i.naturalWidth;c.height=i.naturalHeight;const x=c.getContext('2d');x.drawImage(i,0,0);r(x.getImageData(0,0,c.width,c.height).data);};i.src=src;});
@@ -31,20 +31,20 @@ ok(rc.n>500&&rc.mean<14,'recolor with the default brown matches the baked brown 
 ok(rc.blue>0.9&&rc.leaf>0.97,'recolor to blue turns the pot blue and leaves the plant alone: '+JSON.stringify(rc));
 
 // drawer: idle buttons; catalog opens with filter chips and cards
-ok(await ev(()=>!!document.querySelector('#rmDrawer [data-list="cat"]')&&!document.querySelector('#rmDrawer [data-list="stock"]')),'idle drawer: a catalog button, no stock button while nothing is put away');
+ok(await ev(()=>/הוספת פריטים חדשים/.test(document.querySelector('#rmDrawer [data-list="cat"]').textContent)&&!document.querySelector('#rmDrawer [data-list="stock"]')),'idle drawer: a catalog button, no stock button while nothing is put away');
 await click('[data-list="cat"]');
-ok(await ev(()=>document.querySelectorAll('#rmDrawer .catcard').length===21&&document.querySelectorAll('#rmDrawer .catchips .chip').length>=2&&/קטלוג/.test(document.getElementById('rmDrawer').textContent)),'catalog: 21 cards and filter chips');
+ok(await ev(()=>document.querySelectorAll('#rmDrawer .catcard').length===21&&document.querySelectorAll('#rmDrawer .catchips .chip').length>=2&&/פריטים חדשים/.test(document.getElementById('rmDrawer').textContent)),'catalog: 21 cards and filter chips');
 ok(await ev(()=>{const c=document.querySelector('#rmDrawer .catcard');return /1 🪙/.test(c.textContent)&&c.querySelector('img').getAttribute('src')===ROOM_CATALOG[0].src;}),'a card shows the plant picture, its name and its price');
 await click('[data-filter="plants"]');
 ok(await ev(()=>document.querySelectorAll('#rmDrawer .catcard').length===21&&document.querySelector('.chip.on').dataset.filter==='plants'),'the plants filter works');
 // pick -> preview with a ghost, nothing bought yet
-await ev(()=>{space.spent=space.earned-3;});await click('[data-list="cat"],[data-filter="all"]').catch(()=>{});
+await ev(()=>{space.spent=space.earned-2;});await click('[data-list="cat"],[data-filter="all"]').catch(()=>{});
 await ev(()=>{RM.list='cat';renderDrawer();});
-await click('[data-pick="pl07"]');   // 4 tokens, we have 3
+await click('[data-pick="pl07"]');   // 3 tokens, we have 2
 ok(await ev(()=>RM.pl&&RM.pl.k==='pl07'&&RM.pl.i===-1&&space.things.length===0&&!!document.querySelector('.rmghost')&&!!document.querySelector('.rmtile')),'picking an item previews it as a ghost on a highlighted tile; nothing bought yet');
-ok(await ev(()=>/צריך 4 מטבעות\. יש לך 3/.test(document.getElementById('rmDrawer').textContent)&&document.querySelector('[data-place]').disabled),'too poor: "צריך 4 מטבעות. יש לך 3", buy disabled');
+ok(await ev(()=>/צריך 3 מטבעות\. יש לך 2/.test(document.getElementById('rmDrawer').textContent)&&document.querySelector('[data-place]').disabled),'too poor: "צריך 3 מטבעות. יש לך 2", buy disabled');
 await click('[data-cancel]');
-ok(await ev(()=>!RM.pl&&!document.querySelector('.rmghost')&&space.things.length===0&&space.spent===space.earned-3),'cancel: nothing bought, nothing placed');
+ok(await ev(()=>!RM.pl&&!document.querySelector('.rmghost')&&space.things.length===0&&space.spent===space.earned-2),'cancel: nothing bought, nothing placed');
 // buy a 1-token plant and choose its cell
 await ev(()=>{space.spent=0;RM.list='cat';renderDrawer();});await click('[data-pick="pl00"]');
 ok(await ev(()=>/צריך מטבע אחד\. יש לך 100/.test(document.getElementById('rmDrawer').textContent)||/יש לך 100/.test(document.getElementById('rmDrawer').textContent)),'price line shows the balance');
@@ -87,5 +87,20 @@ ok(await ev(()=>space.things.length===3&&space.things[0].x===3&&space.things[0].
 const cl=await ev(()=>cleanProgress({space:{earned:50,spent:0,trued:true,unlocked:true,things:[{k:'pl00',x:5,y:5},{k:'pl00',x:5,y:5},{k:'nope',x:1,y:9},{k:'pl01',x:1,y:1},{k:'pl02',x:12,y:3},{k:'pl03',x:-1,y:-1},'x',null]}}).space.things);
 ok(cl.length===5&&cl[0].x===5&&cl[1].x===-1&&cl[2].x===-1&&cl[3].x===-1&&cl[4].x===-1&&!cl.some(t=>t.k==='nope'),'bad things are dropped; double, blocked and off-floor cells go to the stock: '+JSON.stringify(cl));
 const mc=await ev(()=>roomMaxCost());
-ok(mc===34+23+54+3*18,'max-out cost includes one of each plant (54): '+mc);
+ok(mc===18+14+54+40,'max-out cost includes one of each plant (40): '+mc);
+// bed footprint: 3 x 4 cells, and the code tracks it that way
+ok(await ev(()=>{let n=0,cells=[];for(let y=0;y<10;y++)for(let x=0;x<10;x++)if(roomBlocked(x,y)){n++;cells.push([x,y]);}return n===12&&BED_CELLS.w===3&&BED_CELLS.d===4&&cells.every(([x,y])=>x<3&&y<4);}),'the bed blocks exactly 3 x 4 = 12 cells at the back corner');
+ok(await ev(()=>roomBlocked(2,3)&&!roomBlocked(3,0)&&!roomBlocked(0,4)),'cell 2,3 is blocked; 3,0 and 0,4 are free');
+// the catalog closes when something in the room is tapped; only placing a floor item is a mode
+await ev(()=>{space.spent=0;RM.sel=null;RM.pl=null;RM.list='cat';renderDrawer();});
+await ev(()=>onRoomTap('item:bed'));
+ok(await ev(()=>!RM.list&&RM.sel&&RM.sel.id==='bed'&&/מיטה/.test(document.getElementById('rmDrawer').textContent)),'catalog open: tapping the bed closes it and shows the bed options');
+await ev(()=>{RM.sel=null;RM.list='cat';renderDrawer();});await ev(()=>onRoomTap('surf:wl'));
+ok(await ev(()=>!RM.list&&RM.sel&&RM.sel.k==='wl'&&document.querySelectorAll('#rmDrawer .brush').length===16),'catalog open: tapping a wall closes it and shows the colors');
+await ev(()=>{RM.sel=null;RM.list='stock';renderDrawer();});await ev(()=>onRoomTap('thing:0'));
+ok(await ev(()=>!RM.list&&RM.sel&&RM.sel.t==='thing'),'stock open: tapping a placed plant closes it and selects the plant');
+await ev(()=>{RM.sel=null;RM.list='cat';renderDrawer();});await ev(()=>onRoomTap(null));
+ok(await ev(()=>!RM.list),'catalog open: tapping empty space closes it');
+await ev(()=>{RM.list=null;RM.pl={k:'pl00',i:-1,x:6,y:6};rmRedraw();renderDrawer();onRoomTap('item:bed');});
+ok(await ev(()=>!!RM.pl&&!RM.sel),'placing a floor item is a mode: tapping the bed does not select it');
 ok(errs.length===0,'no page errors '+errs);console.log(f?'FAILURES '+f:'ALL PASS');await b.close();})();
