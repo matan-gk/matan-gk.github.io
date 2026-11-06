@@ -7,6 +7,17 @@ const ev=(fn,a)=>p.evaluate(fn,a);
 await p.goto(T.URL);await ev(()=>localStorage.clear());await p.reload();
 await p.fill('#pfName','X');await p.click('.gopt:has(input[value=f])');await p.click('[data-pact=save]');await p.waitForTimeout(500);
 await ev(()=>{uSpeed=0.02;});
+
+// main navigation stays aligned with and without the room button, on phone and wide screens
+const fill=async()=>ev(()=>{const L=document.getElementById('levels'),k=[...L.children].map(c=>c.getBoundingClientRect());const rows={};k.forEach(c=>{const y=Math.round(c.top/16);(rows[y]=rows[y]||[]).push(c);});const ext=Object.values(rows).map(row=>[Math.min(...row.map(c=>c.left)),Math.max(...row.map(c=>c.right))]);return ext.every(e=>Math.abs(e[0]-ext[0][0])<3&&Math.abs(e[1]-ext[0][1])<3);});
+for(const [w,h] of [[390,844],[1174,900]]){ await p.setViewportSize({width:w,height:h});
+  await ev(()=>{space.unlocked=false;renderLevels();});
+  ok(await fill(),'navigation rows are full width / full rows without the room button at '+w);
+  await ev(()=>{space.unlocked=true;renderLevels();});
+  ok(await fill()||w>=720,'navigation rows aligned with the room button at '+w);   // wide screens: a lone last card is allowed
+  ok(await ev(()=>{const a=document.querySelector('#spaceBtn .lvimg').getBoundingClientRect(),b=document.querySelector('#levels .levelbtn .lvimg.cut, #levels .levelbtn .lvimg').getBoundingClientRect();return Math.abs(a.width-b.width)<=48&&a.width>=64;}),'the room icon is as large as the other icons at '+w);
+  await ev(()=>{space.unlocked=false;renderLevels();}); }
+await p.setViewportSize({width:390,height:844});
 // 1. no room button until unlocked; the coin area carries the teaser
 ok(await ev(()=>!document.getElementById('spaceBtn')),'locked: no room button on the main screen');
 ok(await ev(()=>{renderRoom();return !document.getElementById('tokChip');}),'0 tokens: no coin area at all');
@@ -58,6 +69,13 @@ await p.click('#spaceBtn');await p.waitForTimeout(300);
 await ev(()=>{rmZoomAt(5,500,450);});ok(await ev(()=>RM.k===3),'zoom is limited to 3x');
 await ev(()=>{rmPan(9999,9999);});ok(await ev(()=>RM.tx<=0&&RM.ty<=0),'pan cannot leave the room');
 await ev(()=>{rmZoomAt(0.2,500,450);});ok(await ev(()=>RM.k===1&&RM.tx===0&&RM.ty===0),'zoom out returns to the full room');
+
+// five levels each; the window grows up the wall; the bed sits in the corner
+ok(await ev(()=>roomMax('bed')===5&&roomMax('window')===5&&ROOM_ART.bed.length===5&&ROOM_ART.window.length===5),'bed and window have 5 levels with pictures');
+const grow=await ev(()=>[1,2,3,4,5].map(l=>{const a=ROOM_ART.window[l-1];return [-85-a.ay, a.h];}));
+ok(grow.every((g,i)=>i===0||g[0]<grow[i-1][0]-1)&&grow.every(g=>g[0]+g[1]>=-92&&g[0]+g[1]<=-75),'the window keeps its sill and grows upward every level: tops '+grow.map(g=>Math.round(g[0])));
+ok(await ev(()=>{const c=gx2s(0,0);return BED_AT[0]>c[0]-150&&BED_AT[0]<c[0]+50&&ROOM_ART.bed.every(a=>BED_AT[1]-a.ay>=0);}),'the bed is anchored at the back corner of the grid and every level fits inside the room');
+ok(await ev(()=>{const i=document.querySelector('[data-hit="item:bed"] image');return !!i&&/^assets\//.test(i.getAttribute('href'));}),'the bed is drawn from its picture');
 // 11. no permanent coin chip over the room; the coins live in the drawer
 ok(await ev(()=>!document.getElementById('rmChip')&&!document.querySelector('#spaceView .tokchip')),'no permanent coin counter above the room');
 // 8. the drawer floats over the room and does not resize it
@@ -105,7 +123,7 @@ ok(await ev(()=>space.unlocked&&space.lv.bed===2&&space.surf.wl===2&&space.spent
 const cl=await ev(()=>cleanProgress({space:{earned:50,spent:2,trued:true,unlocked:true,surf:{wl:99,wr:'x',fl:5},own:{fl:[5,5,77,1]},lv:{bed:9,window:2,ghost:3}}}).space);
 ok(cl.surf.wl===3&&cl.surf.wr===3&&cl.surf.fl===5&&cl.lv.bed===1&&cl.lv.window===2&&!('ghost' in cl.lv)&&JSON.stringify(cl.own.fl)==='[1,5,12]','bad colors and levels fall back; current and starting colors are always owned: '+JSON.stringify(cl.own));
 const mc=await ev(()=>roomMaxCost());
-ok(mc===15+3*(13+6-1),'room max-out cost = items 15 + 3 surfaces x (13 + 3 premium x2 - 1 start) = '+mc);
+ok(mc===(3+6+10+15)+(2+4+7+10)+3*(13+6-1),'room max-out cost = bed 34 + window 23 + 3 surfaces x (13 + 3 premium x2 - 1 start) = 111, got '+mc);
 // a profile already above 10 tokens: ceremony gate on first start
 await ev(()=>{activeProfile().progress=Object.assign(captureProgress(),{space:{earned:25,spent:0,trued:true,unlocked:false}});persist();});
 await p.reload();await p.waitForTimeout(1800);

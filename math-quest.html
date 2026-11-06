@@ -386,7 +386,7 @@ body[data-view="home"][data-bd="1"] #backdrop{display:block; opacity:1}
 body[data-bd="1"][data-view="home"] h1{background:var(--card); color:var(--text); -webkit-background-clip:border-box; background-clip:border-box; border-radius:16px; padding:6px 14px; margin:0 auto 8px; width:max-content; max-width:100%; box-shadow:0 4px 12px var(--shadow)}
 body[data-bd="1"][data-view="home"] .wrap > .sub{background:var(--card); border-radius:12px; padding:4px 12px; width:max-content; max-width:100%; margin:0 auto 12px; box-shadow:0 4px 12px var(--shadow)}
 body[data-bd="1"][data-view="home"] .levelbtn{background:color-mix(in srgb, var(--card) 92%, transparent)}
-.levelbtn .lvimg.cut{border-radius:0; box-shadow:none; object-fit:contain; background:none; filter:drop-shadow(0 3px 5px var(--shadow))}
+.levelbtn .lvimg.cut, .roombtn .lvimg.cut{border-radius:0; box-shadow:none; object-fit:contain; background:none; filter:drop-shadow(0 3px 5px var(--shadow))}
 body[data-view="play"] #levels, body[data-view="play"] .wrap > .sub{display:none}
 body[data-view="play"] h1{background:var(--card); color:var(--text); -webkit-background-clip:border-box; background-clip:border-box; border-radius:16px; padding:6px 14px; margin:0 auto 8px; width:max-content; max-width:100%; box-shadow:0 4px 12px var(--shadow)}
 body[data-view="play"] .charimg{width:104px}
@@ -401,8 +401,8 @@ body[data-view="home"] .wrap > .sub{margin-bottom:12px}
 .levelbtn{grid-column:span 2}
 .levels[data-rem="1"] .levelbtn:last-child{grid-column:1/-1}
 .levels[data-rem="2"] .levelbtn:nth-last-child(-n+2){grid-column:span 3}
-.levelbtn .emoji{font-size:3.1rem; line-height:1.15; display:block; margin-bottom:2px}
-.levelbtn .lvimg{display:block; width:64px; height:64px; margin:0 auto 4px; border-radius:14px; object-fit:cover; box-shadow:0 2px 6px var(--shadow)}
+.levelbtn .emoji, .roombtn .emoji{font-size:3.1rem; line-height:1.15; display:block; margin-bottom:2px}
+.levelbtn .lvimg, .roombtn .lvimg{display:block; width:64px; height:64px; margin:0 auto 4px; border-radius:14px; object-fit:cover; box-shadow:0 2px 6px var(--shadow)}
 .levelbtn.active{border-color:var(--yellow); transform:translateY(-2px)}
 .card{
   background:var(--card); border-radius:24px; padding:22px 20px; box-shadow:0 12px 30px var(--shadow);
@@ -513,9 +513,9 @@ body[data-view="home"] .wrap > .sub{margin-bottom:12px}
 @media (min-width:720px){ .wrap{max-width:720px} .levels{grid-template-columns:repeat(4,minmax(0,1fr))} .levels .levelbtn, .levels .roombtn, .levels[data-rem] .roombtn, .levels[data-rem] .levelbtn:last-child, .levels[data-rem] .levelbtn:nth-last-child(-n+2){grid-column:auto} }
 @media (min-width:1100px){ .wrap{max-width:880px} .levels{grid-template-columns:repeat(8,minmax(0,1fr))} .levelbtn{font-size:.95rem; padding:12px 8px} .card{padding:28px 28px} }
 /* selection screen: the game grid is the main control, so it grows with the room available */
-@media (min-width:480px){ body[data-view="home"] .levelbtn .lvimg{width:84px; height:84px} body[data-view="home"] .levelbtn .lvimg.cut{width:72px; height:72px} body[data-view="home"] .levelbtn{font-size:.95rem; padding:12px 8px} body[data-view="home"] .levelbtn .emoji{font-size:3.6rem} }
-@media (min-width:720px){ body[data-view="home"] .wrap{max-width:860px} body[data-view="home"] .levels{gap:14px} body[data-view="home"] .levelbtn .lvimg{width:120px; height:120px; border-radius:20px} body[data-view="home"] .levelbtn{font-size:1.1rem; padding:16px 10px; border-radius:20px} body[data-view="home"] .levelbtn .emoji{font-size:3.6rem} body[data-view="home"] .levelbtn .lvimg.cut{width:96px; height:96px} body[data-view="home"] .charimg{width:110px} body[data-view="home"] .levelbtn{padding:12px 10px} }
-@media (min-width:1100px){ body[data-view="home"] .wrap{max-width:1040px} body[data-view="home"] .levels{grid-template-columns:repeat(4,minmax(0,1fr)); gap:18px} body[data-view="home"] .levelbtn .lvimg{width:150px; height:150px} body[data-view="home"] .levelbtn .lvimg.cut{width:112px; height:112px} body[data-view="home"] .levelbtn .emoji{font-size:4.2rem} body[data-view="home"] .levelbtn{font-size:1.25rem; padding:14px 12px} }
+@media (min-width:480px){ body[data-view="home"] .levelbtn .lvimg, body[data-view="home"] .roombtn .lvimg{width:84px; height:84px} body[data-view="home"] .levelbtn .lvimg.cut, body[data-view="home"] .roombtn .lvimg.cut{width:72px; height:72px} body[data-view="home"] .levelbtn, body[data-view="home"] .roombtn{font-size:.95rem; padding:12px 8px} body[data-view="home"] .levelbtn .emoji, body[data-view="home"] .roombtn .emoji{font-size:3.6rem} }
+@media (min-width:720px){ body[data-view="home"] .wrap{max-width:860px} body[data-view="home"] .levels{gap:14px} body[data-view="home"] .levelbtn .lvimg, body[data-view="home"] .roombtn .lvimg{width:120px; height:120px; border-radius:20px} body[data-view="home"] .levelbtn, body[data-view="home"] .roombtn{font-size:1.1rem; padding:16px 10px; border-radius:20px} body[data-view="home"] .levelbtn .emoji, body[data-view="home"] .roombtn .emoji{font-size:3.6rem} body[data-view="home"] .levelbtn .lvimg.cut, body[data-view="home"] .roombtn .lvimg.cut{width:96px; height:96px} body[data-view="home"] .charimg{width:110px} body[data-view="home"] .levelbtn, body[data-view="home"] .roombtn{padding:12px 10px} }
+@media (min-width:1100px){ body[data-view="home"] .wrap{max-width:1040px} body[data-view="home"] .levels{grid-template-columns:repeat(4,minmax(0,1fr)); gap:18px} body[data-view="home"] .levelbtn .lvimg, body[data-view="home"] .roombtn .lvimg{width:150px; height:150px} body[data-view="home"] .levelbtn .lvimg.cut, body[data-view="home"] .roombtn .lvimg.cut{width:112px; height:112px} body[data-view="home"] .levelbtn .emoji, body[data-view="home"] .roombtn .emoji{font-size:4.2rem} body[data-view="home"] .levelbtn, body[data-view="home"] .roombtn{font-size:1.25rem; padding:14px 12px} }
 /* location view: slightly see-through question card, so more of the backdrop shows */
 body[data-view="play"] .card{background:color-mix(in srgb, var(--card) 76%, transparent); -webkit-backdrop-filter:blur(3px); backdrop-filter:blur(3px)}
 /* top bar: profile menu, score and streak, and the compact gift square stay at the top of the screen */
@@ -703,16 +703,11 @@ tr.mxempty th[scope=row]{opacity:.6}
 .cup img{position:absolute !important;max-width:none !important;display:block;pointer-events:none}
 
 /* ===== personal space ===== */
-.roombtn{grid-column:span 2; position:relative; min-width:0; display:flex; flex-direction:column; align-items:center; justify-content:center; background:var(--card); border:2px solid var(--yellow); border-radius:16px; padding:10px 8px; text-align:center; cursor:pointer; color:var(--text); font-family:'Baloo 2',sans-serif; font-weight:600; font-size:.82rem; box-shadow:0 4px 10px var(--shadow)}
+.roombtn{grid-column:span 2; position:relative; min-width:0; display:flex; flex-direction:column; align-items:center; justify-content:center; background:var(--card); border:2px solid transparent; border-radius:16px; padding:10px 8px; text-align:center; cursor:pointer; color:var(--text); font-family:'Baloo 2',sans-serif; font-weight:600; font-size:.82rem; box-shadow:0 4px 10px var(--shadow)}
 .roombtn.slot{visibility:hidden}
 .roombtn .rb-in{display:flex; flex-direction:column; align-items:center}
-.rbmedal{position:relative; display:block; width:64px; height:64px; margin:0 auto 4px}
-.rbimg{width:64px; height:64px; object-fit:contain; display:block}
 .levels[data-rem="1"] .roombtn{grid-column:1/-1}
 .levels[data-rem="2"] .roombtn{grid-column:span 3}
-.levels[data-rem="2"] .levelbtn:nth-last-child(-n+2){grid-column:span 2}
-.levels[data-rem="2"] .levelbtn:nth-last-child(2){grid-column:span 3}
-.levels[data-rem="1"] .levelbtn:last-child{grid-column:span 2}
 /* unlock gate: everything else is blocked while the new button poofs in and points the way */
 body.gate{overflow:hidden}
 #unlockGate{position:fixed; inset:0; z-index:45; background:rgba(30,15,50,.72)}
@@ -1123,8 +1118,8 @@ const ROOM_COLORS = [
 const ROOM_DEFAULT = {wl:3, wr:3, fl:12};                    // wall left, wall right, floor start purple / purple / brown
 const ROOM_SURF = {wl:'הקיר השמאלי', wr:'הקיר הימני', fl:'הרצפה'};
 const ROOM_SURF_TO = {wl:'לקיר השמאלי', wr:'לקיר הימני', fl:'לרצפה'};
-const ROOM_ITEMS = {bed:{n:'מיטה', up:[0,3,6]}, window:{n:'חלון', up:[0,2,4]}};   // up[i] = tokens to reach level i+1 (index 0 unused)
-const ROOM_MAXLV = 3;
+const ROOM_ITEMS = {bed:{n:'מיטה', up:[0,3,6,10,15]}, window:{n:'חלון', up:[0,2,4,7,10]}};   // up[i] = tokens to reach level i+1 (index 0 unused); 5 levels each
+const roomMax = id => ROOM_ITEMS[id].up.length;
 function roomMaxCost(){   // everything buyable in the room today (the catalog grows in later steps)
   let t = 0; for(const id in ROOM_ITEMS) t += ROOM_ITEMS[id].up.reduce((a,b)=>a+b,0);
   const all = ROOM_COLORS.reduce((a,c)=>a+c.p,0);
@@ -1146,7 +1141,7 @@ function spaceClean(sp, gold, legacy){
     surf[k] = c; own[k] = [...new Set(o)].sort((a,b)=>a-b);
   }
   const lv = {};
-  for(const id in ROOM_ITEMS){ const v = sp.lv && sp.lv[id]; lv[id] = (Number.isInteger(v) && v>=1 && v<=ROOM_MAXLV) ? v : 1; }
+  for(const id in ROOM_ITEMS){ const v = sp.lv && sp.lv[id]; lv[id] = (Number.isInteger(v) && v>=1 && v<=roomMax(id)) ? v : 1; }
   return {earned, spent:Math.min(spent,earned), trued:true, unlocked:sp.unlocked===true, surf, own, lv};
 }
 function spaceSnap(){ return JSON.parse(JSON.stringify(space)); }
@@ -1982,7 +1977,7 @@ function cloudProfileFromDoc(C, helpers){
 // ===== CLOUD (Google sign-in, cloud progress, problem reports) =====
 // Local-first: the game always works from this device's storage. The cloud is a mirror, so no internet / no account / no quota never blocks play.
 // Everything here is off while CLOUD_CONFIG is null. See firebase/SETUP.md for how to create the (free) Firebase project and paste its settings below.
-const APP_VERSION = '2026.11.06a';       // keep equal to VERSION in sw.js (a test checks it)
+const APP_VERSION = '2026.11.06b';       // keep equal to VERSION in sw.js (a test checks it)
 const CLOUD_CONFIG = {apiKey:"AIzaSyAlq_TJNGvWPJpUrpbdq_hkAoURydqMzm0", authDomain:"learning-quest-1.firebaseapp.com", projectId:"learning-quest-1", appId:"1:98931179722:web:78fb00084ccba3efb53433"};   // e.g. {apiKey:'...', authDomain:'xxx.firebaseapp.com', projectId:'xxx', appId:'...'}
 const CLOUD_LIMITS = {
   pushDelayMs: 60000,          // at most one upload per profile per minute while playing
@@ -4760,7 +4755,7 @@ let uSpeed = 1;   // 1 = real speed; tests set it near 0
 
 // ---- the button on the game-selection screen: only exists once the room is unlocked ----
 function roomBtnHTML(){
-  return `<span class="rb-in"><span class="emoji"><span class="rbmedal"><img class="rbimg" src="${UNLOCK_IMG.medal}" alt=""></span></span>${esc(TX('spaceName','החדר של קאפקייק'))}</span>`;
+  return `<span class="rb-in"><img class="lvimg cut" src="${UNLOCK_IMG.medal}" alt="">${esc(TX('spaceName','החדר של קאפקייק'))}</span>`;
 }
 function addRoomBtn(el){
   if(!space.unlocked && !gateOn) return;
@@ -4858,42 +4853,13 @@ const effLv = id => (RM.pv && RM.pv.t==='lv' && RM.pv.id===id) ? RM.pv.to : spac
 const effCol = k => (RM.pv && RM.pv.t==='col' && RM.pv.k===k) ? RM.pv.idx : space.surf[k];
 const gx2s = (x,y) => [500+(x-y)*50, 400+(x+y)*25];
 const pts = a => a.map(p=>p.join(',')).join(' ');
-function shade(hex, f){   // f<0 darker, f>0 lighter
-  if(hex[0]!=='#') return hex;
-  const n = parseInt(hex.slice(1),16); let r=n>>16, g=(n>>8)&255, b=n&255;
-  const m = v => Math.max(0,Math.min(255, Math.round(f<0 ? v*(1+f) : v+(255-v)*f)));
-  return '#'+[m(r),m(g),m(b)].map(v=>v.toString(16).padStart(2,'0')).join('');
-}
 const surfFill = idx => ROOM_COLORS[idx].h==='rainbow' ? 'url(#rmRainbow)' : ROOM_COLORS[idx].h;
-function isoBox(gx,gy,w,d,h,z,col){   // box on the floor grid; z = height of its bottom above the floor
-  const A=gx2s(gx,gy),B=gx2s(gx+w,gy),C=gx2s(gx+w,gy+d),D=gx2s(gx,gy+d), up=(p,v)=>[p[0],p[1]-v];
-  return `<polygon points="${pts([up(D,z),up(C,z),up(C,z+h),up(D,z+h)])}" fill="${shade(col,-.08)}" stroke="#5b3a2a" stroke-width="3" stroke-linejoin="round"/>`
-       + `<polygon points="${pts([up(C,z),up(B,z),up(B,z+h),up(C,z+h)])}" fill="${shade(col,-.22)}" stroke="#5b3a2a" stroke-width="3" stroke-linejoin="round"/>`
-       + `<polygon points="${pts([up(A,z+h),up(B,z+h),up(C,z+h),up(D,z+h)])}" fill="${shade(col,.12)}" stroke="#5b3a2a" stroke-width="3" stroke-linejoin="round"/>`;
-}
-function bedSVG(lv){   // stand-in drawing until the real bed art arrives (3 levels)
-  let s = isoBox(1,1,4,4,36,0,'#c89a6a');                              // frame
-  s += isoBox(1.15,1.15,3.7,3.7,34,36,lv===3?'#ffd6ec':'#bfe3ff');        // mattress + blanket
-  if(lv>=2) s += isoBox(1,1,4,0.35,120,0,'#c89a6a') + isoBox(1.5,1.2,1.2,0.9,16,70,'#fff') + isoBox(3.3,1.2,1.2,0.9,16,70,'#fff');   // headboard + pillows
-  if(lv===3){
-    [[1,1],[5,1],[1,5],[5,5]].forEach(([x,y])=>{ s += isoBox(x-.12,y-.12,.24,.24,230,0,'#f4cf6a'); });
-    const T=[gx2s(1,1),gx2s(5,1),gx2s(5,5),gx2s(1,5)].map(p=>[p[0],p[1]-230]);
-    ['#ff9ec7','#ffd36e','#9fe3b5','#8fd0ff'].forEach((c,i)=>{ const a=T[i],b=T[(i+1)%4]; s += `<line x1="${a[0]}" y1="${a[1]}" x2="${b[0]}" y2="${b[1]}" stroke="${c}" stroke-width="9" stroke-linecap="round"/>`; });
-    s += `<polygon points="${pts(T)}" fill="#ffffff" opacity=".28"/>`;
-    s += [[2,3.2],[3.5,2.6],[3,4.4]].map(([x,y])=>{ const p=gx2s(x,y); return `<text x="${p[0]}" y="${p[1]-48}" font-size="34" text-anchor="middle">⭐</text>`; }).join('');
-  }
-  return s;
-}
-function windowSVG(lv){   // drawn flat in wall units (x along the wall, y up is negative), skewed onto the right wall by the caller
-  const x0=150, y0=-350, w=200, h=200;
-  let s = `<rect x="${x0-14}" y="${y0-14}" width="${w+28}" height="${h+28}" rx="14" fill="#c89a6a" stroke="#5b3a2a" stroke-width="4"/>`;
-  s += `<rect x="${x0}" y="${y0}" width="${w}" height="${h}" rx="6" fill="${lv===3?'url(#rmRainbow)':'#bfe6ff'}" stroke="#5b3a2a" stroke-width="3"/>`;
-  s += `<path d="M${x0+w/2} ${y0} V${y0+h} M${x0} ${y0+h/2} H${x0+w}" stroke="#5b3a2a" stroke-width="5"/>`;
-  s += `<ellipse cx="${x0+55}" cy="${y0+55}" rx="30" ry="16" fill="#fff" opacity=".9"/>`;
-  if(lv>=2){ s += `<path d="M${x0-26} ${y0-20} h46 q-8 120 12 230 h-58z" fill="#ffb3d6" stroke="#5b3a2a" stroke-width="3"/><path d="M${x0+w+26} ${y0-20} h-46 q8 120 -12 230 h58z" fill="#ffb3d6" stroke="#5b3a2a" stroke-width="3"/>`; }
-  if(lv===3){ s += `<text x="${x0+150}" y="${y0+60}" font-size="34" text-anchor="middle">⭐</text><text x="${x0+100}" y="${y0+150}" font-size="26" text-anchor="middle">✨</text>`; }
-  return s;
-}
+// room item pictures: w,h in room units, (ax,ay) = the point of the picture that sits on the floor corner (bed) or the sill centre (window)
+const ROOM_ART = {bed:[{src:'assets/35da557949c1.webp',w:286.5,h:325.5,ax:122.6,ay:325.5},{src:'assets/ce650816b071.webp',w:286.5,h:324.0,ax:125.0,ay:324.0},{src:'assets/acbbf762c254.webp',w:285.0,h:387.0,ax:127.7,ay:387.0},{src:'assets/b4a7c75a9ed1.webp',w:294.0,h:492.0,ax:137.4,ay:492.0},{src:'assets/2857fd9e4a65.webp',w:306.0,h:522.0,ax:138.0,ay:522.0}],
+  window:[{src:'assets/ab4b2e4250e6.webp',w:210.7,h:214.9,ax:105.0,ay:210.0},{src:'assets/a725113aac4b.webp',w:226.2,h:229.1,ax:113.9,ay:224.1},{src:'assets/ea204b751610.webp',w:217.8,h:270.1,ax:109.0,ay:264.4},{src:'assets/eb3fe20bb9dd.webp',w:225.5,h:294.8,ax:112.7,ay:289.9},{src:'assets/eb13d2dccaf9.webp',w:253.1,h:311.1,ax:126.6,ay:306.1}]};
+const BED_AT = gx2s(2.16,3.24), WIN_U = 250, WIN_SILL = 85;   // bed: its front corner on the floor grid; window: centre along the wall and sill height above the floor
+function bedSVG(lv){ const a = ROOM_ART.bed[lv-1]; return `<image href="${a.src}" x="${(BED_AT[0]-a.ax).toFixed(1)}" y="${(BED_AT[1]-a.ay).toFixed(1)}" width="${a.w}" height="${a.h}"/>`; }
+function windowSVG(lv){ const a = ROOM_ART.window[lv-1]; return `<image href="${a.src}" x="${(WIN_U-a.ax).toFixed(1)}" y="${(-WIN_SILL-a.ay).toFixed(1)}" width="${a.w}" height="${a.h}"/>`; }   // flat in wall units: it grows up the wall with each level
 function roomSVG(){
   const cl = effCol('wl'), cr = effCol('wr'), cf = effCol('fl');
   const sel = (t,id) => RM.sel && RM.sel.t===t && (RM.sel.id||RM.sel.k)===id ? ' sel' : '';
@@ -4936,8 +4902,8 @@ function renderDrawer(){
   const pv = RM.pv, cost = pvCost();
   const buy = !pv ? '' : `<div class="rmsh-need${bal<cost?' poor':''}">${needTxt(cost,bal)}</div><div class="rmsh-btns"><button type="button" class="btn" data-buy="1"${bal<cost?' disabled':''}>קנו · ${cost} 🪙</button><button type="button" class="btn ghost" data-cancel="1">ביטול</button></div><div class="rmsh-s small">אי אפשר להחזיר או למכור אחר כך</div>`;
   if(sel.t==='item'){
-    const id = sel.id, it = ROOM_ITEMS[id], lv = space.lv[id], next = lv<ROOM_MAXLV ? it.up[lv] : null;
-    d.innerHTML = head(`${it.n} · רמה ${lv} מתוך ${ROOM_MAXLV}`)
+    const id = sel.id, it = ROOM_ITEMS[id], lv = space.lv[id], next = lv<roomMax(id) ? it.up[lv] : null;
+    d.innerHTML = head(`${it.n} · רמה ${lv} מתוך ${roomMax(id)}`)
       + (pv ? `<div class="rmsh-s">תצוגה מקדימה: רמה ${pv.to}</div>` + buy
             : next==null ? `<div class="rmmax">רמה מקסימלית ✨</div>`
             : `<button type="button" class="btn" data-prev="${id}">⬆️ ראו רמה ${lv+1} · ${next} 🪙</button>`)
