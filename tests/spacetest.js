@@ -76,8 +76,28 @@ const grow=await ev(()=>[1,2,3,4,5].map(l=>{const a=ROOM_ART.window[l-1];return 
 ok(grow.every((g,i)=>i===0||g[0]<grow[i-1][0]-1)&&grow.every(g=>g[0]+g[1]>=-92&&g[0]+g[1]<=-75),'the window keeps its sill and grows upward every level: tops '+grow.map(g=>Math.round(g[0])));
 ok(await ev(()=>{const c=gx2s(0,0);return BED_AT[0]>c[0]-150&&BED_AT[0]<c[0]+50&&ROOM_ART.bed.every(a=>BED_AT[1]-a.ay>=0);}),'the bed is anchored at the back corner of the grid and every level fits inside the room');
 ok(await ev(()=>{const i=document.querySelector('[data-hit="item:bed"] image');return !!i&&/^assets\//.test(i.getAttribute('href'));}),'the bed is drawn from its picture');
+
+// the bed is grounded and its bedding is white until the coloring step
+ok(await ev(()=>{const g=document.querySelector('[data-hit="item:bed"]');return !!g.querySelector('polygon[filter]')&&!!g.querySelector('image');}),'the bed has a soft floor shadow under it');
+const mag=await ev(async()=>{const out=[];for(let l=1;l<=5;l++){const im=new Image();im.src=new URL(ROOM_ART.bed[l-1].src,document.baseURI).href;await im.decode();const c=document.createElement('canvas');c.width=im.width;c.height=im.height;const x=c.getContext('2d');x.drawImage(im,0,0);const d=x.getImageData(0,0,c.width,c.height).data;let n=0,t=0;for(let i=0;i<d.length;i+=4){if(d[i+3]<200)continue;t++;const r=d[i],g=d[i+1],b=d[i+2];if(r>180&&b>150&&g<r-70&&g<b-50)n++;}out.push(n/t);}return out;});
+ok(mag.every(v=>v<0.01),'no magenta left in any bed level (white default): '+mag.map(v=>(v*100).toFixed(2)+'%'));
 // 11. no permanent coin chip over the room; the coins live in the drawer
 ok(await ev(()=>!document.getElementById('rmChip')&&!document.querySelector('#spaceView .tokchip')),'no permanent coin counter above the room');
+
+// small pictures of the upgrades: only the next one is open, the ones after it are locked
+await ev(()=>{space.lv.bed=2;onRoomTap('item:bed');});
+const th=await ev(()=>[...document.querySelectorAll('#rmDrawer .lvthumb')].map(b=>({locked:b.classList.contains('locked'),dis:b.disabled,img:!!b.querySelector('img[src^="assets/"]'),t:b.textContent})));
+ok(th.length===3&&!th[0].locked&&th[1].locked&&th[2].locked&&th[1].dis&&th[2].dis&&th.every(x=>x.img),'bed at level 2 shows levels 3, 4, 5 as small pictures: 3 open, 4 and 5 locked '+JSON.stringify(th.map(x=>x.t)));
+ok(await ev(()=>/6 🪙/.test(document.querySelector('#rmDrawer .lvthumb:not(.locked)').textContent)&&/🔒/.test(document.querySelectorAll('#rmDrawer .lvthumb')[1].textContent)),'the open one shows its price, the locked ones a lock');
+await ev(()=>document.querySelectorAll('#rmDrawer .lvthumb')[1].click());
+ok(await ev(()=>!RM.pv),'tapping a locked level does nothing');
+await ev(()=>document.querySelector('#rmDrawer .lvthumb:not(.locked)').click());
+ok(await ev(()=>RM.pv&&RM.pv.to===3&&document.querySelector('#rmDrawer .lvthumb.cur')&&!!document.querySelector('[data-buy]')),'tapping the open one previews it and offers Buy / Cancel');
+await ev(()=>{space.lv.bed=5;onRoomTap('item:bed');});
+ok(await ev(()=>document.querySelectorAll('#rmDrawer .lvthumb').length===0&&/רמה מקסימלית/.test(document.getElementById('rmDrawer').textContent)),'at the top level there are no pictures, only "max level"');
+await ev(()=>{space.lv.bed=1;RM.pv=null;onRoomTap('item:window');});
+ok(await ev(()=>document.querySelectorAll('#rmDrawer .lvthumb').length===4&&document.querySelectorAll('#rmDrawer .lvthumb.locked').length===3),'window at level 1: 4 pictures, the next open, 3 locked');
+await ev(()=>{onRoomTap(null);});
 // 8. the drawer floats over the room and does not resize it
 const r0=await ev(()=>JSON.stringify(document.getElementById('rmView').getBoundingClientRect()));
 await ev(()=>onRoomTap('item:bed'));
