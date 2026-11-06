@@ -5612,7 +5612,7 @@ function dbgGenerateActivity(){
   dbgSync();
   const p = store.profiles.find(x=>x.id===dbg.pid);
   if(!p){ dbg.actMsg='אין פרופיל'; return renderProfiles(); }
-  const n = parseInt(document.getElementById('dbgActN').value, 10) || 120;
+  const n = parseInt(document.getElementById('dbgActN').value, 10) || 300;
   const pct = Math.max(10, Math.min(95, parseInt(document.getElementById('dbgActPct').value, 10) || 75)) / 100;
   const days = Math.max(1, Math.min(30, parseInt(document.getElementById('dbgActDays').value, 10) || 14));
 
@@ -5623,6 +5623,18 @@ function dbgGenerateActivity(){
   const regularSkills = Object.keys(SKILL_META).filter(k=>!SKILL_META[k].bonus);
   if(!regularSkills.length){ dbg.actMsg='אין סוגי שאלות זמינים'; return renderProfiles(); }
 
+  // Pick a focused set of skills so each gets enough answers for assessment + trend
+  // Trend needs: window*2 = 60 answers per skill (30 recent + 30 previous), minAnswers = 8
+  // Assessment needs: window = 30, minAnswers = 8
+  const T = STATS_CONFIG.trend;
+  const minForTrend = T.window * 2; // 60
+  const minForAssess = STATS_CONFIG.window; // 30
+  // Aim for trend data: each focus skill should get at least minForTrend answers
+  const maxFocusSkills = Math.max(3, Math.floor(n / minForTrend));
+  const targetSkills = Math.min(maxFocusSkills, 8);
+  const shuffled = [...regularSkills].sort(()=>Math.random()-0.5);
+  const focusSkills = shuffled.slice(0, targetSkills);
+
   const now = Date.now();
   const dayMs = 24*60*60*1000;
   const perDay = Math.ceil(n / days);
@@ -5632,7 +5644,9 @@ function dbgGenerateActivity(){
     const dayStart = now - (days-1-d)*dayMs + Math.floor(Math.random()*dayMs*0.8);
     const todayCount = Math.min(perDay + Math.floor(Math.random()*5)-2, n-created);
     for(let i=0; i<todayCount && created<n; i++){
-      const skill = regularSkills[Math.floor(Math.random()*regularSkills.length)];
+      // Pick from focus skills (80%) or other skills (20%)
+      const skill = Math.random() < 0.8 ? focusSkills[Math.floor(Math.random()*focusSkills.length)]
+                                          : regularSkills[Math.floor(Math.random()*regularSkills.length)];
       const meta = SKILL_META[skill];
       const level = meta.levels ? meta.levels[Math.floor(Math.random()*meta.levels.length)].id : Math.floor(Math.random()*3)+1;
       const ok = Math.random() < pct;
@@ -5681,14 +5695,14 @@ function dbgGenerateActivity(){
     }
   }
 
-  // Compact stats
+  // Compact stats (rolls old log entries into daily summaries)
   statsCompact(stats, STATS_CONFIG);
 
   p.u = Date.now();
   persist();
   cloudChanged();
 
-  dbg.actMsg = `✓ נוצרו ${created} תשובות רגילות על פני ${days} ימים (${Math.round(pct*100)}% הצלחה) + בונוסים. הלשונית "התקדמות" עודכנה.`;
+  dbg.actMsg = `✓ נוצרו ${created} תשובות רגילות על פני ${days} ימים (${Math.round(pct*100)}% הצלחה) + בונוסים. מוקד: ${focusSkills.length} סוגים עיקריים (כל אחד מקבל ~${Math.floor(created*0.8/focusSkills.length)} תשובות – מספיק למגמה). הלשונית "התקדמות" עודכנה.`;
   renderProfiles();
 }
 function profileAction(act, id){
