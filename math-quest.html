@@ -2565,7 +2565,7 @@ function openPanel(tab){
   closeMenu();
   profTab = PANEL_TITLES[tab] ? tab : 'profiles';
   profMode = {view:'list', editId:null, first:false, confirmDel:null, error:''};
-  statsViewId = store.activeId; bk = bkFresh(); dbg.ok = false; dbg.bad = false; dbg.msg = '';
+  statsViewId = store.activeId; bk = bkFresh(); dbg.bad = false; dbg.msg = '';
   document.getElementById('profOverlay').hidden = false; renderProfiles();
 }
 function closeMenu(){
@@ -2579,6 +2579,9 @@ function renderMenu(){
   if(p) h += `<div class="mhead"><span class="mav">${GENDER_INFO[p.gender].avatar}</span><div><b>${esc(profileName(p, store.profiles.indexOf(p)))}</b><small>${GENDER_INFO[p.gender].label}</small></div></div>`;
   if(store.profiles.length>1){
     h += `<div class="msec">החלפת פרופיל</div>` + store.profiles.map((q,i)=>item('switch', `<span class="mav">${GENDER_INFO[q.gender].avatar}</span><span class="mgrow">${esc(profileName(q,i))}</span>${q.id===store.activeId?'<span class="mchk">✓</span>':''}`, q.id, q.id===store.activeId?'cur':'')).join('') + '<div class="mdiv"></div>';
+  }
+  if(dbg.ok){
+    h += '<div class="mdiv"></div>' + item('panel:debug','🛠️ דיבאג');
   }
   h += '<div class="mdiv"></div>' + item('panel:profiles','🔒 אזור הורים') + `<div class="mver">גרסה ${esc(APP_VERSION)}</div>`;
   m.innerHTML = h;
@@ -6116,7 +6119,8 @@ function renderDebugHTML(){
   const balance = Math.max(0, earned - spent);
   const tokEarnedVal = dbg.tokEarned !== '' ? dbg.tokEarned : earned;
   const tokSpentVal = dbg.tokSpent !== '' ? dbg.tokSpent : spent;
-  return `<section class="pa-card"><h2 class="pa-h">הוספת מתנות לבדיקה</h2><p class="pa-sub">מוסיף כמות נבחרת של מתנה נבחרת (או של כולן) לפרופיל. כל מתנה מקבלת מראה אקראי, כמו מתנה רגילה.</p>
+  return `<section class="pa-card"><div class="pa-row" style="align-items:center"><h2 class="pa-h" style="flex:1;margin:0">דיבאג</h2><button type="button" class="pa-btn sm sec" data-pact="dbglock" style="margin-left:8px">נעילה</button></div><p class="pa-sub">הדיבאג פתוח עד סוף המושב. אפשר לנעול אותו מחדש כאן.</p></section>
+    <section class="pa-card"><h2 class="pa-h">הוספת מתנות לבדיקה</h2><p class="pa-sub">מוסיף כמות נבחרת של מתנה נבחרת (או של כולן) לפרופיל. כל מתנה מקבלת מראה אקראי, כמו מתנה רגילה.</p>
     ${paScope('dbgprof', dbg.pid, 'פרופיל')}
     <div class="pa-scope"><span class="pa-scope-l">מתנה</span><div class="pa-seg">${kinds}</div></div>
     <div class="pa-scope"><span class="pa-scope-l">כמות (לכל מתנה)</span><input id="dbgN" type="number" min="1" max="200" value="${dbg.n}" style="width:90px;min-height:44px;font:inherit;padding:0 10px;border-radius:12px;border:2px solid var(--card2)"></div>
@@ -6278,6 +6282,7 @@ function dbgSaveTokens(){
 }
 function profileAction(act, id){
   if(act==='dbgunlock'){ const el = document.getElementById('dbgPw'); dbg.ok = !!el && dbgHash(el.value)===DBG_HASH; dbg.bad = !dbg.ok; dbg.msg=''; return renderProfiles(); }
+  if(act==='dbglock'){ dbg.ok = false; dbg.msg = 'הדיבאג ננעל. אפשר לפתוח אותו שוב עם הסיסמה.'; return renderProfiles(); }
   if(act==='dbgprof'){ dbgSync(); dbg.pid = id; dbg.msg=''; dbg.seq=0; dbg.tokEarned=''; dbg.tokSpent=''; return renderProfiles(); }
   if(act==='dbgkind'){ dbgSync(); dbg.kind = id; dbg.msg=''; dbg.seq=0; return renderProfiles(); }
   if(act==='dbgadd') return dbgAdd();
