@@ -206,6 +206,11 @@ h1{
 .gfall::after{content:'✨'; position:absolute; top:-6px; right:-8px; font-size:.55em}
 .vault{display:grid; grid-template-columns:repeat(5,1fr); gap:6px; margin-top:10px; justify-items:center}
 .vitem{display:flex; align-items:center; justify-content:center}
+.allgrid{display:grid; grid-template-columns:repeat(5,1fr); gap:6px; justify-items:center}
+.alltap{cursor:pointer}
+.ritem.merged{position:relative}
+.wardskt{position:absolute; top:-6px; right:-6px; font-size:.7em; filter:drop-shadow(0 0 3px #ffc93c); animation:wardpop .8s ease-out}
+@keyframes wardpop{0%{transform:scale(0) rotate(-20deg)} 50%{transform:scale(1.3) rotate(5deg)} 100%{transform:scale(1) rotate(0)}}
 .wardrobe{display:grid; grid-template-columns:repeat(auto-fill,minmax(64px,1fr)); gap:8px}
 .look{height:72px; border-radius:14px; background:var(--card2); display:flex; align-items:center; justify-content:center; border:3px solid transparent; cursor:pointer; position:relative; padding:3px}
 .look img{max-height:100%; max-width:100%; object-fit:contain}
@@ -1269,23 +1274,25 @@ const THEME_ITEMS = {
 };
 // texts that change with the theme (the default wording stays at each call site); a function is evaluated when used so it can address the child
 const THEME_TEXT = {
+  sweets: {
+    stripTitle:'🎁 חדר המתנות', roomTitle:'🎁 חדר המתנות של קאפקייק', roomName:'חדר המתנות', inRoom:'בחדר המתנות', toRoom:'לאזן',
+    emptyStrip:'עוד אין מתנות 🎀',
+    roomEmpty:()=>`עוד אין מתנות. ${G('פתרי','פתור','פתרו')} שאלה כדי לקבל את הראשונה! 🎀`,
+    mergeBtn:()=>`${G('מזגי','מזג','מזגו')} ✨`, mergeNow:()=>`✨ ${G('מזגי','מזג','מזגו')} עכשיו`, mergeMore:()=>`✨ ${G('מזגי','מזג','מזגו')} עוד`,
+    mergeInf:'למזג', readySub:'אפשר למזג אותם לגרסה משודרגת ומיוחדת.', mergingTitle:'מתמזגים...', gotUpSub:'היא נשמרת בחדר המתנות.', upUnits:'מתנות רגילות', baseUnits:'מתנות', baseSec:'מתנות קסומות', upSec:'פריטים משודרגים', upHint:()=>`${G('לחצי','לחץ','לחצו')} על פריט משודרג כדי לראות את ${MERGE_COST} המתנות שמהן הוא נוצר.`, allSec:'כל מתנות העבר', allHint:()=>`${G('לחצי','לחץ','לחצו')} על כל מתנה כדי להציג אותה.`,
+    nextBtn:'🍭 לשאלה הבאה', lookIcon:'🎀', praiseMascot:'קאפקייק שמח מאוד! 🦄', tryAgain:'ננסה עוד משימה!', bonusTag:'💖 משימת בונוס',
+    partyEmoji:['🦄🎉','🌈✨','🍰🎊','🧁💖'], partyAlt:'קאפקייק חוגגת', partyTitle:'מסיבת קאפקייק!', partyLine:()=>`${G('את פשוט קוסמת מספרים','אתה פשוט קוסם מספרים','אתם פשוט קוסמי מספרים')}! 🪄`,
+    lookSec:'המדים של קאפקייק', lookReadySub:'זה מספיק כדי לפתוח לוק חדש.', lookWorn:'קאפקייק כבר לובש אותו.'
+  },
   space: {
     stripTitle:'🧰 מחסן הציוד', roomTitle:'🧰 מחסן הציוד של ברק', roomName:'מחסן הציוד', inRoom:'במחסן הציוד', toRoom:'למחסן הציוד',
     emptyStrip:'עוד אין רכיבים 🔧',
     roomEmpty:()=>`עוד אין רכיבים. ${G('פתרי','פתור','פתרו')} שאלה כדי לקבל את הראשון! 🔧`,
-    mergeBtn:()=>`${G('שדרגי','שדרג','שדרגו')} ⚙️`,
-    mergeNow:()=>`⚙️ ${G('שדרגי','שדרג','שדרגו')} עכשיו`,
-    mergeMore:()=>`⚙️ ${G('שדרגי','שדרג','שדרגו')} עוד`,
-    mergeInf:'לשדרג',
-    readySub:'אפשר לחבר אותם יחד ולהפוך אותם לשדרוג מתקדם.',
-    mergingTitle:'מבצעים שדרוג...',
-    gotUpSub:'השדרוג נשמר במחסן הציוד, מוכן לשימוש.',
-    upUnits:'שדרוגים', baseUnits:'רכיבים רגילים', upItem:'השדרוג', upSec:'שדרוגים', baseSec:'רכיבים',
-    upHint:()=>`${G('לחצי','לחץ','לחצו')} על שדרוג כדי לפרק אותו בחזרה ל-${MERGE_COST} רכיבים רגילים.`,
-    nextBtn:'🚀 לשאלה הבאה', lookIcon:'⚙️',
+    mergeBtn:()=>`${G('שדרגי','שדרג','שדרגו')} ⚙️`, mergeNow:()=>`⚙️ ${G('שדרגי','שדרג','שדרגו')} עכשיו`, mergeMore:()=>`⚙️ ${G('שדרגי','שדרג','שדרגו')} עוד`,
+    mergeInf:'לשדרג', readySub:'אפשר לחבר אותם יחד ולהפוך אותם לשדרוג מתקדם.', mergingTitle:'מבצעים שדרוג...', gotUpSub:'השדרוג נשמר במחסן הציוד, מוכן לשימוש.', upUnits:'שדרוגים', baseUnits:'רכיבים רגילים', upItem:'השדרוג', upSec:'שדרוגים', baseSec:'רכיבים',
+    upHint:()=>`${G('לחצי','לחץ','לחצו')} על שדרוג כדי לפרק אותו בחזרה ל-${MERGE_COST} רכיבים רגילים.`, allSec:'כל רכיבי העבר', allHint:()=>`${G('לחצי','לחץ','לחצו')} על כל רכיב כדי להציג אותו.', nextBtn:'🚀 לשאלה הבאה', lookIcon:'⚙️',
     praiseMascot:'ברק שמח מאוד! 🚀', tryAgain:'ננסה עוד משימה!', bonusTag:'🏆 משימת בונוס',
-    partyEmoji:['🚀🎉','🌠✨','🛸🎊','🤖💫'], partyAlt:'ברק חוגג', partyTitle:'חגיגה בחלל!',
-    partyLine:()=>`${G('את פשוט טייסת מספרים','אתה פשוט טייס מספרים','אתם פשוט טייסי מספרים')}! 🚀`,
+    partyEmoji:['🚀🎉','🌠✨','🛸🎊','🤖💫'], partyAlt:'ברק חוגג', partyTitle:'חגיגה בחלל!', partyLine:()=>`${G('את פשוט טייסת מספרים','אתה פשוט טייס מספרים','אתם פשוט טייסי מספרים')}! 🚀`,
     lookSec:'המדים של ברק', lookReadySub:'זה מספיק כדי לפתוח לוק חדש לברק.', lookWorn:'ברק כבר לובש אותו.'
   }
 };
@@ -5019,6 +5026,10 @@ function renderRoom(){
     const gs = golden.slice().sort((p,q)=>rank(p)-rank(q));
     h += `<div class="roomsec">${TX('upSec','פריטים משודרגים')} · ${gs.length}</div><div class="roomhint">${TX('upHint', ()=>`${G('לחצי','לחץ','לחצו')} על פריט משודרג כדי לראות את ${MERGE_COST} המתנות שמהן הוא נוצר.`)}</div><div class="roomgrid">` + gs.map(k=>`<div class="ritem gold" data-act="vault" data-kind="${kOf(k)}" data-g="${k}" role="button">${itemHTML(k,true,40)}</div>`).join('') + '</div>';
   }
+  const all = allRewardsList();
+  if(all.length){
+    h += `<div class="roomsec">${TX('allSec','כל מתנות העבר')} · ${all.length}</div><div class="roomhint">${TX('allHint',()=>`${G('לחצי','לחץ','לחצו')} על כל מתנה כדי להציג אותה.`)}</div><div class="roomgrid allgrid">` + all.map((r,i)=>`<div class="ritem alltap ${r.merged ? 'merged' : ''}" data-act="viewItem" data-item="${String(r.item)}" role="button" title="${esc(rewardName(kOf(r.item),'one')||'')}">${itemHTML(r.item,false,38)}${r.merged ? '<span class="wardskt">✨</span>' : ''}</div>`).join('') + '</div>';
+  }
   if(collection.length){
     const sorted = collection.map((x,i)=>[x,i]).reverse();   // newest first: the order they were received
     h += `<div class="roomsec">${TX('baseSec','מתנות קסומות')} · ${sorted.length}</div><div class="roomgrid">` + sorted.map(([x,i])=>`<div class="ritem tap" data-act="view" data-i="${i}" role="button" title="${esc(rewardName(x,'one')||'')}"><span class="remoji">${rewardGlyph(x,38)}</span></div>`).join('') + '</div>';
@@ -5041,11 +5052,14 @@ function flushCelebs(){
   }
 }
 // tap a reward in the gift room: it opens as a large picture
+function viewItem(item){
+  const px = Math.min(320, Math.round(Math.min(innerWidth,innerHeight)*0.7));
+  const nm = rewardName(kOf(item),'one');
+  showCeleb(`<div class="cbig view" style="min-height:${px}px"><span id="viewPic">${itemHTML(item,false,px)}</span></div>${nm?`<div class="ctitle">${esc(nm)}</div>`:''}`, [{label:'סגירה', fn:closeCeleb}]);
+}
 function viewReward(i){
   const it = collection[i]; if(it==null) return;
-  const px = Math.min(320, Math.round(Math.min(innerWidth,innerHeight)*0.7));
-  const nm = rewardName(it,'one');
-  showCeleb(`<div class="cbig view" style="min-height:${px}px"><span id="viewPic">${itemHTML(it,false,px)}</span></div>${nm?`<div class="ctitle">${esc(nm)}</div>`:''}`, [{label:'סגירה', fn:closeCeleb}]);
+  viewItem(it);
 }
 let celebDismiss = true;
 function showCeleb(bodyHTML, buttons, opts){
@@ -5094,6 +5108,16 @@ function viewGold(kind, g){
   const items = goldItems(kind, g);
   const small = items.map(x=>`<span class="vitem">${itemHTML(x,false,Math.min(64,Math.round(innerWidth/6)))}</span>`).join('');
   showCeleb(`<div class="cbig">${itemHTML(kind,true,90)}</div><div class="ctitle">${esc(rewardName(kind,'up')||TX('upItem','הפריט המשודרג'))}</div><div class="csub">${MERGE_COST} ${TX('baseUnits','המתנות')} שמהן הוא נוצר, שמורות כאן לתמיד:</div><div class="vault">${small}</div>`, [{label:'סגירה', fn:closeCeleb}]);
+}
+function mergedTag(merged){ return merged ? '<span class="wardskt">✨</span>' : ''; }
+// every individual reward the child ever received, still ordered by time received:
+// the ten items inside each upgraded item (the ones it was merged from, in the order they were merged = the order received),
+// then the rewards still sitting in the room (in the order they were received)
+function allRewardsList(){
+  const out=[];
+  golden.forEach(g=>{ const k=kOf(g); goldItems(k,g).forEach(x=>out.push({item:x,gold:g,merged:true})); });
+  collection.forEach(x=>out.push({item:x,gold:null,merged:false}));
+  return out;
 }
 function renderStickerbook(){ renderRewards(); }
 function renderLolli(){ renderRewards(); }
@@ -6220,6 +6244,7 @@ document.getElementById('roomBody').addEventListener('click', e=>{
   if(act==='merge') showReadyCeleb(t.dataset.kind);
   else if(act==='view') viewReward(Number(t.dataset.i));
   else if(act==='vault') viewGold(t.dataset.kind, t.dataset.g);
+  else if(act==='viewItem') viewItem(String(t.dataset.item));
   else if(act==='space'){ closeRoom(); openSpace(); }
   else if(act==='tok') viewTokens();
 });
