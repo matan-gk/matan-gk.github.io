@@ -15,6 +15,7 @@ const TESTS = [
   ['clocktest','clocktest.js','clock level: drawings, wording, answers'],
   ['difftest','difftest.js','difficulty ratings, coverage per section, parent setting'],
   ['unmtest','unmtest.js','merging and unmerging prizes and looks'],
+  ['adulttest','adulttest.js','the adult check in front of the parent area: refuses a child and bad entries, accepts an adult, cancel'],
   ['menutest','menutest.js','top menu, panel navigation, guide, report from a question'],
   ['admintest','admintest.js','parent area: full screen, tabs on phone and desktop, consistent controls, first run', true],
   ['settingtest','settingtest.js','difficulty setting per profile and the sample questions'],

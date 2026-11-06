@@ -141,6 +141,14 @@ h1{
 .rs-count{font-weight:800; font-size:.9rem; white-space:nowrap; color:var(--pink)}
 .roomoverlay{position:fixed; inset:0; background:rgba(30,15,50,.6); z-index:50; display:flex; align-items:center; justify-content:center; padding:16px}
 .roomoverlay[hidden]{display:none}
+.adultcheck{max-width:420px; width:100%; text-align:center}
+.adultcheck h2{font-family:'Baloo 2',sans-serif; font-weight:800; font-size:1.4rem; color:var(--purple); margin:0 0 8px}
+.adultcheck .ac-sub{font-size:.9rem; color:var(--muted); margin-bottom:16px; line-height:1.4}
+.adultcheck .ac-inputwrap{display:flex; gap:8px; justify-content:center; margin-bottom:16px}
+.adultcheck input[type=number]{width:120px; min-height:48px; font-size:1.2rem; text-align:center; border:2px solid var(--card2); border-radius:12px; background:var(--card2); color:var(--text); font-family:'Rubik',sans-serif; font-weight:600}
+.adultcheck .ac-error{color:var(--bad); font-weight:600; font-size:.85rem; min-height:1.2em; margin-bottom:8px}
+.adultcheck .ac-actions{display:flex; gap:8px; justify-content:center}
+.adultcheck .pa-btn{min-width:120px}
 .room{
   background:var(--card); width:100%; max-width:560px; max-height:85vh; border-radius:22px;
   display:flex; flex-direction:column; box-shadow:0 20px 50px rgba(0,0,0,.4); animation:roomup .22s ease-out;
@@ -371,6 +379,25 @@ h1{
 .bkbtns .btn.danger{background:var(--bad); color:#3a0a12}
 .bkbtns{display:flex; gap:8px; flex-wrap:wrap; margin-top:8px}
 .sk-legend{font-size:.75rem; color:var(--muted); font-weight:600; line-height:1.7; margin-top:14px}
+
+/* Activity calendar (month heatmap) */
+.sk-cal-grid{display:grid; grid-template-columns:repeat(7,1fr); gap:2px; margin:8px 0}
+.sk-cal-day{position:relative; aspect-ratio:1; background:var(--card2); border-radius:6px; display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:.7rem; font-weight:700; color:var(--muted)}
+.sk-cal-day.empty{background:transparent}
+.sk-cal-day.today{outline:2px solid var(--purple); outline-offset:-2px}
+.sk-cal-day i{position:absolute; inset:2px; border-radius:4px; opacity:0.8}
+.sk-cal-legend{display:flex; align-items:center; gap:4px; font-size:.7rem; color:var(--muted); margin-top:6px}
+.sk-cal-legend i{width:14px; height:14px; border-radius:3px}
+
+/* Per-level accuracy in skill detail */
+.sk-lvl{margin-top:4px; font-size:.78rem}
+.sk-lvl-row{display:grid; grid-template-columns:40px 1fr 50px; align-items:center; gap:6px; padding:2px 0}
+.sk-lvl-row .sk-bar{height:7px; min-width:40px}
+
+/* Ensure sk-det accommodates extra content */
+.sk-det{padding:2px 12px 10px; font-size:.82rem; font-weight:600; color:var(--text); line-height:1.6}
+.sk-det div{border-top:1px dashed var(--shadow); padding-top:4px; margin-top:4px}
+
 .stickerbook span{font-size:1.3rem}
 .stickerbook .empty{color:var(--muted); font-size:.8rem; font-weight:600}
 /* ---- game selection screen and "locations" ---- */
@@ -812,6 +839,20 @@ body[data-view="space"] #spaceView{box-sizing:border-box; display:flex; flex-dir
         <button type="button" class="roomclose" id="profClose" aria-label="חזרה למשחק"><span class="pa-close-t">חזרה למשחק</span><span aria-hidden="true">✕</span></button>
       </div>
       <div class="roombody" id="profBody"></div>
+    </div>
+  </div>
+  <div class="roomoverlay" id="adultOverlay" hidden>
+    <div class="room adultcheck" role="dialog" aria-label="אימות הורה">
+      <h2>אימות הורה</h2>
+      <p class="ac-sub">כדי להיכנס לאזור הורים, אנא הקלד את שנת הלידה שלך.</p>
+      <div class="ac-inputwrap">
+        <input type="number" id="adultYear" min="1900" max="2026" placeholder="שנת לידה" autocomplete="off" aria-label="שנת לידה" onfocus="this.max=new Date().getFullYear()">
+      </div>
+      <p class="ac-error" id="adultError" aria-live="polite"></p>
+      <div class="ac-actions">
+        <button type="button" class="pa-btn" id="adultSubmit">אישור</button>
+        <button type="button" class="pa-btn ghost" id="adultCancel">ביטול</button>
+      </div>
     </div>
   </div>
   <div class="roomoverlay smp" id="sampleOverlay" hidden>
@@ -2453,6 +2494,11 @@ const PANEL_NAV = {profiles:'פרופילים', progress:'התקדמות', setti
 const PANEL_SHORT = {profiles:'פרופילים', progress:'התקדמות', settings:'הגדרות', backup:'גיבוי', report:'דיווח', guide:'מדריך', debug:'דיבאג'};
 const PANEL_ICON = {profiles:'👥', progress:'📊', settings:'⚙️', backup:'💾', report:'🐞', guide:'📖', debug:'🛠️'};
 function openPanel(tab){
+  // Adult check gate for parent area (profiles tab)
+  if(tab === 'profiles' && !adult.ok){
+    openAdultCheck();
+    return;
+  }
   closeMenu();
   profTab = PANEL_TITLES[tab] ? tab : 'profiles';
   profMode = {view:'list', editId:null, first:false, confirmDel:null, error:''};
@@ -5414,25 +5460,6 @@ function bandColor(id){
   return i<0 ? 'var(--muted)' : (i===0 ? 'var(--good)' : (i===bs.length-1 ? 'var(--bad)' : 'var(--yellow)'));
 }
 function skBar(acc, id){ return `<span class="sk-bar" aria-hidden="true"><i style="width:${acc==null?0:Math.round(acc*100)}%;background:${bandColor(id)}"></i></span>`; }
-function skDetail(sk, stats){
-  const C = STATS_CONFIG, lt = sk.lifetime, tr = sk.trend;
-  const rows = [];
-  rows.push(`<div>${sk.ready ? `לפי ${sk.n} התשובות האחרונות: <b>${sk.correct}</b> נכונות (${pctText(sk.accuracy)}) · זמן חציוני ${secText(sk.medianSec)}` : `עד עכשיו ${sk.n} תשובות. צריך לפחות ${C.minAnswers} כדי לקבוע רמה.`}</div>`);
-  rows.push(`<div><span class="m">בסך הכול:</span> ${lt.n} תשובות, ${pctText(lt.accuracy)} נכונות</div>`);
-  rows.push(`<div><span class="m">מגמה:</span> ${tr.ready ? `${tr.emoji} ${tr.label} (${pctText(tr.previous.accuracy)} ← ${pctText(tr.recent.accuracy)})` : `אין עדיין מספיק נתונים (צריך ${C.trend.minPerWindow} תשובות בכל אחת משתי התקופות)`}</div>`);
-  const ep = numericErrorPatterns(stats, sk.skill, 3);
-  if(ep.patterns.length) rows.push(`<div><span class="m">טעויות מספריות נפוצות (טעות ביחס לנכון):</span> ${ep.patterns.map(p=>`<bdi dir="ltr">${p.diff>0?'+':'−'}${Math.abs(p.diff)} ×${p.count}</bdi>`).join(' · ')}</div>`);
-  const wl = wrongLabelCounts(stats, sk.skill);
-  if(wl.n>=3){
-    const top = wl.list.filter(e=>e.id!=='other').slice(0,2).filter(e=>e.count>=2 && e.count/wl.n>=0.3);
-    if(top.length) rows.push(`<div><span class="m">סוג הטעות הנפוץ:</span> ${top.map(e=>`${esc(WRONG_LABELS[e.id])} (${e.count} מתוך ${wl.n})`).join(' · ')}</div>`);
-  }
-  return `<div class="sk-det">${rows.join('')}</div>`;
-}
-function skSkillRow(sk, stats){
-  const tr = sk.trend;
-  return `<details class="sk-skill"><summary><span class="sk-name">${sk.bonus?'🍭 ':''}${esc(sk.name)}</span>${sk.ready?skBar(sk.accuracy, sk.band.id):skBar(sk.n/STATS_CONFIG.minAnswers, sk.band.id)}<span class="sk-pct">${sk.ready?pctText(sk.accuracy):`${sk.n}/${STATS_CONFIG.minAnswers}`}</span><span title="${esc(tr.label||'')}">${tr.ready?tr.emoji:''}</span></summary>${skDetail(sk, stats)}</details>`;
-}
 function skLegend(){
   const C = STATS_CONFIG, bs = C.bands.slice().sort((a,b)=>b.min-a.min);
   const lines = bs.map((b,i)=>{
@@ -5591,6 +5618,105 @@ function renderSample(){
 document.getElementById('sampleClose').onclick = closeSample;
 document.getElementById('sampleOverlay').addEventListener('click', e=>{ if(e.target.id==='sampleOverlay') closeSample(); });
 document.addEventListener('keydown', e=>{ if(e.key==='Escape' && !document.getElementById('sampleOverlay').hidden) closeSample(); });
+// ===== Additional Progress Views =====
+// Activity calendar (month heatmap)
+function renderActivityCalendar(stats){
+  const C = STATS_CONFIG;
+  const perDay = statsActivity(stats).perDay;
+  const byDay = {}; perDay.forEach(d=>byDay[d.day]=d);
+  const today = new Date();
+  const year = today.getFullYear(), month = today.getMonth();
+  const firstDay = new Date(year, month, 1).getDay(); // 0=Sun, 1=Mon...
+  const daysInMonth = new Date(year, month+1, 0).getDate();
+  const hebrewMonths = ['ינואר','פברואר','מרץ','אפריל','מאי','יוני','יולי','אוגוסט','ספטמבר','אוקטובר','נובמבר','דצמבר'];
+  // Find max for color intensity
+  let maxN = 1;
+  for(let d=1; d<=daysInMonth; d++){
+    const key = statsDateKey(new Date(year, month, d).getTime());
+    const n = (byDay[key]||{n:0}).n;
+    if(n > maxN) maxN = n;
+  }
+  // Color scale: 0=var(--card2), low=var(--good-light), med=var(--good), high=var(--purple)
+  function dayColor(n){
+    if(!n) return 'var(--card2)';
+    const r = n/maxN;
+    if(r < 0.25) return 'var(--good-light)';
+    if(r < 0.5) return 'var(--good)';
+    if(r < 0.75) return 'var(--purple-light)';
+    return 'var(--purple)';
+  }
+  const cells = [];
+  // Empty cells before 1st day (adjust for Hebrew: week starts Sunday=0)
+  for(let i=0; i<firstDay; i++) cells.push(`<div class="sk-cal-day empty"></div>`);
+  for(let d=1; d<=daysInMonth; d++){
+    const key = statsDateKey(new Date(year, month, d).getTime());
+    const dayData = byDay[key]||{n:0, c:0};
+    const n = dayData.n;
+    const isToday = d === today.getDate();
+    const accuracy = dayData.n ? dayData.c/dayData.n : null;
+    cells.push(`<div class="sk-cal-day${isToday?' today':''}" title="${d} ${hebrewMonths[month]}: ${n} תשובות${accuracy!=null?` · ${pctText(accuracy)} נכונות`:''}">
+      <span class="sk-cal-num">${d}</span>
+      <i style="background:${dayColor(n)}"></i>
+    </div>`);
+  }
+  const grid = `<div class="sk-cal-grid">${cells.join('')}</div>`;
+  const legend = `<div class="sk-cal-legend">
+    <span>פחות פעיל</span>
+    <i style="background:var(--good-light)"></i>
+    <i style="background:var(--good)"></i>
+    <i style="background:var(--purple-light)"></i>
+    <i style="background:var(--purple)"></i>
+    <span>יותר פעיל</span>
+  </div>`;
+  return `<h2 class="pa-h">📅 לוח פעילות – ${hebrewMonths[month]} ${year}</h2>${grid}${legend}`;
+}
+
+// Lifetime totals per skill (shown next to recent in skill detail)
+function skDetail(sk, stats){
+  const C = STATS_CONFIG, lt = sk.lifetime, tr = sk.trend;
+  const rows = [];
+  rows.push(`<div>${sk.ready ? `לפי ${sk.n} התשובות האחרונות: <b>${sk.correct}</b> נכונות (${pctText(sk.accuracy)}) · זמן חציוני ${secText(sk.medianSec)}` : `עד עכשיו ${sk.n} תשובות. צריך לפחות ${C.minAnswers} כדי לקבוע רמה.`}</div>`);
+  rows.push(`<div><span class="m">בסך הכול:</span> ${lt.n} תשובות, ${pctText(lt.accuracy)} נכונות${lt.avgSec!=null?` · זמן ממוצע ${secText(lt.avgSec)}`:''}</div>`);
+  rows.push(`<div><span class="m">מגמה:</span> ${tr.ready ? `${tr.emoji} ${tr.label} (${pctText(tr.previous.accuracy)} ← ${pctText(tr.recent.accuracy)})` : `אין עדיין מספיק נתונים (צריך ${C.trend.minPerWindow} תשובות בכל אחת משתי התקופות)`}</div>`);
+  const ep = numericErrorPatterns(stats, sk.skill, 3);
+  if(ep.patterns.length) rows.push(`<div><span class="m">טעויות מספריות נפוצות (טעות ביחס לנכון):</span> ${ep.patterns.map(p=>`<bdi dir="ltr">${p.diff>0?'+':'−'}${Math.abs(p.diff)} ×${p.count}</bdi>`).join(' · ')}</div>`);
+  const wl = wrongLabelCounts(stats, sk.skill);
+  if(wl.n>=3){
+    const top = wl.list.filter(e=>e.id!=='other').slice(0,2).filter(e=>e.count>=2 && e.count/wl.n>=0.3);
+    if(top.length) rows.push(`<div><span class="m">סוג הטעות הנפוץ:</span> ${top.map(e=>`${esc(WRONG_LABELS[e.id])} (${e.count} מתוך ${wl.n})`).join(' · ')}</div>`);
+  }
+  return `<div class="sk-det">${rows.join('')}</div>`;
+}
+
+// Per-level accuracy for a skill (shown in skill detail when expanded)
+function skLevelAccuracy(stats, skill){
+  const C = STATS_CONFIG;
+  const levels = [1,2,3].map(lvl=>{
+    const recs = statsRecent(stats, skill, 1000, 0).filter(r=>r.l===lvl);
+    if(!recs.length) return null;
+    const w = statsSummarize(recs);
+    return {level:lvl, n:w.n, correct:w.correct, accuracy:w.accuracy, medianSec:w.medianSec};
+  }).filter(x=>x);
+  if(!levels.length) return '';
+  const labels = {1:'קל',2:'בינוני',3:'קשה'};
+  const rows = levels.map(l=>`<div class="sk-lvl-row"><span>${esc(labels[l.level])}</span>${skBar(l.accuracy, statsBand(l.accuracy, skill, C).id)}<span class="sk-pct">${pctText(l.accuracy)} (${l.correct}/${l.n})</span></div>`).join('');
+  return `<div class="sk-lvl"><span class="m">לפי רמה:</span>${rows}</div>`;
+}
+
+// Patch skDetail to include per-level accuracy
+function skDetailWithLevels(sk, stats){
+  const base = skDetail(sk, stats);
+  const lvl = skLevelAccuracy(stats, sk.skill);
+  if(!lvl) return base;
+  return base.replace('</div>', lvl + '</div>');
+}
+
+// Patch skSkillRow to use the enhanced detail
+function skSkillRow(sk, stats){
+  const tr = sk.trend;
+  return `<details class="sk-skill"><summary><span class="sk-name">${sk.bonus?'🍭 ':''}${esc(sk.name)}</span>${sk.ready?skBar(sk.accuracy, sk.band.id):skBar(sk.n/STATS_CONFIG.minAnswers, sk.band.id)}<span class="sk-pct">${sk.ready?pctText(sk.accuracy):`${sk.n}/${STATS_CONFIG.minAnswers}`}</span><span title="${esc(tr.label||'')}">${tr.ready?tr.emoji:''}</span></summary>${skDetailWithLevels(sk, stats)}</details>`;
+}
+
 function renderProgressHTML(){
   const C = STATS_CONFIG;
   const prof = store.profiles.find(x=>x.id===statsViewId) || activeProfile();
@@ -5613,7 +5739,9 @@ function renderProgressHTML(){
   const days = []; for(let i=13;i>=0;i--){ const dt=new Date(); dt.setDate(dt.getDate()-i); const k=statsDateKey(dt.getTime()); days.push({k, n:(byDay[k]||{n:0}).n, dow:'אבגדהוש'[dt.getDay()]}); }
   const mx = Math.max(1, ...days.map(d=>d.n));
   const dayBars = `<h2 class="pa-h">📅 14 הימים האחרונים</h2><div class="sk-days">` + days.map(d=>`<div class="sk-day" title="${d.k}: ${d.n} תשובות"><i class="${d.n?'':'none'}" style="height:${d.n?Math.max(8,Math.round(d.n/mx*100)):3}%"></i><small>${d.dow}</small></div>`).join('') + `</div>`;
-  return pick + `<section class="pa-card">${hero}${facts}</section><section class="pa-card">${areas}</section><section class="pa-card"><h2 class="pa-h">📚 לפי נושא</h2>${skills}</section><section class="pa-card">${dayBars}</section><section class="pa-card">${skLegend()}</section>`;
+  // Activity calendar (month heatmap)
+  const calendar = renderActivityCalendar(stats);
+  return pick + `<section class="pa-card">${hero}${facts}</section><section class="pa-card">${areas}</section><section class="pa-card"><h2 class="pa-h">📚 לפי נושא</h2>${skills}</section><section class="pa-card">${dayBars}</section><section class="pa-card">${calendar}</section><section class="pa-card">${skLegend()}</section>`;
 }
 
 
@@ -5742,8 +5870,59 @@ function bkRestore(){
 // ===== DEBUG (parent area, password) =====
 const DBG_HASH = 2113604388352968;       // hash of the debug password (a light gate for testing tools, not real security)
 function dbgHash(s,seed=0){ let h1=0xdeadbeef^seed,h2=0x41c6ce57^seed; for(let i=0;i<s.length;i++){ const c=s.charCodeAt(i); h1=Math.imul(h1^c,2654435761); h2=Math.imul(h2^c,1597334677); } h1=Math.imul(h1^(h1>>>16),2246822507)^Math.imul(h2^(h2>>>13),3266489909); h2=Math.imul(h2^(h2>>>16),2246822507)^Math.imul(h1^(h1>>>13),3266489909); return 4294967296*(2097151&h2)+(h1>>>0); }
-let dbg = {ok:false, msg:'', pid:null, kind:'all', n:5, bad:false, seq:0};
-function dbgSync(){ const n = document.getElementById('dbgN'); if(n){ const v = parseInt(n.value,10); dbg.n = Math.max(1, Math.min(200, isFinite(v)?v:1)); } }
+let dbg = {ok:false, msg:'', pid:null, kind:'all', n:5, bad:false, seq:0, actMsg:''};
+function dbgSync(){
+  const n = document.getElementById('dbgN');
+  if(n){ const v = parseInt(n.value,10); dbg.n = Math.max(1, Math.min(200, isFinite(v)?v:1)); }
+  const an = document.getElementById('dbgActN');
+  if(an){ const v = parseInt(an.value,10); dbg.actN = Math.max(10, Math.min(2000, isFinite(v)?v:120)); }
+  const ap = document.getElementById('dbgActPct');
+  if(ap){ const v = parseInt(ap.value,10); dbg.actPct = Math.max(10, Math.min(95, isFinite(v)?v:75)); }
+  const ad = document.getElementById('dbgActDays');
+  if(ad){ const v = parseInt(ad.value,10); dbg.actDays = Math.max(1, Math.min(30, isFinite(v)?v:14)); }
+}
+
+// ===== ADULT CHECK (parent area gate) =====
+// Ask for birth year, verify age >= 18. State is per-session (not saved), so closing the parent area resets it.
+let adult = {ok:false, bad:false};
+function adultCheck(year){
+  const currentYear = new Date().getFullYear();
+  const age = currentYear - year;
+  return age >= 18 && year >= 1900 && year <= currentYear;
+}
+function openAdultCheck(){
+  adult.ok = false; adult.bad = false;
+  document.getElementById('adultOverlay').hidden = false;
+  const input = document.getElementById('adultYear');
+  if(input){ input.value = ''; input.max = new Date().getFullYear(); input.focus(); }
+}
+function closeAdultCheck(){
+  document.getElementById('adultOverlay').hidden = true;
+  adult.ok = false; adult.bad = false;
+}
+function submitAdultCheck(){
+  const input = document.getElementById('adultYear');
+  if(!input) return;
+  const year = parseInt(input.value, 10);
+  const errEl = document.getElementById('adultError');
+  if(isNaN(year)){
+    adult.bad = true;
+    if(errEl) errEl.textContent = 'נא להקליד שנת לידה תקינה';
+    return;
+  }
+  if(adultCheck(year)){
+    adult.ok = true;
+    adult.bad = false;
+    if(errEl) errEl.textContent = '';
+    // Hide overlay but KEEP adult.ok=true (closeAdultCheck resets it)
+    document.getElementById('adultOverlay').hidden = true;
+    // Open the parent area after successful verification
+    openPanel('profiles');
+  } else {
+    adult.bad = true;
+    if(errEl) errEl.textContent = 'הגישה לאזור הורים מותרת מגיל 18 ומעלה';
+  }
+}
 function renderDebugHTML(){
   if(!dbg.ok) return `<section class="pa-card"><h2 class="pa-h">דיבאג</h2><p class="pa-sub">כלי בדיקה. נדרשת סיסמה.</p>
     <input id="dbgPw" type="password" class="pa-input" autocomplete="off" aria-label="סיסמה" style="width:100%;box-sizing:border-box;min-height:44px;font:inherit;padding:0 12px;border-radius:12px;border:2px solid var(--card2)">
@@ -5760,7 +5939,14 @@ function renderDebugHTML(){
     <div class="pa-scope"><span class="pa-scope-l">מתנה</span><div class="pa-seg">${kinds}</div></div>
     <div class="pa-scope"><span class="pa-scope-l">כמות (לכל מתנה)</span><input id="dbgN" type="number" min="1" max="200" value="${dbg.n}" style="width:90px;min-height:44px;font:inherit;padding:0 10px;border-radius:12px;border:2px solid var(--card2)"></div>
     <div class="pa-actions"><button type="button" class="pa-btn" data-pact="dbgadd">הוספה ל${selName}</button></div>
-    ${dbg.msg?`<p class="pa-sub dbg-msg" id="dbgMsg" role="status">${esc(dbg.msg)}</p>`:''}</section>`;
+    ${dbg.msg?`<p class="pa-sub dbg-msg" id="dbgMsg" role="status">${esc(dbg.msg)}</p>`:''}</section>
+    <section class="pa-card"><h2 class="pa-h">יצירת פעילות משחק מזויפת</h2><p class="pa-sub">יוצר תיעוד תשובות מזויף (נכונות ושגויות) על פני כמה ימים, עם רמות וקושי מגוונים, כדי לבדוק את לשונית ההתקדמות, לוח הפעילות והסטטיסטיקות.</p>
+    ${paScope('dbgprof', dbg.pid, 'פרופיל')}
+    <div class="pa-scope"><span class="pa-scope-l">מספר תשובות</span><input id="dbgActN" type="number" min="10" max="2000" value="120" style="width:90px;min-height:44px;font:inherit;padding:0 10px;border-radius:12px;border:2px solid var(--card2)"></div>
+    <div class="pa-scope"><span class="pa-scope-l">אחוז הצלחה</span><input id="dbgActPct" type="number" min="10" max="95" value="75" style="width:90px;min-height:44px;font:inherit;padding:0 10px;border-radius:12px;border:2px solid var(--card2)">%</div>
+    <div class="pa-scope"><span class="pa-scope-l">פרוס על ימים</span><input id="dbgActDays" type="number" min="1" max="30" value="14" style="width:90px;min-height:44px;font:inherit;padding:0 10px;border-radius:12px;border:2px solid var(--card2)"></div>
+    <div class="pa-actions"><button type="button" class="pa-btn" data-pact="dbgactivity">יצירת פעילות</button></div>
+    ${dbg.actMsg?`<p class="pa-sub dbg-msg" id="dbgActMsg" role="status">${esc(dbg.actMsg)}</p>`:''}</section>`;
 }
 function dbgGive(p, kinds, n){
   const active = p.id===store.activeId, sv = {collection, golden};
@@ -5776,11 +5962,109 @@ function dbgAdd(){
   const kinds = dbg.kind==='all' ? STICKERS.slice() : [dbg.kind]; dbgGive(p, kinds, dbg.n);
   dbg.seq++; dbg.msg = `✓ נוספו ${dbg.n*kinds.length} מתנות ל${profileName(p, store.profiles.indexOf(p))} (${dbg.n} מכל סוג, ${kinds.length} סוגים) · לחיצה מספר ${dbg.seq}`; renderProfiles();
 }
+function dbgGenerateActivity(){
+  dbgSync();
+  const p = store.profiles.find(x=>x.id===dbg.pid);
+  if(!p){ dbg.actMsg='אין פרופיל'; return renderProfiles(); }
+  const n = parseInt(document.getElementById('dbgActN').value, 10) || 300;
+  const pct = Math.max(10, Math.min(95, parseInt(document.getElementById('dbgActPct').value, 10) || 75)) / 100;
+  const days = Math.max(1, Math.min(30, parseInt(document.getElementById('dbgActDays').value, 10) || 14));
+
+  if(!p.stats) p.stats = statsNew();
+  const stats = p.stats;
+
+  // Get all regular (non-bonus) skills
+  const regularSkills = Object.keys(SKILL_META).filter(k=>!SKILL_META[k].bonus);
+  if(!regularSkills.length){ dbg.actMsg='אין סוגי שאלות זמינים'; return renderProfiles(); }
+
+  // Pick a focused set of skills so each gets enough answers for assessment + trend
+  // Trend needs: window*2 = 60 answers per skill (30 recent + 30 previous), minAnswers = 8
+  // Assessment needs: window = 30, minAnswers = 8
+  const T = STATS_CONFIG.trend;
+  const minForTrend = T.window * 2; // 60
+  const minForAssess = STATS_CONFIG.window; // 30
+  // Aim for trend data: each focus skill should get at least minForTrend answers
+  const maxFocusSkills = Math.max(3, Math.floor(n / minForTrend));
+  const targetSkills = Math.min(maxFocusSkills, 8);
+  const shuffled = [...regularSkills].sort(()=>Math.random()-0.5);
+  const focusSkills = shuffled.slice(0, targetSkills);
+
+  const now = Date.now();
+  const dayMs = 24*60*60*1000;
+  const perDay = Math.ceil(n / days);
+  let created = 0;
+
+  for(let d=0; d<days && created<n; d++){
+    const dayStart = now - (days-1-d)*dayMs + Math.floor(Math.random()*dayMs*0.8);
+    const todayCount = Math.min(perDay + Math.floor(Math.random()*5)-2, n-created);
+    for(let i=0; i<todayCount && created<n; i++){
+      // Pick from focus skills (80%) or other skills (20%)
+      const skill = Math.random() < 0.8 ? focusSkills[Math.floor(Math.random()*focusSkills.length)]
+                                          : regularSkills[Math.floor(Math.random()*regularSkills.length)];
+      const meta = SKILL_META[skill];
+      const level = meta.levels ? meta.levels[Math.floor(Math.random()*meta.levels.length)].id : Math.floor(Math.random()*3)+1;
+      const ok = Math.random() < pct;
+      const seconds = 2 + Math.random() * 30;
+      const t = dayStart + i * (1000 + Math.random()*5000);
+
+      let chosen = undefined, correct = undefined;
+      if(!ok){
+        // Generate plausible wrong answer based on skill type
+        const ans = typeof meta.answer === 'function' ? meta.answer() : 10;
+        correct = String(ans);
+        // Common error patterns
+        const errType = Math.random();
+        if(errType < 0.3) chosen = String(ans + (Math.random()<0.5?1:-1)*(Math.random()<0.5?1:10));
+        else if(errType < 0.6) chosen = String(ans * 2);
+        else if(errType < 0.8) chosen = String(Math.max(0, ans - 10));
+        else chosen = String(ans + 5);
+      }
+
+      statsRecord(stats, {
+        skill,
+        level,
+        bonus: false,
+        ok,
+        seconds,
+        chosen,
+        correct,
+        t
+      });
+      created++;
+    }
+  }
+
+  // Also add some bonus answers
+  const bonusSkills = Object.keys(SKILL_META).filter(k=>SKILL_META[k].bonus);
+  if(bonusSkills.length){
+    const bonusCount = Math.floor(n * 0.1);
+    for(let i=0; i<bonusCount; i++){
+      const skill = bonusSkills[Math.floor(Math.random()*bonusSkills.length)];
+      const level = 3;
+      const ok = Math.random() < (pct * 0.6); // bonus is harder
+      const seconds = 10 + Math.random() * 60;
+      const t = now - Math.random()*days*dayMs;
+
+      statsRecord(stats, {skill, level, bonus: true, ok, seconds, chosen:undefined, correct:undefined, t});
+    }
+  }
+
+  // Compact stats (rolls old log entries into daily summaries)
+  statsCompact(stats, STATS_CONFIG);
+
+  p.u = Date.now();
+  persist();
+  cloudChanged();
+
+  dbg.actMsg = `✓ נוצרו ${created} תשובות רגילות על פני ${days} ימים (${Math.round(pct*100)}% הצלחה) + בונוסים. מוקד: ${focusSkills.length} סוגים עיקריים (כל אחד מקבל ~${Math.floor(created*0.8/focusSkills.length)} תשובות – מספיק למגמה). הלשונית "התקדמות" עודכנה.`;
+  renderProfiles();
+}
 function profileAction(act, id){
   if(act==='dbgunlock'){ const el = document.getElementById('dbgPw'); dbg.ok = !!el && dbgHash(el.value)===DBG_HASH; dbg.bad = !dbg.ok; dbg.msg=''; return renderProfiles(); }
   if(act==='dbgprof'){ dbgSync(); dbg.pid = id; dbg.msg=''; dbg.seq=0; return renderProfiles(); }
   if(act==='dbgkind'){ dbgSync(); dbg.kind = id; dbg.msg=''; dbg.seq=0; return renderProfiles(); }
   if(act==='dbgadd') return dbgAdd();
+  if(act==='dbgactivity') return dbgGenerateActivity();
   if(act==='bkgen') return bkGenerate();
   if(act==='bkcopy') return bkCopy();
   if(act==='bkcheck') return bkCheck();
@@ -5974,7 +6258,15 @@ document.getElementById('profOverlay').addEventListener('click', e=>{
   if(e.target.id==='profOverlay') closeProfiles();
   const t = e.target.closest('[data-pact]'); if(t) profileAction(t.dataset.pact, t.dataset.id);
 });
-document.addEventListener('keydown', e=>{ if(e.key==='Escape' && document.getElementById('celebOverlay').hidden){ if(!document.getElementById('reportOverlay').hidden){ closeReport(); return; } if(!document.getElementById('helpOverlay').hidden){ closeHelp(); return; } if(!document.getElementById('profOverlay').hidden) closeProfiles(); else closeRoom(); } });
+document.getElementById('adultSubmit').addEventListener('click', submitAdultCheck);
+document.getElementById('adultCancel').addEventListener('click', closeAdultCheck);
+document.getElementById('adultYear').addEventListener('keydown', e=>{
+  if(e.key==='Enter') submitAdultCheck();
+});
+document.getElementById('adultOverlay').addEventListener('click', e=>{
+  if(e.target.id==='adultOverlay') closeAdultCheck();
+});
+document.addEventListener('keydown', e=>{ if(e.key==='Escape' && document.getElementById('celebOverlay').hidden){ if(!document.getElementById('reportOverlay').hidden){ closeReport(); return; } if(!document.getElementById('helpOverlay').hidden){ closeHelp(); return; } if(!document.getElementById('adultOverlay').hidden){ closeAdultCheck(); return; } if(!document.getElementById('profOverlay').hidden) closeProfiles(); else closeRoom(); } });
 renderLevels();
 renderStickerbook();
 renderLolli();

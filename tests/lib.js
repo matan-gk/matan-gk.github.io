@@ -28,4 +28,19 @@ function cloudBuild(){
   const dir = path.join(ROOT, '_build'); fs.mkdirSync(dir, {recursive: true});
   const f = path.join(dir, 'test_build_' + process.pid + '.html'); fs.writeFileSync(f, s); return f;
 }
-module.exports = {ROOT, GAME, ADMIN, URL: 'file://' + GAME, ADMIN_URL: 'file://' + ADMIN, launchOpts, section, extract, cloudBuild, p: rel => path.join(ROOT, rel)};
+
+// The parent area asks for a birth year (the adult check) before it opens. Tests that are not about that check
+// pass it automatically after every page load, so they can open the parent area as before.
+// A test about the check itself calls T.gate.on() before launching, to see the real thing.
+const gate = {bypass: true, on(){ this.bypass = false; }};
+{
+  const {chromium} = require('playwright'), orig = chromium.launch.bind(chromium);
+  const hook = ctx => ctx.on('page', pg => pg.on('domcontentloaded', () => { if(gate.bypass) pg.evaluate("if(typeof adult!=='undefined') adult.ok = true").catch(()=>{}); }));
+  chromium.launch = async (o) => {
+    const b = await orig(o), nc = b.newContext.bind(b), np = b.newPage.bind(b);
+    b.newContext = async (...a) => { const c = await nc(...a); hook(c); return c; };
+    b.newPage = async (...a) => { const pg = await np(...a); pg.on('domcontentloaded', () => { if(gate.bypass) pg.evaluate("if(typeof adult!=='undefined') adult.ok = true").catch(()=>{}); }); return pg; };
+    return b;
+  };
+}
+module.exports = {gate, ROOT, GAME, ADMIN, URL: 'file://' + GAME, ADMIN_URL: 'file://' + ADMIN, launchOpts, section, extract, cloudBuild, p: rel => path.join(ROOT, rel)};
