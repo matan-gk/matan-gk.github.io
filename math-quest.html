@@ -5870,7 +5870,7 @@ function bkRestore(){
 // ===== DEBUG (parent area, password) =====
 const DBG_HASH = 2113604388352968;       // hash of the debug password (a light gate for testing tools, not real security)
 function dbgHash(s,seed=0){ let h1=0xdeadbeef^seed,h2=0x41c6ce57^seed; for(let i=0;i<s.length;i++){ const c=s.charCodeAt(i); h1=Math.imul(h1^c,2654435761); h2=Math.imul(h2^c,1597334677); } h1=Math.imul(h1^(h1>>>16),2246822507)^Math.imul(h2^(h2>>>13),3266489909); h2=Math.imul(h2^(h2>>>16),2246822507)^Math.imul(h1^(h1>>>13),3266489909); return 4294967296*(2097151&h2)+(h1>>>0); }
-let dbg = {ok:false, msg:'', pid:null, kind:'all', n:5, bad:false, seq:0, actMsg:''};
+let dbg = {ok:false, msg:'', pid:null, kind:'all', n:5, bad:false, seq:0, actMsg:'', tokEarned:'', tokSpent:''};
 function dbgSync(){
   const n = document.getElementById('dbgN');
   if(n){ const v = parseInt(n.value,10); dbg.n = Math.max(1, Math.min(200, isFinite(v)?v:1)); }
@@ -5934,6 +5934,13 @@ function renderDebugHTML(){
   try{ kinds = ['all',...STICKERS].map(k=>`<button type="button" class="pa-chip ${dbg.kind===k?'on':''}" aria-pressed="${dbg.kind===k}" data-pact="dbgkind" data-id="${k}">${k==='all'?'הכול':itemHTML(LAYERS[k]?k+':'+LAYER_DEFAULT[k]:k,false,22)}</button>`).join(''); }
   finally{ themeId = keepTheme; }
   const selName = esc(profileName(sel, store.profiles.indexOf(sel)));
+  // Get the profile's space tokens
+  const profProg = cleanProgress(sel.progress);
+  const earned = profProg.space.earned;
+  const spent = profProg.space.spent;
+  const balance = Math.max(0, earned - spent);
+  const tokEarnedVal = dbg.tokEarned !== '' ? dbg.tokEarned : earned;
+  const tokSpentVal = dbg.tokSpent !== '' ? dbg.tokSpent : spent;
   return `<section class="pa-card"><h2 class="pa-h">הוספת מתנות לבדיקה</h2><p class="pa-sub">מוסיף כמות נבחרת של מתנה נבחרת (או של כולן) לפרופיל. כל מתנה מקבלת מראה אקראי, כמו מתנה רגילה.</p>
     ${paScope('dbgprof', dbg.pid, 'פרופיל')}
     <div class="pa-scope"><span class="pa-scope-l">מתנה</span><div class="pa-seg">${kinds}</div></div>
@@ -5946,7 +5953,14 @@ function renderDebugHTML(){
     <div class="pa-scope"><span class="pa-scope-l">אחוז הצלחה</span><input id="dbgActPct" type="number" min="10" max="95" value="75" style="width:90px;min-height:44px;font:inherit;padding:0 10px;border-radius:12px;border:2px solid var(--card2)">%</div>
     <div class="pa-scope"><span class="pa-scope-l">פרוס על ימים</span><input id="dbgActDays" type="number" min="1" max="30" value="14" style="width:90px;min-height:44px;font:inherit;padding:0 10px;border-radius:12px;border:2px solid var(--card2)"></div>
     <div class="pa-actions"><button type="button" class="pa-btn" data-pact="dbgactivity">יצירת פעילות</button></div>
-    ${dbg.actMsg?`<p class="pa-sub dbg-msg" id="dbgActMsg" role="status">${esc(dbg.actMsg)}</p>`:''}</section>`;
+    ${dbg.actMsg?`<p class="pa-sub dbg-msg" id="dbgActMsg" role="status">${esc(dbg.actMsg)}</p>`:''}</section>
+    <section class="pa-card"><h2 class="pa-h">עריכת אסימונים (טוקנים)</h2><p class="pa-sub">משנה את מספר האסימונים שהפרופיל הרוויח והוציא. המאזן = הרוויח − הוציא (לא יכול להיות שלילי).</p>
+    ${paScope('dbgprof', dbg.pid, 'פרופיל')}
+    <div class="pa-scope"><span class="pa-scope-l">הרוויח (earned)</span><input id="dbgTokEarned" type="number" min="0" max="10000" value="${tokEarnedVal}" style="width:90px;min-height:44px;font:inherit;padding:0 10px;border-radius:12px;border:2px solid var(--card2)"></div>
+    <div class="pa-scope"><span class="pa-scope-l">הוציא (spent)</span><input id="dbgTokSpent" type="number" min="0" max="10000" value="${tokSpentVal}" style="width:90px;min-height:44px;font:inherit;padding:0 10px;border-radius:12px;border:2px solid var(--card2)"></div>
+    <div class="pa-scope"><span class="pa-scope-l">מאזן נוכחי</span><span class="pa-sub" style="font-weight:700;color:var(--purple)">${balance}</span></div>
+    <div class="pa-actions"><button type="button" class="pa-btn" data-pact="dbgtokens">שמירת שינויים</button></div>
+    ${dbg.tokMsg?`<p class="pa-sub dbg-msg" id="dbgTokMsg" role="status">${esc(dbg.tokMsg)}</p>`:''}</section>`;
 }
 function dbgGive(p, kinds, n){
   const active = p.id===store.activeId, sv = {collection, golden};
@@ -6059,12 +6073,36 @@ function dbgGenerateActivity(){
   dbg.actMsg = `✓ נוצרו ${created} תשובות רגילות על פני ${days} ימים (${Math.round(pct*100)}% הצלחה) + בונוסים. מוקד: ${focusSkills.length} סוגים עיקריים (כל אחד מקבל ~${Math.floor(created*0.8/focusSkills.length)} תשובות – מספיק למגמה). הלשונית "התקדמות" עודכנה.`;
   renderProfiles();
 }
+function dbgSaveTokens(){
+  dbgSync();
+  const p = store.profiles.find(x=>x.id===dbg.pid);
+  if(!p){ dbg.tokMsg='אין פרופיל'; return renderProfiles(); }
+  const earnedInput = document.getElementById('dbgTokEarned');
+  const spentInput = document.getElementById('dbgTokSpent');
+  const earned = Math.max(0, parseInt(earnedInput?.value, 10) || 0);
+  const spent = Math.max(0, parseInt(spentInput?.value, 10) || 0);
+  // Ensure spent doesn't exceed earned (balance can't be negative)
+  const finalSpent = Math.min(spent, earned);
+  // Update the profile's progress space object
+  if(!p.progress.space) p.progress.space = spaceClean({}, [], 0);
+  p.progress.space.earned = earned;
+  p.progress.space.spent = finalSpent;
+  p.u = Date.now();
+  persist();
+  cloudChanged();
+  // Store the values for re-render
+  dbg.tokEarned = String(earned);
+  dbg.tokSpent = String(finalSpent);
+  dbg.tokMsg = `✓ עודכנו אסימונים: הרוויח=${earned}, הוציא=${finalSpent}, מאזן=${earned-finalSpent}`;
+  renderProfiles();
+}
 function profileAction(act, id){
   if(act==='dbgunlock'){ const el = document.getElementById('dbgPw'); dbg.ok = !!el && dbgHash(el.value)===DBG_HASH; dbg.bad = !dbg.ok; dbg.msg=''; return renderProfiles(); }
   if(act==='dbgprof'){ dbgSync(); dbg.pid = id; dbg.msg=''; dbg.seq=0; return renderProfiles(); }
   if(act==='dbgkind'){ dbgSync(); dbg.kind = id; dbg.msg=''; dbg.seq=0; return renderProfiles(); }
   if(act==='dbgadd') return dbgAdd();
   if(act==='dbgactivity') return dbgGenerateActivity();
+  if(act==='dbgtokens') return dbgSaveTokens();
   if(act==='bkgen') return bkGenerate();
   if(act==='bkcopy') return bkCopy();
   if(act==='bkcheck') return bkCheck();
