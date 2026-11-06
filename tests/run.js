@@ -27,6 +27,7 @@ const TESTS = [
   ['grptest','grptest.js','shape groups never split across lines; choices fit the screen'],
   ['splittest','splittest.js','the repository as site: small page, picture files listed and used, every picture, icon and font loads'],
   ['tokentest','tokentest.js','personal-space tokens: one per upgrade, stored counter, one-time true-up, balance pictures by tier (1/10/50/100/300)'],
+  ['catalogtest','catalogtest.js','personal space step 3: catalog, buy-and-place preview, floor cells, move, put away, stock, brown pots and the magenta recolor'],
   ['spacetest','spacetest.js','personal space: locked teaser, unlock ceremony, poof, room, zoom/pan, upgrades and colors cost tokens'],
   ['layerstest','layerstest.js','layered rewards: item format, one-time migration, rarity, remembered merges and looks, every combination fits'],
   ['loctest','loctest.js','selection screen and locations: levels only at home, backdrop and title per game, back button, neutral background without backdrop'],

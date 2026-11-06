@@ -143,7 +143,7 @@ ok(await ev(()=>space.unlocked&&space.lv.bed===2&&space.surf.wl===2&&space.spent
 const cl=await ev(()=>cleanProgress({space:{earned:50,spent:2,trued:true,unlocked:true,surf:{wl:99,wr:'x',fl:5},own:{fl:[5,5,77,1]},lv:{bed:9,window:2,ghost:3}}}).space);
 ok(cl.surf.wl===3&&cl.surf.wr===3&&cl.surf.fl===5&&cl.lv.bed===1&&cl.lv.window===2&&!('ghost' in cl.lv)&&JSON.stringify(cl.own.fl)==='[1,5,12]','bad colors and levels fall back; current and starting colors are always owned: '+JSON.stringify(cl.own));
 const mc=await ev(()=>roomMaxCost());
-ok(mc===(3+6+10+15)+(2+4+7+10)+3*(13+6-1),'room max-out cost = bed 34 + window 23 + 3 surfaces x (13 + 3 premium x2 - 1 start) = 111, got '+mc);
+ok(mc===(3+6+10+15)+(2+4+7+10)+3*(13+6-1)+54,'room max-out cost = bed 34 + window 23 + 3 surfaces x (13 + 3 premium x2 - 1 start) + one of each of the 21 plants (54) = 165, got '+mc);
 // a profile already above 10 tokens: ceremony gate on first start
 await ev(()=>{activeProfile().progress=Object.assign(captureProgress(),{space:{earned:25,spent:0,trued:true,unlocked:false}});persist();});
 await p.reload();await p.waitForTimeout(1800);
