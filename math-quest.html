@@ -5516,8 +5516,17 @@ function bkRestore(){
 // ===== DEBUG (parent area, password) =====
 const DBG_HASH = 2113604388352968;       // hash of the debug password (a light gate for testing tools, not real security)
 function dbgHash(s,seed=0){ let h1=0xdeadbeef^seed,h2=0x41c6ce57^seed; for(let i=0;i<s.length;i++){ const c=s.charCodeAt(i); h1=Math.imul(h1^c,2654435761); h2=Math.imul(h2^c,1597334677); } h1=Math.imul(h1^(h1>>>16),2246822507)^Math.imul(h2^(h2>>>13),3266489909); h2=Math.imul(h2^(h2>>>16),2246822507)^Math.imul(h1^(h1>>>13),3266489909); return 4294967296*(2097151&h2)+(h1>>>0); }
-let dbg = {ok:false, msg:'', pid:null, kind:'all', n:5, bad:false, seq:0};
-function dbgSync(){ const n = document.getElementById('dbgN'); if(n){ const v = parseInt(n.value,10); dbg.n = Math.max(1, Math.min(200, isFinite(v)?v:1)); } }
+let dbg = {ok:false, msg:'', pid:null, kind:'all', n:5, bad:false, seq:0, actMsg:''};
+function dbgSync(){
+  const n = document.getElementById('dbgN');
+  if(n){ const v = parseInt(n.value,10); dbg.n = Math.max(1, Math.min(200, isFinite(v)?v:1)); }
+  const an = document.getElementById('dbgActN');
+  if(an){ const v = parseInt(an.value,10); dbg.actN = Math.max(10, Math.min(2000, isFinite(v)?v:120)); }
+  const ap = document.getElementById('dbgActPct');
+  if(ap){ const v = parseInt(ap.value,10); dbg.actPct = Math.max(10, Math.min(95, isFinite(v)?v:75)); }
+  const ad = document.getElementById('dbgActDays');
+  if(ad){ const v = parseInt(ad.value,10); dbg.actDays = Math.max(1, Math.min(30, isFinite(v)?v:14)); }
+}
 
 // ===== ADULT CHECK (parent area gate) =====
 // Ask for birth year, verify age >= 18. State is per-session (not saved), so closing the parent area resets it.
@@ -5576,7 +5585,14 @@ function renderDebugHTML(){
     <div class="pa-scope"><span class="pa-scope-l">מתנה</span><div class="pa-seg">${kinds}</div></div>
     <div class="pa-scope"><span class="pa-scope-l">כמות (לכל מתנה)</span><input id="dbgN" type="number" min="1" max="200" value="${dbg.n}" style="width:90px;min-height:44px;font:inherit;padding:0 10px;border-radius:12px;border:2px solid var(--card2)"></div>
     <div class="pa-actions"><button type="button" class="pa-btn" data-pact="dbgadd">הוספה ל${selName}</button></div>
-    ${dbg.msg?`<p class="pa-sub dbg-msg" id="dbgMsg" role="status">${esc(dbg.msg)}</p>`:''}</section>`;
+    ${dbg.msg?`<p class="pa-sub dbg-msg" id="dbgMsg" role="status">${esc(dbg.msg)}</p>`:''}</section>
+    <section class="pa-card"><h2 class="pa-h">יצירת פעילות משחק מזויפת</h2><p class="pa-sub">יוצר תיעוד תשובות מזויף (נכונות ושגויות) על פני כמה ימים, עם רמות וקושי מגוונים, כדי לבדוק את לשונית ההתקדמות, לוח הפעילות והסטטיסטיקות.</p>
+    ${paScope('dbgprof', dbg.pid, 'פרופיל')}
+    <div class="pa-scope"><span class="pa-scope-l">מספר תשובות</span><input id="dbgActN" type="number" min="10" max="2000" value="120" style="width:90px;min-height:44px;font:inherit;padding:0 10px;border-radius:12px;border:2px solid var(--card2)"></div>
+    <div class="pa-scope"><span class="pa-scope-l">אחוז הצלחה</span><input id="dbgActPct" type="number" min="10" max="95" value="75" style="width:90px;min-height:44px;font:inherit;padding:0 10px;border-radius:12px;border:2px solid var(--card2)">%</div>
+    <div class="pa-scope"><span class="pa-scope-l">פרוס על ימים</span><input id="dbgActDays" type="number" min="1" max="30" value="14" style="width:90px;min-height:44px;font:inherit;padding:0 10px;border-radius:12px;border:2px solid var(--card2)"></div>
+    <div class="pa-actions"><button type="button" class="pa-btn" data-pact="dbgactivity">יצירת פעילות</button></div>
+    ${dbg.actMsg?`<p class="pa-sub dbg-msg" id="dbgActMsg" role="status">${esc(dbg.actMsg)}</p>`:''}</section>`;
 }
 function dbgGive(p, kinds, n){
   const active = p.id===store.activeId, sv = {collection, golden};
@@ -5592,11 +5608,95 @@ function dbgAdd(){
   const kinds = dbg.kind==='all' ? STICKERS.slice() : [dbg.kind]; dbgGive(p, kinds, dbg.n);
   dbg.seq++; dbg.msg = `✓ נוספו ${dbg.n*kinds.length} מתנות ל${profileName(p, store.profiles.indexOf(p))} (${dbg.n} מכל סוג, ${kinds.length} סוגים) · לחיצה מספר ${dbg.seq}`; renderProfiles();
 }
+function dbgGenerateActivity(){
+  dbgSync();
+  const p = store.profiles.find(x=>x.id===dbg.pid);
+  if(!p){ dbg.actMsg='אין פרופיל'; return renderProfiles(); }
+  const n = parseInt(document.getElementById('dbgActN').value, 10) || 120;
+  const pct = Math.max(10, Math.min(95, parseInt(document.getElementById('dbgActPct').value, 10) || 75)) / 100;
+  const days = Math.max(1, Math.min(30, parseInt(document.getElementById('dbgActDays').value, 10) || 14));
+
+  if(!p.stats) p.stats = statsNew();
+  const stats = p.stats;
+
+  // Get all regular (non-bonus) skills
+  const regularSkills = Object.keys(SKILL_META).filter(k=>!SKILL_META[k].bonus);
+  if(!regularSkills.length){ dbg.actMsg='אין סוגי שאלות זמינים'; return renderProfiles(); }
+
+  const now = Date.now();
+  const dayMs = 24*60*60*1000;
+  const perDay = Math.ceil(n / days);
+  let created = 0;
+
+  for(let d=0; d<days && created<n; d++){
+    const dayStart = now - (days-1-d)*dayMs + Math.floor(Math.random()*dayMs*0.8);
+    const todayCount = Math.min(perDay + Math.floor(Math.random()*5)-2, n-created);
+    for(let i=0; i<todayCount && created<n; i++){
+      const skill = regularSkills[Math.floor(Math.random()*regularSkills.length)];
+      const meta = SKILL_META[skill];
+      const level = meta.levels ? meta.levels[Math.floor(Math.random()*meta.levels.length)].id : Math.floor(Math.random()*3)+1;
+      const ok = Math.random() < pct;
+      const seconds = 2 + Math.random() * 30;
+      const t = dayStart + i * (1000 + Math.random()*5000);
+
+      let chosen = undefined, correct = undefined;
+      if(!ok){
+        // Generate plausible wrong answer based on skill type
+        const ans = typeof meta.answer === 'function' ? meta.answer() : 10;
+        correct = String(ans);
+        // Common error patterns
+        const errType = Math.random();
+        if(errType < 0.3) chosen = String(ans + (Math.random()<0.5?1:-1)*(Math.random()<0.5?1:10));
+        else if(errType < 0.6) chosen = String(ans * 2);
+        else if(errType < 0.8) chosen = String(Math.max(0, ans - 10));
+        else chosen = String(ans + 5);
+      }
+
+      statsRecord(stats, {
+        skill,
+        level,
+        bonus: false,
+        ok,
+        seconds,
+        chosen,
+        correct,
+        t
+      });
+      created++;
+    }
+  }
+
+  // Also add some bonus answers
+  const bonusSkills = Object.keys(SKILL_META).filter(k=>SKILL_META[k].bonus);
+  if(bonusSkills.length){
+    const bonusCount = Math.floor(n * 0.1);
+    for(let i=0; i<bonusCount; i++){
+      const skill = bonusSkills[Math.floor(Math.random()*bonusSkills.length)];
+      const level = 3;
+      const ok = Math.random() < (pct * 0.6); // bonus is harder
+      const seconds = 10 + Math.random() * 60;
+      const t = now - Math.random()*days*dayMs;
+
+      statsRecord(stats, {skill, level, bonus: true, ok, seconds, chosen:undefined, correct:undefined, t});
+    }
+  }
+
+  // Compact stats
+  statsCompact(stats, STATS_CONFIG);
+
+  p.u = Date.now();
+  persist();
+  cloudChanged();
+
+  dbg.actMsg = `✓ נוצרו ${created} תשובות רגילות על פני ${days} ימים (${Math.round(pct*100)}% הצלחה) + בונוסים. הלשונית "התקדמות" עודכנה.`;
+  renderProfiles();
+}
 function profileAction(act, id){
   if(act==='dbgunlock'){ const el = document.getElementById('dbgPw'); dbg.ok = !!el && dbgHash(el.value)===DBG_HASH; dbg.bad = !dbg.ok; dbg.msg=''; return renderProfiles(); }
   if(act==='dbgprof'){ dbgSync(); dbg.pid = id; dbg.msg=''; dbg.seq=0; return renderProfiles(); }
   if(act==='dbgkind'){ dbgSync(); dbg.kind = id; dbg.msg=''; dbg.seq=0; return renderProfiles(); }
   if(act==='dbgadd') return dbgAdd();
+  if(act==='dbgactivity') return dbgGenerateActivity();
   if(act==='bkgen') return bkGenerate();
   if(act==='bkcopy') return bkCopy();
   if(act==='bkcheck') return bkCheck();
