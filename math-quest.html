@@ -6087,18 +6087,23 @@ function dbgSaveTokens(){
   if(!p.progress.space) p.progress.space = spaceClean({}, [], 0);
   p.progress.space.earned = earned;
   p.progress.space.spent = finalSpent;
+  // If this is the active profile, update the global space variable too
+  if(p.id === store.activeId){
+    space.earned = earned;
+    space.spent = finalSpent;
+  }
   p.u = Date.now();
   persist();
   cloudChanged();
-  // Store the values for re-render
-  dbg.tokEarned = String(earned);
-  dbg.tokSpent = String(finalSpent);
+  // Clear the stored input values so next render uses actual profile values
+  dbg.tokEarned = '';
+  dbg.tokSpent = '';
   dbg.tokMsg = `✓ עודכנו אסימונים: הרוויח=${earned}, הוציא=${finalSpent}, מאזן=${earned-finalSpent}`;
   renderProfiles();
 }
 function profileAction(act, id){
   if(act==='dbgunlock'){ const el = document.getElementById('dbgPw'); dbg.ok = !!el && dbgHash(el.value)===DBG_HASH; dbg.bad = !dbg.ok; dbg.msg=''; return renderProfiles(); }
-  if(act==='dbgprof'){ dbgSync(); dbg.pid = id; dbg.msg=''; dbg.seq=0; return renderProfiles(); }
+  if(act==='dbgprof'){ dbgSync(); dbg.pid = id; dbg.msg=''; dbg.seq=0; dbg.tokEarned=''; dbg.tokSpent=''; return renderProfiles(); }
   if(act==='dbgkind'){ dbgSync(); dbg.kind = id; dbg.msg=''; dbg.seq=0; return renderProfiles(); }
   if(act==='dbgadd') return dbgAdd();
   if(act==='dbgactivity') return dbgGenerateActivity();
