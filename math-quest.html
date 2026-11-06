@@ -5541,12 +5541,12 @@ function switchProfile(id){
 function openProfiles(first){
   const empty = !store.profiles.length;
   profMode = {view:(first||empty)?'form':'list', editId:null, first:!!(first||empty), confirmDel:null, error:''};
-  profTab = 'profiles'; statsViewId = store.activeId; bk = bkFresh(); dbg.ok = false; dbg.msg = '';
+  profTab = 'profiles'; statsViewId = store.activeId; bk = bkFresh(); dbg.msg = '';
   document.getElementById('profOverlay').hidden = false; renderProfiles();
 }
 function closeProfiles(){
   if(!store.profiles.length) return;          // the first profile must be created before the game can be used
-  document.getElementById('profOverlay').hidden = true; dbg.ok = false;
+  document.getElementById('profOverlay').hidden = true;
 }
 function profileStats(p){
   const pr = (p.id===store.activeId) ? captureProgress() : (p.progress||{});
@@ -6048,7 +6048,13 @@ function bkRestore(){
 // ===== DEBUG (parent area, password) =====
 const DBG_HASH = 2113604388352968;       // hash of the debug password (a light gate for testing tools, not real security)
 function dbgHash(s,seed=0){ let h1=0xdeadbeef^seed,h2=0x41c6ce57^seed; for(let i=0;i<s.length;i++){ const c=s.charCodeAt(i); h1=Math.imul(h1^c,2654435761); h2=Math.imul(h2^c,1597334677); } h1=Math.imul(h1^(h1>>>16),2246822507)^Math.imul(h2^(h2>>>13),3266489909); h2=Math.imul(h2^(h2>>>16),2246822507)^Math.imul(h1^(h1>>>13),3266489909); return 4294967296*(2097151&h2)+(h1>>>0); }
-let dbg = {ok:false, msg:'', pid:null, kind:'all', n:5, bad:false, seq:0, actMsg:'', tokEarned:'', tokSpent:''};
+// Debug panel unlocked state persists in localStorage so it survives page reloads within the browser session
+const DBG_STORAGE_KEY = 'cq_dbg_ok';
+let dbg = {ok:!!(localStorage.getItem(DBG_STORAGE_KEY)==='1'), msg:'', pid:null, kind:'all', n:5, bad:false, seq:0, actMsg:'', tokEarned:'', tokSpent:''};
+function dbgSetOk(v){
+  dbg.ok = !!v;
+  try{ localStorage.setItem(DBG_STORAGE_KEY, dbg.ok ? '1' : '0'); }catch(e){}
+}
 function dbgSync(){
   const n = document.getElementById('dbgN');
   if(n){ const v = parseInt(n.value,10); dbg.n = Math.max(1, Math.min(200, isFinite(v)?v:1)); }
@@ -6281,8 +6287,8 @@ function dbgSaveTokens(){
   renderProfiles();
 }
 function profileAction(act, id){
-  if(act==='dbgunlock'){ const el = document.getElementById('dbgPw'); dbg.ok = !!el && dbgHash(el.value)===DBG_HASH; dbg.bad = !dbg.ok; dbg.msg=''; return renderProfiles(); }
-  if(act==='dbglock'){ dbg.ok = false; dbg.msg = 'הדיבאג ננעל. אפשר לפתוח אותו שוב עם הסיסמה.'; return renderProfiles(); }
+  if(act==='dbgunlock'){ const el = document.getElementById('dbgPw'); const ok = !!el && dbgHash(el.value)===DBG_HASH; dbgSetOk(ok); dbg.bad = !ok; dbg.msg=''; return renderProfiles(); }
+  if(act==='dbglock'){ dbgSetOk(false); dbg.msg = 'הדיבאג ננעל. אפשר לפתוח אותו שוב עם הסיסמה.'; return renderProfiles(); }
   if(act==='dbgprof'){ dbgSync(); dbg.pid = id; dbg.msg=''; dbg.seq=0; dbg.tokEarned=''; dbg.tokSpent=''; return renderProfiles(); }
   if(act==='dbgkind'){ dbgSync(); dbg.kind = id; dbg.msg=''; dbg.seq=0; return renderProfiles(); }
   if(act==='dbgadd') return dbgAdd();
