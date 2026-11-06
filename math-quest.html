@@ -413,7 +413,7 @@ body[data-view="home"][data-bd="1"] #backdrop{display:block; opacity:1}
 body[data-bd="1"][data-view="home"] h1{background:var(--card); color:var(--text); -webkit-background-clip:border-box; background-clip:border-box; border-radius:16px; padding:6px 14px; margin:0 auto 8px; width:max-content; max-width:100%; box-shadow:0 4px 12px var(--shadow)}
 body[data-bd="1"][data-view="home"] .wrap > .sub{background:var(--card); border-radius:12px; padding:4px 12px; width:max-content; max-width:100%; margin:0 auto 12px; box-shadow:0 4px 12px var(--shadow)}
 body[data-bd="1"][data-view="home"] .levelbtn{background:color-mix(in srgb, var(--card) 92%, transparent)}
-.levelbtn .lvimg.cut{border-radius:0; box-shadow:none; object-fit:contain; background:none; filter:drop-shadow(0 3px 5px var(--shadow))}
+.levelbtn .lvimg.cut, .roombtn .lvimg.cut{border-radius:0; box-shadow:none; object-fit:contain; background:none; filter:drop-shadow(0 3px 5px var(--shadow))}
 body[data-view="play"] #levels, body[data-view="play"] .wrap > .sub{display:none}
 body[data-view="play"] h1{background:var(--card); color:var(--text); -webkit-background-clip:border-box; background-clip:border-box; border-radius:16px; padding:6px 14px; margin:0 auto 8px; width:max-content; max-width:100%; box-shadow:0 4px 12px var(--shadow)}
 body[data-view="play"] .charimg{width:104px}
@@ -428,8 +428,8 @@ body[data-view="home"] .wrap > .sub{margin-bottom:12px}
 .levelbtn{grid-column:span 2}
 .levels[data-rem="1"] .levelbtn:last-child{grid-column:1/-1}
 .levels[data-rem="2"] .levelbtn:nth-last-child(-n+2){grid-column:span 3}
-.levelbtn .emoji{font-size:3.1rem; line-height:1.15; display:block; margin-bottom:2px}
-.levelbtn .lvimg{display:block; width:64px; height:64px; margin:0 auto 4px; border-radius:14px; object-fit:cover; box-shadow:0 2px 6px var(--shadow)}
+.levelbtn .emoji, .roombtn .emoji{font-size:3.1rem; line-height:1.15; display:block; margin-bottom:2px}
+.levelbtn .lvimg, .roombtn .lvimg{display:block; width:64px; height:64px; margin:0 auto 4px; border-radius:14px; object-fit:cover; box-shadow:0 2px 6px var(--shadow)}
 .levelbtn.active{border-color:var(--yellow); transform:translateY(-2px)}
 .card{
   background:var(--card); border-radius:24px; padding:22px 20px; box-shadow:0 12px 30px var(--shadow);
@@ -537,12 +537,12 @@ body[data-view="home"] .wrap > .sub{margin-bottom:12px}
 @keyframes bounce{ 0%{transform:scale(1)} 30%{transform:scale(1.18) rotate(-4deg)} 60%{transform:scale(.96) rotate(3deg)} 100%{transform:scale(1)} }
 .milestone .box img{width:150px; margin-bottom:6px}
 [data-skin="space"] .milestone .box img{width:auto; height:190px; max-width:210px; object-fit:contain}
-@media (min-width:720px){ .wrap{max-width:720px} .levels{grid-template-columns:repeat(4,minmax(0,1fr))} .levels .levelbtn, .levels[data-rem] .levelbtn:last-child, .levels[data-rem] .levelbtn:nth-last-child(-n+2){grid-column:auto} }
+@media (min-width:720px){ .wrap{max-width:720px} .levels{grid-template-columns:repeat(4,minmax(0,1fr))} .levels .levelbtn, .levels .roombtn, .levels[data-rem] .roombtn, .levels[data-rem] .levelbtn:last-child, .levels[data-rem] .levelbtn:nth-last-child(-n+2){grid-column:auto} }
 @media (min-width:1100px){ .wrap{max-width:880px} .levels{grid-template-columns:repeat(8,minmax(0,1fr))} .levelbtn{font-size:.95rem; padding:12px 8px} .card{padding:28px 28px} }
 /* selection screen: the game grid is the main control, so it grows with the room available */
-@media (min-width:480px){ body[data-view="home"] .levelbtn .lvimg{width:84px; height:84px} body[data-view="home"] .levelbtn .lvimg.cut{width:72px; height:72px} body[data-view="home"] .levelbtn{font-size:.95rem; padding:12px 8px} body[data-view="home"] .levelbtn .emoji{font-size:3.6rem} }
-@media (min-width:720px){ body[data-view="home"] .wrap{max-width:860px} body[data-view="home"] .levels{gap:14px} body[data-view="home"] .levelbtn .lvimg{width:120px; height:120px; border-radius:20px} body[data-view="home"] .levelbtn{font-size:1.1rem; padding:16px 10px; border-radius:20px} body[data-view="home"] .levelbtn .emoji{font-size:3.6rem} body[data-view="home"] .levelbtn .lvimg.cut{width:96px; height:96px} body[data-view="home"] .charimg{width:110px} body[data-view="home"] .levelbtn{padding:12px 10px} }
-@media (min-width:1100px){ body[data-view="home"] .wrap{max-width:1040px} body[data-view="home"] .levels{grid-template-columns:repeat(4,minmax(0,1fr)); gap:18px} body[data-view="home"] .levelbtn .lvimg{width:150px; height:150px} body[data-view="home"] .levelbtn .lvimg.cut{width:112px; height:112px} body[data-view="home"] .levelbtn .emoji{font-size:4.2rem} body[data-view="home"] .levelbtn{font-size:1.25rem; padding:14px 12px} }
+@media (min-width:480px){ body[data-view="home"] .levelbtn .lvimg, body[data-view="home"] .roombtn .lvimg{width:84px; height:84px} body[data-view="home"] .levelbtn .lvimg.cut, body[data-view="home"] .roombtn .lvimg.cut{width:72px; height:72px} body[data-view="home"] .levelbtn, body[data-view="home"] .roombtn{font-size:.95rem; padding:12px 8px} body[data-view="home"] .levelbtn .emoji, body[data-view="home"] .roombtn .emoji{font-size:3.6rem} }
+@media (min-width:720px){ body[data-view="home"] .wrap{max-width:860px} body[data-view="home"] .levels{gap:14px} body[data-view="home"] .levelbtn .lvimg, body[data-view="home"] .roombtn .lvimg{width:120px; height:120px; border-radius:20px} body[data-view="home"] .levelbtn, body[data-view="home"] .roombtn{font-size:1.1rem; padding:16px 10px; border-radius:20px} body[data-view="home"] .levelbtn .emoji, body[data-view="home"] .roombtn .emoji{font-size:3.6rem} body[data-view="home"] .levelbtn .lvimg.cut, body[data-view="home"] .roombtn .lvimg.cut{width:96px; height:96px} body[data-view="home"] .charimg{width:110px} body[data-view="home"] .levelbtn, body[data-view="home"] .roombtn{padding:12px 10px} }
+@media (min-width:1100px){ body[data-view="home"] .wrap{max-width:1040px} body[data-view="home"] .levels{grid-template-columns:repeat(4,minmax(0,1fr)); gap:18px} body[data-view="home"] .levelbtn .lvimg, body[data-view="home"] .roombtn .lvimg{width:150px; height:150px} body[data-view="home"] .levelbtn .lvimg.cut, body[data-view="home"] .roombtn .lvimg.cut{width:112px; height:112px} body[data-view="home"] .levelbtn .emoji, body[data-view="home"] .roombtn .emoji{font-size:4.2rem} body[data-view="home"] .levelbtn, body[data-view="home"] .roombtn{font-size:1.25rem; padding:14px 12px} }
 /* location view: slightly see-through question card, so more of the backdrop shows */
 body[data-view="play"] .card{background:color-mix(in srgb, var(--card) 76%, transparent); -webkit-backdrop-filter:blur(3px); backdrop-filter:blur(3px)}
 /* top bar: profile menu, score and streak, and the compact gift square stay at the top of the screen */
@@ -728,6 +728,81 @@ tr.mxempty th[scope=row]{opacity:.6}
 @media (min-width:1200px) and (min-height:760px){:root{--rz:1.8}}
 .cup{position:relative;display:inline-block;vertical-align:middle;flex:none;width:calc(var(--n)*var(--rz));height:calc(var(--n)*var(--rz))}
 .cup img{position:absolute !important;max-width:none !important;display:block;pointer-events:none}
+
+/* ===== personal space ===== */
+.roombtn{grid-column:span 2; position:relative; min-width:0; display:flex; flex-direction:column; align-items:center; justify-content:center; background:var(--card); border:2px solid transparent; border-radius:16px; padding:10px 8px; text-align:center; cursor:pointer; color:var(--text); font-family:'Baloo 2',sans-serif; font-weight:600; font-size:.82rem; box-shadow:0 4px 10px var(--shadow)}
+.roombtn.slot{visibility:hidden}
+.roombtn .rb-in{display:flex; flex-direction:column; align-items:center}
+.levels[data-rem="1"] .roombtn{grid-column:1/-1}
+.levels[data-rem="2"] .roombtn{grid-column:span 3}
+/* unlock gate: everything else is blocked while the new button poofs in and points the way */
+body.gate{overflow:hidden}
+#unlockGate{position:fixed; inset:0; z-index:45; background:rgba(30,15,50,.72)}
+.ugbtn{position:fixed}
+.ugbtn .roombtn{position:absolute; inset:0; grid-column:auto}
+.ugcloud{position:absolute; left:50%; top:50%; height:auto; transform:translate(-50%,-50%); transition:width .45s ease; z-index:2; pointer-events:none}
+.ugcloud[data-s="1"]{width:55%} .ugcloud[data-s="2"]{width:90%} .ugcloud[data-s="3"]{width:130%}
+.ugcloud.pop{animation:cpop .45s both}
+.ugcloud.gone{animation:cgone .6s both}
+@keyframes cgone{to{opacity:0; transform:translate(-50%,-50%) scale(1.25)}}
+.ugin.pop{animation:rbin .6s both}
+@keyframes rbin{from{opacity:0; transform:scale(.3)} 70%{transform:scale(1.12)} to{opacity:1; transform:none}}
+.ugin.ready{box-shadow:0 0 0 4px #fff, 0 0 24px 8px var(--yellow,#ffc83d); animation:ugpulse 1.4s ease-in-out infinite}
+@keyframes ugpulse{50%{transform:scale(1.05)}}
+.ugnote{position:fixed; transform:translateX(-50%); width:min(86vw,320px); text-align:center; color:#fff; font-family:'Baloo 2',sans-serif; font-weight:800; font-size:1.2rem; text-shadow:0 2px 6px rgba(0,0,0,.5)}
+.ugarrow{position:fixed; transform:translateX(-50%); font-size:2.2rem; line-height:1; animation:ugbounce .8s ease-in-out infinite}
+.ugarrow.below{transform:translateX(-50%) rotate(180deg); animation:ugbounceu .8s ease-in-out infinite}
+@keyframes ugbounce{50%{margin-bottom:-10px}}
+@keyframes ugbounceu{50%{margin-top:-10px}}
+.ucere{gap:6px; min-height:170px}
+.ufr{width:auto; animation:cpop .6s}
+.ukey{animation:ukey 1.2s both}
+@keyframes ukey{from{transform:translateX(90px) rotate(40deg); opacity:0} to{transform:none; opacity:1}}
+.csub.small{font-size:.8rem; opacity:.75}
+.tokpic{background:none; border:0; padding:0; cursor:pointer; display:flex; align-items:center}
+.tokgo{margin-inline-start:auto; padding:8px 14px}
+/* the room page */
+#spaceView{display:none}
+body[data-view="space"] .wrap{display:none}
+body[data-view="space"] #spaceView{box-sizing:border-box; display:flex; flex-direction:column; width:100%; height:100dvh; padding:10px 12px 12px; gap:8px; max-width:1200px; margin:0 auto; position:relative; z-index:2}
+.spacehead{display:flex; align-items:center; gap:10px}
+.spacehead .btn{padding:8px 14px}
+.spacehead .roomtitle{font-family:'Baloo 2',sans-serif; font-weight:800; font-size:1.2rem; color:var(--purple)}
+.rmlayout{flex:1; min-height:0; display:flex}
+.rmstage{position:relative; flex:1; min-width:0; display:flex; gap:10px}
+.rmview{flex:1; min-width:0; border-radius:16px; background:linear-gradient(#fdf2fb,#e6f1ff); overflow:hidden; touch-action:none; cursor:grab; position:relative}
+.rmview svg{width:100%; height:100%; display:block; user-select:none; -webkit-user-select:none}
+.rmh{cursor:pointer}
+.rmh.sel{filter:drop-shadow(0 0 6px #fff) drop-shadow(0 0 10px var(--purple,#9b5de5))}
+.rmzoom{position:absolute; top:10px; inset-inline-start:10px; display:flex; flex-direction:column; gap:6px; z-index:2}
+.rmz{border:0; background:var(--card); color:var(--text); width:40px; height:40px; border-radius:50%; font-size:1.1rem; font-weight:800; cursor:pointer; box-shadow:0 2px 6px var(--shadow)}
+.rmdrawer{position:absolute; left:0; right:0; bottom:0; max-height:60%; overflow:auto; background:var(--card); border-radius:18px 18px 0 0; box-shadow:0 -6px 22px rgba(0,0,0,.25); padding:12px; z-index:3; display:flex; flex-direction:column; gap:8px; text-align:center}
+.rmdrawer[hidden]{display:none}
+@media (min-width:900px){
+  .rmdrawer{position:static; width:340px; max-height:none; flex:none; border-radius:18px; box-shadow:0 4px 14px var(--shadow); overflow:auto}
+  .rmdrawer[hidden]{display:flex}
+  .rmdrawer.idle{justify-content:center; opacity:.8}
+}
+.rmsh-h{display:flex; align-items:center; justify-content:space-between; gap:8px}
+.rmsh-t{font-family:'Baloo 2',sans-serif; font-weight:800; color:var(--purple); text-align:start}
+.rmcoins{display:flex; align-items:center; gap:4px; font-weight:800; background:var(--card2); border-radius:999px; padding:2px 10px 2px 6px}
+.rmcoins img{width:auto}
+.rmsh-s{font-size:.85rem; opacity:.85}
+.rmsh-s.small{font-size:.75rem; opacity:.65}
+.rmsh-need{font-weight:800}
+.rmsh-need.poor{color:var(--bad,#d33)}
+.rmsh-btns{display:flex; gap:8px; justify-content:center}
+.rmsh-btns .btn{flex:1}
+.rmmax{font-weight:800}
+.rmdrawer .btn.ghost{background:var(--card2); color:var(--text)}
+.rmdrawer .btn[disabled]{opacity:.45; cursor:not-allowed}
+.brushes{display:grid; grid-template-columns:repeat(8,1fr); gap:4px}
+@media (min-width:900px){ .brushes{grid-template-columns:repeat(4,1fr)} }
+.brush{position:relative; background:none; border:2px solid transparent; border-radius:12px; padding:2px; cursor:pointer; aspect-ratio:1}
+.brush img{width:100%; height:100%; object-fit:contain; display:block}
+.brush.new img{opacity:.55}
+.brush.cur{border-color:var(--purple); background:var(--card2)}
+.brush .bp{position:absolute; bottom:-2px; inset-inline-end:-2px; background:var(--yellow,#ffc83d); color:#4a3a5a; border-radius:999px; font-size:.62rem; font-weight:800; padding:0 4px}
 </style>
 </head>
 <body data-view="home">
@@ -839,6 +914,15 @@ tr.mxempty th[scope=row]{opacity:.6}
   </div>
 
 </div>
+
+  <section id="spaceView" hidden aria-label="החדר של קאפקייק">
+    <div class="spacehead"><button type="button" class="btn ghost" id="spaceBack">→ חזרה</button><div class="roomtitle">🏰 החדר של קאפקייק</div></div>
+    <div class="rmlayout">
+      <div class="rmstage"><div class="rmview" id="rmView"></div>
+        <div class="rmzoom"><button type="button" class="rmz" data-z="1" aria-label="הגדלה">＋</button><button type="button" class="rmz" data-z="-1" aria-label="הקטנה">－</button><button type="button" class="rmz" data-z="0" aria-label="איפוס">⤢</button></div>
+        <aside class="rmdrawer" id="rmDrawer" hidden></aside></div>
+    </div>
+  </section>
 
 <script>
 // (The old LOGIC_DIFFICULTY switch is gone: every logic question is in the pool, and each has its own difficulty rating.
@@ -1064,7 +1148,45 @@ function praise(){
   return t; }
 const PRAISE = ["מעולה! 🌟","כל הכבוד!","@@MASCOT@@","פגיעה מדויקת! 🎯","@@GENIUS@@","@@NAME1@@","@@NAME2@@"];
 let level = 1, score = 0, streak = 0, current = null, collection = [], lollipops = [], bonusActive = false;
-let space = {earned:0, spent:0, trued:false};   // personal-space tokens: earned once per upgrade (stored, never derived), spent in the shop later; trued = the one-time true-up for old players was done
+// ===== PERSONAL SPACE =====
+const SPACE_UNLOCK = 10;                                   // tokens earned to open the room
+// 16 brushes (art order). price: tokens for a new color on one surface; the surface's starting color is free
+const ROOM_COLORS = [
+  {n:'לבן',h:'#ffffff',p:1},{n:'שחור',h:'#4a4a55',p:1},{n:'ורוד',h:'#ffc2dc',p:1},{n:'סגול',h:'#cdb0f2',p:1},
+  {n:'כחול',h:'#9a96e6',p:1},{n:'אדום',h:'#f29595',p:1},{n:'תכלת',h:'#a9d9f6',p:1},{n:'כחול כהה',h:'#6b80c0',p:1},
+  {n:'ירוק בהיר',h:'#b6edca',p:1},{n:'ירוק כהה',h:'#79b98a',p:1},{n:'כתום',h:'#ffc08a',p:1},{n:'צהוב',h:'#fff1a3',p:1},
+  {n:'חום',h:'#c9966b',p:1},{n:'זהב',h:'#f2d36b',p:2},{n:'כסף',h:'#d9dde3',p:2},{n:'קשת',h:'rainbow',p:2}];
+const ROOM_DEFAULT = {wl:3, wr:3, fl:12};                    // wall left, wall right, floor start purple / purple / brown
+const ROOM_SURF = {wl:'הקיר השמאלי', wr:'הקיר הימני', fl:'הרצפה'};
+const ROOM_SURF_TO = {wl:'לקיר השמאלי', wr:'לקיר הימני', fl:'לרצפה'};
+const ROOM_ITEMS = {bed:{n:'מיטה', up:[0,3,6,10,15]}, window:{n:'חלון', up:[0,2,4,7,10]}};   // up[i] = tokens to reach level i+1 (index 0 unused); 5 levels each
+const roomMax = id => ROOM_ITEMS[id].up.length;
+function roomMaxCost(){   // everything buyable in the room today (the catalog grows in later steps)
+  let t = 0; for(const id in ROOM_ITEMS) t += ROOM_ITEMS[id].up.reduce((a,b)=>a+b,0);
+  const all = ROOM_COLORS.reduce((a,c)=>a+c.p,0);
+  for(const k in ROOM_DEFAULT) t += all - ROOM_COLORS[ROOM_DEFAULT[k]].p;
+  return t;
+}
+function spaceClean(sp, gold, legacy){
+  sp = (sp && typeof sp==='object') ? sp : {};
+  const nn = v => (Number.isInteger(v) && v>0) ? Math.min(v,1e6) : 0;
+  let earned = nn(sp.earned); const spent = nn(sp.spent), trued = sp.trued===true;
+  // one-time true-up for old players: what they already upgraded (and 10 per look opened before) counts
+  if(!trued) earned = Math.max(earned, gold.length + legacy*MERGE_COST);
+  const surf = {}, own = {};
+  for(const k in ROOM_DEFAULT){
+    const okc = v => Number.isInteger(v) && v>=0 && v<ROOM_COLORS.length;
+    const c = okc(sp.surf && sp.surf[k]) ? sp.surf[k] : ROOM_DEFAULT[k];
+    const o = (Array.isArray(sp.own && sp.own[k]) ? sp.own[k] : []).filter(okc);
+    [ROOM_DEFAULT[k], c].forEach(v=>{ if(!o.includes(v)) o.push(v); });
+    surf[k] = c; own[k] = [...new Set(o)].sort((a,b)=>a-b);
+  }
+  const lv = {};
+  for(const id in ROOM_ITEMS){ const v = sp.lv && sp.lv[id]; lv[id] = (Number.isInteger(v) && v>=1 && v<=roomMax(id)) ? v : 1; }
+  return {earned, spent:Math.min(spent,earned), trued:true, unlocked:sp.unlocked===true, surf, own, lv};
+}
+function spaceSnap(){ return JSON.parse(JSON.stringify(space)); }
+let space = spaceClean({},[],0);   // personal-space tokens: earned once per upgrade (stored, never derived), spent in the shop later; trued = the one-time true-up for old players was done
 let golden = [], legacyLooks = 0;   // upgraded rewards (each remembers the 10 rewards it was made from); how many looks the player had opened before the looks were retired (used by the token true-up)
 const COTTON_CANDY_IMG = "assets/32c4bd427e57.webp";
 // ===== ICON IMAGES (replace the device's emoji font; each name is a file in ICONS.md) =====
@@ -1195,7 +1317,7 @@ function applyTheme(){
 }
 let warmOn = false, sessionDraws = 0;   // warm-up first (parent switch) and how many questions this session has drawn (resets when the game opens or the profile changes)
 let diffOn = [1,2,3];     // enabled difficulty levels for the active profile (see the Settings tab)
-function captureProgress(){ return {score,streak,collection,lollipops,level,golden,legacyLooks,space:{earned:space.earned,spent:space.spent,trued:space.trued},rv:LAYER_V,diff:diffIdsClean(diffOn),mx:mxClean(mxState),focus:focusOn,warm:warmOn,theme:themeId}; }
+function captureProgress(){ return {score,streak,collection,lollipops,level,golden,legacyLooks,space:spaceSnap(),rv:LAYER_V,diff:diffIdsClean(diffOn),mx:mxClean(mxState),focus:focusOn,warm:warmOn,theme:themeId}; }
 function cleanProgress(d){
   d = (d && typeof d==='object') ? d : {};
   let col = Array.isArray(d.collection) ? d.collection.filter(x=>typeof x==='string') : [];
@@ -1214,11 +1336,7 @@ function cleanProgress(d){
   // the looks were retired (their 16 pictures joined the mascot's pictures): only the number opened is kept, for the token true-up
   const oldLooks = Array.isArray(d.looks) ? new Set(d.looks.filter(i=>Number.isInteger(i)&&i>=0&&i<LOOKS.length)).size : 0;
   const legacy = Math.max(oldLooks, (Number.isInteger(d.legacyLooks)&&d.legacyLooks>0) ? Math.min(d.legacyLooks,LOOKS.length) : 0);
-  // tokens: one per upgrade ever made. Old players get a one-time true-up: what they already upgraded (and 10 per look they had opened) counts
-  const sp = (d.space && typeof d.space==='object') ? d.space : {};
-  const nn = v => (Number.isInteger(v) && v>0) ? Math.min(v,1e6) : 0;
-  let earned = nn(sp.earned); const spent = nn(sp.spent), trued = sp.trued===true;
-  if(!trued) earned = Math.max(earned, gold.length + legacy*MERGE_COST);
+  const sp2 = spaceClean(d.space, gold, legacy);   // tokens + the room; old players get a one-time true-up inside
   return {
     score:  (typeof d.score==='number' && isFinite(d.score)) ? d.score : 0,
     streak: (typeof d.streak==='number' && isFinite(d.streak)) ? d.streak : 0,
@@ -1227,7 +1345,7 @@ function cleanProgress(d){
     level: (typeof d.level==='number' && d.level>=1 && d.level<=8) ? d.level : 1,
     golden: gold,
     legacyLooks: legacy,
-    space: {earned, spent:Math.min(spent,earned), trued:true},
+    space: sp2,
     rv: LAYER_V,
     diff: diffIdsClean(d.diff),
     mx: mxClean(d.mx),
@@ -1900,7 +2018,7 @@ function cloudProfileFromDoc(C, helpers){
 // ===== CLOUD (Google sign-in, cloud progress, problem reports) =====
 // Local-first: the game always works from this device's storage. The cloud is a mirror, so no internet / no account / no quota never blocks play.
 // Everything here is off while CLOUD_CONFIG is null. See firebase/SETUP.md for how to create the (free) Firebase project and paste its settings below.
-const APP_VERSION = '2026.11.05b';       // keep equal to VERSION in sw.js (a test checks it)
+const APP_VERSION = '2026.11.06b';       // keep equal to VERSION in sw.js (a test checks it)
 const CLOUD_CONFIG = {apiKey:"AIzaSyAlq_TJNGvWPJpUrpbdq_hkAoURydqMzm0", authDomain:"learning-quest-1.firebaseapp.com", projectId:"learning-quest-1", appId:"1:98931179722:web:78fb00084ccba3efb53433"};   // e.g. {apiKey:'...', authDomain:'xxx.firebaseapp.com', projectId:'xxx', appId:'...'}
 const CLOUD_LIMITS = {
   pushDelayMs: 60000,          // at most one upload per profile per minute while playing
@@ -2518,6 +2636,7 @@ function enterProfile(){
   const p = activeProfile(); if(!p) return;
   curGender = GENDER_INFO[p.gender] ? p.gender : 'f';
   applyProgress(p.progress);
+  setTimeout(()=>{ if(!celebOpen) flushCelebs(); }, 900);   // a profile that is already above 10 tokens gets the unlock ceremony
   sessionDraws = 0;                                  // a new session: the warm-up starts again
 }
 
@@ -4607,7 +4726,7 @@ function openGame(id){
 function renderLevels(){
   const shown = mxVisibleLevels(diffOn, mxState);
   if(shown.length && !shown.includes(level)) level = shown.includes(5) ? 5 : shown[0];   // the parent hid the section she was in
-  const el = document.getElementById('levels'); el.innerHTML=''; el.dataset.rem = String(shown.length%3);
+  const el = document.getElementById('levels'); el.innerHTML=''; el.dataset.rem = String((shown.length + ((space.unlocked||gateOn)?1:0))%3);
   LEVELS.filter(l=>shown.includes(l.id)).forEach(l=>{
     const b=document.createElement('div');
     b.className='levelbtn'+(l.id===level?' active':'');
@@ -4617,6 +4736,7 @@ function renderLevels(){
     b.onclick=()=>openGame(l.id);
     el.appendChild(b);
   });
+  addRoomBtn(el);
 }
 
 let lastRewardCount = -1;
@@ -4671,12 +4791,223 @@ const TOKEN_TIERS = [[300,'chest'],[100,'bag'],[50,'pile'],[10,'stack'],[1,'coin
 const tokenBalance = () => Math.max(0, space.earned - space.spent);
 function tokenTier(n){ const t = TOKEN_TIERS.find(x=>n>=x[0]); return t ? t[1] : null; }
 function tokenHTML(n, px){ const t = tokenTier(n); return t ? `<img class="tokimg" src="${TOKEN_IMG[t]}" alt="" data-tier="${t}" style="height:${px}px">` : ''; }
+const spaceLocked = () => !space.unlocked;
+const UNLOCK_IMG = {lock:'assets/5f98cda1e76a.webp',lockopen:'assets/adf87e4640f8.webp',key:'assets/17e84594a25c.webp',chestlock:'assets/1dcef59e334c.webp',chestajar:'assets/b5dcea537c0b.webp',chestglow:'assets/dad37d8665a2.webp',doorshut:'assets/9474ada24b1f.webp',doorajar:'assets/8dfd75bc73c2.webp',dooropen:'assets/1787a120cdb2.webp',cloud1:'assets/36ff43363ad7.webp',cloud2:'assets/b17aa147f5c5.webp',cloud3:'assets/ed30fb21e306.webp',medal:'assets/81b51c114164.webp'};
+const BRUSH_IMG = ['assets/5d6408b8a9b7.webp','assets/4b127c5e2897.webp','assets/e388eeecfddb.webp','assets/89e7a9870d0b.webp','assets/07bc907bda28.webp','assets/e2a91b617b39.webp','assets/d79f610d6e85.webp','assets/9801e52db979.webp','assets/ae322afebe4e.webp','assets/49372763d775.webp','assets/9896c6b513e0.webp','assets/615b80d46139.webp','assets/5252dff5e850.webp','assets/2e679016f95c.webp','assets/28eff60e8c32.webp','assets/d229f70b9fcb.webp'];
+const uimg = (k,h,cls) => `<img class="${cls||''}" src="${UNLOCK_IMG[k]}" alt="" style="height:${h}px">`;
+const coinsTxt = n => n===1 ? 'מטבע אחד' : `${n} מטבעות`;
+const needTxt = (c,bal) => `צריך ${coinsTxt(c)}. יש לך ${bal}`;
+let uSpeed = 1;   // 1 = real speed; tests set it near 0
+
+// ---- the button on the game-selection screen: only exists once the room is unlocked ----
+function roomBtnHTML(){
+  return `<span class="rb-in"><img class="lvimg cut" src="${UNLOCK_IMG.medal}" alt="">${esc(TX('spaceName','החדר של קאפקייק'))}</span>`;
+}
+function addRoomBtn(el){
+  if(!space.unlocked && !gateOn) return;
+  const b = document.createElement('div');
+  b.className = 'roombtn' + (space.unlocked ? '' : ' slot'); b.id = 'spaceBtn';
+  b.innerHTML = roomBtnHTML();
+  if(space.unlocked){
+    b.setAttribute('role','button'); b.tabIndex = 0; b.onclick = () => openSpace();
+    b.onkeydown = e => { if(e.key==='Enter'||e.key===' '){ e.preventDefault(); openSpace(); } };
+  }
+  el.appendChild(b);
+}
+
+// ---- unlock: close everything, go home, poof the button into being, block the rest, point at it ----
+let gateOn = false, gateTimers = [];
+const gateAfter = (ms, fn) => gateTimers.push(setTimeout(fn, ms*uSpeed));
+function gateClose(){
+  gateTimers.forEach(clearTimeout); gateTimers = [];
+  const g = document.getElementById('unlockGate'); if(g) g.remove();
+  gateOn = false; document.body.classList.remove('gate'); window.removeEventListener('resize', placeGate);
+}
+function placeGate(){
+  const slot = document.getElementById('spaceBtn'), g = document.getElementById('unlockGate'); if(!slot || !g) return;
+  const r = slot.getBoundingClientRect(), b = g.querySelector('.ugbtn'), n = g.querySelector('#ugNote');
+  Object.assign(b.style, {left:r.left+'px', top:r.top+'px', width:r.width+'px', height:r.height+'px'});
+  const above = r.top > 170, cx = r.left + r.width/2, ar = g.querySelector('#ugArrow');
+  const w = Math.min(innerWidth*0.86, 320), left = Math.max(w/2+8, Math.min(innerWidth-w/2-8, cx));
+  n.style.left = left+'px'; ar.style.left = cx+'px'; ar.classList.toggle('below', !above);
+  if(above){ ar.style.bottom = (innerHeight - r.top + 6)+'px'; ar.style.top = 'auto'; n.style.bottom = (innerHeight - r.top + 54)+'px'; n.style.top = 'auto'; }
+  else { ar.style.top = (r.bottom + 6)+'px'; ar.style.bottom = 'auto'; n.style.top = (r.bottom + 54)+'px'; n.style.bottom = 'auto'; }
+}
+function startUnlockGate(){
+  if(gateOn || space.unlocked || space.earned < SPACE_UNLOCK) return;
+  gateOn = true;
+  document.querySelectorAll('.roomoverlay').forEach(o=>{ o.hidden = true; });     // every modal goes
+  celebOpen = false; closeHelp && closeHelp();
+  gameView = 'home'; bonusActive = false; applyView(); renderLevels(); window.scrollTo(0,0);
+  const slot = document.getElementById('spaceBtn'); if(slot) slot.scrollIntoView({block:'center'});
+  document.body.classList.add('gate');
+  const g = document.createElement('div'); g.id = 'unlockGate';
+  g.innerHTML = `<div class="ugbtn" id="ugBtn"><img class="ugcloud" id="ugCloud" alt="" hidden><div class="roombtn ugin" id="ugIn" role="button" tabindex="0" hidden>${roomBtnHTML()}</div></div><div class="ugnote" id="ugNote" hidden>${esc(TX('spaceUnlockHint','פותחים את החדר של קאפקייק!'))}</div><div class="ugarrow" id="ugArrow" hidden>⬇️</div>`;
+  document.body.appendChild(g);
+  window.addEventListener('resize', placeGate);
+  const cloud = document.getElementById('ugCloud'), btn = document.getElementById('ugIn');
+  const show = i => { cloud.hidden = false; cloud.src = UNLOCK_IMG['cloud'+i]; cloud.dataset.s = i; cloud.classList.toggle('pop', i===1); };
+  gateAfter(500, ()=>{ placeGate(); show(1); });          // one cloud that grows: three pictures of the same puff
+  gateAfter(1100, ()=>show(2));
+  gateAfter(1700, ()=>show(3));
+  gateAfter(2400, ()=>{ cloud.classList.add('gone'); btn.hidden = false; btn.classList.add('pop'); });
+  gateAfter(3000, ()=>{ cloud.hidden = true; document.getElementById('ugNote').hidden = false; document.getElementById('ugArrow').hidden = false; placeGate(); btn.onclick = startCeremony; btn.onkeydown = e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); startCeremony(); } }; btn.classList.add('ready'); });
+}
+function finishUnlock(){
+  uTimers.forEach(clearTimeout); uTimers = [];
+  space.unlocked = true; saveState();               // saved only now: until the ceremony is done it starts again
+  gateClose(); closeCeleb(); renderLevels(); openSpace();
+}
+
+// ---- the ceremony: starts only when the child taps the first step, every step is slow ----
+let uTimers = [];
+function setCelebBtns(buttons){
+  const bt = document.getElementById('celebBtns'); bt.innerHTML='';
+  buttons.forEach(b=>{ const el=document.createElement('button'); el.type='button'; el.className='btn'+(b.ghost?' ghost':''); el.textContent=b.label; el.onclick=b.fn; bt.appendChild(el); });
+}
+function startCeremony(){
+  const gg = document.getElementById('unlockGate'); if(gg) gg.style.display = 'none';   // the ceremony has the screen
+  const frames = [
+    [0,     'lock+key',  `${G('מצאת','מצאת','מצאתם')} מפתח!`, 'הוא נראה בדיוק במידה…'],
+    [3200,  'lockopen',  'קליק! המנעול נפתח', ''],
+    [6400,  'chestajar', 'תיבת האוצר נפתחת…', ''],
+    [9600,  'chestglow', 'איזה אור קסום!', ''],
+    [12800, 'doorshut',  'ומאחורי האור… דלת', ''],
+    [16000, 'doorajar',  'היא נפתחת לאט…', ''],
+    [19200, 'dooropen',  `החדר של קאפקייק ${G('שלך','שלך','שלכם')}!`, 'מקשטים אותו במטבעות שמרוויחים משדרוג מתנות.'],
+  ];
+  showCeleb(`<div class="cbig ucere" id="uStage">${uimg('lock',150,'ufr')}</div><div class="ctitle" id="uTitle">${G('הגעת','הגעת','הגעתם')} ל־${SPACE_UNLOCK} מטבעות!</div><div class="csub" id="uSub">משהו קסום מחכה מאחורי המנעול…</div>`,
+    [{label:`🔑 ${G('בואי','בוא','בואו')} נפתח!`, fn:begin}], {dismiss:false});
+  function begin(){
+    burstConfetti(14);
+    setCelebBtns([{label:'דילוג', ghost:true, fn:finishUnlock}]);
+    uTimers.forEach(clearTimeout); uTimers = [];
+    frames.forEach((f,i)=>uTimers.push(setTimeout(()=>{
+      const st = document.getElementById('uStage'); if(!st) return;
+      const [k1,k2] = f[1].split('+');
+      st.innerHTML = uimg(k1,150,'ufr') + (k2 ? uimg(k2,120,'ufr ukey') : '');
+      document.getElementById('uTitle').textContent = f[2]; document.getElementById('uSub').textContent = f[3];
+      if(i>=1) burstConfetti(i===frames.length-1 ? 24 : 6);
+      if(i===frames.length-1) setCelebBtns([{label:`🚪 ${G('היכנסי','היכנס','היכנסו')} לחדר`, fn:finishUnlock}]);
+    }, f[0]*uSpeed)));
+  }
+}
+
+// ---- the room: a page of its own ----
+const RM = {W:1000, H:900, k:1, tx:0, ty:0, sel:null, pv:null};   // sel: {t:'item',id}|{t:'surf',k}; pv: purchase being previewed
+const effLv = id => (RM.pv && RM.pv.t==='lv' && RM.pv.id===id) ? RM.pv.to : space.lv[id];
+const effCol = k => (RM.pv && RM.pv.t==='col' && RM.pv.k===k) ? RM.pv.idx : space.surf[k];
+const gx2s = (x,y) => [500+(x-y)*50, 400+(x+y)*25];
+const pts = a => a.map(p=>p.join(',')).join(' ');
+const surfFill = idx => ROOM_COLORS[idx].h==='rainbow' ? 'url(#rmRainbow)' : ROOM_COLORS[idx].h;
+// room item pictures: w,h in room units, (ax,ay) = the point of the picture that sits on the floor corner (bed) or the sill centre (window)
+const ROOM_ART = {bed:[{src:'assets/35da557949c1.webp',w:286.5,h:325.5,ax:122.6,ay:325.5},{src:'assets/ce650816b071.webp',w:286.5,h:324.0,ax:125.0,ay:324.0},{src:'assets/acbbf762c254.webp',w:285.0,h:387.0,ax:127.7,ay:387.0},{src:'assets/b4a7c75a9ed1.webp',w:294.0,h:492.0,ax:137.4,ay:492.0},{src:'assets/2857fd9e4a65.webp',w:306.0,h:522.0,ax:138.0,ay:522.0}],
+  window:[{src:'assets/ab4b2e4250e6.webp',w:210.7,h:214.9,ax:105.0,ay:210.0},{src:'assets/a725113aac4b.webp',w:226.2,h:229.1,ax:113.9,ay:224.1},{src:'assets/ea204b751610.webp',w:217.8,h:270.1,ax:109.0,ay:264.4},{src:'assets/eb3fe20bb9dd.webp',w:225.5,h:294.8,ax:112.7,ay:289.9},{src:'assets/eb13d2dccaf9.webp',w:253.1,h:311.1,ax:126.6,ay:306.1}]};
+const BED_AT = gx2s(2.16,3.24), WIN_U = 250, WIN_SILL = 85;   // bed: its front corner on the floor grid; window: centre along the wall and sill height above the floor
+function bedSVG(lv){ const a = ROOM_ART.bed[lv-1]; return `<image href="${a.src}" x="${(BED_AT[0]-a.ax).toFixed(1)}" y="${(BED_AT[1]-a.ay).toFixed(1)}" width="${a.w}" height="${a.h}"/>`; }
+function windowSVG(lv){ const a = ROOM_ART.window[lv-1]; return `<image href="${a.src}" x="${(WIN_U-a.ax).toFixed(1)}" y="${(-WIN_SILL-a.ay).toFixed(1)}" width="${a.w}" height="${a.h}"/>`; }   // flat in wall units: it grows up the wall with each level
+function roomSVG(){
+  const cl = effCol('wl'), cr = effCol('wr'), cf = effCol('fl');
+  const sel = (t,id) => RM.sel && RM.sel.t===t && (RM.sel.id||RM.sel.k)===id ? ' sel' : '';
+  let s = `<defs><linearGradient id="rmRainbow" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffb3d6"/><stop offset=".33" stop-color="#fff2a8"/><stop offset=".66" stop-color="#b8f0c8"/><stop offset="1" stop-color="#a9d9f6"/></linearGradient></defs><g id="rmG" transform="translate(${RM.tx} ${RM.ty}) scale(${RM.k})">`;
+  s += `<g data-hit="surf:wl" class="rmh${sel('surf','wl')}"><polygon points="0,250 500,0 500,400 0,650" fill="${surfFill(cl)}" stroke="#5b3a2a" stroke-width="4" stroke-linejoin="round"/><polygon points="0,610 500,360 500,400 0,650" fill="#000" opacity=".08"/></g>`;
+  s += `<g data-hit="surf:wr" class="rmh${sel('surf','wr')}"><polygon points="500,0 1000,250 1000,650 500,400" fill="${surfFill(cr)}" stroke="#5b3a2a" stroke-width="4" stroke-linejoin="round"/><polygon points="500,0 1000,250 1000,650 500,400" fill="#000" opacity=".10"/><polygon points="500,360 1000,610 1000,650 500,400" fill="#000" opacity=".08"/></g>`;
+  let grid = ''; for(let i=1;i<10;i++){ const a=gx2s(i,0),b=gx2s(i,10),c=gx2s(0,i),d=gx2s(10,i); grid += `M${a} L${b} M${c} L${d} `; }
+  s += `<g data-hit="surf:fl" class="rmh${sel('surf','fl')}"><polygon points="500,400 1000,650 500,900 0,650" fill="${surfFill(cf)}" stroke="#5b3a2a" stroke-width="4" stroke-linejoin="round"/><path d="${grid}" stroke="#5b3a2a" stroke-opacity=".16" stroke-width="2" fill="none"/></g>`;
+  s += `<g data-hit="item:window" class="rmh${sel('item','window')}" transform="matrix(1 .5 0 1 500 400)">${windowSVG(effLv('window'))}</g>`;
+  s += `<g data-hit="item:bed" class="rmh${sel('item','bed')}">${bedSVG(effLv('bed'))}</g></g>`;
+  return `<svg id="rmSvg" viewBox="0 0 ${RM.W} ${RM.H}" role="img" aria-label="החדר">${s}</svg>`;
+}
+function openSpace(){
+  if(spaceLocked()) return;
+  RM.sel = null; RM.pv = null; RM.k = 1; RM.tx = 0; RM.ty = 0;
+  gameView = 'space'; applyView();
+  document.getElementById('spaceView').hidden = false; window.scrollTo(0,0);
+  renderSpace();
+}
+function closeSpace(){ RM.sel = null; RM.pv = null; document.getElementById('spaceView').hidden = true; showHome(); }
+function renderSpace(){ document.getElementById('rmView').innerHTML = roomSVG(); renderDrawer(); }
+function rmRedraw(){ const v=document.getElementById('rmView'); if(v) v.innerHTML = roomSVG(); }
+function rmPan(dx,dy){ RM.tx += dx; RM.ty += dy; rmClamp(); rmApply(); }
+function rmClamp(){ RM.k = Math.max(1, Math.min(3, RM.k)); RM.tx = Math.min(0, Math.max((1-RM.k)*RM.W, RM.tx)); RM.ty = Math.min(0, Math.max((1-RM.k)*RM.H, RM.ty)); }
+function rmApply(){ const g=document.getElementById('rmG'); if(g) g.setAttribute('transform',`translate(${RM.tx} ${RM.ty}) scale(${RM.k})`); }
+function rmZoomAt(nk, px, py){ nk = Math.max(1,Math.min(3,nk)); RM.tx = px-(px-RM.tx)*nk/RM.k; RM.ty = py-(py-RM.ty)*nk/RM.k; RM.k = nk; rmClamp(); rmApply(); }
+function rmVB(e){ const svg=document.getElementById('rmSvg'); const r=svg.getBoundingClientRect(); const s=Math.max(RM.W/r.width, RM.H/r.height); return [(e.clientX-r.left-r.width/2)*s+RM.W/2, (e.clientY-r.top-r.height/2)*s+RM.H/2, s]; }
+
+// ---- the drawer: floats over the room on phones, sits beside it on wide screens; shows the coins and every price ----
+function pvCost(){
+  if(!RM.pv) return 0;
+  return RM.pv.t==='lv' ? ROOM_ITEMS[RM.pv.id].up[RM.pv.to-1] : ROOM_COLORS[RM.pv.idx].p;
+}
+function renderDrawer(){
+  const d = document.getElementById('rmDrawer'); if(!d) return;
+  const bal = tokenBalance(), sel = RM.sel;
+  if(!sel){ d.hidden = false; d.classList.add('idle'); d.innerHTML = `<div class="rmsh-s">${'בחרו משהו בחדר כדי לשנות אותו'}</div>`; d.hidden = !window.matchMedia('(min-width:900px)').matches; return; }
+  d.classList.remove('idle'); d.hidden = false;
+  const head = (title) => `<div class="rmsh-h"><div class="rmsh-t">${title}</div><div class="rmcoins" id="rmCoins">${tokenHTML(bal,26)||'<span class="tokzero">🪙</span>'}<b>${bal}</b></div></div>`;
+  const pv = RM.pv, cost = pvCost();
+  const buy = !pv ? '' : `<div class="rmsh-need${bal<cost?' poor':''}">${needTxt(cost,bal)}</div><div class="rmsh-btns"><button type="button" class="btn" data-buy="1"${bal<cost?' disabled':''}>קנו · ${cost} 🪙</button><button type="button" class="btn ghost" data-cancel="1">ביטול</button></div><div class="rmsh-s small">אי אפשר להחזיר או למכור אחר כך</div>`;
+  if(sel.t==='item'){
+    const id = sel.id, it = ROOM_ITEMS[id], lv = space.lv[id], next = lv<roomMax(id) ? it.up[lv] : null;
+    d.innerHTML = head(`${it.n} · רמה ${lv} מתוך ${roomMax(id)}`)
+      + (pv ? `<div class="rmsh-s">תצוגה מקדימה: רמה ${pv.to}</div>` + buy
+            : next==null ? `<div class="rmmax">רמה מקסימלית ✨</div>`
+            : `<button type="button" class="btn" data-prev="${id}">⬆️ ראו רמה ${lv+1} · ${next} 🪙</button>`)
+      + `<button type="button" class="btn ghost" data-close="1">סגירה</button>`;
+  } else {
+    const k = sel.k;
+    const br = ROOM_COLORS.map((c,i)=>{ const own = space.own[k].includes(i), cur = (pv && pv.t==='col' && pv.k===k) ? pv.idx===i : space.surf[k]===i;
+      return `<button type="button" class="brush${cur?' cur':''}${own?'':' new'}" data-col="${i}" aria-label="${c.n}${own?'':' · '+coinsTxt(c.p)}"><img src="${BRUSH_IMG[i]}" alt="">${own?'':`<span class="bp">${c.p}🪙</span>`}</button>`; }).join('');
+    d.innerHTML = head(`צבע ${ROOM_SURF_TO[k]}`) + `<div class="brushes">${br}</div>` + (pv ? buy : `<div class="rmsh-s">צבע שכבר נקנה אפשר להחליף בחינם. צבע חדש עולה על כל משטח בנפרד.</div>`)
+      + `<button type="button" class="btn ghost" data-close="1">סגירה</button>`;
+  }
+}
+function onRoomTap(hit){
+  RM.pv = null;
+  if(!hit){ RM.sel = null; } else { const [kind,id] = hit.split(':'); RM.sel = kind==='item' ? {t:'item',id} : {t:'surf',k:id}; }
+  rmRedraw(); renderDrawer();
+}
+function onDrawerClick(e){
+  const t = e.target.closest('button'); if(!t) return;
+  if(t.dataset.close){ RM.sel = null; RM.pv = null; rmRedraw(); return renderDrawer(); }
+  if(t.dataset.cancel){ RM.pv = null; rmRedraw(); return renderDrawer(); }
+  if(t.dataset.prev){ const id = t.dataset.prev; RM.pv = {t:'lv', id, to:space.lv[id]+1}; rmRedraw(); return renderDrawer(); }
+  if(t.dataset.buy){
+    const c = pvCost(), pv = RM.pv; if(!pv || tokenBalance() < c) return;
+    space.spent += c;
+    if(pv.t==='lv') space.lv[pv.id] = pv.to; else { space.own[pv.k].push(pv.idx); space.surf[pv.k] = pv.idx; }
+    RM.pv = null; saveState(); rmRedraw(); renderDrawer(); burstConfetti(10); return;
+  }
+  if(t.dataset.col){ const k = RM.sel.k, idx = +t.dataset.col;
+    if(space.own[k].includes(idx)){ space.surf[k] = idx; RM.pv = null; saveState(); }   // already bought: free to switch
+    else RM.pv = {t:'col', k, idx};                                                     // new: preview, then buy or cancel
+    rmRedraw(); return renderDrawer(); }
+}
+function spaceInit(){
+  const ov = document.getElementById('spaceView');
+  document.getElementById('spaceBack').onclick = closeSpace;
+  ov.addEventListener('click', e=>{ if(e.target.closest('#rmDrawer')) onDrawerClick(e); const z=e.target.closest('.rmz'); if(z){ const d=+z.dataset.z; if(d===0){RM.k=1;RM.tx=0;RM.ty=0;rmApply();} else rmZoomAt(RM.k*(d>0?1.4:1/1.4), RM.W/2, RM.H/2); } });
+  const ptr = new Map(); let moved = false, last = null, pinch = 0, startHit = null;
+  ov.addEventListener('pointerdown', e=>{ const v=e.target.closest('#rmView'); if(!v) return; v.setPointerCapture && v.setPointerCapture(e.pointerId); ptr.set(e.pointerId,[e.clientX,e.clientY]); moved=false; startHit=(e.target.closest('[data-hit]')||{dataset:{}}).dataset.hit||null; if(ptr.size===2){ const [a,b]=[...ptr.values()]; pinch=Math.hypot(a[0]-b[0],a[1]-b[1]); } last=[e.clientX,e.clientY]; });
+  ov.addEventListener('pointermove', e=>{ if(!ptr.has(e.pointerId)) return; const old=ptr.get(e.pointerId); ptr.set(e.pointerId,[e.clientX,e.clientY]);
+    if(ptr.size===2){ const [a,b]=[...ptr.values()], d=Math.hypot(a[0]-b[0],a[1]-b[1]); if(pinch){ const m=rmVB({clientX:(a[0]+b[0])/2,clientY:(a[1]+b[1])/2}); rmZoomAt(RM.k*d/pinch, m[0], m[1]); } pinch=d; moved=true; return; }
+    const dx=e.clientX-old[0], dy=e.clientY-old[1]; if(!moved && Math.hypot(e.clientX-last[0],e.clientY-last[1])<8) return; moved=true; const s=rmVB(e)[2]; rmPan(dx*s, dy*s); });
+  const up = e=>{ if(!ptr.has(e.pointerId)) return; ptr.delete(e.pointerId); if(ptr.size<2) pinch=0; if(!moved && ptr.size===0) onRoomTap(startHit); };
+  ov.addEventListener('pointerup', up); ov.addEventListener('pointercancel', e=>{ ptr.delete(e.pointerId); pinch=0; });
+  ov.addEventListener('wheel', e=>{ if(!e.target.closest('#rmView')) return; e.preventDefault(); const m=rmVB(e); rmZoomAt(RM.k*(e.deltaY<0?1.15:1/1.15), m[0], m[1]); }, {passive:false});
+}
+// tokens: a big picture, like any reward
+function viewTokens(){
+  const n = tokenBalance(), px = Math.min(300, Math.round(Math.min(innerWidth,innerHeight)*0.6));
+  showCeleb(`<div class="cbig view" style="min-height:${px}px">${tokenHTML(n,px)||'<span class="tokzero" style="font-size:4rem">🪙</span>'}</div><div class="ctitle">${n} ${n===1?'מטבע':'מטבעות'}</div><div class="csub">${esc(tokenHint())}</div>`, [{label:'סגירה', fn:closeCeleb}]);
+}
+function tokenHint(){ return space.unlocked ? 'מטבעות פותחים פריטים ושדרוגים בחדר של קאפקייק' : G('אספי','אסוף','אספו')+' מספיק מטבעות לפרס מיוחד!'; }
 function renderRoom(){
   const body = document.getElementById('roomBody');
   if(!collection.length && !golden.length){ body.innerHTML=`<div class="roomempty">${TX('roomEmpty', ()=>`עוד אין מתנות. ${G('פתרי','פתור','פתרו')} שאלה כדי לקבל את הראשונה! 🎀`)}</div>`; return; }
   const rank = x=>{ const i=STICKERS.indexOf(kOf(x)); return i<0?999:i; };
   let h = '';
-  { const n = tokenBalance(); h += `<div class="tokchip" id="tokChip">${tokenHTML(n,44)||'<span class="tokzero">🪙</span>'}<div><b id="tokN">${n}</b> ${n===1?'מטבע':'מטבעות'}<div class="roomhint">מטבע אחד על כל שדרוג · בקרוב: חדר אישי</div></div></div>`; }
+  if(space.earned>0){ const n = tokenBalance(); h += `<div class="tokchip" id="tokChip"><button type="button" class="tokpic" data-act="tok" aria-label="המטבעות">${tokenHTML(n,44)||'<span class="tokzero">🪙</span>'}</button><div><b id="tokN">${n}</b> ${n===1?'מטבע':'מטבעות'}<div class="roomhint">${esc(tokenHint())}</div></div>${space.unlocked?'<button type="button" class="btn tokgo" data-act="space">🏰 לחדר</button>':''}</div>`; }
   const ready = readyList();
   if(ready.length){
     h += `<div class="roomsec">✨ מוכנים לשדרוג</div>`;
@@ -4703,6 +5034,7 @@ const kindName = k => rewardName(k,'many') || k;
 function queueCeleb(ev){ if(!celebQueue.some(x=>x.type===ev.type && x.kind===ev.kind)) celebQueue.push(ev); }
 function flushCelebs(){
   if(celebOpen) return;
+  if(space.earned>=SPACE_UNLOCK && !space.unlocked && !gateOn){ startUnlockGate(); return; }
   while(celebQueue.length){
     const ev = celebQueue.shift();
     if(ev.type==='merge' && baseCount(ev.kind)>=MERGE_COST){ showReadyCeleb(ev.kind); return; }
@@ -4715,8 +5047,9 @@ function viewReward(i){
   const nm = rewardName(it,'one');
   showCeleb(`<div class="cbig view" style="min-height:${px}px"><span id="viewPic">${itemHTML(it,false,px)}</span></div>${nm?`<div class="ctitle">${esc(nm)}</div>`:''}`, [{label:'סגירה', fn:closeCeleb}]);
 }
-function showCeleb(bodyHTML, buttons){
-  celebOpen = true;
+let celebDismiss = true;
+function showCeleb(bodyHTML, buttons, opts){
+  celebOpen = true; celebDismiss = !(opts && opts.dismiss===false);
   document.getElementById('celebBody').innerHTML = bodyHTML;
   const bt = document.getElementById('celebBtns'); bt.innerHTML='';
   buttons.forEach(b=>{ const el=document.createElement('button'); el.type='button'; el.className='btn'+(b.ghost?' ghost':''); el.textContent=b.label; el.onclick=b.fn; bt.appendChild(el); });
@@ -5880,14 +6213,18 @@ document.getElementById('nextBtn').onclick = nextQuestion;
 document.getElementById('rewardsStrip').onclick = openRoom;
 document.getElementById('backBtn').onclick = showHome;
 document.getElementById('roomClose').onclick = closeRoom;
+spaceInit();
 document.getElementById('roomBody').addEventListener('click', e=>{
   const t = e.target.closest('[data-act]'); if(!t) return;
   const act = t.dataset.act;
   if(act==='merge') showReadyCeleb(t.dataset.kind);
   else if(act==='view') viewReward(Number(t.dataset.i));
   else if(act==='vault') viewGold(t.dataset.kind, t.dataset.g);
+  else if(act==='space'){ closeRoom(); openSpace(); }
+  else if(act==='tok') viewTokens();
 });
 document.getElementById('roomOverlay').addEventListener('click', e=>{ if(e.target.id==='roomOverlay') closeRoom(); });
+document.getElementById('celebOverlay').addEventListener('click', e=>{ if(e.target.id==='celebOverlay' && celebDismiss) closeCeleb(); });
 menuInit();
 document.getElementById('profClose').onclick = closeProfiles;
 document.getElementById('profOverlay').addEventListener('change', e=>{ document.querySelectorAll('.gopt').forEach(l=>l.classList.toggle('sel', l.querySelector('input').checked)); });
