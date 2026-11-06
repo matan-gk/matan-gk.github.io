@@ -1266,7 +1266,9 @@ function spaceClean(sp, gold, legacy){
     }
     things.push({k:t.k, x, y});
   }
-  return {earned, spent:Math.min(spent,earned), trued:true, unlocked:sp.unlocked===true, surf, own, lv, things};
+  const top = {};   // the highest level bought of each item: every level up to it stays owned and can be switched to for free
+  for(const id in ROOM_ITEMS){ const v = sp.top && sp.top[id]; top[id] = Math.max(lv[id], (Number.isInteger(v) && v>=1 && v<=roomMax(id)) ? v : 1); }
+  return {earned, spent:Math.min(spent,earned), trued:true, unlocked:sp.unlocked===true, surf, own, lv, top, things};
 }
 function spaceSnap(){ return JSON.parse(JSON.stringify(space)); }
 let space = spaceClean({},[],0);   // personal-space tokens: earned once per upgrade (stored, never derived), spent in the shop later; trued = the one-time true-up for old players was done
@@ -2103,7 +2105,7 @@ function cloudProfileFromDoc(C, helpers){
 // ===== CLOUD (Google sign-in, cloud progress, problem reports) =====
 // Local-first: the game always works from this device's storage. The cloud is a mirror, so no internet / no account / no quota never blocks play.
 // Everything here is off while CLOUD_CONFIG is null. See firebase/SETUP.md for how to create the (free) Firebase project and paste its settings below.
-const APP_VERSION = '2026.11.06e';       // keep equal to VERSION in sw.js (a test checks it)
+const APP_VERSION = '2026.11.06f';       // keep equal to VERSION in sw.js (a test checks it)
 const CLOUD_CONFIG = {apiKey:"AIzaSyAlq_TJNGvWPJpUrpbdq_hkAoURydqMzm0", authDomain:"learning-quest-1.firebaseapp.com", projectId:"learning-quest-1", appId:"1:98931179722:web:78fb00084ccba3efb53433"};   // e.g. {apiKey:'...', authDomain:'xxx.firebaseapp.com', projectId:'xxx', appId:'...'}
 const CLOUD_LIMITS = {
   pushDelayMs: 60000,          // at most one upload per profile per minute while playing
@@ -4979,18 +4981,26 @@ function startCeremony(){
 }
 
 // ---- the room: a page of its own ----
-const RM = {W:1000, H:900, k:1, tx:0, ty:0, sel:null, pv:null, pl:null, list:null, filter:'all'};   // sel: {t:'item',id}|{t:'surf',k}|{t:'thing',i}; pv: purchase being previewed; pl: floor item being placed {k,i,x,y}; list: 'cat'|'stock'
+const RM_DY = 100;   // the room is drawn this far down inside the frame, so tall furniture (the top bed levels) has room above the back corner
+const RM = {W:1000, H:1000, k:1, tx:0, ty:0, sel:null, pv:null, pl:null, list:null, filter:'all'};   // sel: {t:'item',id}|{t:'surf',k}|{t:'thing',i}; pv: purchase being previewed; pl: floor item being placed {k,i,x,y}; list: 'cat'|'stock'
+const topLv = id => Math.max(space.top && space.top[id] || 1, space.lv[id]);
 const effLv = id => (RM.pv && RM.pv.t==='lv' && RM.pv.id===id) ? RM.pv.to : space.lv[id];
 const effCol = k => (RM.pv && RM.pv.t==='col' && RM.pv.k===k) ? RM.pv.idx : space.surf[k];
 const gx2s = (x,y) => [500+(x-y)*50, 400+(x+y)*25];
 const pts = a => a.map(p=>p.join(',')).join(' ');
 const surfFill = idx => ROOM_COLORS[idx].h==='rainbow' ? 'url(#rmRainbow)' : ROOM_COLORS[idx].h;
 // room item pictures: w,h in room units, (ax,ay) = the point of the picture that sits on the floor corner (bed) or the sill centre (window)
-const ROOM_ART = {bed:[{src:'assets/f079c2224879.webp',w:286.5,h:325.5,ax:122.6,ay:325.5},{src:'assets/8c9bc6b7b540.webp',w:286.5,h:324.0,ax:125.0,ay:324.0},{src:'assets/fc72ab74c218.webp',w:285.0,h:387.0,ax:127.7,ay:387.0},{src:'assets/4312fd9e048e.webp',w:294.0,h:492.0,ax:137.4,ay:492.0},{src:'assets/a0f555cc03e3.webp',w:306.0,h:522.0,ax:138.0,ay:522.0}],
+const ROOM_ART = {bed:[{src:'assets/f079c2224879.webp',w:286.5,h:325.5,ax:122.6,ay:325.5,ft:[[93.0,276.0],[121.5,324.0],[190.5,249.0]]},{src:'assets/8c9bc6b7b540.webp',w:286.5,h:324.0,ax:125.0,ay:324.0,ft:[[91.5,276.0],[121.5,322.5],[190.5,250.5]]},{src:'assets/fc72ab74c218.webp',w:285.0,h:387.0,ax:127.7,ay:387.0,ft:[[91.5,339.0],[127.5,385.5],[189.0,322.5]]},{src:'assets/4312fd9e048e.webp',w:294.0,h:492.0,ax:137.4,ay:492.0,ft:[[84.0,441.0],[130.5,490.5],[195.0,432.0]]},{src:'assets/a0f555cc03e3.webp',w:306.0,h:522.0,ax:138.0,ay:522.0,ft:[[91.5,480.0],[135.0,520.5],[204.0,463.5]]}],
   window:[{src:'assets/ab4b2e4250e6.webp',w:210.7,h:214.9,ax:105.0,ay:210.0},{src:'assets/a725113aac4b.webp',w:226.2,h:229.1,ax:113.9,ay:224.1},{src:'assets/ea204b751610.webp',w:217.8,h:270.1,ax:109.0,ay:264.4},{src:'assets/eb3fe20bb9dd.webp',w:225.5,h:294.8,ax:112.7,ay:289.9},{src:'assets/eb13d2dccaf9.webp',w:253.1,h:311.1,ax:126.6,ay:306.1}]};
-const BED_FOOT = [[-.05,.3],[1.45,.95],[2.25,3.35],[.75,2.7]];   // the four feet (back, right, front, left) measured on the art, a little wider   // where the bed's feet stand: a soft shadow on the floor keeps it from looking afloat
-const BED_AT = gx2s(2.16,3.24).map((v,i)=>i?v+7:v), WIN_U = 250, WIN_SILL = 85;   // bed: its front corner on the floor grid; window: centre along the wall and sill height above the floor
-function bedSVG(lv){ const a = ROOM_ART.bed[lv-1], f = BED_FOOT.map(q=>gx2s(q[0],q[1]).join(',')).join(' '); return `<polygon points="${f}" fill="#3b1d10" opacity=".3" filter="url(#rmBlur)"/><image href="${a.src}" x="${(BED_AT[0]-a.ax).toFixed(1)}" y="${(BED_AT[1]-a.ay).toFixed(1)}" width="${a.w}" height="${a.h}"/>`; }
+const BED_SCALE = 1.25, BED_AT = gx2s(2.85,3.85);   // the bed's art is drawn 1.25x so its feet stand at the corners of its 3 x 4 cells; BED_AT = where its front foot touches the floor
+const WIN_U = 310, WIN_SILL = 85;   // window: centre along the wall and sill height above the floor
+function bedSVG(lv){
+  const a = ROOM_ART.bed[lv-1], S = BED_SCALE, P = q=>[BED_AT[0]+(q[0]-a.ax)*S, BED_AT[1]+(q[1]-a.ay)*S];
+  const [L,F,R] = a.ft.map(P), B = [L[0]+R[0]-F[0], L[1]+R[1]-F[1]];   // the back foot is hidden behind the bed
+  const ex = (v,q)=>q.map((c,i)=>c+(c-v[i])*0.0).join(','), floor = [B,R,F,L].map(q=>q.join(',')).join(' ');
+  const feet = [L,F,R].map(q=>`<ellipse cx="${q[0].toFixed(1)}" cy="${(q[1]-1).toFixed(1)}" rx="${(16*S).toFixed(1)}" ry="${(6.5*S).toFixed(1)}" fill="#2a120a" opacity=".42" filter="url(#rmBlur2)"/>`).join('');
+  return `<polygon points="${floor}" fill="#3b1d10" opacity=".22" filter="url(#rmBlur)"/>${feet}<image href="${a.src}" x="${(BED_AT[0]-a.ax*S).toFixed(1)}" y="${(BED_AT[1]-a.ay*S).toFixed(1)}" width="${(a.w*S).toFixed(1)}" height="${(a.h*S).toFixed(1)}"/>`;
+}
 function windowSVG(lv){ const a = ROOM_ART.window[lv-1]; return `<image href="${a.src}" x="${(WIN_U-a.ax).toFixed(1)}" y="${(-WIN_SILL-a.ay).toFixed(1)}" width="${a.w}" height="${a.h}"/>`; }   // flat in wall units: it grows up the wall with each level
 function thingSVG(c, x, y){
   const fw = fwOf(c), fd = fdOf(c), m = gx2s(x+fw/2, y+fd/2);
@@ -4999,18 +5009,22 @@ function thingSVG(c, x, y){
 }
 // the cell (0..9) under a pointer, or null off the floor
 function cellAt(e){
-  const v = rmVB(e), rx = (v[0]-RM.tx)/RM.k, ry = (v[1]-RM.ty)/RM.k, X = (rx-500)/50, Y = (ry-400)/25;
+  const v = rmVB(e), rx = (v[0]-RM.tx)/RM.k, ry = (v[1]-RM.ty)/RM.k-RM_DY, X = (rx-500)/50, Y = (ry-400)/25;
   const x = Math.floor((Y+X)/2), y = Math.floor((Y-X)/2);
   return (x>=0 && x<ROOM_CELLS && y>=0 && y<ROOM_CELLS) ? [x,y] : null;
 }
-function cellFree(x, y, except){
-  if(x<0 || y<0 || x>=ROOM_CELLS || y>=ROOM_CELLS || roomBlocked(x,y)) return false;
-  return !space.things.some((t,i)=>i!==except && t.x===x && t.y===y);
+// can item c stand with its back cell at x,y? (all its cells on the floor, none under the bed, none used by another item)
+function footFree(c, x, y, except){
+  const fw = fwOf(c), fd = fdOf(c);
+  if(x<0 || y<0 || x+fw>ROOM_CELLS || y+fd>ROOM_CELLS) return false;
+  for(let a=0;a<fw;a++) for(let b=0;b<fd;b++) if(roomBlocked(x+a,y+b)) return false;
+  return !space.things.some((t,i)=>{ if(i===except || t.x<0) return false; const o = catOf(t.k); return x<t.x+fwOf(o) && t.x<x+fw && y<t.y+fdOf(o) && t.y<y+fd; });
 }
-function firstFreeCell(except){   // the free cell nearest the front of the room
+// the free spot nearest the front of the room
+function firstFreeCell(c, except){
   let best = null, bd = 1e9;
-  for(let y=0;y<ROOM_CELLS;y++) for(let x=0;x<ROOM_CELLS;x++) if(cellFree(x,y,except)){ const d = Math.hypot(x-6,y-6); if(d<bd){ bd = d; best = [x,y]; } }
-  return best || [9,9];
+  for(let y=0;y<ROOM_CELLS;y++) for(let x=0;x<ROOM_CELLS;x++) if(footFree(c,x,y,except)){ const d = Math.hypot(x+fwOf(c)/2-6.5,y+fdOf(c)/2-6.5); if(d<bd){ bd = d; best = [x,y]; } }
+  return best || [ROOM_CELLS-fwOf(c), ROOM_CELLS-fdOf(c)];
 }
 const thingCount = k => space.things.filter(t=>t.k===k).length;
 // step 4 uses this: paints the magenta pot of a plant any color (pixels that differ between base and src are the pot; their light level comes from the base)
@@ -5034,7 +5048,7 @@ function recolorSprite(c, hex){
 function roomSVG(){
   const cl = effCol('wl'), cr = effCol('wr'), cf = effCol('fl');
   const sel = (t,id) => RM.sel && RM.sel.t===t && (RM.sel.id||RM.sel.k)===id ? ' sel' : '';
-  let s = `<defs><filter id="rmBlur" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="6"/></filter><linearGradient id="rmRainbow" x1="0" y1="0" x2="1" y2="0.35"><stop offset="0" stop-color="#ff8f9c"/><stop offset=".17" stop-color="#ffae6e"/><stop offset=".34" stop-color="#ffe46b"/><stop offset=".5" stop-color="#8fe08a"/><stop offset=".67" stop-color="#6cc6f5"/><stop offset=".84" stop-color="#8f8cf0"/><stop offset="1" stop-color="#d48cf0"/></linearGradient></defs><g id="rmG" transform="translate(${RM.tx} ${RM.ty}) scale(${RM.k})">`;
+  let s = `<defs><filter id="rmBlur" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="6"/></filter><filter id="rmBlur2" x="-40%" y="-80%" width="180%" height="260%"><feGaussianBlur stdDeviation="2.5"/></filter><linearGradient id="rmRainbow" x1="0" y1="0" x2="1" y2="0.35"><stop offset="0" stop-color="#ff8f9c"/><stop offset=".17" stop-color="#ffae6e"/><stop offset=".34" stop-color="#ffe46b"/><stop offset=".5" stop-color="#8fe08a"/><stop offset=".67" stop-color="#6cc6f5"/><stop offset=".84" stop-color="#8f8cf0"/><stop offset="1" stop-color="#d48cf0"/></linearGradient></defs><g id="rmG" transform="translate(${RM.tx} ${RM.ty}) scale(${RM.k})"><g id="rmR" transform="translate(0 ${RM_DY})">`;
   s += `<g data-hit="surf:wl" class="rmh${sel('surf','wl')}"><polygon points="0,250 500,0 500,400 0,650" fill="${surfFill(cl)}" stroke="#5b3a2a" stroke-width="4" stroke-linejoin="round"/><polygon points="0,610 500,360 500,400 0,650" fill="#000" opacity=".08"/></g>`;
   s += `<g data-hit="surf:wr" class="rmh${sel('surf','wr')}"><polygon points="500,0 1000,250 1000,650 500,400" fill="${surfFill(cr)}" stroke="#5b3a2a" stroke-width="4" stroke-linejoin="round"/><polygon points="500,0 1000,250 1000,650 500,400" fill="#000" opacity=".10"/><polygon points="500,360 1000,610 1000,650 500,400" fill="#000" opacity=".08"/></g>`;
   let grid = ''; for(let i=1;i<10;i++){ const a=gx2s(i,0),b=gx2s(i,10),c=gx2s(0,i),d=gx2s(10,i); grid += `M${a} L${b} M${c} L${d} `; }
@@ -5043,11 +5057,12 @@ function roomSVG(){
   s += `<g data-hit="item:bed" class="rmh${sel('item','bed')}">${bedSVG(effLv('bed'))}</g>`;
   const pl = RM.pl, order = [];
   space.things.forEach((t,i)=>{ if(t.x>=0 && !(pl && pl.i===i)) order.push(i); });
-  order.sort((a,b)=>(space.things[a].x+space.things[a].y)-(space.things[b].x+space.things[b].y));   // further back first
+  const depth = i=>{ const t = space.things[i], c = catOf(t.k); return t.x+fwOf(c)+t.y+fdOf(c); };
+  order.sort((a,b)=>depth(a)-depth(b));   // further back first
   order.forEach(i=>{ const t = space.things[i]; s += `<g data-hit="thing:${i}" class="rmh${RM.sel && RM.sel.t==='thing' && RM.sel.i===i ? ' sel' : ''}">${thingSVG(catOf(t.k), t.x, t.y)}</g>`; });
-  if(pl){ const c = catOf(pl.k), q = [[0,0],[1,0],[1,1],[0,1]].map(d=>gx2s(pl.x+d[0],pl.y+d[1]).join(',')).join(' ');
+  if(pl){ const c = catOf(pl.k), fw = fwOf(c), fd = fdOf(c), q = [[0,0],[fw,0],[fw,fd],[0,fd]].map(d=>gx2s(pl.x+d[0],pl.y+d[1]).join(',')).join(' ');
     s += `<polygon class="rmtile" points="${q}" fill="#7ee08a" fill-opacity=".45" stroke="#2e9d45" stroke-width="3"/><g class="rmghost" opacity=".85">${thingSVG(c, pl.x, pl.y)}</g>`; }
-  s += `</g>`;
+  s += `</g></g>`;
   return `<svg id="rmSvg" viewBox="0 0 ${RM.W} ${RM.H}" role="img" aria-label="החדר">${s}</svg>`;
 }
 function openSpace(){
@@ -5111,11 +5126,11 @@ function renderDrawer(){
   const pv = RM.pv, cost = pvCost();
   const buy = !pv ? '' : `<div class="rmsh-need${bal<cost?' poor':''}">${needTxt(cost,bal)}</div><div class="rmsh-btns"><button type="button" class="btn" data-buy="1"${bal<cost?' disabled':''}>קנו · ${cost} 🪙</button><button type="button" class="btn ghost" data-cancel="1">ביטול</button></div><div class="rmsh-s small">אי אפשר להחזיר או למכור אחר כך</div>`;
   if(sel.t==='item'){
-    const id = sel.id, it = ROOM_ITEMS[id], lv = space.lv[id], mx = roomMax(id), next = lv<mx ? it.up[lv] : null;
-    let th = ''; for(let l=lv+1; l<=mx; l++){ const art = ROOM_ART[id][l-1], open = l===lv+1;
-      th += `<button type="button" class="lvthumb${open?'':' locked'}${pv&&pv.to===l?' cur':''}"${open?` data-prev="${id}"`:' disabled'} aria-label="רמה ${l}${open?'':' · נעול'}"><img src="${art.src}" alt=""><span class="ln">רמה ${l}</span><span class="lt">${open?it.up[lv]+' 🪙':'🔒'}</span></button>`; }
+    const id = sel.id, it = ROOM_ITEMS[id], lv = space.lv[id], mx = roomMax(id), top = topLv(id);
+    let th = ''; for(let l=1; l<=mx; l++){ const art = ROOM_ART[id][l-1], owned = l<=top, open = l===top+1, shown = pv && pv.t==='lv' && pv.id===id ? pv.to : lv;
+      th += `<button type="button" class="lvthumb${owned||open?'':' locked'}${shown===l?' cur':''}${owned?' owned':''}"${owned?` data-sw="${id}:${l}"`:open?` data-prev="${id}"`:' disabled'} aria-label="רמה ${l}${owned?(l===lv?' · בשימוש':' · בבעלותך'):open?'':' · נעול'}"><img src="${art.src}" alt=""><span class="ln">רמה ${l}</span><span class="lt">${owned?(l===lv?'✔':'בחרו'):open?it.up[top]+' 🪙':'🔒'}</span></button>`; }
     d.innerHTML = head(`${it.n} · רמה ${lv} מתוך ${mx}`)
-      + (next==null ? `<div class="rmmax">רמה מקסימלית ✨</div>` : `<div class="lvthumbs">${th}</div>`)
+      + `<div class="lvthumbs">${th}</div>` + (top>=mx ? `<div class="rmmax">כל הרמות בבעלותך ✨</div>` : '')
       + (pv ? `<div class="rmsh-s">תצוגה מקדימה: רמה ${pv.to}</div>` + buy : '')
       + `<button type="button" class="btn ghost" data-close="1">סגירה</button>`;
   } else {
@@ -5128,7 +5143,9 @@ function renderDrawer(){
 }
 function onRoomTap(hit, e){
   if(RM.pl){   // choosing a cell for a floor item
-    const c = e && cellAt(e); if(c && cellFree(c[0],c[1],RM.pl.i)){ RM.pl.x = c[0]; RM.pl.y = c[1]; rmRedraw(); }
+    const c = e && cellAt(e), it = catOf(RM.pl.k);
+    if(c){ const x = Math.max(0,Math.min(ROOM_CELLS-fwOf(it), c[0]-(fwOf(it)>>1))), y = Math.max(0,Math.min(ROOM_CELLS-fdOf(it), c[1]-(fdOf(it)>>1)));   // the tapped cell is the middle of the item
+      if(footFree(it,x,y,RM.pl.i)){ RM.pl.x = x; RM.pl.y = y; rmRedraw(); } }
     return;
   }
   RM.list = null;   // the catalog closes when something in the room is tapped; only placing a floor item is a mode of its own
@@ -5142,21 +5159,22 @@ function onDrawerClick(e){
   if(t.dataset.cancel){ RM.pv = null; RM.pl = null; rmRedraw(); return renderDrawer(); }
   if(t.dataset.list){ RM.list = t.dataset.list; RM.sel = null; RM.pv = null; return renderDrawer(); }
   if(t.dataset.filter){ RM.filter = t.dataset.filter; return renderDrawer(); }
-  if(t.dataset.pick){ const c = catOf(t.dataset.pick), f = firstFreeCell(-1); RM.list = null; RM.pl = {k:c.id, i:-1, x:f[0], y:f[1]}; rmRedraw(); return renderDrawer(); }
-  if(t.dataset.unstow){ const i = +t.dataset.unstow, f = firstFreeCell(i); RM.list = null; RM.pl = {k:space.things[i].k, i, x:f[0], y:f[1]}; rmRedraw(); return renderDrawer(); }
+  if(t.dataset.pick){ const c = catOf(t.dataset.pick), f = firstFreeCell(c, -1); RM.list = null; RM.pl = {k:c.id, i:-1, x:f[0], y:f[1]}; rmRedraw(); return renderDrawer(); }
+  if(t.dataset.unstow){ const i = +t.dataset.unstow, f = firstFreeCell(catOf(space.things[i].k), i); RM.list = null; RM.pl = {k:space.things[i].k, i, x:f[0], y:f[1]}; rmRedraw(); return renderDrawer(); }
   if(t.dataset.move){ const i = +t.dataset.move, th = space.things[i]; RM.sel = null; RM.pl = {k:th.k, i, x:th.x, y:th.y}; rmRedraw(); return renderDrawer(); }
   if(t.dataset.away){ const th = space.things[+t.dataset.away]; th.x = -1; th.y = -1; RM.sel = null; saveState(); rmRedraw(); return renderDrawer(); }
   if(t.dataset.place){
-    const pl = RM.pl; if(!pl || !cellFree(pl.x,pl.y,pl.i)) return;
+    const pl = RM.pl; if(!pl || !footFree(catOf(pl.k),pl.x,pl.y,pl.i)) return;
     if(pl.i<0){ const c = catOf(pl.k); if(tokenBalance()<c.p) return; space.spent += c.p; space.things.push({k:pl.k, x:pl.x, y:pl.y}); burstConfetti(10); }
     else { space.things[pl.i].x = pl.x; space.things[pl.i].y = pl.y; }
     RM.pl = null; saveState(); rmRedraw(); return renderDrawer();
   }
-  if(t.dataset.prev){ const id = t.dataset.prev; RM.pv = {t:'lv', id, to:space.lv[id]+1}; rmRedraw(); return renderDrawer(); }
+  if(t.dataset.sw){ const [id,l] = t.dataset.sw.split(':'); space.lv[id] = +l; RM.pv = null; saveState(); rmRedraw(); return renderDrawer(); }   // an owned level: switch for free
+  if(t.dataset.prev){ const id = t.dataset.prev; RM.pv = {t:'lv', id, to:topLv(id)+1}; rmRedraw(); return renderDrawer(); }
   if(t.dataset.buy){
     const c = pvCost(), pv = RM.pv; if(!pv || tokenBalance() < c) return;
     space.spent += c;
-    if(pv.t==='lv') space.lv[pv.id] = pv.to; else { space.own[pv.k].push(pv.idx); space.surf[pv.k] = pv.idx; }
+    if(pv.t==='lv'){ space.lv[pv.id] = pv.to; space.top[pv.id] = pv.to; } else { space.own[pv.k].push(pv.idx); space.surf[pv.k] = pv.idx; }
     RM.pv = null; saveState(); rmRedraw(); renderDrawer(); burstConfetti(10); return;
   }
   if(t.dataset.col){ const k = RM.sel.k, idx = +t.dataset.col;
