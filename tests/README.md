@@ -44,3 +44,7 @@ Run `node run.js --list` for the current list. In groups:
 - Every change to the game or admin page should come with a new or updated test, and the whole suite should pass before publishing.
 - To add a test: put `my.js` here, start it with `const T=require('./lib.js');`, open the game with `T.URL` and launch the browser with `chromium.launch(T.launchOpts)`. Print `FAIL ...` lines (or exit 1) when a check fails and `ALL PASS` at the end. Then add one line to the `TESTS` list in `run.js`.
 - Known note: at 320 px wide a few answer choices can be wider than the screen; `grptest` reports it but does not fail on it.
+
+## The adult check
+
+The parent area asks for a birth year first. So that the other tests can open it, `lib.js` passes the check automatically after every page load. `adulttest.js` is the one test that sees the real check (`T.gate.on()` before launching).
