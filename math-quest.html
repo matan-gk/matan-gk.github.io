@@ -1206,10 +1206,29 @@ const ROOM_CATALOG = [
   {id:"pl17",n:"סוקולנטים",p:2,src:"assets/4176a5facadb.webp",base:"assets/ea9847e2b8ff.webp",w:88.8,h:120.8,ax:45.4,ay:118.9,ref:0.8961},
   {id:"pl18",n:"ערבת גבישים",p:3,src:"assets/51189de144a4.webp",base:"assets/f857d337a7f7.webp",w:125.9,h:158.3,ax:62.6,ay:156.2,ref:0.902},
   {id:"pl19",n:"צמח הלב",p:3,src:"assets/930d1b578640.webp",base:"assets/81b34c47c90c.webp",w:100.9,h:143.8,ax:50.1,ay:141.9,ref:0.8922},
-  {id:"pl20",n:"צמח הקשת",p:3,src:"assets/53c7b56432cb.webp",base:"assets/b4e8493a3b79.webp",w:102.8,h:149.3,ax:49.8,ay:147.4,ref:0.9}
+  {id:"pl20",n:"צמח הקשת",p:3,src:"assets/53c7b56432cb.webp",base:"assets/b4e8493a3b79.webp",w:102.8,h:149.3,ax:49.8,ay:147.4,ref:0.9},
+  {"id":"toybox1","n":"ארגז צעצועים","p":4,"g":"furniture","fw":2,"fd":2,"src":"assets/38315132547c.webp","base":"assets/56f826e0ecdc.webp","w":190,"h":189.1,"ax":95.0,"ay":149.1,"dc":"#8fd3f4","ref":0.9588},
+  {"id":"toybox2","n":"תיבת צעצועים מעוגלת","p":5,"g":"furniture","fw":2,"fd":2,"src":"assets/987c8ae9c3b3.webp","base":"assets/31c9d55119c7.webp","w":190,"h":194.5,"ax":95.0,"ay":154.5,"dc":"#ff9fcb","ref":0.9706},
+  {"id":"toybox3","n":"תיבת אוצרות","p":6,"g":"furniture","fw":2,"fd":2,"src":"assets/02ae89f8d714.webp","base":"assets/a384fda6863b.webp","w":190,"h":189.1,"ax":95.0,"ay":149.1,"dc":"#c3a2f5","ref":0.9725},
+  {"id":"telescope","n":"טלסקופ","p":4,"g":"play","fw":1,"fd":1,"src":"assets/99836356cfdf.webp","base":null,"w":70,"h":89.7,"ax":35.0,"ay":81.7},
+  {"id":"desk","n":"שולחן כתיבה","p":6,"g":"furniture","fw":2,"fd":4,"src":"assets/534b527fc9f9.webp","base":"assets/3fad10c66f3a.webp","w":270,"h":260.7,"ax":135.0,"ay":200.7,"dc":"#f0d2a0","ref":0.9706},
+  {"id":"desk_turn","n":"שולחן כתיבה (מסובב)","p":6,"g":"furniture","fw":4,"fd":2,"src":"assets/b5ea0b79931f.webp","base":"assets/63c4d0daa779.webp","w":270,"h":260.7,"ax":135.0,"ay":200.7,"dc":"#f0d2a0","ref":0.9706},
+  {"id":"cloud","n":"ספת ענן","p":6,"g":"furniture","fw":2,"fd":2,"src":"assets/6f352e5177c4.webp","base":null,"w":180,"h":166.9,"ax":90.0,"ay":126.9},
+  {"id":"mirror","n":"מראה","p":3,"g":"furniture","fw":1,"fd":1,"src":"assets/a0aa8e0fdffc.webp","base":null,"w":72,"h":125.6,"ax":36.0,"ay":117.6},
+  {"id":"armchair","n":"כורסה","p":6,"g":"furniture","fw":2,"fd":2,"src":"assets/f5c5fe205464.webp","base":"assets/fe1686733b33.webp","w":180,"h":168.6,"ax":90.0,"ay":128.6,"dc":"#ffa6cf","ref":0.9686},
+  {"id":"tablet","n":"לוח ציור","p":3,"g":"play","fw":1,"fd":1,"src":"assets/7604f4f3af6d.webp","base":null,"w":70,"h":97.7,"ax":35.0,"ay":89.7},
+  {"id":"book","n":"יומן קסום","p":2,"g":"play","fw":1,"fd":1,"src":"assets/17fbc2a995bb.webp","base":null,"w":72,"h":56.0,"ax":36.0,"ay":48.0},
+  {"id":"unicorn","n":"בובת חד קרן","p":3,"g":"play","fw":1,"fd":1,"src":"assets/69b5ea264552.webp","base":null,"w":70,"h":80.3,"ax":35.0,"ay":72.3},
+  {"id":"teddy","n":"דובי","p":2,"g":"play","fw":1,"fd":1,"src":"assets/6d28373ba6a4.webp","base":null,"w":62,"h":83.7,"ax":31.0,"ay":75.7},
+  {"id":"heart","n":"כרית לב","p":2,"g":"play","fw":1,"fd":1,"src":"assets/5871c5744569.webp","base":"assets/14f731d523ce.webp","w":66,"h":58.6,"ax":33.0,"ay":50.6,"dc":"#ff7a9e","ref":0.9843},
+  {"id":"star","n":"כרית כוכב","p":2,"g":"play","fw":1,"fd":1,"src":"assets/73dd63dac5d6.webp","base":"assets/e947162a3258.webp","w":66,"h":69.4,"ax":33.0,"ay":61.4,"dc":"#ffd95e","ref":0.9843},
+  {"id":"markers","n":"כוס טושים","p":1,"g":"play","fw":1,"fd":1,"src":"assets/b460c3daaaa7.webp","base":null,"w":50,"h":86.5,"ax":25.0,"ay":78.5},
+  {"id":"piano","n":"פסנתר","p":8,"g":"furniture","fw":4,"fd":2,"src":"assets/d48864214be4.webp","base":null,"w":270,"h":324.3,"ax":135.0,"ay":264.3}
 ];
-const ROOM_GROUPS = {plants:'צמחים'};
-const catGroup = c => 'plants';
+// every entry: g = group, fw x fd = floor cells it covers (x by y, default 1x1), dc = the color painted over its magenta parts by default (only items with magenta parts have `base` and `ref`)
+const ROOM_GROUPS = {plants:'צמחים', furniture:'רהיטים', play:'צעצועים וקישוטים'};
+const catGroup = c => c.g || 'plants';
+const fwOf = c => c.fw || 1, fdOf = c => c.fd || 1;
 const catOf = k => ROOM_CATALOG.find(c=>c.id===k);
 const ROOM_CELLS = 10;
 const BED_CELLS = {w:3, d:4};   // the bed covers 3 x 4 cells of the floor, from the back corner (x 0-2, y 0-3)
@@ -1240,8 +1259,11 @@ function spaceClean(sp, gold, legacy){
   const things = [], occ = new Set();   // bought copies: x,y = their cell, or -1,-1 while put away in the stock
   for(const t of (Array.isArray(sp.things) ? sp.things : []).slice(0,300)){
     if(!t || !catOf(t.k)) continue;
-    let x = -1, y = -1;
-    if(Number.isInteger(t.x) && Number.isInteger(t.y) && t.x>=0 && t.x<ROOM_CELLS && t.y>=0 && t.y<ROOM_CELLS && !roomBlocked(t.x,t.y) && !occ.has(t.x+','+t.y)){ x = t.x; y = t.y; occ.add(x+','+y); }
+    let x = -1, y = -1; const c = catOf(t.k), fw = fwOf(c), fd = fdOf(c);
+    if(Number.isInteger(t.x) && Number.isInteger(t.y) && t.x>=0 && t.y>=0 && t.x+fw<=ROOM_CELLS && t.y+fd<=ROOM_CELLS){
+      const cells = []; for(let a=0;a<fw;a++) for(let b=0;b<fd;b++) cells.push((t.x+a)+','+(t.y+b));
+      if(!cells.some(q=>occ.has(q)) && !cells.some(q=>roomBlocked(+q.split(',')[0], +q.split(',')[1]))){ x = t.x; y = t.y; cells.forEach(q=>occ.add(q)); }
+    }
     things.push({k:t.k, x, y});
   }
   return {earned, spent:Math.min(spent,earned), trued:true, unlocked:sp.unlocked===true, surf, own, lv, things};
@@ -4971,8 +4993,9 @@ const BED_AT = gx2s(2.16,3.24).map((v,i)=>i?v+7:v), WIN_U = 250, WIN_SILL = 85; 
 function bedSVG(lv){ const a = ROOM_ART.bed[lv-1], f = BED_FOOT.map(q=>gx2s(q[0],q[1]).join(',')).join(' '); return `<polygon points="${f}" fill="#3b1d10" opacity=".3" filter="url(#rmBlur)"/><image href="${a.src}" x="${(BED_AT[0]-a.ax).toFixed(1)}" y="${(BED_AT[1]-a.ay).toFixed(1)}" width="${a.w}" height="${a.h}"/>`; }
 function windowSVG(lv){ const a = ROOM_ART.window[lv-1]; return `<image href="${a.src}" x="${(WIN_U-a.ax).toFixed(1)}" y="${(-WIN_SILL-a.ay).toFixed(1)}" width="${a.w}" height="${a.h}"/>`; }   // flat in wall units: it grows up the wall with each level
 function thingSVG(c, x, y){
-  const m = gx2s(x+.5, y+.5);
-  return `<ellipse cx="${m[0]}" cy="${m[1]+2}" rx="34" ry="14" fill="#3b1d10" opacity=".28" filter="url(#rmBlur)"/><image href="${c.src}" x="${(m[0]-c.ax).toFixed(1)}" y="${(m[1]+4-c.ay).toFixed(1)}" width="${c.w}" height="${c.h}"/>`;
+  const fw = fwOf(c), fd = fdOf(c), m = gx2s(x+fw/2, y+fd/2);
+  const sh = (fw*fd>1) ? `<polygon points="${[[.1,.1],[fw-.1,.1],[fw-.1,fd-.1],[.1,fd-.1]].map(q=>gx2s(x+q[0],y+q[1]).join(',')).join(' ')}" fill="#3b1d10" opacity=".28" filter="url(#rmBlur)"/>` : `<ellipse cx="${m[0]}" cy="${m[1]+2}" rx="34" ry="14" fill="#3b1d10" opacity=".28" filter="url(#rmBlur)"/>`;
+  return sh + `<image href="${c.src}" x="${(m[0]-c.ax).toFixed(1)}" y="${(m[1]+4-c.ay).toFixed(1)}" width="${c.w}" height="${c.h}"/>`;
 }
 // the cell (0..9) under a pointer, or null off the floor
 function cellAt(e){
