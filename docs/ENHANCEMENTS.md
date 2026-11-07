@@ -398,3 +398,20 @@ Chosen design: **three options on the Backup page** (see Built). A recovery-code
 - **Known soft spots**: sheet A is low resolution; flat fits for track2 and mat are loose (groundtest has documented per-item tolerances `FLATTOL`, `WIDE`); some near-duplicate pictures (soccer/soccer2, laptop/laptop2) were kept.
 - **Tests**: new `flattest.js`; `catalogtest`, `spacetest`, `colortest`, `groundtest` updated (83 items, 860 max-out, 25 keys).
 - Version 2026.11.07d.
+
+## Step 6: fixes after testing (branch `fixes-items`, off main)
+
+- **Bed level 5 sheet**: the mattress visible between the pillow and the blanket was joined to the right-hand curtain in the mask, so it took the curtain colour. `tools/parts.py` now cuts that patch apart (`SPLITS`: patch 182 eroded 3px, the left piece becomes sheet, the rest stays curtain); the level 5 mask picture is regenerated. Test: `colortest` counts sheet-coloured mask pixels there.
+- **Dark mode**: the colour buttons (`.partbtn`, `.brush .bsw`) use `var(--text)` (was the browser default black). Test: computed colour is light in dark mode.
+- **Default colour = a brush**: the colour an item comes in is pre-purchased and is shown as the brush closest to it (`nearBrush`), on the part buttons and as the first option in the palette, like the walls' starting brush. The palette hides the colour that brush stands in for, so the same brush is not shown twice (a palette now has 16 options, 17 with the blanket pattern).
+- **Footprints**: train toys (small track, round track, wooden train set), chess, tic-tac-toe, both puzzles and the Lego arch are 1x1 solid things (not flat): nothing can be placed on them. Chair (both turns), costume box and telescope are 2x2. Only the 5 rugs and the drawing mat are flat now.
+- **Small train tracks re-cut** with `sheetcut.cut_soft` (upscale first, alpha from the distance to white, white un-mixed from the edges: no grey halo). Chairs use it too. The telescope source is saved in `art/telescope-source.png`.
+- `tools/items2.py` stays the single place where these items' sizes, flat flag, prices and default colours are set; rerun it, then `python3 tools/externalize.py`.
+- Version 2026.11.07e.
+
+## Step 7: bed sheet strip, delete, one list for shop and inventory (branch `fixes-items`)
+
+- **Bed sheet, both sides**: on beds 1-3 the sheet is also turned down along the back edge of the blanket (the strip above the fold line, next to the pillow). It was part of the blanket in the colour map; `tools/parts.py` `STRIPS` now assigns it to the sheet (a half-plane cut along the fold line, per level). Test: `colortest` counts sheet-coloured mask pixels in that strip on beds 1-3.
+- **Delete**: the "put in the inventory" button on a placed item is now "מחיקה", with a note that a bought item stays yours and can be placed again from the list. (Still `data-away`: the copy leaves the room and stays owned, nothing is refunded.)
+- **One list**: the separate shop and inventory are one list (button "פריטים ומלאי", with how many copies are put away). It shows every item; what you own is outlined and marked "✓ ×n", a copy put away is marked 🎒. A "שלי" (mine) chip filters to owned items. Tapping an item with no copy put away goes straight to buy-and-place; tapping an item with a copy put away opens a choice: place it from the inventory (free) or buy another one (`RM.choose`). `RM.list==='stock'` no longer exists.
+- Version 2026.11.07f.

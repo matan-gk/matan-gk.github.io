@@ -1,6 +1,6 @@
 import os, numpy as np, json
 ROOT=os.path.join(os.path.dirname(os.path.abspath(__file__)),'..')+os.sep
-from PIL import Image
+from PIL import Image, ImageFilter
 from scipy import ndimage as nd
 A=Image.open(ROOT+'art/sheet-a-rugs-furniture.png').convert('RGB')
 B=Image.open(ROOT+'art/sheet-b-toys.jpg').convert('RGB')
@@ -30,6 +30,22 @@ def cut(im,box,hollow=False,thr=0.015):
     if not hollow: fg=nd.binary_fill_holes(fg)
     a=np.clip(nd.gaussian_filter(fg.astype(float),0.7)*1.6-0.3,0,1)
     out=np.dstack([sub,a*255]).astype('uint8'); ys,xs=np.where(a>0.1)
+    return Image.fromarray(out[ys.min():ys.max()+1,xs.min():xs.max()+1])
+def cut_soft(im,box,up=4,inset=3):
+    """Low-resolution art on white: upscale first, then take the alpha from how far each pixel is from white and
+    un-mix the white from the edge colours, so there are no grey grid-line halos or dotted fringes (used for the small train tracks)."""
+    b=(box[0]+inset,box[1]+inset,box[2]-inset,box[3]-inset)
+    sub=im.crop(b); sub=sub.resize((sub.width*up,sub.height*up),Image.LANCZOS)
+    c=np.array(sub).astype(float); mn=c.min(2)
+    a=np.clip((246-mn)/60,0,1)
+    a=nd.binary_opening(a>0.5,iterations=2)*a          # specks of the grid lines go
+    l,k=nd.label(a>0)
+    if k>1:
+        sz=nd.sum(a>0,l,range(1,k+1)); a=a*np.isin(l,[j+1 for j,s in enumerate(sz) if s>0.1*sz.max()])
+    a=np.clip(nd.gaussian_filter(a,0.8)*1.15,0,1)
+    fg=np.clip((c-255*(1-a[...,None]))/np.maximum(a[...,None],.05),0,255)
+    fg=np.array(Image.fromarray(fg.astype('uint8')).filter(ImageFilter.UnsharpMask(radius=2,percent=60,threshold=2))).astype(float)
+    out=np.dstack([fg,a*255]).astype('uint8'); ys,xs=np.where(a>0.1)
     return Image.fromarray(out[ys.min():ys.max()+1,xs.min():xs.max()+1])
 if __name__=='__main__':
     os.makedirs('/tmp/it2',exist_ok=True)
