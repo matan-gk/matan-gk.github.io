@@ -24,6 +24,9 @@ PATCHES = [
   {'blanket':[270,307], 'sheet':[285,291,314], 'pillow':[245], 'curtain':[33,30,150,210,207,142,263,272,313]},
   {'blanket':[207,200], 'sheet':[258,253,268,248], 'pillow':[158], 'curtain':[40,41,113,118,125,133,136,144,126,129,131,115,104,122,182,233,117,191]},
 ]
+# a patch that touches another part through a thin bridge is cut apart: (level index, patch number, erosion, part for the pieces left of x_max)
+# level 5: the mattress under the pillow (visible between the pillow and the blanket) was joined to the right-hand curtain; it belongs to the sheet
+SPLITS = [(4, 182, 3, 'sheet', 170)]
 def save_asset(img, ext='webp', **kw):
     import io
     b = io.BytesIO(); img.save(b, ext.upper(), **kw); raw = b.getvalue()
@@ -42,6 +45,18 @@ def masks():
         names = list(PART)
         for pi, pn in enumerate(names):
             for k in PATCHES[lv].get(pn, []): owner[lab == k] = pi + 1
+        for slv, k, it, part, xmax in SPLITS:
+            if slv != lv: continue
+            m = lab == k; core = ndi.binary_erosion(m, iterations=it); cl, cn = ndi.label(core)
+            seeds = np.zeros(m.shape, int)   # 1 = the piece that changes part, 2 = the rest
+            for j in range(1, cn + 1):
+                xs = np.where(cl == j)[1]
+                if len(xs) > 20: seeds[cl == j] = 1 if xs.mean() < xmax else 2
+            _, (iy, ix) = ndi.distance_transform_edt(seeds == 0, return_indices=True)
+            near = seeds[iy, ix]; owner[(m) & (owner == 0)] = 0
+            owner[m & (near == 1)] = names.index(part) + 1
+            for q, pn in enumerate(names):
+                if pn == 'curtain': owner[m & (near == 2)] = q + 1
         light = (a[...,3] > 128) & (mn > 110)
         for _ in range(2):   # the anti-aliased rim of a patch belongs to it
             for pi in range(len(names)):
@@ -78,7 +93,11 @@ def pattern():
         d.polygon([(sx,sy-6),(sx+2,sy-2),(sx+6,sy),(sx+2,sy+2),(sx,sy+6),(sx-2,sy+2),(sx-6,sy),(sx-2,sy-2)], fill=(250,250,255,255))
     return save_asset(tile.convert('RGB'), 'webp', lossless=True, quality=100), [int(v) for v in bg]
 if __name__ == '__main__':
+    old = re.findall(r"mask:'(assets/[^']+)'", open(ROOT + 'math-quest.html', encoding='utf-8').read())[:5]
     m = masks(); p, bg = pattern()
+    h = open(ROOT + 'math-quest.html', encoding='utf-8').read()
+    for o, n in zip(old, m): h = h.replace("mask:'" + o + "'", "mask:'" + n + "'", 1)
+    open(ROOT + 'math-quest.html', 'w', encoding='utf-8').write(h)
     print(json.dumps({'masks': m, 'pattern': p, 'bg': bg}))
     names = sorted(f for f in os.listdir(ROOT + 'assets') if re.match(r'^[0-9a-f]{12}\.', f))
     json.dump(names, open(ROOT + 'assets.json', 'w'))

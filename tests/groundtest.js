@@ -3,7 +3,7 @@
 const T=require('./lib.js');
 const {chromium}=require('playwright');
 let f=0;const ok=(c,m)=>{console.log((c?'ok   ':'FAIL ')+m);if(!c)f++;};
-const WIDE={sax:30,easel:24,easel2:24};   // tripod legs / a leaning instrument: the lowest pixel is one leg, not the middle
+const WIDE={lego:14,sax:30,easel:24,easel2:24};   // tripod legs / a leaning instrument: the lowest pixel is one leg, not the middle
 const FLATTOL={mat:16,track2:34};          // oddly shaped flat art (angled mat, looped track) fits its footprint loosely
 const TOL={front:12,side:30,spot:[0,18],spotX:12,tall:60};   // tall = the big bed levels 4-5 have a canopy that overhangs the floor block
 (async()=>{const b=await chromium.launch({...T.launchOpts});

@@ -18,14 +18,14 @@ S = {
 'dollhouse':('בית בובות',8,'furniture',2,2,0,'#ef8a93',0,'dollhouse'),
 'wardrobe':('ארון בגדים',6,'furniture',2,1,0,'#9ad0f5',0,'wardrobe'),
 'wardrobe2':('ארון גדול',8,'furniture',2,1,0,'#b9a1e8',0,'wardrobe'),
-'chair':('כיסא',3,'furniture',1,1,66,'#8fd3f4',0,'chair'),
-'chair2':('כיסא (מסובב)',3,'furniture',1,1,66,'#ffb3c7',0,'chair'),
+'chair':('כיסא',3,'furniture',2,2,0,'#8fd3f4',0,'chair'),
+'chair2':('כיסא (מסובב)',3,'furniture',2,2,0,'#ffb3c7',0,'chair'),
 'slide':('מגלשה',8,'play',1,3,0,'#ffcc5c',0,'slide'),
 'slide2':('מגלשה (מסובבת)',8,'play',3,1,0,'#6fcf97',0,'slide'),
 'slide3':('מגלשה נמוכה',6,'play',3,1,0,'#6db3f2',0,'slide'),
-'track':('מסלול רכבת קטן',4,'play',3,3,0,'#e85d5d',1,'track'),
-'track2':('מסלול רכבת עגול',4,'play',3,3,0,'#5aa9e6',1,'track'),
-'trainset':('רכבת עץ',8,'play',3,4,0,'#e85d5d',1,'track'),
+'track':('מסלול רכבת קטן',4,'play',1,1,100,'#e85d5d',0,'track'),
+'track2':('מסלול רכבת עגול',4,'play',1,1,100,'#5aa9e6',0,'track'),
+'trainset':('רכבת עץ',8,'play',1,1,112,'#e85d5d',0,'track'),
 'table':('שולחן נמוך',5,'furniture',2,2,0,None,0,None),
 'rug_sq':('שטיח מרובע קטן',3,'rugs',2,2,0,'#9fd8c8',1,'rug'),
 'rug_sq2':('שטיח מרובע גדול',5,'rugs',3,3,0,'#f4b6c8',1,'rug'),
@@ -37,8 +37,8 @@ S = {
 'guitar2':('גיטרה קלאסית',5,'play',1,1,60,'#8a4b2a',0,'guitar'),
 'sax':('סקסופון',5,'play',1,1,62,None,0,None),
 'mat':('דף ציור וטושים',2,'play',2,2,0,None,1,None),
-'tictac':('איקס עיגול',3,'play',2,2,0,None,1,None),
-'chess':('שחמט',4,'play',2,2,0,None,1,None),
+'tictac':('איקס עיגול',3,'play',1,1,96,None,0,None),
+'chess':('שחמט',4,'play',1,1,96,None,0,None),
 'blocks':('קוביות בנייה',3,'play',1,1,84,None,0,None),
 'soccer':('כדורגל',2,'play',1,1,60,None,0,None),
 'soccer2':('כדורגל (מסובב)',2,'play',1,1,60,None,0,None),
@@ -48,14 +48,14 @@ S = {
 'books':('ערימת ספרים',2,'play',1,1,70,None,0,None),
 'books2':('ערימת ספרי קסם',2,'play',1,1,72,None,0,None),
 'bookshelf':('ספרייה',6,'furniture',2,1,0,None,0,None),
-'dressbox':('ארגז תחפושות',4,'play',1,1,90,'#c3a2f5',0,'dressbox'),
+'dressbox':('ארגז תחפושות',4,'play',2,2,0,'#c3a2f5',0,'dressbox'),
 'easel':('כן ציור גדול',5,'play',1,1,96,None,0,None),
 'easel2':('כן ציור',4,'play',1,1,92,None,0,None),
-'puzzle':('פאזל חד קרן',3,'play',2,2,0,None,1,None),
-'puzzle2':('פאזל קשת',3,'play',2,2,0,None,1,None),
+'puzzle':('פאזל חד קרן',3,'play',1,1,96,None,0,None),
+'puzzle2':('פאזל קשת',3,'play',1,1,96,None,0,None),
 'laptop':('מחשב נייד',4,'play',1,1,80,'#7fd0e8',0,'laptop'),
 'laptop2':('מחשב נייד (שני)',4,'play',1,1,80,'#c8a2f0',0,'laptop'),
-'lego':('לגו קשת',3,'play',2,1,0,None,0,None),
+'lego':('לגו קשת',3,'play',1,1,100,None,0,None),
 'monkey':('קוף',3,'play',1,1,74,'#b9824f',0,'monkey'),
 'ladybug':('פרת משה רבנו',3,'play',1,1,76,'#e8473f',0,'ladybug'),
 'bunny':('ארנב',3,'play',1,1,66,'#bcd7f5',0,'bunny'),
@@ -95,7 +95,7 @@ def main():
     entries = []
     for n, sheet, box in sheetcut.ITEMS:
         name, price, grp, fw, fd, W0, dc, flat, pk = S[n]
-        a = np.array(sheetcut.cut(sheetcut.A if sheet=='A' else sheetcut.B, box, n in sheetcut.HOLLOW, 0.25 if sheet=='A' else 0.015)).astype(float)
+        a = np.array(sheetcut.cut_soft(sheetcut.A, box) if n in ('track','track2','chair','chair2') else sheetcut.cut(sheetcut.A if sheet=='A' else sheetcut.B, box, n in sheetcut.HOLLOW, 0.25 if sheet=='A' else 0.015)).astype(float)
         H0, Wd = a.shape[:2]
         baked, ref, m = bake(a, dc) if dc else (a, None, None)
         if dc and ref is None: print('no magenta found in', n, '- not colorable', file=sys.stderr); dc = None
@@ -109,6 +109,11 @@ def main():
         if dc: e['dc'] = dc; e['ref'] = round(ref, 4)
         if pk: e['pk'] = pk
         entries.append(e); print(n, fw, fd, 'flat' if flat else '', r, 'fit' if res < 1 else 'res %.1f' % res, 'colorable' if dc else '', file=sys.stderr)
+    # the telescope (from the furniture sheet, cut earlier) is a 2x2 piece now
+    ta = np.array(Image.open(ROOT+'art/telescope-source.png').convert('RGBA')).astype(float); H0, Wd = ta.shape[:2]
+    wroom = (2+2)*50*0.95; sz = (round(wroom*PX), round(wroom*PX*H0/Wd))
+    sp = save(Image.fromarray(ta.astype('uint8')).resize(sz, Image.LANCZOS)); r, res = fit(sp, 2, 2, 0, 0)
+    entries.append({'id':'telescope', 'n':'טלסקופ', 'p':4, 'g':'play', 'fw':2, 'fd':2, 'src':sp, 'base':None, 'r':r}); print('telescope 2x2', r, file=sys.stderr)
     h = open(ROOT+'math-quest.html', encoding='utf-8').read()
     i = h.index('const ROOM_CATALOG = ['); j = h.index('\n];', i); body = h[i:j]
     old = [x for x in re.findall(r'"id":"([a-z0-9_]+)"', body)]

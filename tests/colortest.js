@@ -44,12 +44,24 @@ ok(await ev(()=>document.querySelectorAll('#rmDrawer .partbtn').length===0&&!!do
 
 // the palette: original + 16 colours (+ patterns where offered); prices; patterns only on the blanket
 await ev(()=>{space.lv.bed=1;RM.sel={t:'item',id:'bed'};renderDrawer();});await click('#rmDrawer [data-part=blanket]');
-ok(await ev(()=>document.querySelectorAll('#rmDrawer [data-popt]').length===18),'blanket palette: original, 16 colours and the unicorn pattern');
+ok(await ev(()=>document.querySelectorAll('#rmDrawer [data-popt]').length===17),'blanket palette: original (as the brush closest to it) + the other 15 colours + the unicorn pattern');
 ok(await ev(()=>{const q=document.querySelector('#rmDrawer [data-popt="p:unicorn"] .bp');return !!q&&q.textContent.startsWith('2');}),'the pattern costs 2 tokens and shows its price');
 await click('#rmDrawer [data-pback]');await click('#rmDrawer [data-part=sheet]');
-ok(await ev(()=>document.querySelectorAll('#rmDrawer [data-popt]').length===17&&!document.querySelector('#rmDrawer [data-popt="p:unicorn"]')),'the sheet palette has no pattern (a pattern may be offered in one place and not another)');
+ok(await ev(()=>document.querySelectorAll('#rmDrawer [data-popt]').length===16&&!document.querySelector('#rmDrawer [data-popt="p:unicorn"]')),'the sheet palette has no pattern (a pattern may be offered in one place and not another)');
 await click('#rmDrawer [data-pback]');
 
+// the original colour is shown as a brush (pre-purchased with the item), never a coloured square; the part buttons are readable in dark mode
+await ev(()=>{space.lv.bed=1;RM.sel={t:'item',id:'bed'};renderDrawer();});
+ok(await ev(()=>document.querySelectorAll('#rmDrawer .partbtn img.pbrush').length===3&&!document.querySelector('#rmDrawer .partbtn .pdot[style*="background:#fff"]')),'part buttons show the default colour as a brush picture');
+await ev(()=>{document.documentElement.dataset.theme='dark';});
+ok(await ev(()=>{const c=getComputedStyle(document.querySelector('#rmDrawer .partbtn')).color.match(/\d+/g).map(Number);return (c[0]+c[1]+c[2])/3>170;}),'dark mode: the colour buttons\' text is light');
+await ev(()=>{delete document.documentElement.dataset.theme;});
+await click('#rmDrawer [data-part=blanket]');
+ok(await ev(()=>{const b=document.querySelector('#rmDrawer [data-popt="d"] img');return !!b&&/assets\//.test(b.getAttribute('src'));}),'the original-colour option is a brush picture');
+// bed level 5: the mattress between the pillow and the blanket belongs to the sheet, not to the curtains (numbers from the mask picture)
+const mk=await ev(async()=>{const src=ROOM_ART.bed[4].mask;const im=new Image();im.src=src;await im.decode();const c=document.createElement('canvas');c.width=im.width;c.height=im.height;const x=c.getContext('2d');x.drawImage(im,0,0);const d=x.getImageData(0,0,c.width,c.height).data;let sheetNearPillow=0;for(let y=190;y<250;y++)for(let X=145;X<172;X++){const i=(y*c.width+X)*4;if(d[i+1]>200&&d[i]<60&&d[i+2]<60)sheetNearPillow++;}return sheetNearPillow;});
+ok(mk>150,'level 5 mask: the mattress under the pillow is sheet-coloured ('+mk+' px)');
+await click('#rmDrawer [data-pback]');
 // buy a blanket colour: preview first (nothing paid), cancel, then buy; the picture is repainted red in the blanket only
 await click('#rmDrawer [data-part=blanket]');
 await click('#rmDrawer [data-popt="5"]');await idle();
@@ -91,7 +103,7 @@ await ev(()=>{RM.sel={t:'thing',i:1};RM.pv=null;renderDrawer();});await click('#
 ok(await ev(()=>space.spent===1&&space.things[1].c===7),'the second plant takes the owned pot colour for free');
 // furniture: its own surface key
 await ev(()=>{RM.sel={t:'thing',i:2};RM.pv=null;renderDrawer();});await click('#rmDrawer [data-part=toybox1]');
-ok(await ev(()=>document.querySelectorAll('#rmDrawer [data-popt]').length===17&&partOwned('toybox1','d')&&!partOwned('toybox1',3)&&partOwned('pot',7)),'the toy box has its own palette; the plants\' pot colour is not owned there');
+ok(await ev(()=>document.querySelectorAll('#rmDrawer [data-popt]').length===16&&partOwned('toybox1','d')&&!partOwned('toybox1',3)&&partOwned('pot',7)),'the toy box has its own palette; the plants\' pot colour is not owned there');
 
 // saving: unowned or unknown options are dropped, owned ones kept; the state survives a reload
 const cl=await ev(()=>{const s=spaceClean({earned:50,unlocked:true,po:{'bed.blanket':[5,'p:unicorn',99,'p:nope'],'bad key!':[1],pot:[7]},bc:{blanket:'p:unicorn',sheet:4,pillow:99},things:[{k:'pl00',x:6,y:0,c:7},{k:'pl03',x:8,y:0,c:3},{k:'toybox1',x:5,y:5,c:'d'}]},['🍪'],0);

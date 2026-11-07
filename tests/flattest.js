@@ -9,9 +9,13 @@ await p.fill('#pfName','X');await p.click('.gopt:has(input[value=f])');await p.c
 await ev(()=>{space.earned=1000;space.spent=0;space.unlocked=true;golden=['🍪'];renderLevels();openSpace();});
 // data
 ok(await ev(()=>ROOM_CATALOG.filter(c=>c.g==='rugs').length===5&&ROOM_CATALOG.filter(c=>c.g==='rugs').every(c=>c.flat&&c.pk==='rug'&&c.base&&c.dc)),'5 rugs: flat, share one "rug" part key, magenta original + default colour');
-ok(await ev(()=>ROOM_CATALOG.filter(isFlat).length===13&&ROOM_CATALOG.filter(isFlat).every(c=>c.fw>=2&&c.fd>=2)),'13 flat things, all at least 2x2');
+ok(await ev(()=>ROOM_CATALOG.filter(isFlat).length===6&&ROOM_CATALOG.filter(isFlat).every(c=>c.fw>=2&&c.fd>=2)),'6 flat things (5 rugs and the drawing mat), all at least 2x2');
 ok(await ev(()=>!!ROOM_GROUPS.rugs&&partLabel&&PART_NAMES.rug==='שטיח'),'rugs group and part name exist');
 ok(await ev(()=>partKeyOf(catOf('rug_rd'))==='rug'&&partKeyOf(catOf('rug_sq2'))==='rug'&&partKeyOf(catOf('car'))==='car'),'partKeyOf uses pk when given');
+// train toys, chess, lego, puzzles and tic-tac-toe are 1x1 and solid: nothing can be placed on them; chair, telescope and costume box are 2x2
+ok(await ev(()=>['track','track2','trainset','chess','lego','puzzle','puzzle2','tictac'].every(k=>{const c=catOf(k);return fwOf(c)===1&&fdOf(c)===1&&!isFlat(c);})),'train toys, chess, lego, puzzles, tic-tac-toe: 1x1 and not flat');
+ok(await ev(()=>['chair','chair2','telescope','dressbox'].every(k=>fwOf(catOf(k))===2&&fdOf(catOf(k))===2)),'chair, telescope, costume box: 2x2');
+ok(await ev(()=>{space.things=[{k:'chess',x:6,y:6}];return !footFree(catOf('chair'),6,6,-1)&&!footFree(catOf('chair'),5,5,-1)&&footFree(catOf('chair'),7,6,-1)&&!footFree(catOf('track'),6,6,-1)&&!footFree(catOf('teddy'),6,6,-1);}),'nothing can be placed on a 1x1 game or train (a 2x2 chair next to it is fine)');
 // placement
 const r=await ev(()=>{
   const bed=bedFp(space.lv?.bed||1);

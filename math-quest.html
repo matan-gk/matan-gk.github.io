@@ -824,9 +824,10 @@ body[data-view="space"] #spaceView{box-sizing:border-box; display:flex; flex-dir
 .brush.new img{opacity:.55}
 .brush.cur{border-color:var(--purple); background:var(--card2)}
 .partrow{display:flex; gap:6px; justify-content:center; flex-wrap:wrap}
-.partbtn{display:flex; align-items:center; gap:6px; background:var(--card2); border:2px solid var(--line,#e5dcef); border-radius:14px; padding:6px 10px; font:inherit; font-weight:700; cursor:pointer}
+.partbtn{color:var(--text); display:flex; align-items:center; gap:6px; background:var(--card2); border:2px solid var(--line,#e5dcef); border-radius:14px; padding:6px 10px; font:inherit; font-weight:700; cursor:pointer}
+.pbrush{width:30px; height:30px; object-fit:contain; display:block; flex:none}
 .pdot{display:inline-block; width:22px; height:22px; border-radius:50%; border:2px solid #5b3a2a55; background-size:cover; background-position:center}
-.brush .bsw{display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; width:100%; height:100%; font-size:.6rem; font-weight:700}
+.brush .bsw{color:var(--text); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; width:100%; height:100%; font-size:.6rem; font-weight:700}
 .brush .bsw .pdot{width:78%; height:auto; aspect-ratio:1; border-radius:10px}
 .brush .bsw em{font-style:normal}
 .brush .bp{position:absolute; bottom:-2px; inset-inline-end:-2px; background:var(--yellow,#ffc83d); color:#4a3a5a; border-radius:999px; font-size:.62rem; font-weight:800; padding:0 4px}
@@ -1223,7 +1224,6 @@ const ROOM_CATALOG = [
   {"id":"toybox1","n":"ארגז צעצועים","p":4,"g":"furniture","fw":2,"fd":2,"src":"assets/38315132547c.webp","base":"assets/56f826e0ecdc.webp","dc":"#8fd3f4","ref":0.9588,"r":[-92.7,-61.4,185.3,160.5]},
   {"id":"toybox2","n":"תיבת צעצועים מעוגלת","p":5,"g":"furniture","fw":2,"fd":2,"src":"assets/987c8ae9c3b3.webp","base":"assets/31c9d55119c7.webp","dc":"#ff9fcb","ref":0.9706,"r":[-92.7,-65.1,185.3,164.3]},
   {"id":"toybox3","n":"תיבת אוצרות","p":6,"g":"furniture","fw":2,"fd":2,"src":"assets/02ae89f8d714.webp","base":"assets/a384fda6863b.webp","dc":"#c3a2f5","ref":0.9725,"r":[-92.0,-57.2,184.6,155.7]},
-  {"id":"telescope","n":"טלסקופ","p":4,"g":"play","fw":1,"fd":1,"src":"assets/99836356cfdf.webp","base":null,"r":[-35.0,-52.7,70,89.7]},
   {"id":"desk","n":"שולחן כתיבה","p":6,"g":"furniture","fw":2,"fd":4,"src":"assets/534b527fc9f9.webp","base":"assets/3fad10c66f3a.webp","dc":"#f0d2a0","ref":0.9706,"r":[-216.0,-130.3,327.0,275.1]},
   {"id":"desk_turn","n":"שולחן כתיבה (מסובב)","p":6,"g":"furniture","fw":4,"fd":2,"src":"assets/b5ea0b79931f.webp","base":"assets/63c4d0daa779.webp","dc":"#f0d2a0","ref":0.9706,"r":[-109.3,-130.3,326.7,275.1]},
   {"id":"cloud","n":"ספת ענן","p":6,"g":"furniture","fw":2,"fd":2,"src":"assets/6f352e5177c4.webp","base":null,"r":[-92.7,-89.1,185.4,188.6]},
@@ -1240,13 +1240,13 @@ const ROOM_CATALOG = [
   {"id":"dollhouse","n":"בית בובות","p":8,"g":"furniture","fw":2,"fd":2,"src":"assets/ce1c8401dc8d.webp","base":"assets/a01d9fc181d3.webp","r":[-92.0,-115.1,184.0,213.8],"dc":"#ef8a93","ref":0.9373,"pk":"dollhouse"},
   {"id":"wardrobe","n":"ארון בגדים","p":6,"g":"furniture","fw":2,"fd":1,"src":"assets/c37e42e2f469.webp","base":"assets/400e9fc3ed18.webp","r":[-44.0,-125.1,138.0,198.9],"dc":"#9ad0f5","ref":0.8412,"pk":"wardrobe"},
   {"id":"wardrobe2","n":"ארון גדול","p":8,"g":"furniture","fw":2,"fd":1,"src":"assets/cec8084dd774.webp","base":"assets/4fbd0a6a60d2.webp","r":[-44.0,-96.5,138.0,170.2],"dc":"#b9a1e8","ref":0.8039,"pk":"wardrobe"},
-  {"id":"chair","n":"כיסא","p":3,"g":"furniture","fw":1,"fd":1,"src":"assets/98f3dec17673.webp","base":"assets/9609d111c6cf.webp","r":[-33.0,-56.3,66,93.3],"dc":"#8fd3f4","ref":0.9451,"pk":"chair"},
+  {"id":"chair","n":"כיסא","p":3,"g":"furniture","fw":2,"fd":2,"src":"assets/1859095e2acd.webp","base":"assets/0d93e27e5342.webp","r":[-92.7,-98.6,185.3,197.1],"dc":"#8fd3f4","ref":0.949,"pk":"chair"},
   {"id":"slide","n":"מגלשה","p":8,"g":"play","fw":1,"fd":3,"src":"assets/45c1ddb142f2.webp","base":"assets/fa6b81f57721.webp","r":[-142.0,-27.0,184.0,125.5],"dc":"#ffcc5c","ref":0.9275,"pk":"slide"},
-  {"id":"chair2","n":"כיסא (מסובב)","p":3,"g":"furniture","fw":1,"fd":1,"src":"assets/210e6c65198e.webp","base":"assets/05b74c0e3b35.webp","r":[-33.0,-58.3,66,95.3],"dc":"#ffb3c7","ref":0.9373,"pk":"chair"},
+  {"id":"chair2","n":"כיסא (מסובב)","p":3,"g":"furniture","fw":2,"fd":2,"src":"assets/75fd80bac50f.webp","base":"assets/33190eca4365.webp","r":[-92.7,-100.2,185.3,198.7],"dc":"#ffb3c7","ref":0.9412,"pk":"chair"},
   {"id":"slide2","n":"מגלשה (מסובבת)","p":8,"g":"play","fw":3,"fd":1,"src":"assets/5512eb82e929.webp","base":"assets/44595f7e112e.webp","r":[-42.0,-20.8,184.0,119.3],"dc":"#6fcf97","ref":0.9196,"pk":"slide"},
   {"id":"slide3","n":"מגלשה נמוכה","p":6,"g":"play","fw":3,"fd":1,"src":"assets/6a5de9191b09.webp","base":"assets/c9a4a1a870a1.webp","r":[-42.0,-60.8,184.0,159.6],"dc":"#6db3f2","ref":0.8333,"pk":"slide"},
-  {"id":"track","n":"מסלול רכבת קטן","p":4,"g":"play","fw":3,"fd":3,"src":"assets/c478ecf9d198.webp","base":"assets/0d9a81eb601a.webp","r":[-139.3,5.4,277.0,139.4],"flat":1,"dc":"#e85d5d","ref":0.702,"pk":"track"},
-  {"id":"track2","n":"מסלול רכבת עגול","p":4,"g":"play","fw":3,"fd":3,"src":"assets/1a1324b9c68f.webp","base":"assets/88b7d4f7b80f.webp","r":[-118.6,3.7,269.8,139.9],"flat":1,"dc":"#5aa9e6","ref":0.6267,"pk":"track"},
+  {"id":"track","n":"מסלול רכבת קטן","p":4,"g":"play","fw":1,"fd":1,"src":"assets/5e436df9e0af.webp","base":"assets/fe7a3e9e5898.webp","r":[-50.0,-17.7,100,54.7],"dc":"#e85d5d","ref":0.7471,"pk":"track"},
+  {"id":"track2","n":"מסלול רכבת עגול","p":4,"g":"play","fw":1,"fd":1,"src":"assets/5da6531f3d17.webp","base":"assets/7fa2fefbdba3.webp","r":[-50.0,-18.3,100,55.3],"dc":"#5aa9e6","ref":0.7137,"pk":"track"},
   {"id":"table","n":"שולחן נמוך","p":5,"g":"furniture","fw":2,"fd":2,"src":"assets/b5725e6e808d.webp","base":null,"r":[-92.0,-31.6,184.0,130.2]},
   {"id":"rug_sq","n":"שטיח מרובע קטן","p":3,"g":"rugs","fw":2,"fd":2,"src":"assets/f78291868fc2.webp","base":"assets/f3bc06becad8.webp","r":[-90.6,5.8,181.9,89.7],"flat":1,"dc":"#9fd8c8","ref":0.951,"pk":"rug"},
   {"id":"rug_sq2","n":"שטיח מרובע גדול","p":5,"g":"rugs","fw":3,"fd":3,"src":"assets/e13e0d044601.webp","base":"assets/06d216a98c77.webp","r":[-142.3,5.7,284.6,141.4],"flat":1,"dc":"#f4b6c8","ref":0.951,"pk":"rug"},
@@ -1258,9 +1258,9 @@ const ROOM_CATALOG = [
   {"id":"guitar2","n":"גיטרה קלאסית","p":5,"g":"play","fw":1,"fd":1,"src":"assets/358367604fb5.webp","base":null,"r":[-30.0,-90.3,60,127.3],"pk":"guitar"},
   {"id":"sax","n":"סקסופון","p":5,"g":"play","fw":1,"fd":1,"src":"assets/ecf10e598e88.webp","base":null,"r":[-31.0,-79.7,62,116.7]},
   {"id":"mat","n":"דף ציור וטושים","p":2,"g":"play","fw":2,"fd":2,"src":"assets/94910cbbd900.webp","base":null,"r":[-93.5,5.1,165.4,80.9],"flat":1},
-  {"id":"tictac","n":"איקס עיגול","p":3,"g":"play","fw":2,"fd":2,"src":"assets/a9d854d78910.webp","base":null,"r":[-91.6,4.3,184.0,92.0],"flat":1},
-  {"id":"chess","n":"שחמט","p":4,"g":"play","fw":2,"fd":2,"src":"assets/cced7704e24b.webp","base":null,"r":[-91.6,3.5,184.0,92.0],"flat":1},
-  {"id":"trainset","n":"רכבת עץ","p":8,"g":"play","fw":3,"fd":4,"src":"assets/1020d60a4bde.webp","base":"assets/a4cb3d7f5de7.webp","r":[-193.2,6.9,334.3,166.7],"flat":1,"dc":"#e85d5d","ref":0.8098,"pk":"track"},
+  {"id":"tictac","n":"איקס עיגול","p":3,"g":"play","fw":1,"fd":1,"src":"assets/a13a88d01b2f.webp","base":null,"r":[-48.0,-25.0,96,62.0]},
+  {"id":"chess","n":"שחמט","p":4,"g":"play","fw":1,"fd":1,"src":"assets/ad1b1ef07186.webp","base":null,"r":[-48.0,-26.3,96,63.3]},
+  {"id":"trainset","n":"רכבת עץ","p":8,"g":"play","fw":1,"fd":1,"src":"assets/f37d00182443.webp","base":"assets/9a5e9f9e8d45.webp","r":[-56.0,-15.7,112,52.7],"dc":"#e85d5d","ref":0.8098,"pk":"track"},
   {"id":"blocks","n":"קוביות בנייה","p":3,"g":"play","fw":1,"fd":1,"src":"assets/e913595223ab.webp","base":null,"r":[-42.0,-45.0,84,82.0]},
   {"id":"soccer","n":"כדורגל","p":2,"g":"play","fw":1,"fd":1,"src":"assets/80a785073595.webp","base":null,"r":[-30.0,-23.7,60,60.7]},
   {"id":"soccer2","n":"כדורגל (מסובב)","p":2,"g":"play","fw":1,"fd":1,"src":"assets/f804701c551e.webp","base":null,"r":[-30.0,-22.3,60,59.3]},
@@ -1270,18 +1270,19 @@ const ROOM_CATALOG = [
   {"id":"books","n":"ערימת ספרים","p":2,"g":"play","fw":1,"fd":1,"src":"assets/d81493a752a1.webp","base":null,"r":[-35.0,-37.7,70,74.7]},
   {"id":"books2","n":"ערימת ספרי קסם","p":2,"g":"play","fw":1,"fd":1,"src":"assets/0ee991def960.webp","base":null,"r":[-36.0,-33.0,72,70.0]},
   {"id":"bookshelf","n":"ספרייה","p":6,"g":"furniture","fw":2,"fd":1,"src":"assets/ecc862b80e4c.webp","base":null,"r":[-44.0,-108.5,138.0,182.2]},
-  {"id":"dressbox","n":"ארגז תחפושות","p":4,"g":"play","fw":1,"fd":1,"src":"assets/1ba8e572e3a3.webp","base":"assets/5ee47df05b6c.webp","r":[-45.0,-54.3,90,91.3],"dc":"#c3a2f5","ref":0.7902,"pk":"dressbox"},
+  {"id":"dressbox","n":"ארגז תחפושות","p":4,"g":"play","fw":2,"fd":2,"src":"assets/de5ae30d2b45.webp","base":"assets/736ac9608e84.webp","r":[-92.0,-87.5,184.0,186.2],"dc":"#c3a2f5","ref":0.7902,"pk":"dressbox"},
   {"id":"easel","n":"כן ציור גדול","p":5,"g":"play","fw":1,"fd":1,"src":"assets/9d78f20b4258.webp","base":null,"r":[-48.0,-179.0,96,216.0]},
-  {"id":"puzzle","n":"פאזל חד קרן","p":3,"g":"play","fw":2,"fd":2,"src":"assets/159fb8d4671a.webp","base":null,"r":[-91.5,4.9,183.4,91.9],"flat":1},
-  {"id":"puzzle2","n":"פאזל קשת","p":3,"g":"play","fw":2,"fd":2,"src":"assets/9ed446d59038.webp","base":null,"r":[-90.5,5.2,181.7,91.7],"flat":1},
+  {"id":"puzzle","n":"פאזל חד קרן","p":3,"g":"play","fw":1,"fd":1,"src":"assets/35303163ac3b.webp","base":null,"r":[-48.0,-19.0,96,56.0]},
+  {"id":"puzzle2","n":"פאזל קשת","p":3,"g":"play","fw":1,"fd":1,"src":"assets/aa8a74c81ae4.webp","base":null,"r":[-48.0,-19.0,96,56.0]},
   {"id":"laptop","n":"מחשב נייד","p":4,"g":"play","fw":1,"fd":1,"src":"assets/17a39b80b468.webp","base":"assets/23f30a0fccd9.webp","r":[-40.0,-43.7,80,80.7],"dc":"#7fd0e8","ref":0.8314,"pk":"laptop"},
   {"id":"laptop2","n":"מחשב נייד (שני)","p":4,"g":"play","fw":1,"fd":1,"src":"assets/4158f8215a4b.webp","base":"assets/381bf55609f5.webp","r":[-40.0,-43.0,80,80.0],"dc":"#c8a2f0","ref":0.8294,"pk":"laptop"},
   {"id":"easel2","n":"כן ציור","p":4,"g":"play","fw":1,"fd":1,"src":"assets/dfb08856c056.webp","base":null,"r":[-46.0,-169.7,92,206.7]},
-  {"id":"lego","n":"לגו קשת","p":3,"g":"play","fw":2,"fd":1,"src":"assets/c7dba5acde64.webp","base":null,"r":[-44.0,-8.1,138.0,81.8]},
+  {"id":"lego","n":"לגו קשת","p":3,"g":"play","fw":1,"fd":1,"src":"assets/e3358091b190.webp","base":null,"r":[-50.0,-18.3,100,55.3]},
   {"id":"monkey","n":"קוף","p":3,"g":"play","fw":1,"fd":1,"src":"assets/d89bb4022a78.webp","base":"assets/204b07128f02.webp","r":[-37.0,-47.0,74,84.0],"dc":"#b9824f","ref":0.8882,"pk":"monkey"},
   {"id":"ladybug","n":"פרת משה רבנו","p":3,"g":"play","fw":1,"fd":1,"src":"assets/3c2e5267a3db.webp","base":"assets/500e70ea03c9.webp","r":[-38.0,-13.7,76,50.7],"dc":"#e8473f","ref":0.9353,"pk":"ladybug"},
   {"id":"bunny","n":"ארנב","p":3,"g":"play","fw":1,"fd":1,"src":"assets/6c3dbde189f3.webp","base":"assets/6d336e7c9eed.webp","r":[-33.0,-55.0,66,92.0],"dc":"#bcd7f5","ref":0.8843,"pk":"bunny"},
-  {"id":"bunny2","n":"ארנב פרווה","p":3,"g":"play","fw":1,"fd":1,"src":"assets/74b30305a74a.webp","base":"assets/674bffdec120.webp","r":[-31.0,-51.0,62,88.0],"dc":"#ffd0e0","ref":0.8941,"pk":"bunny"}
+  {"id":"bunny2","n":"ארנב פרווה","p":3,"g":"play","fw":1,"fd":1,"src":"assets/74b30305a74a.webp","base":"assets/674bffdec120.webp","r":[-31.0,-51.0,62,88.0],"dc":"#ffd0e0","ref":0.8941,"pk":"bunny"},
+  {"id":"telescope","n":"טלסקופ","p":4,"g":"play","fw":2,"fd":2,"src":"assets/8333a6ccf0b8.webp","base":null,"r":[-93.3,-91.6,186.6,191.2]}
 ];
 // every entry: g = group, fw x fd = floor cells it covers (x by y, default 1x1), dc = the color painted over its magenta parts by default (only items with magenta parts have `base` and `ref`)
 const ROOM_GROUPS = {plants:'צמחים', furniture:'רהיטים', rugs:'שטיחים', play:'צעצועים וקישוטים'};
@@ -2171,7 +2172,7 @@ function cloudProfileFromDoc(C, helpers){
 // ===== CLOUD (Google sign-in, cloud progress, problem reports) =====
 // Local-first: the game always works from this device's storage. The cloud is a mirror, so no internet / no account / no quota never blocks play.
 // Everything here is off while CLOUD_CONFIG is null. See firebase/SETUP.md for how to create the (free) Firebase project and paste its settings below.
-const APP_VERSION = '2026.11.07d';       // keep equal to VERSION in sw.js (a test checks it)
+const APP_VERSION = '2026.11.07e';       // keep equal to VERSION in sw.js (a test checks it)
 const CLOUD_CONFIG = {apiKey:"AIzaSyAlq_TJNGvWPJpUrpbdq_hkAoURydqMzm0", authDomain:"learning-quest-1.firebaseapp.com", projectId:"learning-quest-1", appId:"1:98931179722:web:78fb00084ccba3efb53433"};   // e.g. {apiKey:'...', authDomain:'xxx.firebaseapp.com', projectId:'xxx', appId:'...'}
 const CLOUD_LIMITS = {
   pushDelayMs: 60000,          // at most one upload per profile per minute while playing
@@ -5059,7 +5060,7 @@ const gx2s = (x,y) => [500+(x-y)*50, 400+(x+y)*25];
 const pts = a => a.map(p=>p.join(',')).join(' ');
 const surfFill = idx => ROOM_COLORS[idx].h==='rainbow' ? 'url(#rmRainbow)' : ROOM_COLORS[idx].h;
 // room item pictures: w,h in room units, (ax,ay) = the point of the picture that sits on the floor corner (bed) or the sill centre (window)
-const ROOM_ART = {bed:[{src:'assets/f079c2224879.webp',mask:'assets/c9b0e47b3c0a.webp',fp:[3,4],r:[-206.3,-167.9,363.6,338.3]},{src:'assets/8c9bc6b7b540.webp',mask:'assets/9c9c2079f512.webp',fp:[3,4],r:[-209.1,-166.4,367.7,336.8]},{src:'assets/fc72ab74c218.webp',mask:'assets/1d64423c823e.webp',fp:[3,4],r:[-212.7,-240.0,372.1,412.2]},{src:'assets/4312fd9e048e.webp',mask:'assets/68b62a12908f.webp',fp:[3,3],r:[-150.9,-324.7,320.3,470.1]},{src:'assets/a0f555cc03e3.webp',mask:'assets/90a252ea3c50.webp',fp:[3,4],r:[-168.6,-355.4,320.4,503.1]}],
+const ROOM_ART = {bed:[{src:'assets/f079c2224879.webp',mask:'assets/c9b0e47b3c0a.webp',fp:[3,4],r:[-206.3,-167.9,363.6,338.3]},{src:'assets/8c9bc6b7b540.webp',mask:'assets/9c9c2079f512.webp',fp:[3,4],r:[-209.1,-166.4,367.7,336.8]},{src:'assets/fc72ab74c218.webp',mask:'assets/1d64423c823e.webp',fp:[3,4],r:[-212.7,-240.0,372.1,412.2]},{src:'assets/4312fd9e048e.webp',mask:'assets/68b62a12908f.webp',fp:[3,3],r:[-150.9,-324.7,320.3,470.1]},{src:'assets/a0f555cc03e3.webp',mask:'assets/914ea6ebcbdc.webp',fp:[3,4],r:[-168.6,-355.4,320.4,503.1]}],
   window:[{src:'assets/ab4b2e4250e6.webp',w:210.7,h:214.9,ax:105.0,ay:210.0},{src:'assets/a725113aac4b.webp',w:226.2,h:229.1,ax:113.9,ay:224.1},{src:'assets/ea204b751610.webp',w:217.8,h:270.1,ax:109.0,ay:264.4},{src:'assets/eb3fe20bb9dd.webp',w:225.5,h:294.8,ax:112.7,ay:289.9},{src:'assets/eb13d2dccaf9.webp',w:253.1,h:311.1,ax:126.6,ay:306.1}]};
 const WIN_U = 300, WIN_SILL = 235;   // window: centre along the wall and sill height above the floor
 // GROUNDING: every floor sprite carries r = [dx,dy,w,h], where its picture goes relative to gx2s(x,y) (the back corner of its footprint).
@@ -5205,7 +5206,10 @@ function pvCost(){
   return RM.pv.t==='lv' ? ROOM_ITEMS[RM.pv.id].up[RM.pv.to-1] : RM.pv.t==='part' ? optPrice(RM.pv.o) : ROOM_COLORS[RM.pv.idx].p;
 }
 // the part pickers (step 4): a row of parts under the item's other buttons, and the palette of one part
-const dotHTML = (o, dflt) => o==='d' ? `<span class="pdot" style="background:${dflt||'#fff'}"></span>` : typeof o==='string' ? `<span class="pdot pat" style="background-image:url(${ROOM_PATTERNS.find(q=>'p:'+q.id===o).src})"></span>` : ROOM_COLORS[o].h==='rainbow' ? `<span class="pdot" style="background:linear-gradient(90deg,#f7a0a0,#ffd27a,#b6edca,#a9d9f6,#cdb0f2)"></span>` : `<span class="pdot" style="background:${ROOM_COLORS[o].h}"></span>`;
+// the colour an item comes in is pre-purchased: shown as the brush closest to it, like the walls' starting brush (never a plain coloured square)
+const nearBrush = hex => { const w = [1,3,5].map(i=>parseInt((hex||'#ffffff').slice(i,i+2),16)); let best = 0, bd = 1e9;
+  ROOM_COLORS.forEach((c,i)=>{ if(c.h==='rainbow') return; const d = [1,3,5].reduce((a,k,j)=>a+Math.pow(parseInt(c.h.slice(k,k+2),16)-w[j],2),0); if(d<bd){ bd = d; best = i; } }); return best; };
+const dotHTML = (o, dflt) => o==='d' ? `<img class="pbrush" src="${BRUSH_IMG[nearBrush(dflt)]}" alt="">` : typeof o==='string' ? `<span class="pdot pat" style="background-image:url(${ROOM_PATTERNS.find(q=>'p:'+q.id===o).src})"></span>` : ROOM_COLORS[o].h==='rainbow' ? `<span class="pdot" style="background:linear-gradient(90deg,#f7a0a0,#ffd27a,#b6edca,#a9d9f6,#cdb0f2)"></span>` : `<span class="pdot" style="background:${ROOM_COLORS[o].h}"></span>`;
 function partsRowHTML(){
   const s = RM.sel; let rows = [];
   if(s.t==='item' && s.id==='bed') rows = bedParts(space.lv.bed).map(n=>({k:n, label:PART_NAMES[n], cur:bedChoice(n), dflt:'#fff'}));
@@ -5221,10 +5225,11 @@ function partInfo(){   // the part being colored: its ownership key, label, curr
 }
 function paletteHTML(pi){
   const pv = pvPart(), shown = pv ? pv.o : pi.cur;
-  return optsFor(pi.key).reduce((h,o)=>{ const own = partOwned(pi.key,o), cur = shown===o, ar = o==='d' ? 'הצבע המקורי' : typeof o==='string' ? ROOM_PATTERNS.find(q=>'p:'+q.id===o).n : ROOM_COLORS[o].n;
+  const nb = nearBrush(pi.dflt);   // the original colour's brush stands in for the colour closest to it, so the same brush is not shown twice
+  return optsFor(pi.key).filter(o=>o!==nb).reduce((h,o)=>{ const own = partOwned(pi.key,o), cur = shown===o, ar = o==='d' ? 'הצבע המקורי' : typeof o==='string' ? ROOM_PATTERNS.find(q=>'p:'+q.id===o).n : ROOM_COLORS[o].n;
     const inner = typeof o==='number' ? `<img src="${BRUSH_IMG[o]}" alt="">` : `<span class="bsw">${dotHTML(o)}</span>`;
     return h + `<button type="button" class="brush${cur?' cur':''}${own?'':' new'}" data-popt="${o}" aria-label="${ar}${own?'':' · '+coinsTxt(optPrice(o))}">${inner}${own?'':`<span class="bp">${optPrice(o)}🪙</span>`}</button>`; },
-    `<button type="button" class="brush${shown==='d'?' cur':''}" data-popt="d" aria-label="הצבע המקורי"><span class="bsw">${dotHTML('d',pi.dflt)}<em>מקורי</em></span></button>`);
+    `<button type="button" class="brush${shown==='d'||shown===nb?' cur':''}" data-popt="d" aria-label="הצבע המקורי"><img src="${BRUSH_IMG[nb]}" alt=""></button>`);
 }
 function renderDrawer(){
   const d = document.getElementById('rmDrawer'); if(!d) return;

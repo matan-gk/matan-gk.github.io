@@ -398,3 +398,13 @@ Chosen design: **three options on the Backup page** (see Built). A recovery-code
 - **Known soft spots**: sheet A is low resolution; flat fits for track2 and mat are loose (groundtest has documented per-item tolerances `FLATTOL`, `WIDE`); some near-duplicate pictures (soccer/soccer2, laptop/laptop2) were kept.
 - **Tests**: new `flattest.js`; `catalogtest`, `spacetest`, `colortest`, `groundtest` updated (83 items, 860 max-out, 25 keys).
 - Version 2026.11.07d.
+
+## Step 6: fixes after testing (branch `fixes-items`, off main)
+
+- **Bed level 5 sheet**: the mattress visible between the pillow and the blanket was joined to the right-hand curtain in the mask, so it took the curtain colour. `tools/parts.py` now cuts that patch apart (`SPLITS`: patch 182 eroded 3px, the left piece becomes sheet, the rest stays curtain); the level 5 mask picture is regenerated. Test: `colortest` counts sheet-coloured mask pixels there.
+- **Dark mode**: the colour buttons (`.partbtn`, `.brush .bsw`) use `var(--text)` (was the browser default black). Test: computed colour is light in dark mode.
+- **Default colour = a brush**: the colour an item comes in is pre-purchased and is shown as the brush closest to it (`nearBrush`), on the part buttons and as the first option in the palette, like the walls' starting brush. The palette hides the colour that brush stands in for, so the same brush is not shown twice (a palette now has 16 options, 17 with the blanket pattern).
+- **Footprints**: train toys (small track, round track, wooden train set), chess, tic-tac-toe, both puzzles and the Lego arch are 1x1 solid things (not flat): nothing can be placed on them. Chair (both turns), costume box and telescope are 2x2. Only the 5 rugs and the drawing mat are flat now.
+- **Small train tracks re-cut** with `sheetcut.cut_soft` (upscale first, alpha from the distance to white, white un-mixed from the edges: no grey halo). Chairs use it too. The telescope source is saved in `art/telescope-source.png`.
+- `tools/items2.py` stays the single place where these items' sizes, flat flag, prices and default colours are set; rerun it, then `python3 tools/externalize.py`.
+- Version 2026.11.07e.
