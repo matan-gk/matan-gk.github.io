@@ -812,6 +812,9 @@ body[data-view="space"] #spaceView{box-sizing:border-box; display:flex; flex-dir
 .catchips .chip{border:2px solid transparent; background:var(--card2); color:var(--text); border-radius:999px; padding:3px 12px; font:inherit; font-weight:700; font-size:.8rem; cursor:pointer}
 .catchips .chip.on{border-color:var(--purple)}
 .catgrid{display:grid; grid-template-columns:repeat(auto-fill,minmax(78px,1fr)); gap:6px}
+.catone{display:flex; justify-content:center; padding:4px 0} .catone img{height:86px; object-fit:contain}
+.catcard.owned{outline:2px solid var(--good); outline-offset:-2px}
+.catcard .cst{position:absolute; top:2px; inset-inline-end:4px; font-size:11px; font-weight:800; background:var(--good); color:#06322c; border-radius:9px; padding:1px 6px}
 .catcard{position:relative; display:flex; flex-direction:column; align-items:center; gap:1px; padding:4px 2px; background:var(--card2); border:2px solid transparent; border-radius:12px; cursor:pointer; color:var(--text); font:inherit; font-size:.7rem; font-weight:700}
 .catcard img{width:60px; height:60px; object-fit:contain; object-position:bottom; display:block}
 .catcard .cp{font-size:.75rem}
@@ -2172,7 +2175,7 @@ function cloudProfileFromDoc(C, helpers){
 // ===== CLOUD (Google sign-in, cloud progress, problem reports) =====
 // Local-first: the game always works from this device's storage. The cloud is a mirror, so no internet / no account / no quota never blocks play.
 // Everything here is off while CLOUD_CONFIG is null. See firebase/SETUP.md for how to create the (free) Firebase project and paste its settings below.
-const APP_VERSION = '2026.11.07e';       // keep equal to VERSION in sw.js (a test checks it)
+const APP_VERSION = '2026.11.07f';       // keep equal to VERSION in sw.js (a test checks it)
 const CLOUD_CONFIG = {apiKey:"AIzaSyAlq_TJNGvWPJpUrpbdq_hkAoURydqMzm0", authDomain:"learning-quest-1.firebaseapp.com", projectId:"learning-quest-1", appId:"1:98931179722:web:78fb00084ccba3efb53433"};   // e.g. {apiKey:'...', authDomain:'xxx.firebaseapp.com', projectId:'xxx', appId:'...'}
 const CLOUD_LIMITS = {
   pushDelayMs: 60000,          // at most one upload per profile per minute while playing
@@ -5052,7 +5055,7 @@ function startCeremony(){
 
 // ---- the room: a page of its own ----
 const RM_DY = 250;   // the room is drawn this far down inside the frame: the walls are 600 high (corner at -200 in room units) and the top bed levels stand above the back corner
-const RM = {W:1000, H:1150, k:1, tx:0, ty:0, sel:null, pv:null, pl:null, list:null, filter:'all'};   // sel: {t:'item',id}|{t:'surf',k}|{t:'thing',i}; pv: purchase being previewed; pl: floor item being placed {k,i,x,y}; list: 'cat'|'stock'
+const RM = {W:1000, H:1150, k:1, tx:0, ty:0, sel:null, pv:null, pl:null, list:null, choose:null, filter:'all'};   // sel: {t:'item',id}|{t:'surf',k}|{t:'thing',i}; pv: purchase being previewed; pl: floor item being placed {k,i,x,y}; list: 'cat'|'stock'
 const topLv = id => Math.max(space.top && space.top[id] || 1, space.lv[id]);
 const effLv = id => (RM.pv && RM.pv.t==='lv' && RM.pv.id===id) ? RM.pv.to : space.lv[id];
 const effCol = k => (RM.pv && RM.pv.t==='col' && RM.pv.k===k) ? RM.pv.idx : space.surf[k];
@@ -5060,7 +5063,7 @@ const gx2s = (x,y) => [500+(x-y)*50, 400+(x+y)*25];
 const pts = a => a.map(p=>p.join(',')).join(' ');
 const surfFill = idx => ROOM_COLORS[idx].h==='rainbow' ? 'url(#rmRainbow)' : ROOM_COLORS[idx].h;
 // room item pictures: w,h in room units, (ax,ay) = the point of the picture that sits on the floor corner (bed) or the sill centre (window)
-const ROOM_ART = {bed:[{src:'assets/f079c2224879.webp',mask:'assets/c9b0e47b3c0a.webp',fp:[3,4],r:[-206.3,-167.9,363.6,338.3]},{src:'assets/8c9bc6b7b540.webp',mask:'assets/9c9c2079f512.webp',fp:[3,4],r:[-209.1,-166.4,367.7,336.8]},{src:'assets/fc72ab74c218.webp',mask:'assets/1d64423c823e.webp',fp:[3,4],r:[-212.7,-240.0,372.1,412.2]},{src:'assets/4312fd9e048e.webp',mask:'assets/68b62a12908f.webp',fp:[3,3],r:[-150.9,-324.7,320.3,470.1]},{src:'assets/a0f555cc03e3.webp',mask:'assets/914ea6ebcbdc.webp',fp:[3,4],r:[-168.6,-355.4,320.4,503.1]}],
+const ROOM_ART = {bed:[{src:'assets/f079c2224879.webp',mask:'assets/d7e337ab5221.webp',fp:[3,4],r:[-206.3,-167.9,363.6,338.3]},{src:'assets/8c9bc6b7b540.webp',mask:'assets/76a3893f6ba5.webp',fp:[3,4],r:[-209.1,-166.4,367.7,336.8]},{src:'assets/fc72ab74c218.webp',mask:'assets/2055d7d914ad.webp',fp:[3,4],r:[-212.7,-240.0,372.1,412.2]},{src:'assets/4312fd9e048e.webp',mask:'assets/68b62a12908f.webp',fp:[3,3],r:[-150.9,-324.7,320.3,470.1]},{src:'assets/a0f555cc03e3.webp',mask:'assets/914ea6ebcbdc.webp',fp:[3,4],r:[-168.6,-355.4,320.4,503.1]}],
   window:[{src:'assets/ab4b2e4250e6.webp',w:210.7,h:214.9,ax:105.0,ay:210.0},{src:'assets/a725113aac4b.webp',w:226.2,h:229.1,ax:113.9,ay:224.1},{src:'assets/ea204b751610.webp',w:217.8,h:270.1,ax:109.0,ay:264.4},{src:'assets/eb3fe20bb9dd.webp',w:225.5,h:294.8,ax:112.7,ay:289.9},{src:'assets/eb13d2dccaf9.webp',w:253.1,h:311.1,ax:126.6,ay:306.1}]};
 const WIN_U = 300, WIN_SILL = 235;   // window: centre along the wall and sill height above the floor
 // GROUNDING: every floor sprite carries r = [dx,dy,w,h], where its picture goes relative to gx2s(x,y) (the back corner of its footprint).
@@ -5244,23 +5247,23 @@ function renderDrawer(){
         : `<div class="rmsh-btns"><button type="button" class="btn" data-place="1">הציבו כאן</button><button type="button" class="btn ghost" data-cancel="1">ביטול</button></div>`);
     return;
   }
-  if(RM.list){   // the catalog (RM.list==='cat') or the stock of put-away items ('stock')
+  if(RM.list){   // one list for the shop and the inventory: everything, with what you own marked
     d.classList.remove('idle'); d.hidden = false;
-    const inCat = RM.list==='cat';
-    let cards;
-    if(inCat){
-      const f = RM.filter||'all';
-      cards = ROOM_CATALOG.filter(c=>f==='all'||catGroup(c)===f).map(c=>{ const n = thingCount(c.id), poor = bal<c.p;
-        return `<button type="button" class="catcard${poor?' poor':''}" data-pick="${c.id}" aria-label="${c.n} · ${coinsTxt(c.p)}"><img src="${c.src}" alt="">${n?`<span class="cn">×${n}</span>`:''}<span class="cname">${c.n}</span><span class="cp">${c.p} 🪙</span></button>`; }).join('');
-    } else {
-      cards = stock.map(([t,i])=>{ const c = catOf(t.k); return `<button type="button" class="catcard" data-unstow="${i}" aria-label="${c.n}"><img src="${c.src}" alt=""><span class="cname">${c.n}</span></button>`; }).join('') || `<div class="rmsh-s">אין פריטים במלאי</div>`;
+    if(RM.choose){   // an item with a copy put away: place that one for free, or buy another
+      const c = catOf(RM.choose), st = stock.filter(([t])=>t.k===c.id), poor = bal<c.p;
+      d.innerHTML = head(c.n) + `<div class="catone"><img src="${c.src}" alt=""></div><div class="rmsh-btns"><button type="button" class="btn" data-unstow="${st[0]?st[0][1]:-1}"${st.length?'':' disabled'}>הציבו מהמלאי${st.length>1?` (${st.length})`:''}</button><button type="button" class="btn${poor?' ghost':''}" data-pick="${c.id}"${poor?' disabled':''}>קנו עוד אחד · ${c.p} 🪙</button></div><button type="button" class="btn ghost" data-list="cat">חזרה לרשימה</button>`;
+      return;
     }
-    const chips = inCat ? `<div class="catchips">${[['all','הכל'],...Object.entries(ROOM_GROUPS)].map(([k,n])=>`<button type="button" class="chip${(RM.filter||'all')===k?' on':''}" data-filter="${k}">${n}</button>`).join('')}</div>` : '';
-    d.innerHTML = head(inCat?'פריטים חדשים':`מלאי · ${stock.length}`) + chips + `<div class="catgrid">${cards}</div><button type="button" class="btn ghost" data-close="1">סגירה</button>`;
+    const f = RM.filter||'all';
+    const cards = ROOM_CATALOG.filter(c=>f==='all'||(f==='own'?thingCount(c.id)>0:catGroup(c)===f)).map(c=>{
+      const n = thingCount(c.id), st = stock.filter(([t])=>t.k===c.id).length, poor = bal<c.p;
+      return `<button type="button" class="catcard${n?' owned':''}${!st&&poor?' poor':''}" ${st?`data-choose="${c.id}"`:`data-pick="${c.id}"`} aria-label="${c.n}${n?' · שלכם ×'+n:' · '+coinsTxt(c.p)}${st?' · במלאי '+st:''}"><img src="${c.src}" alt="">${n?`<span class="cn">✓ ×${n}</span>`:''}${st?`<span class="cst">🎒 ${st}</span>`:''}<span class="cname">${c.n}</span><span class="cp">${c.p} 🪙</span></button>`; }).join('') || `<div class="rmsh-s">עוד לא קניתם פריטים</div>`;
+    const chips = `<div class="catchips">${[['all','הכל'],['own','שלי'],...Object.entries(ROOM_GROUPS)].map(([k,n])=>`<button type="button" class="chip${f===k?' on':''}" data-filter="${k}">${n}</button>`).join('')}</div>`;
+    d.innerHTML = head(`פריטים${stock.length?` · ${stock.length} במלאי`:''}`) + chips + `<div class="catgrid">${cards}</div><button type="button" class="btn ghost" data-close="1">סגירה</button>`;
     return;
   }
   if(!sel){ d.classList.remove('idle'); d.hidden = false;
-    d.innerHTML = head('החדר') + `<div class="rmsh-s">בחרו משהו בחדר כדי לשנות אותו</div><div class="rmsh-btns"><button type="button" class="btn" data-list="cat">➕ הוספת פריטים חדשים</button>${stock.length?`<button type="button" class="btn ghost" data-list="stock">🎒 מלאי · ${stock.length}</button>`:''}</div>`; return; }
+    d.innerHTML = head('החדר') + `<div class="rmsh-s">בחרו משהו בחדר כדי לשנות אותו</div><div class="rmsh-btns"><button type="button" class="btn" data-list="cat">🛍️ פריטים ומלאי${stock.length?` · ${stock.length} במלאי`:''}</button></div>`; return; }
   d.classList.remove('idle'); d.hidden = false;
   if(sel.part){ const pi = partInfo(); if(!pi){ sel.part = null; } else {
       const pv = pvPart(), cost = pv ? optPrice(pv.o) : 0, buyH = !pv ? '' : `<div class="rmsh-need${bal<cost?' poor':''}">${needTxt(cost,bal)}</div><div class="rmsh-btns"><button type="button" class="btn" data-buy="1"${bal<cost?' disabled':''}>קנו · ${cost} 🪙</button><button type="button" class="btn ghost" data-cancel="1">ביטול</button></div><div class="rmsh-s small">אי אפשר להחזיר או למכור אחר כך</div>`;
@@ -5268,7 +5271,7 @@ function renderDrawer(){
       return; } }
   if(sel.t==='thing'){
     const t = space.things[sel.i], c = t && catOf(t.k); if(!c){ RM.sel = null; return renderDrawer(); }
-    d.innerHTML = head(c.n) + `<div class="rmsh-btns"><button type="button" class="btn" data-move="${sel.i}">העבירו</button><button type="button" class="btn ghost" data-away="${sel.i}">הכניסו למלאי</button></div>${partsRowHTML()}<button type="button" class="btn ghost" data-close="1">סגירה</button>`;
+    d.innerHTML = head(c.n) + `<div class="rmsh-btns"><button type="button" class="btn" data-move="${sel.i}">העבירו</button><button type="button" class="btn ghost" data-away="${sel.i}">מחיקה</button></div><div class="rmsh-s small">פריט שנקנה נשאר שלכם ואפשר להציב אותו שוב מרשימת הפריטים</div>${partsRowHTML()}<button type="button" class="btn ghost" data-close="1">סגירה</button>`;
     return;
   }
   const pv = RM.pv, cost = pvCost();
@@ -5305,10 +5308,11 @@ function onDrawerClick(e){
   const t = e.target.closest('button'); if(!t) return;
   if(t.dataset.close){ RM.sel = null; RM.pv = null; RM.list = null; rmRedraw(); return renderDrawer(); }
   if(t.dataset.cancel){ RM.pv = null; RM.pl = null; rmRedraw(); return renderDrawer(); }
-  if(t.dataset.list){ RM.list = t.dataset.list; RM.sel = null; RM.pv = null; return renderDrawer(); }
+  if(t.dataset.list){ RM.list = t.dataset.list; RM.choose = null; RM.sel = null; RM.pv = null; return renderDrawer(); }
+  if(t.dataset.choose){ RM.choose = t.dataset.choose; return renderDrawer(); }
   if(t.dataset.filter){ RM.filter = t.dataset.filter; return renderDrawer(); }
-  if(t.dataset.pick){ const c = catOf(t.dataset.pick), f = firstFreeCell(c, -1); RM.list = null; RM.pl = {k:c.id, i:-1, x:f[0], y:f[1]}; rmRedraw(); return renderDrawer(); }
-  if(t.dataset.unstow){ const i = +t.dataset.unstow, f = firstFreeCell(catOf(space.things[i].k), i); RM.list = null; RM.pl = {k:space.things[i].k, i, x:f[0], y:f[1]}; rmRedraw(); return renderDrawer(); }
+  if(t.dataset.pick){ const c = catOf(t.dataset.pick), f = firstFreeCell(c, -1); RM.list = null; RM.choose = null; RM.pl = {k:c.id, i:-1, x:f[0], y:f[1]}; rmRedraw(); return renderDrawer(); }
+  if(t.dataset.unstow){ const i = +t.dataset.unstow, f = firstFreeCell(catOf(space.things[i].k), i); RM.list = null; RM.choose = null; RM.pl = {k:space.things[i].k, i, x:f[0], y:f[1]}; rmRedraw(); return renderDrawer(); }
   if(t.dataset.move){ const i = +t.dataset.move, th = space.things[i]; RM.sel = null; RM.pl = {k:th.k, i, x:th.x, y:th.y}; rmRedraw(); return renderDrawer(); }
   if(t.dataset.away){ const th = space.things[+t.dataset.away]; th.x = -1; th.y = -1; RM.sel = null; saveState(); rmRedraw(); return renderDrawer(); }
   if(t.dataset.place){

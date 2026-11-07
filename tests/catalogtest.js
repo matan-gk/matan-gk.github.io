@@ -31,9 +31,9 @@ ok(rc.n>500&&rc.mean<14,'recolor with the default brown matches the baked brown 
 ok(rc.blue>0.9&&rc.leaf>0.97,'recolor to blue turns the pot blue and leaves the plant alone: '+JSON.stringify(rc));
 
 // drawer: idle buttons; catalog opens with filter chips and cards
-ok(await ev(()=>/הוספת פריטים חדשים/.test(document.querySelector('#rmDrawer [data-list="cat"]').textContent)&&!document.querySelector('#rmDrawer [data-list="stock"]')),'idle drawer: a catalog button, no stock button while nothing is put away');
+ok(await ev(()=>/פריטים ומלאי/.test(document.querySelector('#rmDrawer [data-list="cat"]').textContent)&&!document.querySelector('#rmDrawer [data-list="stock"]')&&!/במלאי/.test(document.getElementById('rmDrawer').textContent)),'idle drawer: one list button for shop and inventory (no separate stock button, no stock count while nothing is put away)');
 await click('[data-list="cat"]');
-ok(await ev(()=>document.querySelectorAll('#rmDrawer .catcard').length===83&&document.querySelectorAll('#rmDrawer .catchips .chip').length>=4&&/פריטים חדשים/.test(document.getElementById('rmDrawer').textContent)),'catalog: 83 cards and filter chips');
+ok(await ev(()=>document.querySelectorAll('#rmDrawer .catcard').length===83&&document.querySelectorAll('#rmDrawer .catchips .chip').length>=4&&!!document.querySelector('#rmDrawer .catchips [data-filter=own]')),'list: 83 cards and filter chips incl. "mine"');
 ok(await ev(()=>{const c=document.querySelector('#rmDrawer .catcard');return /1 🪙/.test(c.textContent)&&c.querySelector('img').getAttribute('src')===ROOM_CATALOG[0].src;}),'a card shows the plant picture, its name and its price');
 await click('[data-filter="plants"]');
 ok(await ev(()=>document.querySelectorAll('#rmDrawer .catcard').length===21&&document.querySelector('.chip.on').dataset.filter==='plants'),'the plants filter works');
@@ -76,11 +76,18 @@ ok(await ev(()=>space.things[0].x===8&&space.things[0].y===8&&space.spent===2),'
 // put away -> stock -> place again
 await ev(()=>onRoomTap('thing:0'));await click('[data-away]');
 ok(await ev(()=>space.things[0].x===-1&&space.things.length===3&&!document.querySelector('[data-hit="thing:0"]')&&space.spent===2),'put away: leaves the room, stays owned, nothing refunded');
-ok(await ev(()=>!!document.querySelector('#rmDrawer [data-list="stock"]')&&/מלאי · 1/.test(document.getElementById('rmDrawer').textContent)),'the stock button counts what is put away');
-await click('[data-list="stock"]');
-ok(await ev(()=>document.querySelectorAll('#rmDrawer [data-unstow]').length===1),'the stock lists it');
+ok(await ev(()=>!document.querySelector('#rmDrawer [data-list="stock"]')&&/1 במלאי/.test(document.querySelector('#rmDrawer [data-list="cat"]').textContent)),'the single list button counts what is put away');
+await click('[data-list="cat"]');
+ok(await ev(()=>{const own=document.querySelectorAll('#rmDrawer .catcard.owned');const st=document.querySelectorAll('#rmDrawer .catcard[data-choose]');return own.length>=1&&st.length===1&&/🎒 1/.test(st[0].textContent)&&document.querySelectorAll('#rmDrawer .catcard').length===83;}),'the list shows everything; what you own is marked, and a card with a copy put away is marked 🎒');
+await click('[data-filter=own]');
+ok(await ev(()=>{const n=document.querySelectorAll('#rmDrawer .catcard').length;return n>=1&&n<10&&[...document.querySelectorAll('#rmDrawer .catcard')].every(c=>c.classList.contains('owned'));}),'"mine" filter lists only what you own');
+await click('[data-choose]');
+ok(await ev(()=>!!document.querySelector('#rmDrawer [data-unstow]:not([disabled])')&&!!document.querySelector('#rmDrawer [data-pick]')&&/קנו עוד אחד/.test(document.getElementById('rmDrawer').textContent)),'a card with a copy put away offers: place it from the inventory, or buy another');
 await click('[data-unstow]');await tapCell(3,6);await click('[data-place]');
-ok(await ev(()=>space.things[0].x===3&&space.things[0].y===6&&space.spent===2),'placed from the stock for free');
+ok(await ev(()=>space.things[0].x===3&&space.things[0].y===6&&space.spent===2),'placed from the inventory for free');
+await ev(()=>{RM.sel=null;RM.list='cat';RM.choose=null;RM.filter='all';renderDrawer();});
+ok(await ev(()=>!document.querySelector('#rmDrawer .catcard[data-choose]')&&!!document.querySelector('#rmDrawer .catcard.owned[data-pick]')),'nothing put away: tapping an owned card goes straight to buying another');
+ok(await ev(()=>{RM.list=null;RM.sel={t:'thing',i:0};renderDrawer();const b=document.querySelector('#rmDrawer [data-away]');return b.textContent.trim()==='מחיקה'&&/נשאר שלכם/.test(document.getElementById('rmDrawer').textContent);}),'the put-away button is called delete, with a note that bought items stay yours');
 // persistence and sanitizing
 await p.reload();await p.waitForTimeout(500);
 ok(await ev(()=>space.things.length===3&&space.things[0].x===3&&space.things[0].y===6),'things survive a reload');
@@ -103,8 +110,8 @@ await ev(()=>onRoomTap('item:bed'));
 ok(await ev(()=>!RM.list&&RM.sel&&RM.sel.id==='bed'&&/מיטה/.test(document.getElementById('rmDrawer').textContent)),'catalog open: tapping the bed closes it and shows the bed options');
 await ev(()=>{RM.sel=null;RM.list='cat';renderDrawer();});await ev(()=>onRoomTap('surf:wl'));
 ok(await ev(()=>!RM.list&&RM.sel&&RM.sel.k==='wl'&&document.querySelectorAll('#rmDrawer .brush').length===16),'catalog open: tapping a wall closes it and shows the colors');
-await ev(()=>{RM.sel=null;RM.list='stock';renderDrawer();});await ev(()=>onRoomTap('thing:0'));
-ok(await ev(()=>!RM.list&&RM.sel&&RM.sel.t==='thing'),'stock open: tapping a placed plant closes it and selects the plant');
+await ev(()=>{RM.sel=null;RM.list='cat';RM.filter='own';renderDrawer();});await ev(()=>onRoomTap('thing:0'));
+ok(await ev(()=>!RM.list&&RM.sel&&RM.sel.t==='thing'),'list open: tapping a placed plant closes it and selects the plant');
 await ev(()=>{RM.sel=null;RM.list='cat';renderDrawer();});await ev(()=>onRoomTap(null));
 ok(await ev(()=>!RM.list),'catalog open: tapping empty space closes it');
 await ev(()=>{RM.list=null;RM.pl={k:'pl00',i:-1,x:6,y:6};rmRedraw();renderDrawer();onRoomTap('item:bed');});
@@ -116,7 +123,7 @@ ok(await ev(()=>['toybox1','toybox2','toybox3','armchair','heart','star','desk',
 const rc2=await ev(async()=>{const c=catOf('heart');const load=s=>new Promise(r=>{const i=new Image();i.onload=()=>r(i);i.src=s;});const data=i=>{const k=document.createElement('canvas');k.width=i.naturalWidth;k.height=i.naturalHeight;const x=k.getContext('2d');x.drawImage(i,0,0);return x.getImageData(0,0,k.width,k.height).data;};
   const B=data(await load(c.src)),A=data(await load(c.base)),R=data(await load(await recolorSprite(c,c.dc)));let n=0,d=0;for(let i=0;i<B.length;i+=4){if(A[i+3]<200)continue;if(Math.abs(A[i]-B[i])+Math.abs(A[i+1]-B[i+1])+Math.abs(A[i+2]-B[i+2])>24){n++;d+=Math.abs(R[i]-B[i])+Math.abs(R[i+1]-B[i+1])+Math.abs(R[i+2]-B[i+2]);}}return {n,mean:d/n/3};});
 ok(rc2.n>2000&&rc2.mean<14,'the heart cushion: recoloring with its default color reproduces the shown picture '+JSON.stringify(rc2));
-await ev(()=>{space.things=[];space.spent=0;RM.sel=null;RM.pl=null;RM.list='cat';renderDrawer();});
+await ev(()=>{space.things=[];space.spent=0;RM.sel=null;RM.pl=null;RM.list='cat';RM.filter='all';renderDrawer();});
 await click('[data-pick="toybox1"]');
 ok(await ev(()=>RM.pl&&RM.pl.k==='toybox1'&&/4 מטבעות|קנו · 4/.test(document.getElementById('rmDrawer').textContent)&&document.querySelector('.rmtile').getAttribute('points').split(' ').length===4),'a 2x2 item previews with one highlighted footprint');
 await tapCell(6,6);

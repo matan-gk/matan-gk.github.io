@@ -61,6 +61,9 @@ ok(await ev(()=>{const b=document.querySelector('#rmDrawer [data-popt="d"] img')
 // bed level 5: the mattress between the pillow and the blanket belongs to the sheet, not to the curtains (numbers from the mask picture)
 const mk=await ev(async()=>{const src=ROOM_ART.bed[4].mask;const im=new Image();im.src=src;await im.decode();const c=document.createElement('canvas');c.width=im.width;c.height=im.height;const x=c.getContext('2d');x.drawImage(im,0,0);const d=x.getImageData(0,0,c.width,c.height).data;let sheetNearPillow=0;for(let y=190;y<250;y++)for(let X=145;X<172;X++){const i=(y*c.width+X)*4;if(d[i+1]>200&&d[i]<60&&d[i+2]<60)sheetNearPillow++;}return sheetNearPillow;});
 ok(mk>150,'level 5 mask: the mattress under the pillow is sheet-coloured ('+mk+' px)');
+// beds 1-3: the sheet is turned down along the back edge of the blanket too (a second strip of sheet next to the one at the right)
+const strips=await ev(async()=>{const o=[];for(const lv of [0,1,2]){const im=new Image();im.src=ROOM_ART.bed[lv].mask;await im.decode();const c=document.createElement('canvas');c.width=im.width;c.height=im.height;const x=c.getContext('2d');x.drawImage(im,0,0);const d=x.getImageData(0,0,c.width,c.height).data;let n=0;for(let y=70;y<115;y++)for(let X=70;X<140;X++){const i=(y*c.width+X)*4;if(d[i+1]>200&&d[i]<60&&d[i+2]<60)n++;}o.push(n);}return o;});
+ok(strips.every(n=>n>250),'beds 1-3: the sheet strip along the back edge of the blanket is sheet-coloured: '+strips.join(', ')+' px');
 await click('#rmDrawer [data-pback]');
 // buy a blanket colour: preview first (nothing paid), cancel, then buy; the picture is repainted red in the blanket only
 await click('#rmDrawer [data-part=blanket]');

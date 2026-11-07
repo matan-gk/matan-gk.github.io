@@ -27,6 +27,9 @@ PATCHES = [
 # a patch that touches another part through a thin bridge is cut apart: (level index, patch number, erosion, part for the pieces left of x_max)
 # level 5: the mattress under the pillow (visible between the pillow and the blanket) was joined to the right-hand curtain; it belongs to the sheet
 SPLITS = [(4, 182, 3, 'sheet', 170)]
+# the sheet is turned down over the blanket along the back edge of beds 1-3: the strip above the fold line is sheet (second side of the sheet, next to the one at the right)
+# (level index, patch number, fold line from (x1,y1) to (x2,y2) in picture pixels; only left of x2)
+STRIPS = [(0, 52, (72.5, 75), (141, 114)), (1, 57, (76, 77.5), (142, 116)), (2, 66, (70, 101), (138, 136))]
 def save_asset(img, ext='webp', **kw):
     import io
     b = io.BytesIO(); img.save(b, ext.upper(), **kw); raw = b.getvalue()
@@ -57,6 +60,11 @@ def masks():
             owner[m & (near == 1)] = names.index(part) + 1
             for q, pn in enumerate(names):
                 if pn == 'curtain': owner[m & (near == 2)] = q + 1
+        for slv, k, (x1, y1), (x2, y2) in STRIPS:
+            if slv != lv: continue
+            yy, xx = np.mgrid[:lab.shape[0], :lab.shape[1]]
+            strip = (lab == k) & (xx <= x2) & (yy < y1 + (y2 - y1) / (x2 - x1) * (xx - x1))
+            owner[strip] = names.index('sheet') + 1
         light = (a[...,3] > 128) & (mn > 110)
         for _ in range(2):   # the anti-aliased rim of a patch belongs to it
             for pi in range(len(names)):

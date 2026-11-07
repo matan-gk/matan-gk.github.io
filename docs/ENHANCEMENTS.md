@@ -408,3 +408,10 @@ Chosen design: **three options on the Backup page** (see Built). A recovery-code
 - **Small train tracks re-cut** with `sheetcut.cut_soft` (upscale first, alpha from the distance to white, white un-mixed from the edges: no grey halo). Chairs use it too. The telescope source is saved in `art/telescope-source.png`.
 - `tools/items2.py` stays the single place where these items' sizes, flat flag, prices and default colours are set; rerun it, then `python3 tools/externalize.py`.
 - Version 2026.11.07e.
+
+## Step 7: bed sheet strip, delete, one list for shop and inventory (branch `fixes-items`)
+
+- **Bed sheet, both sides**: on beds 1-3 the sheet is also turned down along the back edge of the blanket (the strip above the fold line, next to the pillow). It was part of the blanket in the colour map; `tools/parts.py` `STRIPS` now assigns it to the sheet (a half-plane cut along the fold line, per level). Test: `colortest` counts sheet-coloured mask pixels in that strip on beds 1-3.
+- **Delete**: the "put in the inventory" button on a placed item is now "מחיקה", with a note that a bought item stays yours and can be placed again from the list. (Still `data-away`: the copy leaves the room and stays owned, nothing is refunded.)
+- **One list**: the separate shop and inventory are one list (button "פריטים ומלאי", with how many copies are put away). It shows every item; what you own is outlined and marked "✓ ×n", a copy put away is marked 🎒. A "שלי" (mine) chip filters to owned items. Tapping an item with no copy put away goes straight to buy-and-place; tapping an item with a copy put away opens a choice: place it from the inventory (free) or buy another one (`RM.choose`). `RM.list==='stock'` no longer exists.
+- Version 2026.11.07f.
