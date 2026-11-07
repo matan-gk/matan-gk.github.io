@@ -27,7 +27,7 @@ ok(md.every(m=>m.parts.every(n=>m.cnt[n]>=250)),'every bed level has its parts i
 ok(md.every(m=>(m.l>=4)===(m.cnt.curtain>0)),'curtains exist only on levels 4 and 5');
 ok(md.every(m=>m.dark<m.cnt.blanket*0.02),'the masks cover only light linen, never wood or outlines: '+md.map(m=>m.dark).join(','));
 ok(await ev(()=>ROOM_PATTERNS.length===1&&ROOM_PATTERNS[0].parts.join()==='bed.blanket'&&/^assets\//.test(ROOM_PATTERNS[0].src)),'one pattern (rainbow unicorn), offered on the bed blanket only');
-ok(await ev(()=>{const k=partKeys();return k.includes('pot')&&k.includes('bed.pillow')&&k.length===12&&ROOM_CATALOG.filter(hasParts).every(c=>c.base)&&ROOM_CATALOG.filter(c=>!c.base).every(c=>!hasParts(c));}),'12 colorable parts: 4 bed parts, the plants\' pot, 7 furniture surfaces; items without a magenta surface have none');
+ok(await ev(()=>{const k=partKeys();return k.includes('pot')&&k.includes('bed.pillow')&&k.length===25&&ROOM_CATALOG.filter(hasParts).every(c=>c.base)&&ROOM_CATALOG.filter(c=>!c.base).every(c=>!hasParts(c));}),'12 colorable parts: 4 bed parts, the plants\' pot, 7 furniture surfaces; items without a magenta surface have none');
 ok(await ev(()=>[1,2,3,4,5].every(l=>{space.lv.bed=l;return bedSrc(l)===ROOM_ART.bed[l-1].src;})&&(space.lv.bed=1,true)),'the default bed draws the original picture');
 
 // the drawer: the bed keeps its level thumbnails and gains one button per part

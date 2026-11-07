@@ -385,3 +385,16 @@ Chosen design: **three options on the Backup page** (see Built). A recovery-code
 - **Tests:** `tests/` (42 tests, one command, about 1.5 minutes; `--quick` skips two slow ones). Pure logic is read from the game file at run time, so it never tests a stale copy. Run it before every publish.
 
 - **Publishing note (2026-11-02):** an artifact may hold at most 512 files, so `tools/build_split.py` now keeps pictures under 10 KB inside the page (`MIN_SPLIT`, default 10000 bytes; the page is about 2 MB) and only splits larger ones; when republishing, delete assets that the new `assets.json` no longer lists (map form `"assets/x.webp": null`).
+
+## Step 5: 45 new items and rugs (branch `items2`, on top of `colors`)
+
+- **Art**: two sprite sheets (`art/sheet-a-rugs-furniture.png`, `art/sheet-b-toys.jpg`) cut with `tools/sheetcut.py`, baked/fitted/written into `ROOM_CATALOG` by `tools/items2.py` (rerun-safe: it replaces entries with the same ids). Magenta surfaces are baked to a default colour exactly like earlier items (`base` = magenta original, `dc` = default, `ref` = brightness reference).
+- **Catalog now 83 items** (was 38), price sum 297. **25 colorable part keys** (was 12). Max-out cost is **860** (was 425): each new colorable key adds 19.
+- **Flat things** (`flat:true`; 13 items: 5 rugs, 3 train tracks/trainset, mat, tic-tac-toe, chess, 2 puzzles) lie on the floor. Rule: a flat thing only excludes other flat things; every other item can stand on it. They are drawn first (under everything), then solid things by depth, and have no drop shadow. Implemented in `isFlat`, `footFree`, `spaceClean` (separate `occF` occupancy) and `roomSVG` ordering.
+- **Rugs** are a new drawer group `rugs` ("שטיחים") and share one part key `rug` through the new optional catalog field `pk` (`partKeyOf` uses `c.pk` first), so a bought rug colour applies to every rug.
+- **Defaults and sizes** (fw x fd, price): rug_sq 2x2 mint, 3; rug_sq2 3x3 pink, 5; rug_rd 2x2 lilac, 3; rug_rd2 3x3 yellow, 5; rug_fluffy 2x2 pale pink, 5; tracks 3x3 red/blue, trainset 3x4; dollhouse 2x2; wardrobes 2x1; slides 1x3 / 3x1; small toys 1x1.
+- **Not colorable**: guitar2 (no magenta in the art), plus items without a magenta surface.
+- **Part names** added for: dollhouse, wardrobe, chair, slide, track, guitar, rug, dressbox, car, laptop, monkey, ladybug, bunny.
+- **Known soft spots**: sheet A is low resolution; flat fits for track2 and mat are loose (groundtest has documented per-item tolerances `FLATTOL`, `WIDE`); some near-duplicate pictures (soccer/soccer2, laptop/laptop2) were kept.
+- **Tests**: new `flattest.js`; `catalogtest`, `spacetest`, `colortest`, `groundtest` updated (83 items, 860 max-out, 25 keys).
+- Version 2026.11.07d.

@@ -13,7 +13,7 @@ const click=async sel=>{await ev(s=>document.querySelector(s).click(),sel);};
 const tapCell=async(x,y)=>{const pt=await ev(([x,y])=>{const g=document.getElementById('rmR'),m=g.getScreenCTM(),sx=500+(x+.5-(y+.5))*50,sy=400+(x+.5+y+.5)*25;return [m.a*sx+m.c*sy+m.e,m.b*sx+m.d*sy+m.f];},[x,y]);await p.mouse.click(pt[0],pt[1]);};
 
 // catalog data
-ok(await ev(()=>ROOM_CATALOG.length===38&&ROOM_CATALOG.every(c=>c.n&&(c.id.startsWith('pl')?c.p<=3:c.p<=8)&&c.p>=1&&/^assets\//.test(c.src)&&(c.base?(c.src!==c.base&&c.ref>0):!c.dc)&&c.r&&c.r[2]>0&&c.r[3]>0&&true)&&new Set(ROOM_CATALOG.map(c=>c.id)).size===38),'catalog: 38 items; plants cost 1-3; colorable ones keep their magenta original');
+ok(await ev(()=>ROOM_CATALOG.length===83&&ROOM_CATALOG.every(c=>c.n&&(c.id.startsWith('pl')?c.p<=3:c.p<=8)&&c.p>=1&&/^assets\//.test(c.src)&&(c.base?(c.src!==c.base&&c.ref>0):!c.dc)&&c.r&&c.r[2]>0&&c.r[3]>0&&true)&&new Set(ROOM_CATALOG.map(c=>c.id)).size===83),'catalog: 83 items; plants cost 1-3; colorable ones keep their magenta original');
 ok(await ev(()=>/^pl/.test(ROOM_CATALOG[0].id)&&Object.keys(ROOM_GROUPS).includes('plants')),'plants are the first group');
 // default pot is brown, original magenta
 const px=await ev(async()=>{const get=src=>new Promise(r=>{const i=new Image();i.onload=()=>{const c=document.createElement('canvas');c.width=i.naturalWidth;c.height=i.naturalHeight;const x=c.getContext('2d');x.drawImage(i,0,0);r(x.getImageData(0,0,c.width,c.height).data);};i.src=src;});
@@ -33,7 +33,7 @@ ok(rc.blue>0.9&&rc.leaf>0.97,'recolor to blue turns the pot blue and leaves the 
 // drawer: idle buttons; catalog opens with filter chips and cards
 ok(await ev(()=>/הוספת פריטים חדשים/.test(document.querySelector('#rmDrawer [data-list="cat"]').textContent)&&!document.querySelector('#rmDrawer [data-list="stock"]')),'idle drawer: a catalog button, no stock button while nothing is put away');
 await click('[data-list="cat"]');
-ok(await ev(()=>document.querySelectorAll('#rmDrawer .catcard').length===38&&document.querySelectorAll('#rmDrawer .catchips .chip').length>=4&&/פריטים חדשים/.test(document.getElementById('rmDrawer').textContent)),'catalog: 38 cards and filter chips');
+ok(await ev(()=>document.querySelectorAll('#rmDrawer .catcard').length===83&&document.querySelectorAll('#rmDrawer .catchips .chip').length>=4&&/פריטים חדשים/.test(document.getElementById('rmDrawer').textContent)),'catalog: 83 cards and filter chips');
 ok(await ev(()=>{const c=document.querySelector('#rmDrawer .catcard');return /1 🪙/.test(c.textContent)&&c.querySelector('img').getAttribute('src')===ROOM_CATALOG[0].src;}),'a card shows the plant picture, its name and its price');
 await click('[data-filter="plants"]');
 ok(await ev(()=>document.querySelectorAll('#rmDrawer .catcard').length===21&&document.querySelector('.chip.on').dataset.filter==='plants'),'the plants filter works');
@@ -87,7 +87,7 @@ ok(await ev(()=>space.things.length===3&&space.things[0].x===3&&space.things[0].
 const cl=await ev(()=>cleanProgress({space:{earned:50,spent:0,trued:true,unlocked:true,things:[{k:'pl00',x:5,y:5},{k:'pl00',x:5,y:5},{k:'nope',x:1,y:9},{k:'pl01',x:1,y:1},{k:'pl02',x:12,y:3},{k:'pl03',x:-1,y:-1},'x',null]}}).space.things);
 ok(cl.length===5&&cl[0].x===5&&cl[1].x===-1&&cl[2].x===-1&&cl[3].x===-1&&cl[4].x===-1&&!cl.some(t=>t.k==='nope'),'bad things are dropped; double, blocked and off-floor cells go to the stock: '+JSON.stringify(cl));
 const mc=await ev(()=>roomMaxCost());
-ok(mc===18+14+54+109+12*19+2,'max-out cost = 195 (bed, window, 3 surfaces, 38 floor items) + 12 colorable parts x 19 (13 basic + 3 premium x2) + 2 for the bed blanket pattern = 425: '+mc);
+ok(mc===18+14+54+297+25*19+2,'max-out cost = 86 (bed, window, 3 surfaces) + 83 floor items (297) + 25 colorable parts x 19 + 2 for the bed blanket pattern = 860: '+mc);
 // bed footprint: 3 x 4 cells, and the code tracks it that way
 ok(await ev(()=>{const cnt=l=>{let n=0,all=true;for(let y=0;y<10;y++)for(let x=0;x<10;x++)if(roomBlocked(x,y,l)){n++;if(!(x<bedFp(l)[0]&&y<bedFp(l)[1]))all=false;}return [n,all];};return JSON.stringify([1,2,3,4,5].map(cnt))===JSON.stringify([[12,true],[12,true],[12,true],[9,true],[12,true]]);}),'the bed blocks its own footprint at the back corner: 3 x 4 = 12 cells for levels 1-3 and 5, 3 x 3 = 9 for level 4');
 // switching to a smaller bed frees cells; switching back stows what is in the way
