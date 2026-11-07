@@ -415,3 +415,7 @@ Chosen design: **three options on the Backup page** (see Built). A recovery-code
 - **Delete**: the "put in the inventory" button on a placed item is now "מחיקה", with a note that a bought item stays yours and can be placed again from the list. (Still `data-away`: the copy leaves the room and stays owned, nothing is refunded.)
 - **One list**: the separate shop and inventory are one list (button "פריטים ומלאי", with how many copies are put away). It shows every item; what you own is outlined and marked "✓ ×n", a copy put away is marked 🎒. A "שלי" (mine) chip filters to owned items. Tapping an item with no copy put away goes straight to buy-and-place; tapping an item with a copy put away opens a choice: place it from the inventory (free) or buy another one (`RM.choose`). `RM.list==='stock'` no longer exists.
 - Version 2026.11.07f.
+
+## Step 8: things on furniture, phase 1 (branch `items-on-furniture-p1`)
+
+Data model, rules and save cleaning only (nothing drawn yet); design and phases in `docs/ITEMS_ON_FURNITURE.md`. New: thing ids `u`, `thing.on = {h,dx,dy}`, catalog `top` on 6 hosts, `BED_TOP`, `canSit`, `surfFree`, `topOf`, `settleSurfaces`, `SURF_SUB`/`space.sub` (for a finer grid later). Moving a host carries its sitters; deleting it or upgrading the bed sends sitters with no place to the inventory. The delete note names how many things go along, only when there are some. Test: `surfacetest.js`. Version 2026.11.07g.
