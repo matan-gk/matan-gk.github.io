@@ -616,6 +616,10 @@ body[data-view="play"] .card{background:color-mix(in srgb, var(--card) 76%, tran
 .pa-h{font-size:1.02rem; font-weight:800; margin:0 0 4px; color:var(--text)}
 .mxd>summary{cursor:pointer; list-style:none; margin:0}
 .mxd>summary::-webkit-details-marker{display:none}
+.welcome-detail>summary{list-style:none; display:flex; align-items:center; gap:8px}
+.welcome-detail>summary::-webkit-details-marker{display:none}
+.welcome-detail>summary::after{content:'▾'; color:var(--muted); font-size:.8rem; margin-inline-start:auto; transition:transform .15s ease}
+.welcome-detail[open]>summary::after{transform:rotate(180deg)}
 .mxtag{font-size:.7rem; font-weight:700; background:var(--card2); color:var(--purple); padding:2px 8px; border-radius:999px; margin-inline-start:6px}
 .mxwrap{overflow-x:auto}
 table.qmx{width:100%; table-layout:fixed; border-collapse:collapse; font-size:.85rem}
@@ -5630,8 +5634,33 @@ function renderProfilesInner(){
   if(profMode.view==='form'){
     const editing = profMode.editId ? store.profiles.find(x=>x.id===profMode.editId) : null;
     document.getElementById('profTitle').textContent = profMode.first ? '👋 ברוכים הבאים!' : (editing ? '✏️ עריכת פרופיל' : '➕ פרופיל חדש');
+    const welcomeDetail = profMode.first ? `
+      <details class="welcome-detail" style="margin:12px 0 16px; padding:12px; background:var(--card2); border-radius:12px;">
+        <summary style="cursor:pointer; font-weight:700; display:flex; align-items:center; gap:8px; list-style:none;">
+          <span style="font-size:1.1rem;">📖</span> עוד פרטים על המשחק
+        </summary>
+        <div style="margin-top:12px; line-height:1.6; font-size:.9rem;">
+          <p><b>דוגמאות לשאלות:</b></p>
+          <ul style="margin:8px 0; padding-inline-start:20px;">
+            <li>חיבור וחיסור עד 20: "יש 7 תפוחים, אכלנו 3. כמה נשארו?"</li>
+            <li>השוואת כמויות: "למי יותר מדבקות, לי עם 12 או לך עם 9?"</li>
+            <li>זיהוי תבניות: "מה הצורה הבאה? 🔴🔵🔴🔵🔴 ?"</li>
+            <li>סדרות מספרים: "השלם: 2, 4, 6, __"</li>
+            <li>בעיות מילוליות קצרות עם איורים</li>
+          </ul>
+          <p style="margin-top:12px; padding-top:12px; border-top:1px solid var(--card3);">
+            <b>צילום מסך:</b> המשחק מציג שאלות עם איורים צבעוניים, משוב מיידי, ואזור מתנות שגדל עם כל תשובה נכונה.
+          </p>
+          <p style="margin-top:12px; font-style:italic; color:var(--muted);">
+            פיתחתי את המשחק עבור הבת שלי, והוא ממשיך לגדול לפי הבקשות שלה.
+            אשמח לקבל תגובות מכולם — בתוך המשחק (כפתור "דיווח") או ישירות במייל.
+          </p>
+        </div>
+      </details>
+    ` : '';
     body.innerHTML = `<div class="pform">
-      ${profMode.first?'<p class="pa-sub" style="text-align:center">מי משחק? אפשר להוסיף עוד פרופילים בהמשך.</p>':''}
+      ${profMode.first?'<p class="pa-sub" style="text-align:center">מתמטיקה בכיף — תרגילים קצרים, משוב מיידי, אוסף מתנות שגדל עם כל הצלחה.</p>':''}
+      ${welcomeDetail}
       <div class="pa-field"><label for="pfName">שם (אפשר להשאיר ריק)</label>
       <input type="text" id="pfName" maxlength="20" autocomplete="off" value="${editing?esc(editing.name):''}"></div>
       <div class="pa-field"><label>איך פונים אל השחקן?</label>
