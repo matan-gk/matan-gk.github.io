@@ -28,6 +28,7 @@ const TESTS = [
   ['splittest','splittest.js','the repository as site: small page, picture files listed and used, every picture, icon and font loads'],
   ['tokentest','tokentest.js','personal-space tokens: one per upgrade, stored counter, one-time true-up, balance pictures by tier (1/10/50/100/300)'],
   ['catalogtest','catalogtest.js','personal space step 3: catalog, buy-and-place preview, floor cells, move, put away, stock, brown pots and the magenta recolor'],
+  ['flattest','flattest.js','personal space: rugs and other flat floor things (stand-on rule, draw order, no shadow, shared rug colour)'],
   ['groundtest','groundtest.js','grounding: from the real sprite pixels, every floor item and bed level stands on its footprint corners (no floating)'],
   ['colortest','colortest.js','colors of parts: bed blanket/sheet/pillow/curtains, pots, furniture; palette, pattern, prices, free switching, repainting, saving'],
   ['spacetest','spacetest.js','personal space: locked teaser, unlock ceremony, poof, room, zoom/pan, upgrades and colors cost tokens'],
