@@ -74,7 +74,7 @@ await ev(()=>{rmZoomAt(0.2,500,450);});ok(await ev(()=>RM.k===1&&RM.tx===0&&RM.t
 ok(await ev(()=>roomMax('bed')===5&&roomMax('window')===5&&ROOM_ART.bed.length===5&&ROOM_ART.window.length===5),'bed and window have 5 levels with pictures');
 const grow=await ev(()=>[1,2,3,4,5].map(l=>{const a=ROOM_ART.window[l-1];return [-85-a.ay, a.h];}));
 ok(grow.every((g,i)=>i===0||g[0]<grow[i-1][0]-1)&&grow.every(g=>g[0]+g[1]>=-92&&g[0]+g[1]<=-75),'the window keeps its sill and grows upward every level: tops '+grow.map(g=>Math.round(g[0])));
-ok(await ev(()=>{const c=gx2s(0,0);return BED_AT[0]>c[0]-150&&BED_AT[0]<c[0]+50&&ROOM_ART.bed.every(a=>BED_AT[1]+RM_DY-a.ay*BED_SCALE>=0);}),'the bed is anchored at the back corner of the grid and every level fits inside the room');
+ok(await ev(()=>ROOM_ART.bed.every(a=>a.fp&&a.r&&400+a.r[1]+RM_DY>=0&&a.fp[0]===3&&(a.fp[1]===3||a.fp[1]===4))),'every bed level has a footprint (3 x 4 or 3 x 3) and its picture fits inside the room');
 ok(await ev(()=>{const i=document.querySelector('[data-hit="item:bed"] image');return !!i&&/^assets\//.test(i.getAttribute('href'));}),'the bed is drawn from its picture');
 
 // the bed is grounded and its bedding is white until the coloring step

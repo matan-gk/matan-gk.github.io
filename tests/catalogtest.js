@@ -13,7 +13,7 @@ const click=async sel=>{await ev(s=>document.querySelector(s).click(),sel);};
 const tapCell=async(x,y)=>{const pt=await ev(([x,y])=>{const g=document.getElementById('rmR'),m=g.getScreenCTM(),sx=500+(x+.5-(y+.5))*50,sy=400+(x+.5+y+.5)*25;return [m.a*sx+m.c*sy+m.e,m.b*sx+m.d*sy+m.f];},[x,y]);await p.mouse.click(pt[0],pt[1]);};
 
 // catalog data
-ok(await ev(()=>ROOM_CATALOG.length===38&&ROOM_CATALOG.every(c=>c.n&&(c.id.startsWith('pl')?c.p<=3:c.p<=8)&&c.p>=1&&/^assets\//.test(c.src)&&(c.base?(c.src!==c.base&&c.ref>0):!c.dc)&&c.w>0&&c.ay>0&&true)&&new Set(ROOM_CATALOG.map(c=>c.id)).size===38),'catalog: 38 items; plants cost 1-3; colorable ones keep their magenta original');
+ok(await ev(()=>ROOM_CATALOG.length===38&&ROOM_CATALOG.every(c=>c.n&&(c.id.startsWith('pl')?c.p<=3:c.p<=8)&&c.p>=1&&/^assets\//.test(c.src)&&(c.base?(c.src!==c.base&&c.ref>0):!c.dc)&&c.r&&c.r[2]>0&&c.r[3]>0&&true)&&new Set(ROOM_CATALOG.map(c=>c.id)).size===38),'catalog: 38 items; plants cost 1-3; colorable ones keep their magenta original');
 ok(await ev(()=>/^pl/.test(ROOM_CATALOG[0].id)&&Object.keys(ROOM_GROUPS).includes('plants')),'plants are the first group');
 // default pot is brown, original magenta
 const px=await ev(async()=>{const get=src=>new Promise(r=>{const i=new Image();i.onload=()=>{const c=document.createElement('canvas');c.width=i.naturalWidth;c.height=i.naturalHeight;const x=c.getContext('2d');x.drawImage(i,0,0);r(x.getImageData(0,0,c.width,c.height).data);};i.src=src;});
@@ -89,7 +89,13 @@ ok(cl.length===5&&cl[0].x===5&&cl[1].x===-1&&cl[2].x===-1&&cl[3].x===-1&&cl[4].x
 const mc=await ev(()=>roomMaxCost());
 ok(mc===18+14+54+109,'max-out cost includes one of each floor item (109): '+mc);
 // bed footprint: 3 x 4 cells, and the code tracks it that way
-ok(await ev(()=>{let n=0,cells=[];for(let y=0;y<10;y++)for(let x=0;x<10;x++)if(roomBlocked(x,y)){n++;cells.push([x,y]);}return n===12&&BED_CELLS.w===3&&BED_CELLS.d===4&&cells.every(([x,y])=>x<3&&y<4);}),'the bed blocks exactly 3 x 4 = 12 cells at the back corner');
+ok(await ev(()=>{const cnt=l=>{let n=0,all=true;for(let y=0;y<10;y++)for(let x=0;x<10;x++)if(roomBlocked(x,y,l)){n++;if(!(x<bedFp(l)[0]&&y<bedFp(l)[1]))all=false;}return [n,all];};return JSON.stringify([1,2,3,4,5].map(cnt))===JSON.stringify([[12,true],[12,true],[12,true],[9,true],[9,true]]);}),'the bed blocks its own footprint at the back corner: 3 x 4 = 12 cells for levels 1-3, 3 x 3 = 9 for levels 4-5');
+// switching to a smaller bed frees cells; switching back stows what is in the way
+await ev(()=>{window.__sv=JSON.stringify([space.things,space.lv.bed,space.top.bed]);space.top.bed=5;space.lv.bed=5;space.things=[{k:'pl00',x:1,y:3}];});
+ok(await ev(()=>{stowBlocked();return space.things[0].x===1;}),'level 5 bed (3 x 3) leaves cell 1,3 free: the plant stays');
+await ev(()=>{space.lv.bed=1;stowBlocked();});
+ok(await ev(()=>space.things[0].x===-1&&space.things[0].y===-1),'switching to a 3 x 4 bed stows the plant that would be under it');
+await ev(()=>{const s=JSON.parse(window.__sv);space.things=s[0];space.lv.bed=s[1];space.top.bed=s[2];});
 ok(await ev(()=>roomBlocked(2,3)&&!roomBlocked(3,0)&&!roomBlocked(0,4)),'cell 2,3 is blocked; 3,0 and 0,4 are free');
 // the catalog closes when something in the room is tapped; only placing a floor item is a mode
 await ev(()=>{space.spent=0;RM.sel=null;RM.pl=null;RM.list='cat';renderDrawer();});
