@@ -2107,7 +2107,7 @@ function cloudProfileFromDoc(C, helpers){
 // ===== CLOUD (Google sign-in, cloud progress, problem reports) =====
 // Local-first: the game always works from this device's storage. The cloud is a mirror, so no internet / no account / no quota never blocks play.
 // Everything here is off while CLOUD_CONFIG is null. See firebase/SETUP.md for how to create the (free) Firebase project and paste its settings below.
-const APP_VERSION = '2026.11.07a';       // keep equal to VERSION in sw.js (a test checks it)
+const APP_VERSION = '2026.11.07b';       // keep equal to VERSION in sw.js (a test checks it)
 const CLOUD_CONFIG = {apiKey:"AIzaSyAlq_TJNGvWPJpUrpbdq_hkAoURydqMzm0", authDomain:"learning-quest-1.firebaseapp.com", projectId:"learning-quest-1", appId:"1:98931179722:web:78fb00084ccba3efb53433"};   // e.g. {apiKey:'...', authDomain:'xxx.firebaseapp.com', projectId:'xxx', appId:'...'}
 const CLOUD_LIMITS = {
   pushDelayMs: 60000,          // at most one upload per profile per minute while playing
@@ -4986,8 +4986,8 @@ function startCeremony(){
 }
 
 // ---- the room: a page of its own ----
-const RM_DY = 100;   // the room is drawn this far down inside the frame, so tall furniture (the top bed levels) has room above the back corner
-const RM = {W:1000, H:1000, k:1, tx:0, ty:0, sel:null, pv:null, pl:null, list:null, filter:'all'};   // sel: {t:'item',id}|{t:'surf',k}|{t:'thing',i}; pv: purchase being previewed; pl: floor item being placed {k,i,x,y}; list: 'cat'|'stock'
+const RM_DY = 250;   // the room is drawn this far down inside the frame: the walls are 600 high (corner at -200 in room units) and the top bed levels stand above the back corner
+const RM = {W:1000, H:1150, k:1, tx:0, ty:0, sel:null, pv:null, pl:null, list:null, filter:'all'};   // sel: {t:'item',id}|{t:'surf',k}|{t:'thing',i}; pv: purchase being previewed; pl: floor item being placed {k,i,x,y}; list: 'cat'|'stock'
 const topLv = id => Math.max(space.top && space.top[id] || 1, space.lv[id]);
 const effLv = id => (RM.pv && RM.pv.t==='lv' && RM.pv.id===id) ? RM.pv.to : space.lv[id];
 const effCol = k => (RM.pv && RM.pv.t==='col' && RM.pv.k===k) ? RM.pv.idx : space.surf[k];
@@ -4995,9 +4995,9 @@ const gx2s = (x,y) => [500+(x-y)*50, 400+(x+y)*25];
 const pts = a => a.map(p=>p.join(',')).join(' ');
 const surfFill = idx => ROOM_COLORS[idx].h==='rainbow' ? 'url(#rmRainbow)' : ROOM_COLORS[idx].h;
 // room item pictures: w,h in room units, (ax,ay) = the point of the picture that sits on the floor corner (bed) or the sill centre (window)
-const ROOM_ART = {bed:[{src:'assets/f079c2224879.webp',fp:[3,4],r:[-206.3,-167.9,363.6,338.3]},{src:'assets/8c9bc6b7b540.webp',fp:[3,4],r:[-209.1,-166.4,367.7,336.8]},{src:'assets/fc72ab74c218.webp',fp:[3,4],r:[-212.7,-240.0,372.1,412.2]},{src:'assets/4312fd9e048e.webp',fp:[3,3],r:[-150.9,-324.7,320.3,470.1]},{src:'assets/a0f555cc03e3.webp',fp:[3,3],r:[-168.4,-446.3,376.9,591.9]}],
+const ROOM_ART = {bed:[{src:'assets/f079c2224879.webp',fp:[3,4],r:[-206.3,-167.9,363.6,338.3]},{src:'assets/8c9bc6b7b540.webp',fp:[3,4],r:[-209.1,-166.4,367.7,336.8]},{src:'assets/fc72ab74c218.webp',fp:[3,4],r:[-212.7,-240.0,372.1,412.2]},{src:'assets/4312fd9e048e.webp',fp:[3,3],r:[-150.9,-324.7,320.3,470.1]},{src:'assets/a0f555cc03e3.webp',fp:[3,4],r:[-168.6,-355.4,320.4,503.1]}],
   window:[{src:'assets/ab4b2e4250e6.webp',w:210.7,h:214.9,ax:105.0,ay:210.0},{src:'assets/a725113aac4b.webp',w:226.2,h:229.1,ax:113.9,ay:224.1},{src:'assets/ea204b751610.webp',w:217.8,h:270.1,ax:109.0,ay:264.4},{src:'assets/eb3fe20bb9dd.webp',w:225.5,h:294.8,ax:112.7,ay:289.9},{src:'assets/eb13d2dccaf9.webp',w:253.1,h:311.1,ax:126.6,ay:306.1}]};
-const WIN_U = 250, WIN_SILL = 85;   // window: centre along the wall and sill height above the floor
+const WIN_U = 300, WIN_SILL = 235;   // window: centre along the wall and sill height above the floor
 // GROUNDING: every floor sprite carries r = [dx,dy,w,h], where its picture goes relative to gx2s(x,y) (the back corner of its footprint).
 // r is fitted per picture (tools/ground.py) so the sprite's contact points land on the footprint's corners; nothing is positioned by hand
 const footPoly = (x,y,fw,fd,e) => [[e,e],[fw-e,e],[fw-e,fd-e],[e,fd-e]].map(q=>gx2s(x+q[0],y+q[1]).map(v=>+v.toFixed(1)).join(',')).join(' ');
@@ -5050,8 +5050,8 @@ function roomSVG(){
   const cl = effCol('wl'), cr = effCol('wr'), cf = effCol('fl');
   const sel = (t,id) => RM.sel && RM.sel.t===t && (RM.sel.id||RM.sel.k)===id ? ' sel' : '';
   let s = `<defs><filter id="rmBlur" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="6"/></filter><filter id="rmBlur2" x="-40%" y="-80%" width="180%" height="260%"><feGaussianBlur stdDeviation="2.5"/></filter><linearGradient id="rmRainbow" x1="0" y1="0" x2="1" y2="0.35"><stop offset="0" stop-color="#ff8f9c"/><stop offset=".17" stop-color="#ffae6e"/><stop offset=".34" stop-color="#ffe46b"/><stop offset=".5" stop-color="#8fe08a"/><stop offset=".67" stop-color="#6cc6f5"/><stop offset=".84" stop-color="#8f8cf0"/><stop offset="1" stop-color="#d48cf0"/></linearGradient></defs><g id="rmG" transform="translate(${RM.tx} ${RM.ty}) scale(${RM.k})"><g id="rmR" transform="translate(0 ${RM_DY})">`;
-  s += `<g data-hit="surf:wl" class="rmh${sel('surf','wl')}"><polygon points="0,250 500,0 500,400 0,650" fill="${surfFill(cl)}" stroke="#5b3a2a" stroke-width="4" stroke-linejoin="round"/><polygon points="0,610 500,360 500,400 0,650" fill="#000" opacity=".08"/></g>`;
-  s += `<g data-hit="surf:wr" class="rmh${sel('surf','wr')}"><polygon points="500,0 1000,250 1000,650 500,400" fill="${surfFill(cr)}" stroke="#5b3a2a" stroke-width="4" stroke-linejoin="round"/><polygon points="500,0 1000,250 1000,650 500,400" fill="#000" opacity=".10"/><polygon points="500,360 1000,610 1000,650 500,400" fill="#000" opacity=".08"/></g>`;
+  s += `<g data-hit="surf:wl" class="rmh${sel('surf','wl')}"><polygon points="0,50 500,-200 500,400 0,650" fill="${surfFill(cl)}" stroke="#5b3a2a" stroke-width="4" stroke-linejoin="round"/><polygon points="0,610 500,360 500,400 0,650" fill="#000" opacity=".08"/></g>`;
+  s += `<g data-hit="surf:wr" class="rmh${sel('surf','wr')}"><polygon points="500,-200 1000,50 1000,650 500,400" fill="${surfFill(cr)}" stroke="#5b3a2a" stroke-width="4" stroke-linejoin="round"/><polygon points="500,-200 1000,50 1000,650 500,400" fill="#000" opacity=".10"/><polygon points="500,360 1000,610 1000,650 500,400" fill="#000" opacity=".08"/></g>`;
   let grid = ''; for(let i=1;i<10;i++){ const a=gx2s(i,0),b=gx2s(i,10),c=gx2s(0,i),d=gx2s(10,i); grid += `M${a} L${b} M${c} L${d} `; }
   s += `<g data-hit="surf:fl" class="rmh${sel('surf','fl')}"><polygon points="500,400 1000,650 500,900 0,650" fill="${surfFill(cf)}" stroke="#5b3a2a" stroke-width="4" stroke-linejoin="round"/><path d="${grid}" stroke="#5b3a2a" stroke-opacity=".16" stroke-width="2" fill="none"/></g>`;
   s += `<g data-hit="item:window" class="rmh${sel('item','window')}" transform="matrix(1 .5 0 1 500 400)">${windowSVG(effLv('window'))}</g>`;

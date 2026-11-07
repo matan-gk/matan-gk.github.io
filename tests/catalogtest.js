@@ -89,10 +89,10 @@ ok(cl.length===5&&cl[0].x===5&&cl[1].x===-1&&cl[2].x===-1&&cl[3].x===-1&&cl[4].x
 const mc=await ev(()=>roomMaxCost());
 ok(mc===18+14+54+109,'max-out cost includes one of each floor item (109): '+mc);
 // bed footprint: 3 x 4 cells, and the code tracks it that way
-ok(await ev(()=>{const cnt=l=>{let n=0,all=true;for(let y=0;y<10;y++)for(let x=0;x<10;x++)if(roomBlocked(x,y,l)){n++;if(!(x<bedFp(l)[0]&&y<bedFp(l)[1]))all=false;}return [n,all];};return JSON.stringify([1,2,3,4,5].map(cnt))===JSON.stringify([[12,true],[12,true],[12,true],[9,true],[9,true]]);}),'the bed blocks its own footprint at the back corner: 3 x 4 = 12 cells for levels 1-3, 3 x 3 = 9 for levels 4-5');
+ok(await ev(()=>{const cnt=l=>{let n=0,all=true;for(let y=0;y<10;y++)for(let x=0;x<10;x++)if(roomBlocked(x,y,l)){n++;if(!(x<bedFp(l)[0]&&y<bedFp(l)[1]))all=false;}return [n,all];};return JSON.stringify([1,2,3,4,5].map(cnt))===JSON.stringify([[12,true],[12,true],[12,true],[9,true],[12,true]]);}),'the bed blocks its own footprint at the back corner: 3 x 4 = 12 cells for levels 1-3 and 5, 3 x 3 = 9 for level 4');
 // switching to a smaller bed frees cells; switching back stows what is in the way
-await ev(()=>{window.__sv=JSON.stringify([space.things,space.lv.bed,space.top.bed]);space.top.bed=5;space.lv.bed=5;space.things=[{k:'pl00',x:1,y:3}];});
-ok(await ev(()=>{stowBlocked();return space.things[0].x===1;}),'level 5 bed (3 x 3) leaves cell 1,3 free: the plant stays');
+await ev(()=>{window.__sv=JSON.stringify([space.things,space.lv.bed,space.top.bed]);space.top.bed=4;space.lv.bed=4;space.things=[{k:'pl00',x:1,y:3}];});
+ok(await ev(()=>{stowBlocked();return space.things[0].x===1;}),'level 4 bed (3 x 3) leaves cell 1,3 free: the plant stays');
 await ev(()=>{space.lv.bed=1;stowBlocked();});
 ok(await ev(()=>space.things[0].x===-1&&space.things[0].y===-1),'switching to a 3 x 4 bed stows the plant that would be under it');
 await ev(()=>{const s=JSON.parse(window.__sv);space.things=s[0];space.lv.bed=s[1];space.top.bed=s[2];});

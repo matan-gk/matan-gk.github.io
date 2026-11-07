@@ -33,9 +33,9 @@ for(const r of rows){
     ok(dy>=TOL.spot[0]&&dy<=TOL.spot[1]&&Math.abs(dx)<=TOL.spotX,`${r.id}: stands on its cell centre, lowest point ${dy.toFixed(1)} below it (${dx.toFixed(1)} sideways)`);
     continue;
   }
-  const dyF=r.bottom[1]-r.F[1],dxF=r.bottom[0]-r.F[0];
+  const dyF=r.bottom[1]-r.F[1],dxF=r.bottom[0]-r.F[0],ftol=r.id==='bed5'?45:TOL.front;   // bed5 is a smaller bed centred in its 3 x 4 block: standing on the floor inside the block, so it may stop short of the front corner but never pass it
   // the sprite must touch the floor: its lowest point sits on the footprint's front corner, never floating above or sinking below it
-  ok(Math.abs(dyF)<=TOL.front,`${r.id}: lowest point is ${dyF.toFixed(1)} from the front corner (${dxF.toFixed(1)} sideways), tolerance ${TOL.front}`);
+  ok(dyF<=TOL.front&&dyF>=-ftol,`${r.id}: lowest point is ${dyF.toFixed(1)} from the front corner (${dxF.toFixed(1)} sideways), tolerance ${ftol}`);
   const eL=r.left[0]-r.Lf[0],eR=r.right[0]-r.Rf[0],tol=/^bed[45]$/.test(r.id)?TOL.tall:TOL.side;
   ok(Math.abs(eL)<=tol&&Math.abs(eR)<=tol,`${r.id}: width spans the footprint, left ${eL.toFixed(1)} right ${eR.toFixed(1)}, tolerance ${tol}`);
 }
