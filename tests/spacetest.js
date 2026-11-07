@@ -74,7 +74,7 @@ await ev(()=>{rmZoomAt(0.2,500,450);});ok(await ev(()=>RM.k===1&&RM.tx===0&&RM.t
 ok(await ev(()=>roomMax('bed')===5&&roomMax('window')===5&&ROOM_ART.bed.length===5&&ROOM_ART.window.length===5),'bed and window have 5 levels with pictures');
 const grow=await ev(()=>[1,2,3,4,5].map(l=>{const a=ROOM_ART.window[l-1];return [-85-a.ay, a.h];}));
 ok(grow.every((g,i)=>i===0||g[0]<grow[i-1][0]-1)&&grow.every(g=>g[0]+g[1]>=-92&&g[0]+g[1]<=-75),'the window keeps its sill and grows upward every level: tops '+grow.map(g=>Math.round(g[0])));
-ok(await ev(()=>{const c=gx2s(0,0);return BED_AT[0]>c[0]-150&&BED_AT[0]<c[0]+50&&ROOM_ART.bed.every(a=>BED_AT[1]-a.ay>=0);}),'the bed is anchored at the back corner of the grid and every level fits inside the room');
+ok(await ev(()=>{const c=gx2s(0,0);return BED_AT[0]>c[0]-150&&BED_AT[0]<c[0]+50&&ROOM_ART.bed.every(a=>BED_AT[1]+RM_DY-a.ay*BED_SCALE>=0);}),'the bed is anchored at the back corner of the grid and every level fits inside the room');
 ok(await ev(()=>{const i=document.querySelector('[data-hit="item:bed"] image');return !!i&&/^assets\//.test(i.getAttribute('href'));}),'the bed is drawn from its picture');
 
 // the bed is grounded and its bedding is white until the coloring step
@@ -84,20 +84,31 @@ ok(mag.every(v=>v<0.01),'no magenta left in any bed level (white default): '+mag
 // 11. no permanent coin chip over the room; the coins live in the drawer
 ok(await ev(()=>!document.getElementById('rmChip')&&!document.querySelector('#spaceView .tokchip')),'no permanent coin counter above the room');
 
-// small pictures of the upgrades: only the next one is open, the ones after it are locked
-await ev(()=>{space.lv.bed=2;onRoomTap('item:bed');});
-const th=await ev(()=>[...document.querySelectorAll('#rmDrawer .lvthumb')].map(b=>({locked:b.classList.contains('locked'),dis:b.disabled,img:!!b.querySelector('img[src^="assets/"]'),t:b.textContent})));
-ok(th.length===3&&!th[0].locked&&th[1].locked&&th[2].locked&&th[1].dis&&th[2].dis&&th.every(x=>x.img),'bed at level 2 shows levels 3, 4, 5 as small pictures: 3 open, 4 and 5 locked '+JSON.stringify(th.map(x=>x.t)));
-ok(await ev(()=>/4 🪙/.test(document.querySelector('#rmDrawer .lvthumb:not(.locked)').textContent)&&/🔒/.test(document.querySelectorAll('#rmDrawer .lvthumb')[1].textContent)),'the open one shows its price, the locked ones a lock');
+// small pictures of every level: the ones bought are free to switch to, the next one is open to buy, the rest are locked
+await ev(()=>{space.lv.bed=2;space.top.bed=2;space.spent=3;onRoomTap('item:bed');});
+const th=await ev(()=>[...document.querySelectorAll('#rmDrawer .lvthumb')].map(b=>({locked:b.classList.contains('locked'),owned:b.classList.contains('owned'),dis:b.disabled,img:!!b.querySelector('img[src^="assets/"]'),t:b.textContent})));
+ok(th.length===5&&th[0].owned&&th[1].owned&&!th[2].owned&&!th[2].locked&&th[3].locked&&th[4].locked&&th[3].dis&&th[4].dis&&th.every(x=>x.img),'bed with level 2 bought shows all 5 levels: 1-2 owned, 3 open, 4 and 5 locked '+JSON.stringify(th.map(x=>x.t)));
+ok(await ev(()=>/4 🪙/.test(document.querySelector('#rmDrawer .lvthumb:not(.locked):not(.owned)').textContent)&&/🔒/.test(document.querySelectorAll('#rmDrawer .lvthumb')[3].textContent)&&/✔/.test(document.querySelectorAll('#rmDrawer .lvthumb')[1].textContent)),'owned levels show a check or "choose", the open one its price, the locked ones a lock');
+await ev(()=>document.querySelectorAll('#rmDrawer .lvthumb')[3].click());
+ok(await ev(()=>!RM.pv&&space.lv.bed===2),'tapping a locked level does nothing');
+// switching back to a lower level you already bought is free
+await ev(()=>document.querySelectorAll('#rmDrawer .lvthumb')[0].click());
+ok(await ev(()=>space.lv.bed===1&&space.top.bed===2&&space.spent===3&&!RM.pv&&document.querySelector('[data-hit="item:bed"] image').getAttribute('href')===ROOM_ART.bed[0].src&&document.querySelectorAll('#rmDrawer .lvthumb')[0].classList.contains('cur')),'switching to bought level 1 is free: the room shows it, nothing spent, level 2 stays owned');
 await ev(()=>document.querySelectorAll('#rmDrawer .lvthumb')[1].click());
-ok(await ev(()=>!RM.pv),'tapping a locked level does nothing');
-await ev(()=>document.querySelector('#rmDrawer .lvthumb:not(.locked)').click());
+ok(await ev(()=>space.lv.bed===2&&space.spent===3),'and back to level 2, still free');
+await ev(()=>document.querySelector('#rmDrawer .lvthumb:not(.locked):not(.owned)').click());
 ok(await ev(()=>RM.pv&&RM.pv.to===3&&document.querySelector('#rmDrawer .lvthumb.cur')&&!!document.querySelector('[data-buy]')),'tapping the open one previews it and offers Buy / Cancel');
-await ev(()=>{space.lv.bed=5;onRoomTap('item:bed');});
-ok(await ev(()=>document.querySelectorAll('#rmDrawer .lvthumb').length===0&&/רמה מקסימלית/.test(document.getElementById('rmDrawer').textContent)),'at the top level there are no pictures, only "max level"');
-await ev(()=>{space.lv.bed=1;RM.pv=null;onRoomTap('item:window');});
-ok(await ev(()=>document.querySelectorAll('#rmDrawer .lvthumb').length===4&&document.querySelectorAll('#rmDrawer .lvthumb.locked').length===3),'window at level 1: 4 pictures, the next open, 3 locked');
-await ev(()=>{onRoomTap(null);});
+// view level 1 and buy level 3: the next is top+1, not current+1
+await ev(()=>{RM.pv=null;space.lv.bed=1;onRoomTap('item:bed');document.querySelector('#rmDrawer .lvthumb:not(.locked):not(.owned)').click();});
+ok(await ev(()=>RM.pv.to===3),'viewing level 1 with 2 bought, the open level is still 3');
+await ev(()=>{document.querySelector('[data-buy]').click();});
+ok(await ev(()=>space.lv.bed===3&&space.top.bed===3&&space.spent===7),'buying level 3 (4 tokens) shows it and records it as the highest');
+ok(await ev(()=>{const c=cleanProgress({space:{earned:50,spent:0,trued:true,unlocked:true,lv:{bed:1,window:4},top:{bed:4,window:2}}}).space;return c.lv.bed===1&&c.top.bed===4&&c.lv.window===4&&c.top.window===4;}),'saved: the highest bought level survives, and is never below the one shown');
+await ev(()=>{space.lv.bed=5;space.top.bed=5;onRoomTap('item:bed');});
+ok(await ev(()=>document.querySelectorAll('#rmDrawer .lvthumb.owned').length===5&&/כל הרמות בבעלותך/.test(document.getElementById('rmDrawer').textContent)),'with every level bought: 5 owned pictures and "all levels owned"');
+await ev(()=>{space.lv.bed=1;space.top.bed=1;RM.pv=null;onRoomTap('item:window');});
+ok(await ev(()=>document.querySelectorAll('#rmDrawer .lvthumb').length===5&&document.querySelectorAll('#rmDrawer .lvthumb.locked').length===3&&document.querySelectorAll('#rmDrawer .lvthumb.owned').length===1),'window at level 1: 5 pictures, 1 owned, the next open, 3 locked');
+await ev(()=>{space.spent=0;for(const id of ['bed','window']){space.lv[id]=1;space.top[id]=1;}RM.pv=null;onRoomTap(null);});
 // 8. the drawer floats over the room and does not resize it
 const r0=await ev(()=>JSON.stringify(document.getElementById('rmView').getBoundingClientRect()));
 await ev(()=>onRoomTap('item:bed'));
@@ -143,7 +154,7 @@ ok(await ev(()=>space.unlocked&&space.lv.bed===2&&space.surf.wl===2&&space.spent
 const cl=await ev(()=>cleanProgress({space:{earned:50,spent:2,trued:true,unlocked:true,surf:{wl:99,wr:'x',fl:5},own:{fl:[5,5,77,1]},lv:{bed:9,window:2,ghost:3}}}).space);
 ok(cl.surf.wl===3&&cl.surf.wr===3&&cl.surf.fl===5&&cl.lv.bed===1&&cl.lv.window===2&&!('ghost' in cl.lv)&&JSON.stringify(cl.own.fl)==='[1,5,12]','bad colors and levels fall back; current and starting colors are always owned: '+JSON.stringify(cl.own));
 const mc=await ev(()=>roomMaxCost());
-ok(mc===(3+4+5+6)+(2+3+4+5)+3*(13+6-1)+40,'room max-out cost = bed 18 + window 14 + 3 surfaces x (13 + 3 premium x2 - 1 start) + one of each of the 21 plants (40) = 126, got '+mc);
+ok(mc===(3+4+5+6)+(2+3+4+5)+3*(13+6-1)+109,'room max-out cost = bed 18 + window 14 + 3 surfaces x (13 + 3 premium x2 - 1 start) + one of each of the 38 floor items (109) = 195, got '+mc);
 ok(await ev(()=>JSON.stringify(ROOM_ITEMS.bed.up)==='[0,3,4,5,6]'&&JSON.stringify(ROOM_ITEMS.window.up)==='[0,2,3,4,5]'),'upgrade prices: bed 3,4,5,6 and window 2,3,4,5');
 ok(await ev(()=>{onRoomTap(null);space.surf.wl=15;rmRedraw();const st=[...document.querySelectorAll('#rmRainbow stop')];return st.length>=6&&document.querySelector('[data-hit="surf:wl"] polygon').getAttribute('fill')==='url(#rmRainbow)'&&new Set(st.map(x=>x.getAttribute('stop-color'))).size===st.length;}),'the rainbow is a real rainbow: 6+ different color stops on every surface');
 // a profile already above 10 tokens: ceremony gate on first start
