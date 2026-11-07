@@ -39,3 +39,6 @@ The game's `groundtest` re-measures every picture from its pixels, so art that d
 - **Furniture sheet 2 (front-on):** a different projection; usable only for wall items (windows, shelves, mirror), not for floor items.
 - **Paintbrush sheet:** the color picker. 16 brushes = 16 palette colors (white, black, pink, purple, indigo, red, light blue, navy, light green, dark green, orange, yellow, brown; gold, silver and rainbow as premium colors).
 - **Coin sheet:** the token icon (coin), the balance display (stack, pile, bag) and the unlock ceremony (treasure chest).
+
+## G. Colorable beds (for the next bed pictures)
+The bed parts are colored in the game by a mask. To make that exact, ask for each bed level in two versions with the same pixels: the normal one, and one where the blanket is flat magenta (#ff00ff), the sheet flat cyan (#00ffff), the pillow flat yellow (#ffff00) and the curtains flat green (#00ff00), keeping the same shading and outlines. The game then derives the masks from the difference (the same magenta trick as plants and furniture) instead of from the white areas.

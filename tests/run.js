@@ -29,6 +29,7 @@ const TESTS = [
   ['tokentest','tokentest.js','personal-space tokens: one per upgrade, stored counter, one-time true-up, balance pictures by tier (1/10/50/100/300)'],
   ['catalogtest','catalogtest.js','personal space step 3: catalog, buy-and-place preview, floor cells, move, put away, stock, brown pots and the magenta recolor'],
   ['groundtest','groundtest.js','grounding: from the real sprite pixels, every floor item and bed level stands on its footprint corners (no floating)'],
+  ['colortest','colortest.js','colors of parts: bed blanket/sheet/pillow/curtains, pots, furniture; palette, pattern, prices, free switching, repainting, saving'],
   ['spacetest','spacetest.js','personal space: locked teaser, unlock ceremony, poof, room, zoom/pan, upgrades and colors cost tokens'],
   ['layerstest','layerstest.js','layered rewards: item format, one-time migration, rarity, remembered merges and looks, every combination fits'],
   ['loctest','loctest.js','selection screen and locations: levels only at home, backdrop and title per game, back button, neutral background without backdrop'],

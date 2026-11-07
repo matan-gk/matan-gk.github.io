@@ -87,7 +87,7 @@ ok(await ev(()=>space.things.length===3&&space.things[0].x===3&&space.things[0].
 const cl=await ev(()=>cleanProgress({space:{earned:50,spent:0,trued:true,unlocked:true,things:[{k:'pl00',x:5,y:5},{k:'pl00',x:5,y:5},{k:'nope',x:1,y:9},{k:'pl01',x:1,y:1},{k:'pl02',x:12,y:3},{k:'pl03',x:-1,y:-1},'x',null]}}).space.things);
 ok(cl.length===5&&cl[0].x===5&&cl[1].x===-1&&cl[2].x===-1&&cl[3].x===-1&&cl[4].x===-1&&!cl.some(t=>t.k==='nope'),'bad things are dropped; double, blocked and off-floor cells go to the stock: '+JSON.stringify(cl));
 const mc=await ev(()=>roomMaxCost());
-ok(mc===18+14+54+109,'max-out cost includes one of each floor item (109): '+mc);
+ok(mc===18+14+54+109+12*19+2,'max-out cost = 195 (bed, window, 3 surfaces, 38 floor items) + 12 colorable parts x 19 (13 basic + 3 premium x2) + 2 for the bed blanket pattern = 425: '+mc);
 // bed footprint: 3 x 4 cells, and the code tracks it that way
 ok(await ev(()=>{const cnt=l=>{let n=0,all=true;for(let y=0;y<10;y++)for(let x=0;x<10;x++)if(roomBlocked(x,y,l)){n++;if(!(x<bedFp(l)[0]&&y<bedFp(l)[1]))all=false;}return [n,all];};return JSON.stringify([1,2,3,4,5].map(cnt))===JSON.stringify([[12,true],[12,true],[12,true],[9,true],[12,true]]);}),'the bed blocks its own footprint at the back corner: 3 x 4 = 12 cells for levels 1-3 and 5, 3 x 3 = 9 for level 4');
 // switching to a smaller bed frees cells; switching back stows what is in the way
