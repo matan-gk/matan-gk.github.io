@@ -1186,44 +1186,44 @@ const roomMax = id => ROOM_ITEMS[id].up.length;
 // src = the pot painted brown (what the room shows); base = the original with a magenta pot (step 4 recolors from it: pixels that differ from src are the pot).
 // w,h,ax,ay in room units: (ax,ay) is the pot's bottom centre, which sits on the middle of its cell; ref = the pot's light level used to shade any color
 const ROOM_CATALOG = [
-  {id:"pl00",n:"מונסטרה",p:1,src:"assets/9837c9c6f33a.webp",base:"assets/06313d1e7733.webp",w:113.0,h:142.4,ax:55.8,ay:140.4,ref:0.8882},
-  {id:"pl01",n:"שרך",p:1,src:"assets/9936a9efcd8a.webp",base:"assets/c60d8679611b.webp",w:139.1,h:153.3,ax:69.5,ay:150.9,ref:0.9118},
-  {id:"pl02",n:"סנסיווריה",p:1,src:"assets/22f54093cf46.webp",base:"assets/9df1f4e77d56.webp",w:73.1,h:134.5,ax:36.8,ay:132.5,ref:0.8863},
-  {id:"pl03",n:"פוטוס",p:1,src:"assets/72dd8eb735a8.webp",base:"assets/e321b07c82a3.webp",w:118.3,h:120.2,ax:60.1,ay:118.3,ref:0.9118},
-  {id:"pl04",n:"שושנת עלים בהירים",p:2,src:"assets/544492ea6bf7.webp",base:"assets/90804f88b040.webp",w:109.7,h:133.6,ax:52.0,ay:131.5,ref:0.9},
-  {id:"pl05",n:"אלוקסיה",p:2,src:"assets/ff281ec59fea.webp",base:"assets/990f27a9e267.webp",w:101.9,h:132.6,ax:50.0,ay:130.6,ref:0.8922},
-  {id:"pl06",n:"פרח אמטיסט",p:2,src:"assets/360f2ce6aa51.webp",base:"assets/eb347c43c813.webp",w:99.0,h:134.6,ax:50.1,ay:132.6,ref:0.8941},
-  {id:"pl07",n:"פרח כחול זוהר",p:3,src:"assets/dc93e9be3d5b.webp",base:"assets/20d95612cec0.webp",w:100.9,h:150.4,ax:49.5,ay:147.8,ref:0.8667},
-  {id:"pl08",n:"בועות ורודות",p:3,src:"assets/5814ca1cd9c9.webp",base:"assets/7fee712dc272.webp",w:97.6,h:146.5,ax:48.8,ay:143.8,ref:0.8843},
-  {id:"pl09",n:"גביש סגול",p:2,src:"assets/ab9d1d977a85.webp",base:"assets/eece0d43fe8b.webp",w:87.9,h:128.0,ax:46.7,ay:125.6,ref:0.8725},
-  {id:"pl10",n:"פרח זהב נוצץ",p:3,src:"assets/9b2cfc06664d.webp",base:"assets/0d649ba85b35.webp",w:103.6,h:141.9,ax:52.1,ay:139.2,ref:0.9039},
-  {id:"pl11",n:"קקטוס",p:1,src:"assets/ac69bdaf9f2c.webp",base:"assets/153a8ec543b6.webp",w:71.9,h:128.7,ax:35.6,ay:126.0,ref:0.8824},
-  {id:"pl12",n:"שושנת השלום",p:1,src:"assets/74381f28d7ee.webp",base:"assets/a38dd10019be.webp",w:81.0,h:141.1,ax:39.5,ay:138.4,ref:0.8824},
-  {id:"pl13",n:"פיקוס כינורי",p:1,src:"assets/dbf2a861e663.webp",base:"assets/903934241afd.webp",w:81.2,h:145.2,ax:37.6,ay:142.5,ref:0.8647},
-  {id:"pl14",n:"צבר",p:1,src:"assets/c63aa6d5599a.webp",base:"assets/59c9d3258d0e.webp",w:78.9,h:126.1,ax:37.5,ay:124.1,ref:0.8824},
-  {id:"pl15",n:"קלה לבנה",p:2,src:"assets/8a584f3b39b1.webp",base:"assets/5fe3794d08c4.webp",w:85.6,h:146.3,ax:42.1,ay:144.3,ref:0.8784},
-  {id:"pl16",n:"פיקוס גדול",p:2,src:"assets/fa0be3c5862b.webp",base:"assets/a7a98bb58038.webp",w:80.2,h:151.3,ax:40.7,ay:149.3,ref:0.8588},
-  {id:"pl17",n:"סוקולנטים",p:2,src:"assets/4176a5facadb.webp",base:"assets/ea9847e2b8ff.webp",w:88.8,h:120.8,ax:45.4,ay:118.9,ref:0.8961},
-  {id:"pl18",n:"ערבת גבישים",p:3,src:"assets/51189de144a4.webp",base:"assets/f857d337a7f7.webp",w:125.9,h:158.3,ax:62.6,ay:156.2,ref:0.902},
-  {id:"pl19",n:"צמח הלב",p:3,src:"assets/930d1b578640.webp",base:"assets/81b34c47c90c.webp",w:100.9,h:143.8,ax:50.1,ay:141.9,ref:0.8922},
-  {id:"pl20",n:"צמח הקשת",p:3,src:"assets/53c7b56432cb.webp",base:"assets/b4e8493a3b79.webp",w:102.8,h:149.3,ax:49.8,ay:147.4,ref:0.9},
-  {"id":"toybox1","n":"ארגז צעצועים","p":4,"g":"furniture","fw":2,"fd":2,"src":"assets/38315132547c.webp","base":"assets/56f826e0ecdc.webp","w":190,"h":189.1,"ax":95.0,"ay":149.1,"dc":"#8fd3f4","ref":0.9588},
-  {"id":"toybox2","n":"תיבת צעצועים מעוגלת","p":5,"g":"furniture","fw":2,"fd":2,"src":"assets/987c8ae9c3b3.webp","base":"assets/31c9d55119c7.webp","w":190,"h":194.5,"ax":95.0,"ay":154.5,"dc":"#ff9fcb","ref":0.9706},
-  {"id":"toybox3","n":"תיבת אוצרות","p":6,"g":"furniture","fw":2,"fd":2,"src":"assets/02ae89f8d714.webp","base":"assets/a384fda6863b.webp","w":190,"h":189.1,"ax":95.0,"ay":149.1,"dc":"#c3a2f5","ref":0.9725},
-  {"id":"telescope","n":"טלסקופ","p":4,"g":"play","fw":1,"fd":1,"src":"assets/99836356cfdf.webp","base":null,"w":70,"h":89.7,"ax":35.0,"ay":81.7},
-  {"id":"desk","n":"שולחן כתיבה","p":6,"g":"furniture","fw":2,"fd":4,"src":"assets/534b527fc9f9.webp","base":"assets/3fad10c66f3a.webp","w":270,"h":260.7,"ax":135.0,"ay":200.7,"dc":"#f0d2a0","ref":0.9706},
-  {"id":"desk_turn","n":"שולחן כתיבה (מסובב)","p":6,"g":"furniture","fw":4,"fd":2,"src":"assets/b5ea0b79931f.webp","base":"assets/63c4d0daa779.webp","w":270,"h":260.7,"ax":135.0,"ay":200.7,"dc":"#f0d2a0","ref":0.9706},
-  {"id":"cloud","n":"ספת ענן","p":6,"g":"furniture","fw":2,"fd":2,"src":"assets/6f352e5177c4.webp","base":null,"w":180,"h":166.9,"ax":90.0,"ay":126.9},
-  {"id":"mirror","n":"מראה","p":3,"g":"furniture","fw":1,"fd":1,"src":"assets/a0aa8e0fdffc.webp","base":null,"w":72,"h":125.6,"ax":36.0,"ay":117.6},
-  {"id":"armchair","n":"כורסה","p":6,"g":"furniture","fw":2,"fd":2,"src":"assets/f5c5fe205464.webp","base":"assets/fe1686733b33.webp","w":180,"h":168.6,"ax":90.0,"ay":128.6,"dc":"#ffa6cf","ref":0.9686},
-  {"id":"tablet","n":"לוח ציור","p":3,"g":"play","fw":1,"fd":1,"src":"assets/7604f4f3af6d.webp","base":null,"w":70,"h":97.7,"ax":35.0,"ay":89.7},
-  {"id":"book","n":"יומן קסום","p":2,"g":"play","fw":1,"fd":1,"src":"assets/17fbc2a995bb.webp","base":null,"w":72,"h":56.0,"ax":36.0,"ay":48.0},
-  {"id":"unicorn","n":"בובת חד קרן","p":3,"g":"play","fw":1,"fd":1,"src":"assets/69b5ea264552.webp","base":null,"w":70,"h":80.3,"ax":35.0,"ay":72.3},
-  {"id":"teddy","n":"דובי","p":2,"g":"play","fw":1,"fd":1,"src":"assets/6d28373ba6a4.webp","base":null,"w":62,"h":83.7,"ax":31.0,"ay":75.7},
-  {"id":"heart","n":"כרית לב","p":2,"g":"play","fw":1,"fd":1,"src":"assets/5871c5744569.webp","base":"assets/14f731d523ce.webp","w":66,"h":58.6,"ax":33.0,"ay":50.6,"dc":"#ff7a9e","ref":0.9843},
-  {"id":"star","n":"כרית כוכב","p":2,"g":"play","fw":1,"fd":1,"src":"assets/73dd63dac5d6.webp","base":"assets/e947162a3258.webp","w":66,"h":69.4,"ax":33.0,"ay":61.4,"dc":"#ffd95e","ref":0.9843},
-  {"id":"markers","n":"כוס טושים","p":1,"g":"play","fw":1,"fd":1,"src":"assets/b460c3daaaa7.webp","base":null,"w":50,"h":86.5,"ax":25.0,"ay":78.5},
-  {"id":"piano","n":"פסנתר","p":8,"g":"furniture","fw":4,"fd":2,"src":"assets/d48864214be4.webp","base":null,"w":270,"h":324.3,"ax":135.0,"ay":264.3}
+  {"id":"pl00","n":"מונסטרה","p":1,"src":"assets/9837c9c6f33a.webp","base":"assets/06313d1e7733.webp","ref":0.8882,"r":[-55.8,-111.4,113.0,142.4]},
+  {"id":"pl01","n":"שרך","p":1,"src":"assets/9936a9efcd8a.webp","base":"assets/c60d8679611b.webp","ref":0.9118,"r":[-69.5,-121.9,139.1,153.3]},
+  {"id":"pl02","n":"סנסיווריה","p":1,"src":"assets/22f54093cf46.webp","base":"assets/9df1f4e77d56.webp","ref":0.8863,"r":[-36.8,-103.5,73.1,134.5]},
+  {"id":"pl03","n":"פוטוס","p":1,"src":"assets/72dd8eb735a8.webp","base":"assets/e321b07c82a3.webp","ref":0.9118,"r":[-60.1,-89.3,118.3,120.2]},
+  {"id":"pl04","n":"שושנת עלים בהירים","p":2,"src":"assets/544492ea6bf7.webp","base":"assets/90804f88b040.webp","ref":0.9,"r":[-52.0,-102.5,109.7,133.6]},
+  {"id":"pl05","n":"אלוקסיה","p":2,"src":"assets/ff281ec59fea.webp","base":"assets/990f27a9e267.webp","ref":0.8922,"r":[-50.0,-101.6,101.9,132.6]},
+  {"id":"pl06","n":"פרח אמטיסט","p":2,"src":"assets/360f2ce6aa51.webp","base":"assets/eb347c43c813.webp","ref":0.8941,"r":[-50.1,-103.6,99.0,134.6]},
+  {"id":"pl07","n":"פרח כחול זוהר","p":3,"src":"assets/dc93e9be3d5b.webp","base":"assets/20d95612cec0.webp","ref":0.8667,"r":[-49.5,-118.8,100.9,150.4]},
+  {"id":"pl08","n":"בועות ורודות","p":3,"src":"assets/5814ca1cd9c9.webp","base":"assets/7fee712dc272.webp","ref":0.8843,"r":[-48.8,-114.8,97.6,146.5]},
+  {"id":"pl09","n":"גביש סגול","p":2,"src":"assets/ab9d1d977a85.webp","base":"assets/eece0d43fe8b.webp","ref":0.8725,"r":[-46.7,-96.6,87.9,128.0]},
+  {"id":"pl10","n":"פרח זהב נוצץ","p":3,"src":"assets/9b2cfc06664d.webp","base":"assets/0d649ba85b35.webp","ref":0.9039,"r":[-52.1,-110.2,103.6,141.9]},
+  {"id":"pl11","n":"קקטוס","p":1,"src":"assets/ac69bdaf9f2c.webp","base":"assets/153a8ec543b6.webp","ref":0.8824,"r":[-35.6,-97.0,71.9,128.7]},
+  {"id":"pl12","n":"שושנת השלום","p":1,"src":"assets/74381f28d7ee.webp","base":"assets/a38dd10019be.webp","ref":0.8824,"r":[-39.5,-109.4,81.0,141.1]},
+  {"id":"pl13","n":"פיקוס כינורי","p":1,"src":"assets/dbf2a861e663.webp","base":"assets/903934241afd.webp","ref":0.8647,"r":[-37.6,-113.5,81.2,145.2]},
+  {"id":"pl14","n":"צבר","p":1,"src":"assets/c63aa6d5599a.webp","base":"assets/59c9d3258d0e.webp","ref":0.8824,"r":[-37.5,-95.1,78.9,126.1]},
+  {"id":"pl15","n":"קלה לבנה","p":2,"src":"assets/8a584f3b39b1.webp","base":"assets/5fe3794d08c4.webp","ref":0.8784,"r":[-42.1,-115.3,85.6,146.3]},
+  {"id":"pl16","n":"פיקוס גדול","p":2,"src":"assets/fa0be3c5862b.webp","base":"assets/a7a98bb58038.webp","ref":0.8588,"r":[-40.7,-120.3,80.2,151.3]},
+  {"id":"pl17","n":"סוקולנטים","p":2,"src":"assets/4176a5facadb.webp","base":"assets/ea9847e2b8ff.webp","ref":0.8961,"r":[-45.4,-89.9,88.8,120.8]},
+  {"id":"pl18","n":"ערבת גבישים","p":3,"src":"assets/51189de144a4.webp","base":"assets/f857d337a7f7.webp","ref":0.902,"r":[-62.6,-127.2,125.9,158.3]},
+  {"id":"pl19","n":"צמח הלב","p":3,"src":"assets/930d1b578640.webp","base":"assets/81b34c47c90c.webp","ref":0.8922,"r":[-50.1,-112.9,100.9,143.8]},
+  {"id":"pl20","n":"צמח הקשת","p":3,"src":"assets/53c7b56432cb.webp","base":"assets/b4e8493a3b79.webp","ref":0.9,"r":[-49.8,-118.4,102.8,149.3]},
+  {"id":"toybox1","n":"ארגז צעצועים","p":4,"g":"furniture","fw":2,"fd":2,"src":"assets/38315132547c.webp","base":"assets/56f826e0ecdc.webp","dc":"#8fd3f4","ref":0.9588,"r":[-92.7,-61.4,185.3,160.5]},
+  {"id":"toybox2","n":"תיבת צעצועים מעוגלת","p":5,"g":"furniture","fw":2,"fd":2,"src":"assets/987c8ae9c3b3.webp","base":"assets/31c9d55119c7.webp","dc":"#ff9fcb","ref":0.9706,"r":[-92.7,-65.1,185.3,164.3]},
+  {"id":"toybox3","n":"תיבת אוצרות","p":6,"g":"furniture","fw":2,"fd":2,"src":"assets/02ae89f8d714.webp","base":"assets/a384fda6863b.webp","dc":"#c3a2f5","ref":0.9725,"r":[-92.0,-57.2,184.6,155.7]},
+  {"id":"telescope","n":"טלסקופ","p":4,"g":"play","fw":1,"fd":1,"src":"assets/99836356cfdf.webp","base":null,"r":[-35.0,-52.7,70,89.7]},
+  {"id":"desk","n":"שולחן כתיבה","p":6,"g":"furniture","fw":2,"fd":4,"src":"assets/534b527fc9f9.webp","base":"assets/3fad10c66f3a.webp","dc":"#f0d2a0","ref":0.9706,"r":[-216.0,-130.3,327.0,275.1]},
+  {"id":"desk_turn","n":"שולחן כתיבה (מסובב)","p":6,"g":"furniture","fw":4,"fd":2,"src":"assets/b5ea0b79931f.webp","base":"assets/63c4d0daa779.webp","dc":"#f0d2a0","ref":0.9706,"r":[-109.3,-130.3,326.7,275.1]},
+  {"id":"cloud","n":"ספת ענן","p":6,"g":"furniture","fw":2,"fd":2,"src":"assets/6f352e5177c4.webp","base":null,"r":[-92.7,-89.1,185.4,188.6]},
+  {"id":"mirror","n":"מראה","p":3,"g":"furniture","fw":1,"fd":1,"src":"assets/a0aa8e0fdffc.webp","base":null,"r":[-36.0,-88.6,72,125.6]},
+  {"id":"armchair","n":"כורסה","p":6,"g":"furniture","fw":2,"fd":2,"src":"assets/f5c5fe205464.webp","base":"assets/fe1686733b33.webp","dc":"#ffa6cf","ref":0.9686,"r":[-92.7,-67.5,185.4,166.9]},
+  {"id":"tablet","n":"לוח ציור","p":3,"g":"play","fw":1,"fd":1,"src":"assets/7604f4f3af6d.webp","base":null,"r":[-35.0,-60.7,70,97.7]},
+  {"id":"book","n":"יומן קסום","p":2,"g":"play","fw":1,"fd":1,"src":"assets/17fbc2a995bb.webp","base":null,"r":[-36.0,-19.0,72,56.0]},
+  {"id":"unicorn","n":"בובת חד קרן","p":3,"g":"play","fw":1,"fd":1,"src":"assets/69b5ea264552.webp","base":null,"r":[-35.0,-43.3,70,80.3]},
+  {"id":"teddy","n":"דובי","p":2,"g":"play","fw":1,"fd":1,"src":"assets/6d28373ba6a4.webp","base":null,"r":[-31.0,-46.7,62,83.7]},
+  {"id":"heart","n":"כרית לב","p":2,"g":"play","fw":1,"fd":1,"src":"assets/5871c5744569.webp","base":"assets/14f731d523ce.webp","dc":"#ff7a9e","ref":0.9843,"r":[-33.0,-21.6,66,58.6]},
+  {"id":"star","n":"כרית כוכב","p":2,"g":"play","fw":1,"fd":1,"src":"assets/73dd63dac5d6.webp","base":"assets/e947162a3258.webp","dc":"#ffd95e","ref":0.9843,"r":[-33.0,-32.4,66,69.4]},
+  {"id":"markers","n":"כוס טושים","p":1,"g":"play","fw":1,"fd":1,"src":"assets/b460c3daaaa7.webp","base":null,"r":[-25.0,-49.5,50,86.5]},
+  {"id":"piano","n":"פסנתר","p":8,"g":"furniture","fw":4,"fd":2,"src":"assets/d48864214be4.webp","base":null,"r":[-89.4,-127.0,278.8,275.5]}
 ];
 // every entry: g = group, fw x fd = floor cells it covers (x by y, default 1x1), dc = the color painted over its magenta parts by default (only items with magenta parts have `base` and `ref`)
 const ROOM_GROUPS = {plants:'צמחים', furniture:'רהיטים', play:'צעצועים וקישוטים'};
@@ -1231,8 +1231,10 @@ const catGroup = c => c.g || 'plants';
 const fwOf = c => c.fw || 1, fdOf = c => c.fd || 1;
 const catOf = k => ROOM_CATALOG.find(c=>c.id===k);
 const ROOM_CELLS = 10;
-const BED_CELLS = {w:3, d:4};   // the bed covers 3 x 4 cells of the floor, from the back corner (x 0-2, y 0-3)
-const roomBlocked = (x,y) => x<BED_CELLS.w && y<BED_CELLS.d;
+// the bed's footprint is per level (ROOM_ART.bed[l].fp = [cells along x, cells along y], from the back corner); its art is fitted to exactly that block
+const bedFp = l => ROOM_ART.bed[(l||1)-1].fp;
+const roomBlocked = (x,y,l) => { const f = bedFp(l || (space && space.lv && space.lv.bed)); return x<f[0] && y<f[1]; };
+function stowBlocked(){ for(const t of space.things){ if(t.x<0) continue; const c = catOf(t.k); let hit = false; for(let a=0;a<fwOf(c);a++) for(let b=0;b<fdOf(c);b++) if(roomBlocked(t.x+a,t.y+b)) hit = true; if(hit){ t.x = -1; t.y = -1; } } }
 function roomMaxCost(){   // everything buyable in the room today (the catalog grows in later steps)
   let t = 0; for(const id in ROOM_ITEMS) t += ROOM_ITEMS[id].up.reduce((a,b)=>a+b,0);
   t += ROOM_CATALOG.reduce((a,c)=>a+c.p,0);   // one copy of each floor item
@@ -1256,13 +1258,13 @@ function spaceClean(sp, gold, legacy){
   }
   const lv = {};
   for(const id in ROOM_ITEMS){ const v = sp.lv && sp.lv[id]; lv[id] = (Number.isInteger(v) && v>=1 && v<=roomMax(id)) ? v : 1; }
-  const things = [], occ = new Set();   // bought copies: x,y = their cell, or -1,-1 while put away in the stock
+  const bedLv = lv.bed || 1, things = [], occ = new Set();   // bought copies: x,y = their cell, or -1,-1 while put away in the stock
   for(const t of (Array.isArray(sp.things) ? sp.things : []).slice(0,300)){
     if(!t || !catOf(t.k)) continue;
     let x = -1, y = -1; const c = catOf(t.k), fw = fwOf(c), fd = fdOf(c);
     if(Number.isInteger(t.x) && Number.isInteger(t.y) && t.x>=0 && t.y>=0 && t.x+fw<=ROOM_CELLS && t.y+fd<=ROOM_CELLS){
       const cells = []; for(let a=0;a<fw;a++) for(let b=0;b<fd;b++) cells.push((t.x+a)+','+(t.y+b));
-      if(!cells.some(q=>occ.has(q)) && !cells.some(q=>roomBlocked(+q.split(',')[0], +q.split(',')[1]))){ x = t.x; y = t.y; cells.forEach(q=>occ.add(q)); }
+      if(!cells.some(q=>occ.has(q)) && !cells.some(q=>roomBlocked(+q.split(',')[0], +q.split(',')[1], bedLv))){ x = t.x; y = t.y; cells.forEach(q=>occ.add(q)); }
     }
     things.push({k:t.k, x, y});
   }
@@ -2105,7 +2107,7 @@ function cloudProfileFromDoc(C, helpers){
 // ===== CLOUD (Google sign-in, cloud progress, problem reports) =====
 // Local-first: the game always works from this device's storage. The cloud is a mirror, so no internet / no account / no quota never blocks play.
 // Everything here is off while CLOUD_CONFIG is null. See firebase/SETUP.md for how to create the (free) Firebase project and paste its settings below.
-const APP_VERSION = '2026.11.06f';       // keep equal to VERSION in sw.js (a test checks it)
+const APP_VERSION = '2026.11.07a';       // keep equal to VERSION in sw.js (a test checks it)
 const CLOUD_CONFIG = {apiKey:"AIzaSyAlq_TJNGvWPJpUrpbdq_hkAoURydqMzm0", authDomain:"learning-quest-1.firebaseapp.com", projectId:"learning-quest-1", appId:"1:98931179722:web:78fb00084ccba3efb53433"};   // e.g. {apiKey:'...', authDomain:'xxx.firebaseapp.com', projectId:'xxx', appId:'...'}
 const CLOUD_LIMITS = {
   pushDelayMs: 60000,          // at most one upload per profile per minute while playing
@@ -4993,23 +4995,19 @@ const gx2s = (x,y) => [500+(x-y)*50, 400+(x+y)*25];
 const pts = a => a.map(p=>p.join(',')).join(' ');
 const surfFill = idx => ROOM_COLORS[idx].h==='rainbow' ? 'url(#rmRainbow)' : ROOM_COLORS[idx].h;
 // room item pictures: w,h in room units, (ax,ay) = the point of the picture that sits on the floor corner (bed) or the sill centre (window)
-const ROOM_ART = {bed:[{src:'assets/f079c2224879.webp',w:286.5,h:325.5,ax:122.6,ay:325.5,ft:[[93.0,276.0],[121.5,324.0],[190.5,249.0]]},{src:'assets/8c9bc6b7b540.webp',w:286.5,h:324.0,ax:125.0,ay:324.0,ft:[[91.5,276.0],[121.5,322.5],[190.5,250.5]]},{src:'assets/fc72ab74c218.webp',w:285.0,h:387.0,ax:127.7,ay:387.0,ft:[[91.5,339.0],[127.5,385.5],[189.0,322.5]]},{src:'assets/4312fd9e048e.webp',w:294.0,h:492.0,ax:137.4,ay:492.0,ft:[[84.0,441.0],[130.5,490.5],[195.0,432.0]]},{src:'assets/a0f555cc03e3.webp',w:306.0,h:522.0,ax:138.0,ay:522.0,ft:[[91.5,480.0],[135.0,520.5],[204.0,463.5]]}],
+const ROOM_ART = {bed:[{src:'assets/f079c2224879.webp',fp:[3,4],r:[-206.3,-167.9,363.6,338.3]},{src:'assets/8c9bc6b7b540.webp',fp:[3,4],r:[-209.1,-166.4,367.7,336.8]},{src:'assets/fc72ab74c218.webp',fp:[3,4],r:[-212.7,-240.0,372.1,412.2]},{src:'assets/4312fd9e048e.webp',fp:[3,3],r:[-150.9,-324.7,320.3,470.1]},{src:'assets/a0f555cc03e3.webp',fp:[3,3],r:[-168.4,-446.3,376.9,591.9]}],
   window:[{src:'assets/ab4b2e4250e6.webp',w:210.7,h:214.9,ax:105.0,ay:210.0},{src:'assets/a725113aac4b.webp',w:226.2,h:229.1,ax:113.9,ay:224.1},{src:'assets/ea204b751610.webp',w:217.8,h:270.1,ax:109.0,ay:264.4},{src:'assets/eb3fe20bb9dd.webp',w:225.5,h:294.8,ax:112.7,ay:289.9},{src:'assets/eb13d2dccaf9.webp',w:253.1,h:311.1,ax:126.6,ay:306.1}]};
-const BED_SCALE = 1.25, BED_AT = gx2s(2.85,3.85);   // the bed's art is drawn 1.25x so its feet stand at the corners of its 3 x 4 cells; BED_AT = where its front foot touches the floor
-const WIN_U = 310, WIN_SILL = 85;   // window: centre along the wall and sill height above the floor
-function bedSVG(lv){
-  const a = ROOM_ART.bed[lv-1], S = BED_SCALE, P = q=>[BED_AT[0]+(q[0]-a.ax)*S, BED_AT[1]+(q[1]-a.ay)*S];
-  const [L,F,R] = a.ft.map(P), B = [L[0]+R[0]-F[0], L[1]+R[1]-F[1]];   // the back foot is hidden behind the bed
-  const ex = (v,q)=>q.map((c,i)=>c+(c-v[i])*0.0).join(','), floor = [B,R,F,L].map(q=>q.join(',')).join(' ');
-  const feet = [L,F,R].map(q=>`<ellipse cx="${q[0].toFixed(1)}" cy="${(q[1]-1).toFixed(1)}" rx="${(16*S).toFixed(1)}" ry="${(6.5*S).toFixed(1)}" fill="#2a120a" opacity=".42" filter="url(#rmBlur2)"/>`).join('');
-  return `<polygon points="${floor}" fill="#3b1d10" opacity=".22" filter="url(#rmBlur)"/>${feet}<image href="${a.src}" x="${(BED_AT[0]-a.ax*S).toFixed(1)}" y="${(BED_AT[1]-a.ay*S).toFixed(1)}" width="${(a.w*S).toFixed(1)}" height="${(a.h*S).toFixed(1)}"/>`;
+const WIN_U = 250, WIN_SILL = 85;   // window: centre along the wall and sill height above the floor
+// GROUNDING: every floor sprite carries r = [dx,dy,w,h], where its picture goes relative to gx2s(x,y) (the back corner of its footprint).
+// r is fitted per picture (tools/ground.py) so the sprite's contact points land on the footprint's corners; nothing is positioned by hand
+const footPoly = (x,y,fw,fd,e) => [[e,e],[fw-e,e],[fw-e,fd-e],[e,fd-e]].map(q=>gx2s(x+q[0],y+q[1]).map(v=>+v.toFixed(1)).join(',')).join(' ');
+function spriteSVG(src, r, x, y, fw, fd, op){
+  const o = gx2s(x,y);
+  return `<polygon points="${footPoly(x,y,fw,fd,.12)}" fill="#3b1d10" opacity="${op}" filter="url(#rmBlur)"/><image href="${src}" x="${(o[0]+r[0]).toFixed(1)}" y="${(o[1]+r[1]).toFixed(1)}" width="${r[2]}" height="${r[3]}"/>`;
 }
+function bedSVG(lv){ const a = ROOM_ART.bed[lv-1]; return spriteSVG(a.src, a.r, 0, 0, a.fp[0], a.fp[1], .3); }
 function windowSVG(lv){ const a = ROOM_ART.window[lv-1]; return `<image href="${a.src}" x="${(WIN_U-a.ax).toFixed(1)}" y="${(-WIN_SILL-a.ay).toFixed(1)}" width="${a.w}" height="${a.h}"/>`; }   // flat in wall units: it grows up the wall with each level
-function thingSVG(c, x, y){
-  const fw = fwOf(c), fd = fdOf(c), m = gx2s(x+fw/2, y+fd/2);
-  const sh = (fw*fd>1) ? `<polygon points="${[[.1,.1],[fw-.1,.1],[fw-.1,fd-.1],[.1,fd-.1]].map(q=>gx2s(x+q[0],y+q[1]).join(',')).join(' ')}" fill="#3b1d10" opacity=".28" filter="url(#rmBlur)"/>` : `<ellipse cx="${m[0]}" cy="${m[1]+2}" rx="34" ry="14" fill="#3b1d10" opacity=".28" filter="url(#rmBlur)"/>`;
-  return sh + `<image href="${c.src}" x="${(m[0]-c.ax).toFixed(1)}" y="${(m[1]+4-c.ay).toFixed(1)}" width="${c.w}" height="${c.h}"/>`;
-}
+function thingSVG(c, x, y){ return spriteSVG(c.src, c.r, x, y, fwOf(c), fdOf(c), fwOf(c)*fdOf(c)>1 ? .28 : .22); }
 // the cell (0..9) under a pointer, or null off the floor
 function cellAt(e){
   const v = rmVB(e), rx = (v[0]-RM.tx)/RM.k, ry = (v[1]-RM.ty)/RM.k-RM_DY, X = (rx-500)/50, Y = (ry-400)/25;
@@ -5172,12 +5170,12 @@ function onDrawerClick(e){
     else { space.things[pl.i].x = pl.x; space.things[pl.i].y = pl.y; }
     RM.pl = null; saveState(); rmRedraw(); return renderDrawer();
   }
-  if(t.dataset.sw){ const [id,l] = t.dataset.sw.split(':'); space.lv[id] = +l; RM.pv = null; saveState(); rmRedraw(); return renderDrawer(); }   // an owned level: switch for free
+  if(t.dataset.sw){ const [id,l] = t.dataset.sw.split(':'); space.lv[id] = +l; RM.pv = null; stowBlocked(); saveState(); rmRedraw(); return renderDrawer(); }   // an owned level: switch for free
   if(t.dataset.prev){ const id = t.dataset.prev; RM.pv = {t:'lv', id, to:topLv(id)+1}; rmRedraw(); return renderDrawer(); }
   if(t.dataset.buy){
     const c = pvCost(), pv = RM.pv; if(!pv || tokenBalance() < c) return;
     space.spent += c;
-    if(pv.t==='lv'){ space.lv[pv.id] = pv.to; space.top[pv.id] = pv.to; } else { space.own[pv.k].push(pv.idx); space.surf[pv.k] = pv.idx; }
+    if(pv.t==='lv'){ space.lv[pv.id] = pv.to; space.top[pv.id] = pv.to; stowBlocked(); } else { space.own[pv.k].push(pv.idx); space.surf[pv.k] = pv.idx; }
     RM.pv = null; saveState(); rmRedraw(); renderDrawer(); burstConfetti(10); return;
   }
   if(t.dataset.col){ const k = RM.sel.k, idx = +t.dataset.col;
