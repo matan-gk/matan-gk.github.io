@@ -823,6 +823,12 @@ body[data-view="space"] #spaceView{box-sizing:border-box; display:flex; flex-dir
 .brush img{width:100%; height:100%; object-fit:contain; display:block}
 .brush.new img{opacity:.55}
 .brush.cur{border-color:var(--purple); background:var(--card2)}
+.partrow{display:flex; gap:6px; justify-content:center; flex-wrap:wrap}
+.partbtn{display:flex; align-items:center; gap:6px; background:var(--card2); border:2px solid var(--line,#e5dcef); border-radius:14px; padding:6px 10px; font:inherit; font-weight:700; cursor:pointer}
+.pdot{display:inline-block; width:22px; height:22px; border-radius:50%; border:2px solid #5b3a2a55; background-size:cover; background-position:center}
+.brush .bsw{display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; width:100%; height:100%; font-size:.6rem; font-weight:700}
+.brush .bsw .pdot{width:78%; height:auto; aspect-ratio:1; border-radius:10px}
+.brush .bsw em{font-style:normal}
 .brush .bp{position:absolute; bottom:-2px; inset-inline-end:-2px; background:var(--yellow,#ffc83d); color:#4a3a5a; border-radius:999px; font-size:.62rem; font-weight:800; padding:0 4px}
 </style>
 </head>
@@ -1177,6 +1183,13 @@ const ROOM_COLORS = [
   {n:'כחול',h:'#9a96e6',p:1},{n:'אדום',h:'#f29595',p:1},{n:'תכלת',h:'#a9d9f6',p:1},{n:'כחול כהה',h:'#6b80c0',p:1},
   {n:'ירוק בהיר',h:'#b6edca',p:1},{n:'ירוק כהה',h:'#79b98a',p:1},{n:'כתום',h:'#ffc08a',p:1},{n:'צהוב',h:'#fff1a3',p:1},
   {n:'חום',h:'#c9966b',p:1},{n:'זהב',h:'#f2d36b',p:2},{n:'כסף',h:'#d9dde3',p:2},{n:'קשת',h:'rainbow',p:2}];
+// ===== colorable parts (step 4): the bed's blanket, sheet, pillow and curtains; the pot of every plant; the colored surface of a furniture item =====
+// an option is 'd' (the original picture), a colour index into ROOM_COLORS, or 'p:<id>' for a pattern. A part is bought per option, like the walls; owned options switch for free.
+const PART_NAMES = {blanket:'שמיכה', sheet:'סדין', pillow:'כרית', curtain:'וילונות', pot:'עציץ'};
+const ROOM_PATTERNS = [{id:'unicorn', n:'חד קרן וקשת', src:'assets/17d0ef6255cb.webp', sc:.36, p:2, parts:['bed.blanket']}];   // sc = sprite pixels per tile pixel; parts = where the pattern is offered
+const optOk = v => v==='d' || (Number.isInteger(v) && v>=0 && v<ROOM_COLORS.length) || (typeof v==='string' && ROOM_PATTERNS.some(q=>'p:'+q.id===v));
+const optPrice = v => typeof v==='number' ? ROOM_COLORS[v].p : ROOM_PATTERNS.find(q=>'p:'+q.id===v).p;
+const PART_KEY_RX = /^[a-z0-9]+(\.[a-z]+)?$/;
 const ROOM_DEFAULT = {wl:3, wr:3, fl:12};                    // wall left, wall right, floor start purple / purple / brown
 const ROOM_SURF = {wl:'הקיר השמאלי', wr:'הקיר הימני', fl:'הרצפה'};
 const ROOM_SURF_TO = {wl:'לקיר השמאלי', wr:'לקיר הימני', fl:'לרצפה'};
@@ -1240,6 +1253,7 @@ function roomMaxCost(){   // everything buyable in the room today (the catalog g
   t += ROOM_CATALOG.reduce((a,c)=>a+c.p,0);   // one copy of each floor item
   const all = ROOM_COLORS.reduce((a,c)=>a+c.p,0);
   for(const k in ROOM_DEFAULT) t += all - ROOM_COLORS[ROOM_DEFAULT[k]].p;
+  for(const k of partKeys()) t += all + ROOM_PATTERNS.filter(q=>q.parts.includes(k)).reduce((a,q)=>a+q.p,0);   // every colour and pattern of every colorable part
   return t;
 }
 function spaceClean(sp, gold, legacy){
@@ -1256,6 +1270,9 @@ function spaceClean(sp, gold, legacy){
     [ROOM_DEFAULT[k], c].forEach(v=>{ if(!o.includes(v)) o.push(v); });
     surf[k] = c; own[k] = [...new Set(o)].sort((a,b)=>a-b);
   }
+  const po = {}, bc = {};   // po: the options bought for each part key; bc: the bed's chosen option per part
+  if(sp.po && typeof sp.po==='object') for(const k of Object.keys(sp.po).slice(0,80)){ if(PART_KEY_RX.test(k) && Array.isArray(sp.po[k])) po[k] = [...new Set(sp.po[k].filter(v=>v!=='d' && optOk(v)))]; }
+  for(const n of ['blanket','sheet','pillow','curtain']){ const v = sp.bc && sp.bc[n]; if(v!=='d' && optOk(v) && (po['bed.'+n]||[]).includes(v)) bc[n] = v; }
   const lv = {};
   for(const id in ROOM_ITEMS){ const v = sp.lv && sp.lv[id]; lv[id] = (Number.isInteger(v) && v>=1 && v<=roomMax(id)) ? v : 1; }
   const bedLv = lv.bed || 1, things = [], occ = new Set();   // bought copies: x,y = their cell, or -1,-1 while put away in the stock
@@ -1266,11 +1283,11 @@ function spaceClean(sp, gold, legacy){
       const cells = []; for(let a=0;a<fw;a++) for(let b=0;b<fd;b++) cells.push((t.x+a)+','+(t.y+b));
       if(!cells.some(q=>occ.has(q)) && !cells.some(q=>roomBlocked(+q.split(',')[0], +q.split(',')[1], bedLv))){ x = t.x; y = t.y; cells.forEach(q=>occ.add(q)); }
     }
-    things.push({k:t.k, x, y});
+    const th = {k:t.k, x, y}; if(t.c!=='d' && optOk(t.c) && (po[partKeyOf(c)]||[]).includes(t.c)) th.c = t.c; things.push(th);
   }
   const top = {};   // the highest level bought of each item: every level up to it stays owned and can be switched to for free
   for(const id in ROOM_ITEMS){ const v = sp.top && sp.top[id]; top[id] = Math.max(lv[id], (Number.isInteger(v) && v>=1 && v<=roomMax(id)) ? v : 1); }
-  return {earned, spent:Math.min(spent,earned), trued:true, unlocked:sp.unlocked===true, surf, own, lv, top, things};
+  return {earned, spent:Math.min(spent,earned), trued:true, unlocked:sp.unlocked===true, surf, own, po, bc, lv, top, things};
 }
 function spaceSnap(){ return JSON.parse(JSON.stringify(space)); }
 let space = spaceClean({},[],0);   // personal-space tokens: earned once per upgrade (stored, never derived), spent in the shop later; trued = the one-time true-up for old players was done
@@ -2107,7 +2124,7 @@ function cloudProfileFromDoc(C, helpers){
 // ===== CLOUD (Google sign-in, cloud progress, problem reports) =====
 // Local-first: the game always works from this device's storage. The cloud is a mirror, so no internet / no account / no quota never blocks play.
 // Everything here is off while CLOUD_CONFIG is null. See firebase/SETUP.md for how to create the (free) Firebase project and paste its settings below.
-const APP_VERSION = '2026.11.07b';       // keep equal to VERSION in sw.js (a test checks it)
+const APP_VERSION = '2026.11.07c';       // keep equal to VERSION in sw.js (a test checks it)
 const CLOUD_CONFIG = {apiKey:"AIzaSyAlq_TJNGvWPJpUrpbdq_hkAoURydqMzm0", authDomain:"learning-quest-1.firebaseapp.com", projectId:"learning-quest-1", appId:"1:98931179722:web:78fb00084ccba3efb53433"};   // e.g. {apiKey:'...', authDomain:'xxx.firebaseapp.com', projectId:'xxx', appId:'...'}
 const CLOUD_LIMITS = {
   pushDelayMs: 60000,          // at most one upload per profile per minute while playing
@@ -4995,7 +5012,7 @@ const gx2s = (x,y) => [500+(x-y)*50, 400+(x+y)*25];
 const pts = a => a.map(p=>p.join(',')).join(' ');
 const surfFill = idx => ROOM_COLORS[idx].h==='rainbow' ? 'url(#rmRainbow)' : ROOM_COLORS[idx].h;
 // room item pictures: w,h in room units, (ax,ay) = the point of the picture that sits on the floor corner (bed) or the sill centre (window)
-const ROOM_ART = {bed:[{src:'assets/f079c2224879.webp',fp:[3,4],r:[-206.3,-167.9,363.6,338.3]},{src:'assets/8c9bc6b7b540.webp',fp:[3,4],r:[-209.1,-166.4,367.7,336.8]},{src:'assets/fc72ab74c218.webp',fp:[3,4],r:[-212.7,-240.0,372.1,412.2]},{src:'assets/4312fd9e048e.webp',fp:[3,3],r:[-150.9,-324.7,320.3,470.1]},{src:'assets/a0f555cc03e3.webp',fp:[3,4],r:[-168.6,-355.4,320.4,503.1]}],
+const ROOM_ART = {bed:[{src:'assets/f079c2224879.webp',mask:'assets/c9b0e47b3c0a.webp',fp:[3,4],r:[-206.3,-167.9,363.6,338.3]},{src:'assets/8c9bc6b7b540.webp',mask:'assets/9c9c2079f512.webp',fp:[3,4],r:[-209.1,-166.4,367.7,336.8]},{src:'assets/fc72ab74c218.webp',mask:'assets/1d64423c823e.webp',fp:[3,4],r:[-212.7,-240.0,372.1,412.2]},{src:'assets/4312fd9e048e.webp',mask:'assets/68b62a12908f.webp',fp:[3,3],r:[-150.9,-324.7,320.3,470.1]},{src:'assets/a0f555cc03e3.webp',mask:'assets/90a252ea3c50.webp',fp:[3,4],r:[-168.6,-355.4,320.4,503.1]}],
   window:[{src:'assets/ab4b2e4250e6.webp',w:210.7,h:214.9,ax:105.0,ay:210.0},{src:'assets/a725113aac4b.webp',w:226.2,h:229.1,ax:113.9,ay:224.1},{src:'assets/ea204b751610.webp',w:217.8,h:270.1,ax:109.0,ay:264.4},{src:'assets/eb3fe20bb9dd.webp',w:225.5,h:294.8,ax:112.7,ay:289.9},{src:'assets/eb13d2dccaf9.webp',w:253.1,h:311.1,ax:126.6,ay:306.1}]};
 const WIN_U = 300, WIN_SILL = 235;   // window: centre along the wall and sill height above the floor
 // GROUNDING: every floor sprite carries r = [dx,dy,w,h], where its picture goes relative to gx2s(x,y) (the back corner of its footprint).
@@ -5005,9 +5022,9 @@ function spriteSVG(src, r, x, y, fw, fd, op){
   const o = gx2s(x,y);
   return `<polygon points="${footPoly(x,y,fw,fd,.12)}" fill="#3b1d10" opacity="${op}" filter="url(#rmBlur)"/><image href="${src}" x="${(o[0]+r[0]).toFixed(1)}" y="${(o[1]+r[1]).toFixed(1)}" width="${r[2]}" height="${r[3]}"/>`;
 }
-function bedSVG(lv){ const a = ROOM_ART.bed[lv-1]; return spriteSVG(a.src, a.r, 0, 0, a.fp[0], a.fp[1], .3); }
+function bedSVG(lv){ const a = ROOM_ART.bed[lv-1]; return spriteSVG(bedSrc(lv), a.r, 0, 0, a.fp[0], a.fp[1], .3); }
 function windowSVG(lv){ const a = ROOM_ART.window[lv-1]; return `<image href="${a.src}" x="${(WIN_U-a.ax).toFixed(1)}" y="${(-WIN_SILL-a.ay).toFixed(1)}" width="${a.w}" height="${a.h}"/>`; }   // flat in wall units: it grows up the wall with each level
-function thingSVG(c, x, y){ return spriteSVG(c.src, c.r, x, y, fwOf(c), fdOf(c), fwOf(c)*fdOf(c)>1 ? .28 : .22); }
+function thingSVG(c, x, y, i){ return spriteSVG(thingSrc(c, i), c.r, x, y, fwOf(c), fdOf(c), fwOf(c)*fdOf(c)>1 ? .28 : .22); }
 // the cell (0..9) under a pointer, or null off the floor
 function cellAt(e){
   const v = rmVB(e), rx = (v[0]-RM.tx)/RM.k, ry = (v[1]-RM.ty)/RM.k-RM_DY, X = (rx-500)/50, Y = (ry-400)/25;
@@ -5046,6 +5063,57 @@ function recolorSprite(c, hex){
     a.onload = b.onload = go; a.onerror = b.onerror = ()=>rej(new Error('sprite')); a.src = c.base; b.src = c.src;
   });
 }
+// ===== colorable parts: which parts an item has, and repainting the sprite =====
+const partKeyOf = c => c.id.startsWith('pl') ? 'pot' : c.id.replace(/_turn$/,'');   // every plant shares the pot colors; a turned desk shares the desk's
+const partLabel = c => PART_NAMES[partKeyOf(c)] || 'הפריט';
+const hasParts = c => !!c.base;
+const bedParts = lv => lv>=4 ? ['blanket','sheet','pillow','curtain'] : ['blanket','sheet','pillow'];
+const partKeys = () => ['bed.blanket','bed.sheet','bed.pillow','bed.curtain', ...new Set(ROOM_CATALOG.filter(hasParts).map(partKeyOf))];
+const partOwned = (key, o) => o==='d' || (space.po[key]||[]).includes(o);
+const optsFor = key => [...ROOM_COLORS.map((c,i)=>i), ...ROOM_PATTERNS.filter(q=>q.parts.includes(key)).map(q=>'p:'+q.id)];
+const isPat = o => typeof o==='string' && o!=='d';
+const pvPart = () => (RM.pv && RM.pv.t==='part') ? RM.pv : null;
+const bedChoice = n => { const pv = pvPart(); return (pv && RM.sel && RM.sel.t==='item' && RM.sel.id==='bed' && RM.sel.part===n) ? pv.o : (space.bc[n] || 'd'); };
+const thingOpt = i => { const pv = pvPart(); return (pv && RM.sel && RM.sel.t==='thing' && RM.sel.i===i) ? pv.o : ((space.things[i] && space.things[i].c) || 'd'); };
+const PAINT = new Map();   // key -> data URL of a repainted sprite, or 'wait' while it is being made
+window.paintBusy = () => [...PAINT.values()].filter(v=>v==='wait').length;
+function paintedSrc(key, base, make){
+  const v = PAINT.get(key); if(v && v!=='wait') return v;
+  if(!v){ PAINT.set(key,'wait'); make().then(u=>{ PAINT.set(key,u); rmRedraw(); }).catch(()=>{ PAINT.set(key,base); }); }
+  return v==='wait' ? base : base;
+}
+const loadImg = s => new Promise((res,rej)=>{ const i = new Image(); i.onload = ()=>res(i); i.onerror = ()=>rej(new Error('img')); i.src = s; });
+function readPx(im){ const w = im.naturalWidth, h = im.naturalHeight, cv = document.createElement('canvas'); cv.width = w; cv.height = h; const cx = cv.getContext('2d',{willReadFrequently:true}); cx.drawImage(im,0,0); return {cv, cx, w, h, img:cx.getImageData(0,0,w,h)}; }
+function hueRGB(h){ const f = n => { const k = (n + h*6) % 6; return 0.78 - 0.30*Math.max(0, Math.min(k, 4-k, 1)); }; return [f(5),f(3),f(1)].map(v=>v*255); }   // a soft rainbow
+// the colour an option gives the pixel at sprite column x of w (patterns sample a tile)
+function optColor(o, x, y, w, pat){
+  if(isPat(o)){ const q = ROOM_PATTERNS.find(z=>'p:'+z.id===o), T = pat.w, u = ((Math.floor(x/q.sc) % T) + T) % T, v = ((Math.floor(y/q.sc) % pat.h) + pat.h) % pat.h, j = (v*T+u)*4; return [pat.d[j],pat.d[j+1],pat.d[j+2]]; }
+  const hx = ROOM_COLORS[o].h; return hx==='rainbow' ? hueRGB(x/w) : [1,3,5].map(i=>parseInt(hx.slice(i,i+2),16));
+}
+async function patFor(o){ if(!isPat(o)) return null; const q = ROOM_PATTERNS.find(z=>'p:'+z.id===o), px = readPx(await loadImg(q.src)); return {w:px.w, h:px.h, d:px.img.data}; }
+// the bed: every pixel of the mask says which part it is; the part's colour is multiplied by the pixel's own shading (light = white linen at its brightest)
+async function paintBed(a, ch){
+  const [base, mask] = await Promise.all([loadImg(a.src), loadImg(a.mask)]), B = readPx(base), M = readPx(mask).img.data, d = B.img.data, names = ['blanket','sheet','pillow','curtain'];
+  const pats = {}; for(const n of names) if(isPat(ch[n])) pats[n] = await patFor(ch[n]);
+  const part = new Uint8Array(B.w*B.h), hist = names.map(()=>new Uint32Array(256)), cnt = names.map(()=>0);
+  for(let i=0,j=0;i<d.length;i+=4,j++){ const r = M[i]>128, g = M[i+1]>128, b = M[i+2]>128, p = r&&g ? 4 : r ? 1 : g ? 2 : b ? 3 : 0; part[j] = p; if(p && d[i+3]>0){ hist[p-1][Math.round((d[i]+d[i+1]+d[i+2])/3)]++; cnt[p-1]++; } }
+  const ref = hist.map((h,k)=>{ let s = 0; for(let v=255; v>=0; v--){ s += h[v]; if(s >= cnt[k]*.05) return Math.max(150, v)/255; } return 1; });
+  for(let i=0,j=0;i<d.length;i+=4,j++){ const p = part[j]; if(!p || d[i+3]===0) continue; const n = names[p-1], o = ch[n]; if(!o || o==='d') continue;
+    const x = j % B.w, y = (j / B.w) | 0, f = Math.min(1.12, (d[i]+d[i+1]+d[i+2])/3/255/ref[p-1]), c = optColor(o, x, y, B.w, pats[n]);
+    d[i] = Math.min(255,c[0]*f); d[i+1] = Math.min(255,c[1]*f); d[i+2] = Math.min(255,c[2]*f); }
+  B.cx.putImageData(B.img,0,0); return B.cv.toDataURL('image/png');
+}
+// a catalog item: the magenta surface of its base picture (same rule as recolorSprite), in any colour
+async function paintItem(c, o){
+  const [a, b] = await Promise.all([loadImg(c.base), loadImg(c.src)]), A = readPx(a), e = readPx(b).img.data, d = A.img.data;
+  for(let i=0,j=0;i<d.length;i+=4,j++){ if(d[i+3]>0 && Math.abs(d[i]-e[i])+Math.abs(d[i+1]-e[i+1])+Math.abs(d[i+2]-e[i+2])>24){
+    const f = Math.min(1.6, (d[i]+d[i+2])/2/255/c.ref), t = optColor(o, j % A.w, 0, A.w, null); d[i] = Math.min(255,t[0]*f); d[i+1] = Math.min(255,t[1]*f); d[i+2] = Math.min(255,t[2]*f); } }
+  A.cx.putImageData(A.img,0,0); return A.cv.toDataURL('image/png');
+}
+function bedSrc(lv){ const a = ROOM_ART.bed[lv-1], names = bedParts(lv), ch = {}; names.forEach(n=>ch[n] = bedChoice(n));
+  if(names.every(n=>ch[n]==='d')) return a.src;
+  return paintedSrc('bed|'+lv+'|'+names.map(n=>ch[n]).join(','), a.src, ()=>paintBed(a, ch)); }
+function thingSrc(c, i){ const o = i==null ? 'd' : thingOpt(i); if(o==='d' || !hasParts(c) || isPat(o)) return c.src; return paintedSrc(c.id+'|'+o, c.src, ()=>paintItem(c, o)); }
 function roomSVG(){
   const cl = effCol('wl'), cr = effCol('wr'), cf = effCol('fl');
   const sel = (t,id) => RM.sel && RM.sel.t===t && (RM.sel.id||RM.sel.k)===id ? ' sel' : '';
@@ -5060,7 +5128,7 @@ function roomSVG(){
   space.things.forEach((t,i)=>{ if(t.x>=0 && !(pl && pl.i===i)) order.push(i); });
   const depth = i=>{ const t = space.things[i], c = catOf(t.k); return t.x+fwOf(c)+t.y+fdOf(c); };
   order.sort((a,b)=>depth(a)-depth(b));   // further back first
-  order.forEach(i=>{ const t = space.things[i]; s += `<g data-hit="thing:${i}" class="rmh${RM.sel && RM.sel.t==='thing' && RM.sel.i===i ? ' sel' : ''}">${thingSVG(catOf(t.k), t.x, t.y)}</g>`; });
+  order.forEach(i=>{ const t = space.things[i]; s += `<g data-hit="thing:${i}" class="rmh${RM.sel && RM.sel.t==='thing' && RM.sel.i===i ? ' sel' : ''}">${thingSVG(catOf(t.k), t.x, t.y, i)}</g>`; });
   if(pl){ const c = catOf(pl.k), fw = fwOf(c), fd = fdOf(c), q = [[0,0],[fw,0],[fw,fd],[0,fd]].map(d=>gx2s(pl.x+d[0],pl.y+d[1]).join(',')).join(' ');
     s += `<polygon class="rmtile" points="${q}" fill="#7ee08a" fill-opacity=".45" stroke="#2e9d45" stroke-width="3"/><g class="rmghost" opacity=".85">${thingSVG(c, pl.x, pl.y)}</g>`; }
   s += `</g></g>`;
@@ -5086,7 +5154,29 @@ function rmVB(e){ const svg=document.getElementById('rmSvg'); const r=svg.getBou
 function pvCost(){
   if(RM.pl) return RM.pl.i<0 ? catOf(RM.pl.k).p : 0;
   if(!RM.pv) return 0;
-  return RM.pv.t==='lv' ? ROOM_ITEMS[RM.pv.id].up[RM.pv.to-1] : ROOM_COLORS[RM.pv.idx].p;
+  return RM.pv.t==='lv' ? ROOM_ITEMS[RM.pv.id].up[RM.pv.to-1] : RM.pv.t==='part' ? optPrice(RM.pv.o) : ROOM_COLORS[RM.pv.idx].p;
+}
+// the part pickers (step 4): a row of parts under the item's other buttons, and the palette of one part
+const dotHTML = (o, dflt) => o==='d' ? `<span class="pdot" style="background:${dflt||'#fff'}"></span>` : typeof o==='string' ? `<span class="pdot pat" style="background-image:url(${ROOM_PATTERNS.find(q=>'p:'+q.id===o).src})"></span>` : ROOM_COLORS[o].h==='rainbow' ? `<span class="pdot" style="background:linear-gradient(90deg,#f7a0a0,#ffd27a,#b6edca,#a9d9f6,#cdb0f2)"></span>` : `<span class="pdot" style="background:${ROOM_COLORS[o].h}"></span>`;
+function partsRowHTML(){
+  const s = RM.sel; let rows = [];
+  if(s.t==='item' && s.id==='bed') rows = bedParts(space.lv.bed).map(n=>({k:n, label:PART_NAMES[n], cur:bedChoice(n), dflt:'#fff'}));
+  else if(s.t==='thing'){ const t = space.things[s.i], c = t && catOf(t.k); if(c && hasParts(c)) rows = [{k:partKeyOf(c), label:partLabel(c), cur:thingOpt(s.i), dflt:c.dc}]; }
+  if(!rows.length) return '';
+  return `<div class="rmsh-s small">צבעים</div><div class="partrow">${rows.map(r=>`<button type="button" class="partbtn" data-part="${r.k}" aria-label="צבע ${r.label}">${dotHTML(r.cur, r.dflt)}<span>${r.label}</span></button>`).join('')}</div>`;
+}
+function partInfo(){   // the part being colored: its ownership key, label, current option, default colour, and how to set it
+  const s = RM.sel; if(!s || !s.part) return null;
+  if(s.t==='item' && s.id==='bed') return {key:'bed.'+s.part, label:PART_NAMES[s.part], cur:bedChoice(s.part), dflt:'#fff', set:o=>{ if(o==='d') delete space.bc[s.part]; else space.bc[s.part] = o; }};
+  if(s.t==='thing'){ const t = space.things[s.i], c = t && catOf(t.k); if(!c) return null; return {key:partKeyOf(c), label:partLabel(c), cur:thingOpt(s.i), dflt:c.dc, set:o=>{ if(o==='d') delete t.c; else t.c = o; }}; }
+  return null;
+}
+function paletteHTML(pi){
+  const pv = pvPart(), shown = pv ? pv.o : pi.cur;
+  return optsFor(pi.key).reduce((h,o)=>{ const own = partOwned(pi.key,o), cur = shown===o, ar = o==='d' ? 'הצבע המקורי' : typeof o==='string' ? ROOM_PATTERNS.find(q=>'p:'+q.id===o).n : ROOM_COLORS[o].n;
+    const inner = typeof o==='number' ? `<img src="${BRUSH_IMG[o]}" alt="">` : `<span class="bsw">${dotHTML(o)}</span>`;
+    return h + `<button type="button" class="brush${cur?' cur':''}${own?'':' new'}" data-popt="${o}" aria-label="${ar}${own?'':' · '+coinsTxt(optPrice(o))}">${inner}${own?'':`<span class="bp">${optPrice(o)}🪙</span>`}</button>`; },
+    `<button type="button" class="brush${shown==='d'?' cur':''}" data-popt="d" aria-label="הצבע המקורי"><span class="bsw">${dotHTML('d',pi.dflt)}<em>מקורי</em></span></button>`);
 }
 function renderDrawer(){
   const d = document.getElementById('rmDrawer'); if(!d) return;
@@ -5119,9 +5209,13 @@ function renderDrawer(){
   if(!sel){ d.classList.remove('idle'); d.hidden = false;
     d.innerHTML = head('החדר') + `<div class="rmsh-s">בחרו משהו בחדר כדי לשנות אותו</div><div class="rmsh-btns"><button type="button" class="btn" data-list="cat">➕ הוספת פריטים חדשים</button>${stock.length?`<button type="button" class="btn ghost" data-list="stock">🎒 מלאי · ${stock.length}</button>`:''}</div>`; return; }
   d.classList.remove('idle'); d.hidden = false;
+  if(sel.part){ const pi = partInfo(); if(!pi){ sel.part = null; } else {
+      const pv = pvPart(), cost = pv ? optPrice(pv.o) : 0, buyH = !pv ? '' : `<div class="rmsh-need${bal<cost?' poor':''}">${needTxt(cost,bal)}</div><div class="rmsh-btns"><button type="button" class="btn" data-buy="1"${bal<cost?' disabled':''}>קנו · ${cost} 🪙</button><button type="button" class="btn ghost" data-cancel="1">ביטול</button></div><div class="rmsh-s small">אי אפשר להחזיר או למכור אחר כך</div>`;
+      d.innerHTML = head(`צבע ${pi.label}`) + `<div class="brushes">${paletteHTML(pi)}</div>` + (pv ? buyH : `<div class="rmsh-s">צבע שכבר נקנה אפשר להחליף בחינם. צבע חדש עולה על כל חלק בנפרד.</div>`) + `<button type="button" class="btn ghost" data-pback="1">חזרה</button>`;
+      return; } }
   if(sel.t==='thing'){
     const t = space.things[sel.i], c = t && catOf(t.k); if(!c){ RM.sel = null; return renderDrawer(); }
-    d.innerHTML = head(c.n) + `<div class="rmsh-btns"><button type="button" class="btn" data-move="${sel.i}">העבירו</button><button type="button" class="btn ghost" data-away="${sel.i}">הכניסו למלאי</button></div><button type="button" class="btn ghost" data-close="1">סגירה</button>`;
+    d.innerHTML = head(c.n) + `<div class="rmsh-btns"><button type="button" class="btn" data-move="${sel.i}">העבירו</button><button type="button" class="btn ghost" data-away="${sel.i}">הכניסו למלאי</button></div>${partsRowHTML()}<button type="button" class="btn ghost" data-close="1">סגירה</button>`;
     return;
   }
   const pv = RM.pv, cost = pvCost();
@@ -5132,7 +5226,7 @@ function renderDrawer(){
       th += `<button type="button" class="lvthumb${owned||open?'':' locked'}${shown===l?' cur':''}${owned?' owned':''}"${owned?` data-sw="${id}:${l}"`:open?` data-prev="${id}"`:' disabled'} aria-label="רמה ${l}${owned?(l===lv?' · בשימוש':' · בבעלותך'):open?'':' · נעול'}"><img src="${art.src}" alt=""><span class="ln">רמה ${l}</span><span class="lt">${owned?(l===lv?'✔':'בחרו'):open?it.up[top]+' 🪙':'🔒'}</span></button>`; }
     d.innerHTML = head(`${it.n} · רמה ${lv} מתוך ${mx}`)
       + `<div class="lvthumbs">${th}</div>` + (top>=mx ? `<div class="rmmax">כל הרמות בבעלותך ✨</div>` : '')
-      + (pv ? `<div class="rmsh-s">תצוגה מקדימה: רמה ${pv.to}</div>` + buy : '')
+      + (pv && pv.t==='lv' ? `<div class="rmsh-s">תצוגה מקדימה: רמה ${pv.to}</div>` + buy : '') + (id==='bed' ? partsRowHTML() : '')
       + `<button type="button" class="btn ghost" data-close="1">סגירה</button>`;
   } else {
     const k = sel.k;
@@ -5172,9 +5266,15 @@ function onDrawerClick(e){
   }
   if(t.dataset.sw){ const [id,l] = t.dataset.sw.split(':'); space.lv[id] = +l; RM.pv = null; stowBlocked(); saveState(); rmRedraw(); return renderDrawer(); }   // an owned level: switch for free
   if(t.dataset.prev){ const id = t.dataset.prev; RM.pv = {t:'lv', id, to:topLv(id)+1}; rmRedraw(); return renderDrawer(); }
+  if(t.dataset.part){ RM.sel.part = t.dataset.part.replace(/^bed\./,''); RM.pv = null; rmRedraw(); return renderDrawer(); }
+  if(t.dataset.pback){ RM.sel.part = null; RM.pv = null; rmRedraw(); return renderDrawer(); }
+  if(t.dataset.popt!==undefined){ const pi = partInfo(); if(!pi) return; const o = t.dataset.popt==='d' ? 'd' : /^\d+$/.test(t.dataset.popt) ? +t.dataset.popt : t.dataset.popt;
+    if(partOwned(pi.key,o)){ pi.set(o); RM.pv = null; saveState(); } else RM.pv = {t:'part', o};   // owned: free to switch; new: preview, then buy or cancel
+    rmRedraw(); return renderDrawer(); }
   if(t.dataset.buy){
     const c = pvCost(), pv = RM.pv; if(!pv || tokenBalance() < c) return;
     space.spent += c;
+    if(pv.t==='part'){ const pi = partInfo(); if(!pi){ space.spent -= c; return; } (space.po[pi.key] = space.po[pi.key] || []).push(pv.o); pi.set(pv.o); RM.pv = null; saveState(); rmRedraw(); renderDrawer(); burstConfetti(10); return; }
     if(pv.t==='lv'){ space.lv[pv.id] = pv.to; space.top[pv.id] = pv.to; stowBlocked(); } else { space.own[pv.k].push(pv.idx); space.surf[pv.k] = pv.idx; }
     RM.pv = null; saveState(); rmRedraw(); renderDrawer(); burstConfetti(10); return;
   }
