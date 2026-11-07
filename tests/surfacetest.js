@@ -16,7 +16,7 @@ ok(await ev(()=>['rug_sq','mat','chair','telescope','dressbox','piano','desk','s
 ok(await ev(()=>{const c={id:'x',fw:1,fd:1,r:[0,0,10,10],sm:0};const d={id:'y',fw:2,fd:2,r:[0,0,10,10],sm:1};return !canSit(c)&&canSit(d);}),'c.sm forces no / yes');
 // hosts
 ok(await ev(()=>['table','desk','desk_turn','toybox1','toybox2','toybox3'].every(k=>{const c=catOf(k),tp=c.top;return tp&&tp.c[0]>=0&&tp.c[1]>=0&&tp.c[0]+tp.c[2]<=fwOf(c)&&tp.c[1]+tp.c[3]<=fdOf(c)&&tp.z>0;})&&ROOM_CATALOG.filter(c=>c.top).length===6),'6 hosts (low table, desk and its turn, 3 toy boxes) with a top inside their footprint');
-ok(await ev(()=>[1,2,3,4,5].every(l=>{const b=BED_TOP[l],fp=bedFp(l);return b.c[0]+b.c[2]<=fp[0]&&b.c[1]+b.c[3]<=fp[1]&&b.z>0;})),'the bed has a visible top inside its footprint on every level');
+ok(await ev(()=>[1,2,3,4,5].every(l=>{const b=BED_TOP[l],fp=bedFp(l);return b.c[0]+b.c[2]<=fp[0]&&b.c[1]+b.c[3]<=fp[1]&&b.z>0&&b.cells.length>=3&&b.cells.every(q=>q[0]>=b.c[0]&&q[0]<b.c[0]+b.c[2]&&q[1]>=b.c[1]&&q[1]<b.c[1]+b.c[3]);})),'the bed has a list of visible top cells inside its footprint on every level');
 ok(await ev(()=>SURF_SUB===1&&surfSize(catOf('teddy')).join()==='1,1'),'one surface unit = one cell today, items are one unit');
 
 // rules
@@ -38,11 +38,11 @@ await ev(()=>{space.things[0].x=7;space.things[0].y=2;settleSurfaces();});
 ok(await ev(()=>space.things[1].x===7&&space.things[1].y===2&&space.things[1].on.h==='tab1'),'moving the host carries what stands on it');
 await ev(()=>{const th=space.things[0];th.x=-1;th.y=-1;settleSurfaces();});
 ok(await ev(()=>space.things[1].x===-1&&!space.things[1].on&&space.things[0].x===-1),'host put away: everything on it goes to the inventory too');
-await set([{k:'teddy',x:0,y:0,u:'ted1',on:{h:'bed',dx:2,dy:2}},{k:'teddy',x:0,y:0,u:'ted2',on:{h:'bed',dx:2,dy:0}}],1);
+await set([{k:'teddy',x:0,y:0,u:'ted1',on:{h:'bed',dx:2,dy:2}},{k:'teddy',x:0,y:0,u:'ted2',on:{h:'bed',dx:0,dy:3}}],1);
 ok(await ev(()=>space.things.every(t=>t.on&&t.x>=0)&&space.things[0].x===2&&space.things[0].y===2),'the bed takes things on its visible top (world cell = back corner + offset)');
 await ev(()=>{space.lv.bed=5;stowBlocked();});
-ok(await ev(()=>!space.things[0].on&&space.things[0].x===-1&&space.things[1].on&&space.things[1].x>=0),'bed upgraded to a level whose visible top is smaller: what is no longer on it goes to the inventory');
-ok(await ev(()=>!surfFree(catOf('teddy'),'bed',0,3)&&!surfFree(catOf('teddy'),'bed',3,0)&&surfFree(catOf('teddy'),'bed',1,1)),'foot row of the bed is not on its visible top');
+ok(await ev(()=>space.things[0].on&&space.things[0].x===2&&!space.things[1].on&&space.things[1].x===-1),'bed upgraded to a level whose visible top is smaller: what is no longer on it goes to the inventory, the rest stays');
+ok(await ev(()=>{space.lv.bed=1;const c=catOf('teddy');return !surfFree(c,'bed',0,0)&&!surfFree(c,'bed',1,0)&&!surfFree(c,'bed',3,1)&&surfFree(c,'bed',1,1)&&surfFree(c,'bed',2,3);}),'bed 1: the pillow end is not on its visible top, the rest of the blanket is');
 
 // spaceClean (loading a save)
 const cl=await ev(()=>{const g=(raw)=>spaceClean(raw,['🍪'],0).things.map(t=>[t.k,t.x,t.y,t.on?t.on.h+':'+t.on.dx+','+t.on.dy:'-'].join('|'));
@@ -59,7 +59,7 @@ const cl=await ev(()=>{const g=(raw)=>spaceClean(raw,['🍪'],0).things.map(t=>[
    self:g(base([{k:'table',x:3,y:3,u:'tabl',on:{h:'tabl',dx:0,dy:0}}])),
    junk:g(base([{k:'table',x:3,y:3,u:'tabl'},{k:'teddy',x:0,y:0,u:'tedd',on:{h:'tabl',dx:'1',dy:null}},{k:'heart',x:5,y:5,u:'hear',on:'x'}])),
    bedok:g(base([{k:'teddy',x:0,y:0,u:'tedd',on:{h:'bed',dx:1,dy:1}}])),
-   bedfoot:g(base([{k:'teddy',x:0,y:0,u:'tedd',on:{h:'bed',dx:1,dy:3}}])),
+   bedhead:g(base([{k:'teddy',x:0,y:0,u:'tedd',on:{h:'bed',dx:1,dy:0}}])),
    floorOnBed:g(base([{k:'teddy',x:1,y:1,u:'tedd'}])),
    uid:spaceClean(base([{k:'teddy',x:5,y:5},{k:'teddy',x:6,y:6,u:'same'},{k:'teddy',x:7,y:7,u:'same'},{k:'teddy',x:8,y:8,u:'BAD ID'}]),['🍪'],0).things.map(t=>t.u),
    sub:g({earned:500,spent:0,unlocked:true,sub:1,things:[{k:'table',x:3,y:3,u:'tabl'},{k:'teddy',x:0,y:0,u:'tedd',on:{h:'tabl',dx:1,dy:1}}]}),
@@ -75,7 +75,7 @@ ok(cl.hoststowed.join()==='table|-1|-1|-,teddy|-1|-1|-','host in the inventory: 
 ok(cl.self.join()==='table|-1|-1|-','a thing cannot sit on itself (it goes to the inventory): '+cl.self);
 ok(cl.junk.join()==='table|3|3|-,teddy|-1|-1|-,heart|5|5|-','a malformed `on` is ignored (the floor spot, if any, is kept; a teddy at 0,0 is under the bed): '+cl.junk);
 ok(cl.bedok.join()==='teddy|1|1|bed:1,1','a sitter on the bed: '+cl.bedok);
-ok(cl.bedfoot.join()==='teddy|-1|-1|-','not on the foot row of the bed: '+cl.bedfoot);
+ok(cl.bedhead.join()==='teddy|-1|-1|-','not on the pillow end of the bed: '+cl.bedhead);
 ok(cl.floorOnBed.join()==='teddy|-1|-1|-','a floor thing under the bed still goes to the inventory: '+cl.floorOnBed);
 ok(cl.uid[0]&&cl.uid[1]==='same'&&cl.uid[2]!=='same'&&cl.uid[3]!=='BAD ID'&&new Set(cl.uid).size===4&&cl.uid.every(u=>/^[a-z0-9]{4,12}$/.test(u)),'every thing gets a unique, valid id (old saves have none): '+cl.uid);
 ok(cl.sub.join()===cl.ok.join()&&cl.saved===1,'a save made with the same surface unit loads as is, and space.sub records the unit');

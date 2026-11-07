@@ -9,10 +9,10 @@ await p.goto(T.URL);await ev(()=>localStorage.clear());await p.reload();
 await p.fill('#pfName','X');await p.click('.gopt:has(input[value=f])');await p.click('[data-pact=save]');await p.waitForTimeout(500);
 await ev(()=>{space.earned=1000;space.spent=0;space.unlocked=true;golden=['🍪'];renderLevels();openSpace();});
 // screen point of a world point (cell units, may be fractional) lifted by z room units
-const scr=(x,y,z)=>ev(([x,y,z])=>{const g=document.getElementById('rmR'),m=g.getScreenCTM(),sx=500+(x-y)*50,sy=400+(x+y)*25-z;return [m.a*sx+m.c*sy+m.e,m.b*sx+m.d*sy+m.f];},[x,y,z||0]);
-const tapW=async(x,y,z)=>{const q=await scr(x,y,z);await p.mouse.click(q[0],q[1]);};
+const scr=(x,y,z,ox)=>ev(([x,y,z,ox])=>{const g=document.getElementById('rmR'),m=g.getScreenCTM(),sx=500+(x-y)*50+ox,sy=400+(x+y)*25-z;return [m.a*sx+m.c*sy+m.e,m.b*sx+m.d*sy+m.f];},[x,y,z||0,ox||0]);
+const tapW=async(x,y,z,ox)=>{const q=await scr(x,y,z,ox);await p.mouse.click(q[0],q[1]);};
 const set=(things,lv)=>ev(([th,l])=>{space.things=th;space.spent=0;space.lv.bed=l||1;settleSurfaces();RM.sel=null;RM.pl=null;RM.list=null;rmRedraw();renderDrawer();},[things,lv]);
-const zT=await ev(()=>catOf('table').top.z), zBed=await ev(()=>BED_TOP[1].z);
+const zT=await ev(()=>catOf('table').top.z), zBed=await ev(()=>BED_TOP[1].z), oxBed=await ev(()=>BED_TOP[1].ox);
 await set([{k:'table',x:6,y:6,u:'tab1'},{k:'teddy',x:6,y:6,u:'ted1',on:{h:'tab1',dx:0,dy:0}}]);
 
 // drawing: the sitter is drawn right after its host, lifted by the top's height
@@ -54,12 +54,12 @@ await ev(()=>{RM.pl={k:'heart',i:-1,x:8,y:2};rmRedraw();});
 await tapW(6.5,7.5,zT);
 ok(await ev(()=>!RM.pl.on||!(RM.pl.on.dx===0&&RM.pl.on.dy===1)),'a cell that already holds something is not chosen');
 // the front-most top wins where tops overlap on screen
-const tc=await ev(()=>{const c=catOf('teddy');const q=(x,y,z)=>{const g=document.getElementById('rmR'),m=g.getScreenCTM(),sx=500+(x-y)*50,sy=400+(x+y)*25-z;return {clientX:m.a*sx+m.c*sy+m.e,clientY:m.b*sx+m.d*sy+m.f};};
-  const r=document.getElementById('rmSvg').getBoundingClientRect();return {c1:topCellAt(q(7.5,6.5,catOf('table').top.z),c,-1), floor:topCellAt(q(9.5,2.5,0),c,-1), bed:topCellAt(q(1.5,1.5,BED_TOP[1].z),c,-1), bedMiss:topCellAt(q(1.5,3.5,BED_TOP[1].z),c,-1)};});
+const tc=await ev(()=>{const c=catOf('teddy');const q=(x,y,z,ox)=>{const g=document.getElementById('rmR'),m=g.getScreenCTM(),sx=500+(x-y)*50+(ox||0),sy=400+(x+y)*25-z;return {clientX:m.a*sx+m.c*sy+m.e,clientY:m.b*sx+m.d*sy+m.f};};
+  const r=document.getElementById('rmSvg').getBoundingClientRect();return {c1:topCellAt(q(7.5,6.5,catOf('table').top.z),c,-1), floor:topCellAt(q(9.5,2.5,0),c,-1), bed:topCellAt(q(1.5,1.5,BED_TOP[1].z,BED_TOP[1].ox),c,-1), bedMiss:topCellAt(q(1.5,0.5,BED_TOP[1].z,BED_TOP[1].ox),c,-1)};});
 ok(tc.c1&&tc.c1.h==='tab1'&&tc.c1.dx===1&&tc.c1.dy===0,'topCellAt: the raised table cell: '+JSON.stringify(tc.c1));
 ok(tc.floor===null,'topCellAt: bare floor is not a top');
 ok(tc.bed&&tc.bed.h==='bed'&&tc.bed.dx===1&&tc.bed.dy===1,'topCellAt: the bed\'s visible top: '+JSON.stringify(tc.bed));
-ok(tc.bedMiss===null,'topCellAt: the foot of the bed is not a top');
+ok(tc.bedMiss===null,'topCellAt: the pillow end of the bed is not a top');
 
 // tapping a sitter selects it; a button goes to the furniture
 await set([{k:'table',x:6,y:6,u:'tab1'},{k:'teddy',x:7,y:6,u:'ted1',on:{h:'tab1',dx:1,dy:0}}]);
@@ -71,7 +71,7 @@ ok(await ev(()=>RM.sel&&RM.sel.t==='thing'&&RM.sel.i===0&&!document.querySelecto
 await ev(()=>{RM.sel={t:'thing',i:0};renderDrawer();});
 ok(await ev(()=>/הפריט שעליו יעבור גם הוא למלאי/.test(document.getElementById('rmDrawer').textContent)),'and the table\'s drawer warns that the teddy goes to the inventory on delete');
 await set([{k:'teddy',x:1,y:1,u:'ted1',on:{h:'bed',dx:1,dy:1}}]);
-await tapW(1.5,1.5,zBed+8);
+await tapW(1.5,1.5,zBed+8,oxBed);
 await ev(()=>{});
 ok(await ev(()=>RM.sel&&RM.sel.t==='thing'&&/המיטה/.test(document.querySelector('#rmDrawer [data-host]').textContent)),'a thing on the bed: tap selects it, the button says "the bed"');
 await ev(()=>document.querySelector('#rmDrawer [data-host]').click());
@@ -84,7 +84,7 @@ ok(await ev(()=>RM.pl&&RM.pl.on&&RM.pl.on.h==='tab1'&&!document.querySelector('#
 await tapW(8.5,8.5,0);await ev(()=>document.querySelector('[data-place]').click());
 ok(await ev(()=>{const t=space.things[1];return !t.on&&t.x===8&&t.y===8&&space.spent===0;}),'moved to the floor for free');
 await ev(()=>{RM.sel={t:'thing',i:1};renderDrawer();document.querySelector('[data-move]').click();});
-await tapW(1.5,2.5,zBed);await ev(()=>document.querySelector('[data-place]').click());
+await tapW(1.5,2.5,zBed,oxBed);await ev(()=>document.querySelector('[data-place]').click());
 ok(await ev(()=>{const t=space.things[1];return t.on&&t.on.h==='bed'&&t.on.dx===1&&t.on.dy===2&&t.x===1&&t.y===2;}),'moved from the floor onto the bed');
 await set([{k:'table',x:6,y:6,u:'tab1'},{k:'teddy',x:7,y:6,u:'ted1',on:{h:'tab1',dx:1,dy:0}}]);
 await ev(()=>{RM.sel={t:'thing',i:0};renderDrawer();document.querySelector('[data-move]').click();});

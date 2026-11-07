@@ -427,3 +427,7 @@ The three tests that failed on main tested things that were changed on purpose l
 ## Step 13: things on furniture, phase 2 (branch `items-on-furniture-p2`, off phase 1)
 
 Drawing and interaction (details in `docs/ITEMS_ON_FURNITURE.md`): sitters drawn with their host at the top's height; lit free top cells while placing/moving a small thing; tap a lit cell to put it there, tap the floor for the floor; tapping a sitter selects it, with a "select the table / the bed" button; moves between floor and tops; a host's things follow it (and show in its move preview). Placing drawer hints that small things can go on a lit top. `catalogtest` now expects the foot of the bed (not a lit top) to refuse a plant. Test: `surfaceuitest.js`. Version 2026.11.07h.
+
+## Step 14: things on furniture, phase 3 (branch `items-on-furniture-p3`, off phase 2)
+
+Calibration from the pictures (details in `docs/ITEMS_ON_FURNITURE.md`): `tools/surfaces.py` replaces the estimated heights with measured ones (table 27, desk 110, toy boxes 53/56/53) and measures the bed: per level a height `z`, a sideways shift `ox` and the list of visible cells (`BED_TOP[level].cells`, so the pillow end is out and levels 4-5 take only 3-4 cells). New: `top.ox`, `top.cells` honoured by `topOf`, `surfFree`, sitter drawing, lit cells, the placing preview and `topCellAt`. Tests: `surfacegroundtest.js` (numbers against pictures, via `tools/surfaces.py --check`); `surfacetest`/`surfaceuitest` updated for the bed's irregular top. Version 2026.11.07i.
