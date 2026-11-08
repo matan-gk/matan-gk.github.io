@@ -4,7 +4,7 @@ Small things can stand on tables, desks, toy boxes and the visible part of the b
 
 ## Decisions (Matan, 2026-11-07)
 - Tapping a thing that stands on furniture selects that thing, and the drawer offers a simple button to switch to the furniture under it. (Phase 2.)
-- The surface grid may become finer later (a 2x2 sub-grid per cell, so a pile of books and a jar of crayons can differ in size). Phase 1 is built so that this is a constant change: see "Surface units".
+- The grid is finer (built, branch `denser_room_grid`): one grid unit is half an old cell, so a jar of crayons (1x1 units) and a pile of books (2x2 units) differ in size. See "Grid units".
 - The bed only takes things on the visible part of its top (not where the frame, curtains or footboard cover it).
 - Plants may stand on furniture.
 - Deleting furniture puts everything on it into the inventory. The delete button says so, only when there is something on it.
@@ -21,8 +21,10 @@ Small things can stand on tables, desks, toy boxes and the visible part of the b
 - `settleSurfaces()` runs after a move, a delete (put away) and a bed level change: sitters follow their host; those with no valid place on it go to the inventory.
 - `spaceClean` validates a save in two passes (floor things first, so order in the list does not matter) with the same `surfFree`. A malformed `on` is ignored; a well-formed one that fails sends the thing to the inventory, never to the floor.
 
-## Surface units (sub-grid later)
-`SURF_SUB = 1` surface unit per cell. To get a finer grid: raise `SURF_SUB` (e.g. 2), give items that are bigger than one unit `ss`, and saved `dx,dy` are multiplied by `SURF_SUB / space.sub` on load (`space.sub` records the unit a save was made in). A thing's own `x,y` stay whole cells. Not built yet: rendering/tapping at sub-cell positions and per-item sizes.
+## Grid units
+There is one grid for everything placed: `GU = 2` grid units per old cell, the room is `ROOM_CELLS = 10 * GU` = 20 units wide, and a unit is 1/GU of an old cell on screen (`UX = 50/GU`, `UY = 25/GU`; `gx2s` projects units). The catalog's `fw` x `fd` are in units: small things are 1x1 (lego, chess, tic-tac-toe, puzzles, trains, the marker cup), old one-cell things 2x2 (plants for now: a small and a large version come later), old 2x2 things 4x4. A small item's picture `r` is half the old size (the picture's offsets are from the footprint's back corner, so scaling by the footprint keeps the contact points right).
+Floor things and things on furniture use the same units: `thing.x,y` = the back corner in units; `on.dx,dy` = units from the host's back corner; a sitter's x,y = host x,y + dx,dy. A thing takes up its own footprint on a top (`surfSize`), and may stand on furniture if it is no bigger than one old cell (`canSit`: fw, fd <= GU; `sm` still forces yes / no). The tops (`top.c`, `BED_TOP.c`, and the bed's visible `cells`) and the bed's footprint (`ROOM_ART.bed[].fp`) are still authored in old cells and turned into units by `topOf` / `bedFp`, so `tools/surfaces.py` measures in cells (it reads GU from the page and divides the catalog sizes by it); `tools/ground.py` does the same.
+Saves record the unit their positions were counted in (`space.sub`; none or 1 = whole cells, from before the denser grid) and `spaceClean` multiplies floor positions and `dx,dy` up to GU. Tapping the floor or a top picks the unit under the pointer (the tapped unit is the middle of the item); in the placing drawer four arrows (`data-nudge`) move the ghost one unit along the screen axes, and they stay in the small bar on phones. `settleSurfaces` re-checks the links in list order, so when two sitters overlap the first stays.
 
 ## Phases
 1. **Data, rules, save cleaning, tests, delete note** (this branch, `items-on-furniture-p1`). Nothing is drawn or tappable yet.

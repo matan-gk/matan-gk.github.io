@@ -12,7 +12,7 @@ await p.goto(T.URL);
 const rows=await p.evaluate(async()=>{
   const load=s=>new Promise(r=>{const i=new Image();i.onload=()=>r(i);i.src=s;});
   const items=ROOM_CATALOG.map(c=>({id:c.id,src:c.src,r:c.r,fw:fwOf(c),fd:fdOf(c)}));
-  ROOM_ART.bed.forEach((a,i)=>items.push({id:'bed'+(i+1),src:a.src,r:a.r,fw:a.fp[0],fd:a.fp[1]}));
+  ROOM_ART.bed.forEach((a,i)=>items.push({id:'bed'+(i+1),src:a.src,r:a.r,fw:a.fp[0]*GU,fd:a.fp[1]*GU}));
   const out=[];
   for(const it of items){
     const im=await load(it.src),W=im.naturalWidth,H=im.naturalHeight,k=document.createElement('canvas');k.width=W;k.height=H;const x=k.getContext('2d');x.drawImage(im,0,0);const d=x.getImageData(0,0,W,H).data;
@@ -23,15 +23,16 @@ const rows=await p.evaluate(async()=>{
     // y of the left and right extremes: mean of opaque pixels in the outer 3 columns
     const colY=cx=>{let s=0,m=0;for(let px=cx;px!==cx+3*(cx<W/2?1:-1);px+=(cx<W/2?1:-1))for(let py=0;py<H;py++)if(al(px,py)){s+=py;m++;}return m?s/m:0;};
     const [ox,oy,w,h]=it.r,sc=[w/W,h/H],M=(px,py)=>[ox+px*sc[0],oy+py*sc[1]];
-    const F=[50*(it.fw-it.fd),25*(it.fw+it.fd)],Lf=[-50*it.fd,25*it.fd],Rf=[50*it.fw,25*it.fw];
+    const F=[UX*(it.fw-it.fd),UY*(it.fw+it.fd)],Lf=[-UX*it.fd,UY*it.fd],Rf=[UX*it.fw,UY*it.fw];
     out.push({id:it.id,fw:it.fw,fd:it.fd,bottom:M(sx/n,bot+1),left:M(l,colY(l)),right:M(rr+1,colY(rr)),F,Lf,Rf});
   }
   return out;});
+const GUV=await p.evaluate(()=>GU);
 for(const r of rows){
-  const spot=r.fw*r.fd===1;
+  const spot=r.fw<=GUV&&r.fd<=GUV&&r.fw===r.fd, sc=r.fw/GUV;   // one old cell or less (half-size items too)
   if(spot){
     // small items stand on the middle of their cell: the lowest point is at most 18 below the cell's centre (25) and never above it, and on its centre line
-    const dy=r.bottom[1]-25,dx=r.bottom[0];
+    const dy=(r.bottom[1]-r.F[1]/2)/sc,dx=r.bottom[0]/sc;   // measured in cell sizes, so a half-size item is held to the same standard
     ok(dy>=TOL.spot[0]&&dy<=TOL.spot[1]&&Math.abs(dx)<=(WIDE[r.id]||TOL.spotX),`${r.id}: stands on its cell centre, lowest point ${dy.toFixed(1)} below it (${dx.toFixed(1)} sideways)`);
     continue;
   }
