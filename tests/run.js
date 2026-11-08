@@ -34,6 +34,7 @@ const TESTS = [
   ['surfacemsgtest','surfacemsgtest.js','personal space: things on furniture, phase 4 (bed level preview, inventory notices, save and reload)'],
   ['surfacegroundtest','surfacegroundtest.js','personal space: the tops of tables, desk, toy boxes and beds match their pictures (tools/surfaces.py --check)'],
   ['gridtest','gridtest.js','denser room grid: unit sizes, small things, nudge arrows, converting old saves'],
+  ['fixturetest','fixturetest.js','moving, deleting and upgrading the bed and the window'],
   ['groundtest','groundtest.js','grounding: from the real sprite pixels, every floor item and bed level stands on its footprint corners (no floating)'],
   ['colortest','colortest.js','colors of parts: bed blanket/sheet/pillow/curtains, pots, furniture; palette, pattern, prices, free switching, repainting, saving'],
   ['spacetest','spacetest.js','personal space: locked teaser, unlock ceremony, poof, room, zoom/pan, upgrades and colors cost tokens'],
