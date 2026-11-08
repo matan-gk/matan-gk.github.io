@@ -789,6 +789,8 @@ body[data-view="space"] #spaceView{box-sizing:border-box; display:flex; flex-dir
 .rmdrawer.mini .rmsh-t{font-weight:800; font-size:14px}
 .rmdrawer.mini .rmsh-need,.rmdrawer.mini .rmsh-s{margin:0; font-size:13px}
 .rmdrawer.mini .rmsh-btns{margin:0}
+.rmnudge{display:flex; gap:6px; justify-content:center; margin:2px 0 6px}
+.rmnudge .btn{min-width:44px; min-height:40px; padding:0 10px; font-size:18px}
 .rmdrawer.mini .btn{white-space:nowrap; min-height:44px; padding:0 14px}
 .rmdrawer.mini .mini-max{min-width:44px; padding:0 10px}
 @media (min-width:900px){
@@ -1357,12 +1359,14 @@ function surfFree(c, h, dx, dy, except, ctx){
 function sitCell(h, dx, dy, ctx){ const tp = topOf(h, ctx); return tp ? [tp.x+dx, tp.y+dy] : null; }
 // after anything changed (a host moved, put away or upgraded): things that no longer have a valid place on their host go to the inventory; the others follow their host
 function settleSurfaces(){
+  // every link is checked again in list order against the ones already kept, so when two things overlap the first stays (the same rule as loading a save)
+  const ons = space.things.map(t=>t.on); space.things.forEach(t=>{ delete t.on; });
   space.things.forEach((t,i)=>{
-    if(!t.on) return; const c = catOf(t.k), h = t.on.h;
-    const host = h==='bed' ? null : hostThing(h);
-    const ok = (h==='bed' || (host && !host.on)) && surfFree(c, h, t.on.dx, t.on.dy, i);   // topOf() already refuses a host that is put away or itself sitting
-    if(!ok){ delete t.on; t.x = -1; t.y = -1; return; }
-    const cell = sitCell(h, t.on.dx, t.on.dy); t.x = cell[0]; t.y = cell[1];
+    const o = ons[i]; if(!o) return; const c = catOf(t.k), h = o.h;
+    const hi = h==='bed' ? -1 : space.things.findIndex(q=>q.u===h);
+    const ok = (h==='bed' || (hi>=0 && !ons[hi])) && surfFree(c, h, o.dx, o.dy, i);   // topOf() already refuses a host that is put away; a host that itself sits on something is no host
+    if(!ok){ t.x = -1; t.y = -1; return; }
+    t.on = o; const cell = sitCell(h, o.dx, o.dy); t.x = cell[0]; t.y = cell[1];
   });
 }
 function spaceClean(sp, gold, legacy){
@@ -5370,7 +5374,7 @@ function renderDrawer(){
   const mini = prev && narrowRoom() && !RM.big;
   d.classList.toggle('mini', mini);
   if(mini){
-    const keep = ['.rmsh-t', '.rmsh-need', '.rmsh-s.lost', '.rmsh-btns'].map(s=>d.querySelector(s)).filter(Boolean);
+    const keep = ['.rmsh-t', '.rmsh-need', '.rmsh-s.lost', '.rmnudge', '.rmsh-btns'].map(s=>d.querySelector(s)).filter(Boolean);
     if(keep.length){ d.replaceChildren(...keep); const b = document.createElement('button'); b.type = 'button'; b.className = 'btn ghost mini-max'; b.dataset.max = '1'; b.setAttribute('aria-label', 'הצגת המגירה המלאה'); b.textContent = '⬆'; d.append(b); }
   } else if(prev && narrowRoom() && !d.querySelector('[data-min]')){
     const b = document.createElement('button'); b.type = 'button'; b.className = 'btn ghost'; b.dataset.min = '1'; b.textContent = 'הקטנה כדי לראות את החדר'; d.append(b);
@@ -5386,7 +5390,8 @@ function renderDrawerBody(){
   if(RM.pl){   // placing a floor item: tap a cell of the floor to choose where it stands
     const pl = RM.pl, c = catOf(pl.k), cost = pvCost(), poor = bal<cost;
     d.classList.remove('idle'); d.hidden = false;
-    d.innerHTML = head(c.n) + `<div class="rmsh-s">${pl.on ? 'הפריט יעמוד על המשטח המסומן. אפשר גם להקיש על הרצפה' : 'הקישו על משבצת ברצפה כדי לבחור מקום'}</div>${canSit(c) && !pl.on && surfaces(pl.i).length ? `<div class="rmsh-s small">אפשר גם להציב על שולחן, ארגז או מיטה: הקישו על משטח מואר</div>` : ''}`
+    const nudge = `<div class="rmnudge" role="group" aria-label="הזזה קטנה">${[['↖','-1,0','למעלה ושמאלה'],['↗','0,-1','למעלה וימינה'],['↙','0,1','למטה ושמאלה'],['↘','1,0','למטה וימינה']].map(([g,v,l])=>`<button type="button" class="btn ghost" data-nudge="${v}" aria-label="הזיזו צעד אחד ${l}">${g}</button>`).join('')}</div>`;
+    d.innerHTML = head(c.n) + `<div class="rmsh-s">${pl.on ? 'הפריט יעמוד על המשטח המסומן. אפשר גם להקיש על הרצפה' : 'הקישו על הרצפה כדי לבחור מקום'}</div>${canSit(c) && !pl.on && surfaces(pl.i).length ? `<div class="rmsh-s small">אפשר גם להציב על שולחן, ארגז או מיטה: הקישו על משטח מואר</div>` : ''}${nudge}`
       + (pl.i<0 ? `<div class="rmsh-need${poor?' poor':''}">${needTxt(cost,bal)}</div><div class="rmsh-btns"><button type="button" class="btn" data-place="1"${poor?' disabled':''}>קנו · ${cost} 🪙</button><button type="button" class="btn ghost" data-cancel="1">ביטול</button></div><div class="rmsh-s small">אי אפשר להחזיר או למכור אחר כך</div>`
         : `<div class="rmsh-btns"><button type="button" class="btn" data-place="1">הציבו כאן</button><button type="button" class="btn ghost" data-cancel="1">ביטול</button></div>`);
     return;
@@ -5464,6 +5469,12 @@ function onDrawerClick(e){
   if(t.dataset.unstow){ const i = +t.dataset.unstow, f = firstFreeCell(catOf(space.things[i].k), i); RM.list = null; RM.choose = null; RM.pl = {k:space.things[i].k, i, x:f[0], y:f[1]}; rmRedraw(); return renderDrawer(); }
   if(t.dataset.move){ const i = +t.dataset.move, th = space.things[i]; RM.sel = null; RM.pl = {k:th.k, i, x:th.x, y:th.y}; if(th.on) RM.pl.on = {...th.on}; rmRedraw(); return renderDrawer(); }
   if(t.dataset.away){ const th = space.things[+t.dataset.away]; th.x = -1; th.y = -1; delete th.on; settleSurfaces(); RM.sel = null; saveState(); rmRedraw(); return renderDrawer(); }
+  if(t.dataset.nudge && RM.pl){   // one grid unit at a time: the arrows follow the screen (down-right is +x, down-left is +y)
+    const [a,b] = t.dataset.nudge.split(',').map(Number), pl = RM.pl, it = catOf(pl.k);
+    if(pl.on){ const dx = pl.on.dx+a, dy = pl.on.dy+b; if(surfFree(it, pl.on.h, dx, dy, pl.i)){ const cell = sitCell(pl.on.h, dx, dy); pl.on = {h:pl.on.h, dx, dy}; pl.x = cell[0]; pl.y = cell[1]; } }
+    else if(footFree(it, pl.x+a, pl.y+b, pl.i)){ pl.x += a; pl.y += b; }
+    rmRedraw(); return renderDrawer();
+  }
   if(t.dataset.place){
     const pl = RM.pl; if(!pl || (pl.on ? !surfFree(catOf(pl.k), pl.on.h, pl.on.dx, pl.on.dy, pl.i) : !footFree(catOf(pl.k),pl.x,pl.y,pl.i))) return;
     if(pl.i<0){ const c = catOf(pl.k); if(tokenBalance()<c.p) return; space.spent += c.p; const th = {k:pl.k, x:pl.x, y:pl.y, u:newUid()}; if(pl.on) th.on = {...pl.on}; space.things.push(th); burstConfetti(10); }
