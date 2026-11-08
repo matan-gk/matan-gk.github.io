@@ -50,8 +50,8 @@ await ev(()=>{space.spent=0;RM.list='cat';renderDrawer();});await click('[data-p
 ok(await ev(()=>/צריך מטבע אחד\. יש לך 100/.test(document.getElementById('rmDrawer').textContent)||/יש לך 100/.test(document.getElementById('rmDrawer').textContent)),'price line shows the balance');
 await tapCell(6,5);
 ok(await ev(()=>RM.pl.x===6&&RM.pl.y===5),'tapping a floor cell moves the ghost there');
-await tapCell(1,1);
-ok(await ev(()=>RM.pl.x===6&&RM.pl.y===5),'a cell under the bed is refused');
+await tapCell(1,3);
+ok(await ev(()=>RM.pl.x===6&&RM.pl.y===5),'the foot of the bed (not a lit top) is refused');
 await click('[data-place]');
 ok(await ev(()=>space.things.length===1&&space.things[0].x===6&&space.things[0].y===5&&space.spent===1&&!RM.pl),'bought and placed: 1 token spent, one thing on cell 6,5');
 ok(await ev(()=>!!document.querySelector('[data-hit="thing:0"] image')&&document.querySelector('[data-hit="thing:0"] image').getAttribute('href')===ROOM_CATALOG[0].src),'the plant is drawn with its brown-pot picture');

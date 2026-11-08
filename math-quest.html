@@ -778,6 +778,7 @@ body[data-view="space"] #spaceView{box-sizing:border-box; display:flex; flex-dir
 .rmview{flex:1; min-width:0; border-radius:16px; background:linear-gradient(#fdf2fb,#e6f1ff); overflow:hidden; touch-action:none; cursor:grab; position:relative}
 .rmview svg{width:100%; height:100%; display:block; user-select:none; -webkit-user-select:none}
 .rmh{cursor:pointer}
+.rmtop,.rmtile{pointer-events:none}
 .rmh.sel{filter:drop-shadow(0 0 6px #fff) drop-shadow(0 0 10px var(--purple,#9b5de5))}
 .rmzoom{position:absolute; top:10px; inset-inline-start:10px; display:flex; flex-direction:column; gap:6px; z-index:2}
 .rmz{border:0; background:var(--card); color:var(--text); width:40px; height:40px; border-radius:50%; font-size:1.1rem; font-weight:800; cursor:pointer; box-shadow:0 2px 6px var(--shadow)}
@@ -2236,7 +2237,7 @@ function cloudProfileFromDoc(C, helpers){
 // ===== CLOUD (Google sign-in, cloud progress, problem reports) =====
 // Local-first: the game always works from this device's storage. The cloud is a mirror, so no internet / no account / no quota never blocks play.
 // Everything here is off while CLOUD_CONFIG is null. See firebase/SETUP.md for how to create the (free) Firebase project and paste its settings below.
-const APP_VERSION = '2026.11.08c';       // keep equal to VERSION in sw.js (a test checks it)
+const APP_VERSION = '2026.11.08d';       // keep equal to VERSION in sw.js (a test checks it)
 const CLOUD_CONFIG = {apiKey:"AIzaSyAlq_TJNGvWPJpUrpbdq_hkAoURydqMzm0", authDomain:"learning-quest-1.firebaseapp.com", projectId:"learning-quest-1", appId:"1:98931179722:web:78fb00084ccba3efb53433"};   // e.g. {apiKey:'...', authDomain:'xxx.firebaseapp.com', projectId:'xxx', appId:'...'}
 const CLOUD_LIMITS = {
   pushDelayMs: 60000,          // at most one upload per profile per minute while playing
@@ -5143,6 +5144,31 @@ function cellAt(e){
   const x = Math.floor((Y+X)/2), y = Math.floor((Y-X)/2);
   return (x>=0 && x<ROOM_CELLS && y>=0 && y<ROOM_CELLS) ? [x,y] : null;
 }
+// ---- things on furniture: drawing and tapping (phase 2)
+// every surface that is available right now: the bed and each thing with a top that stands on the floor; {h, tp (see topOf), depth}
+function surfaces(skipIdx){
+  const o = [], bt = topOf('bed'); if(bt) o.push({h:'bed', tp:bt, depth:bt.x+bt.c[0]+bt.c[2]+bt.y+bt.c[1]+bt.c[3]});
+  space.things.forEach((t,i)=>{ if(i===skipIdx || !t.u) return; const tp = topOf(t); if(tp) o.push({h:t.u, tp, depth:tp.x+tp.c[0]+tp.c[2]+tp.y+tp.c[1]+tp.c[3]}); });
+  return o;
+}
+const raised = (pts, z) => pts.map(q=>[q[0], q[1]-z]);
+// the top cell under a pointer that item c could stand on (the one in front wins where tops overlap on screen), or null
+function topCellAt(e, c, except){
+  const v = rmVB(e), rx = (v[0]-RM.tx)/RM.k, ry = (v[1]-RM.ty)/RM.k-RM_DY; let best = null;
+  for(const s of surfaces(except)){
+    const X = (rx-500)/50, Y = (ry+s.tp.z-400)/25, x = Math.floor((Y+X)/2), y = Math.floor((Y-X)/2);   // the pointer, brought back down to the floor plane
+    const dx = (x-s.tp.x)*SURF_SUB, dy = (y-s.tp.y)*SURF_SUB;
+    if(surfFree(c, s.h, dx, dy, except) && (!best || s.depth>best.depth)) best = {h:s.h, dx, dy, depth:s.depth};
+  }
+  return best && {h:best.h, dx:best.dx, dy:best.dy};
+}
+// a sitter, drawn on its host's top (hx,hy = the host's back corner; z = the top's height)
+function sitterSVG(t, i, hx, hy, z){
+  const c = catOf(t.k), cx = hx + Math.floor(t.on.dx/SURF_SUB), cy = hy + Math.floor(t.on.dy/SURF_SUB);
+  return `<g data-hit="thing:${i}" class="rmh${RM.sel && RM.sel.t==='thing' && RM.sel.i===i ? ' sel' : ''}"><g transform="translate(0 ${-z})">${thingSVG(c, cx, cy, i)}</g></g>`;
+}
+const sittersSVG = (h, hx, hy, z, skip) => space.things.map((t,i)=>[t,i]).filter(([t,i])=>t.on && t.on.h===h && i!==skip && t.x>=0 && !(RM.pl && RM.pl.i===i))
+  .sort((a,b)=>(a[0].x+a[0].y)-(b[0].x+b[0].y)).map(([t,i])=>sitterSVG(t, i, hx, hy, z)).join('');
 // can item c stand with its back cell at x,y? (all its cells on the floor, none under the bed, none used by another item)
 function footFree(c, x, y, except){
   const fw = fwOf(c), fd = fdOf(c);
@@ -5237,14 +5263,24 @@ function roomSVG(){
   s += `<g data-hit="surf:fl" class="rmh${sel('surf','fl')}"><polygon points="500,400 1000,650 500,900 0,650" fill="${surfFill(cf)}" stroke="#5b3a2a" stroke-width="4" stroke-linejoin="round"/><path d="${grid}" stroke="#5b3a2a" stroke-opacity=".16" stroke-width="2" fill="none"/></g>`;
   s += `<g data-hit="item:window" class="rmh${sel('item','window')}" transform="matrix(1 .5 0 1 500 400)">${windowSVG(effLv('window'))}</g>`;
   s += `<g data-hit="item:bed" class="rmh${sel('item','bed')}">${bedSVG(effLv('bed'))}</g>`;
-  const pl = RM.pl, order = [];
-  space.things.forEach((t,i)=>{ if(t.x>=0 && !(pl && pl.i===i)) order.push(i); });
+  const pl = RM.pl, order = [], bt = topOf('bed');
+  if(bt) s += sittersSVG('bed', 0, 0, bt.z);   // what lies on the bed, right after the bed
+  space.things.forEach((t,i)=>{ if(t.x>=0 && !t.on && !(pl && pl.i===i)) order.push(i); });
   const depth = i=>{ const t = space.things[i], c = catOf(t.k); return t.x+fwOf(c)+t.y+fdOf(c); };
   const flatFirst = i => isFlat(catOf(space.things[i].k)) ? 0 : 1;
   order.sort((a,b)=>flatFirst(a)-flatFirst(b) || depth(a)-depth(b));   // rugs and other flat things first, then further back first
-  order.forEach(i=>{ const t = space.things[i]; s += `<g data-hit="thing:${i}" class="rmh${RM.sel && RM.sel.t==='thing' && RM.sel.i===i ? ' sel' : ''}">${thingSVG(catOf(t.k), t.x, t.y, i)}</g>`; });
-  if(pl){ const c = catOf(pl.k), fw = fwOf(c), fd = fdOf(c), q = [[0,0],[fw,0],[fw,fd],[0,fd]].map(d=>gx2s(pl.x+d[0],pl.y+d[1]).join(',')).join(' ');
-    s += `<polygon class="rmtile" points="${q}" fill="#7ee08a" fill-opacity=".45" stroke="#2e9d45" stroke-width="3"/><g class="rmghost" opacity=".85">${thingSVG(c, pl.x, pl.y)}</g>`; }
+  order.forEach(i=>{ const t = space.things[i], tp = topOf(t); s += `<g data-hit="thing:${i}" class="rmh${RM.sel && RM.sel.t==='thing' && RM.sel.i===i ? ' sel' : ''}">${thingSVG(catOf(t.k), t.x, t.y, i)}</g>` + (tp && t.u ? sittersSVG(t.u, tp.x, tp.y, tp.z) : ''); });   // a host and what is on it are drawn as one group
+  if(pl){ const c = catOf(pl.k), fw = fwOf(c), fd = fdOf(c);
+    if(canSit(c)) for(const sf of surfaces(pl.i)){   // a small thing can also go on furniture: the free cells of every top are lit
+      for(let dx=sf.tp.c[0]*SURF_SUB; dx<(sf.tp.c[0]+sf.tp.c[2])*SURF_SUB; dx++) for(let dy=sf.tp.c[1]*SURF_SUB; dy<(sf.tp.c[1]+sf.tp.c[3])*SURF_SUB; dy++){
+        if(!surfFree(c, sf.h, dx, dy, pl.i)) continue; const cx = sf.tp.x+dx/SURF_SUB, cy = sf.tp.y+dy/SURF_SUB;
+        s += `<polygon class="rmtop" points="${pts(raised([[0,0],[1,0],[1,1],[0,1]].map(d=>gx2s(cx+d[0]/SURF_SUB*1,cy+d[1]/SURF_SUB*1)), sf.tp.z))}" fill="#fff" fill-opacity=".28" stroke="#fff" stroke-opacity=".9" stroke-width="2" stroke-dasharray="6 5"/>`; } }
+    if(pl.on){ const tp = topOf(pl.on.h), cx = tp.x+Math.floor(pl.on.dx/SURF_SUB), cy = tp.y+Math.floor(pl.on.dy/SURF_SUB);
+      s += `<polygon class="rmtile" points="${pts(raised([[0,0],[1,0],[1,1],[0,1]].map(d=>gx2s(cx+d[0],cy+d[1])), tp.z))}" fill="#7ee08a" fill-opacity=".55" stroke="#2e9d45" stroke-width="3"/><g class="rmghost" opacity=".9" transform="translate(0 ${-tp.z})">${thingSVG(c, cx, cy)}</g>`; }
+    else { const q = [[0,0],[fw,0],[fw,fd],[0,fd]].map(d=>gx2s(pl.x+d[0],pl.y+d[1]).join(',')).join(' ');
+      s += `<polygon class="rmtile" points="${q}" fill="#7ee08a" fill-opacity=".45" stroke="#2e9d45" stroke-width="3"/><g class="rmghost" opacity=".85">${thingSVG(c, pl.x, pl.y)}</g>`;
+      const mv = pl.i>=0 ? space.things[pl.i] : null, tp = mv && mv.u ? topOf({k:mv.k, x:pl.x, y:pl.y, u:mv.u}) : null;   // a host being moved brings its things along in the preview
+      if(tp) s += `<g opacity=".85">${sittersSVG(mv.u, tp.x, tp.y, tp.z)}</g>`; } }
   s += `</g></g>`;
   return `<svg id="rmSvg" viewBox="0 0 ${RM.W} ${RM.H}" role="img" aria-label="החדר">${s}</svg>`;
 }
@@ -5304,7 +5340,7 @@ function renderDrawer(){
   if(RM.pl){   // placing a floor item: tap a cell of the floor to choose where it stands
     const pl = RM.pl, c = catOf(pl.k), cost = pvCost(), poor = bal<cost;
     d.classList.remove('idle'); d.hidden = false;
-    d.innerHTML = head(c.n) + `<div class="rmsh-s">הקישו על משבצת ברצפה כדי לבחור מקום</div>`
+    d.innerHTML = head(c.n) + `<div class="rmsh-s">${pl.on ? 'הפריט יעמוד על המשטח המסומן. אפשר גם להקיש על הרצפה' : 'הקישו על משבצת ברצפה כדי לבחור מקום'}</div>${canSit(c) && !pl.on && surfaces(pl.i).length ? `<div class="rmsh-s small">אפשר גם להציב על שולחן, ארגז או מיטה: הקישו על משטח מואר</div>` : ''}`
       + (pl.i<0 ? `<div class="rmsh-need${poor?' poor':''}">${needTxt(cost,bal)}</div><div class="rmsh-btns"><button type="button" class="btn" data-place="1"${poor?' disabled':''}>קנו · ${cost} 🪙</button><button type="button" class="btn ghost" data-cancel="1">ביטול</button></div><div class="rmsh-s small">אי אפשר להחזיר או למכור אחר כך</div>`
         : `<div class="rmsh-btns"><button type="button" class="btn" data-place="1">הציבו כאן</button><button type="button" class="btn ghost" data-cancel="1">ביטול</button></div>`);
     return;
@@ -5333,7 +5369,7 @@ function renderDrawer(){
       return; } }
   if(sel.t==='thing'){
     const t = space.things[sel.i], c = t && catOf(t.k); if(!c){ RM.sel = null; return renderDrawer(); }
-    d.innerHTML = head(c.n) + `<div class="rmsh-btns"><button type="button" class="btn" data-move="${sel.i}">העבירו</button><button type="button" class="btn ghost" data-away="${sel.i}">מחיקה</button></div><div class="rmsh-s small">פריט שנקנה נשאר שלכם ואפשר להציב אותו שוב מרשימת הפריטים</div>${(()=>{ const n = t.u ? sitters(t.u).length : 0; return n ? `<div class="rmsh-s small">${n===1?'הפריט שעליו יעבור גם הוא למלאי':n+' הפריטים שעליו יעברו גם הם למלאי'}</div>` : ''; })()}${partsRowHTML()}<button type="button" class="btn ghost" data-close="1">סגירה</button>`;
+    d.innerHTML = head(c.n) + `<div class="rmsh-btns"><button type="button" class="btn" data-move="${sel.i}">העבירו</button><button type="button" class="btn ghost" data-away="${sel.i}">מחיקה</button></div>${t.on ? `<button type="button" class="btn ghost" data-host="${t.on.h}">בחירת ${t.on.h==='bed' ? 'המיטה' : ((hostThing(t.on.h)&&catOf(hostThing(t.on.h).k)||{}).n||'הרהיט')}</button>` : ''}<div class="rmsh-s small">פריט שנקנה נשאר שלכם ואפשר להציב אותו שוב מרשימת הפריטים</div>${(()=>{ const n = t.u ? sitters(t.u).length : 0; return n ? `<div class="rmsh-s small">${n===1?'הפריט שעליו יעבור גם הוא למלאי':n+' הפריטים שעליו יעברו גם הם למלאי'}</div>` : ''; })()}${partsRowHTML()}<button type="button" class="btn ghost" data-close="1">סגירה</button>`;
     return;
   }
   const pv = RM.pv, cost = pvCost();
@@ -5356,9 +5392,10 @@ function renderDrawer(){
 }
 function onRoomTap(hit, e){
   if(RM.pl){   // choosing a cell for a floor item
-    const c = e && cellAt(e), it = catOf(RM.pl.k);
+    const c = e && cellAt(e), it = catOf(RM.pl.k), on = e && canSit(it) && topCellAt(e, it, RM.pl.i);   // a free cell on a top wins over the floor behind it
+    if(on){ const cell = sitCell(on.h, on.dx, on.dy); RM.pl.on = on; RM.pl.x = cell[0]; RM.pl.y = cell[1]; rmRedraw(); return renderDrawer(); }
     if(c){ const x = Math.max(0,Math.min(ROOM_CELLS-fwOf(it), c[0]-(fwOf(it)>>1))), y = Math.max(0,Math.min(ROOM_CELLS-fdOf(it), c[1]-(fdOf(it)>>1)));   // the tapped cell is the middle of the item
-      if(footFree(it,x,y,RM.pl.i)){ RM.pl.x = x; RM.pl.y = y; rmRedraw(); } }
+      if(footFree(it,x,y,RM.pl.i)){ RM.pl.x = x; RM.pl.y = y; delete RM.pl.on; rmRedraw(); return renderDrawer(); } }
     return;
   }
   RM.list = null;   // the catalog closes when something in the room is tapped; only placing a floor item is a mode of its own
@@ -5371,16 +5408,17 @@ function onDrawerClick(e){
   if(t.dataset.close){ RM.sel = null; RM.pv = null; RM.list = null; rmRedraw(); return renderDrawer(); }
   if(t.dataset.cancel){ RM.pv = null; RM.pl = null; rmRedraw(); return renderDrawer(); }
   if(t.dataset.list){ RM.list = t.dataset.list; RM.choose = null; RM.sel = null; RM.pv = null; return renderDrawer(); }
+  if(t.dataset.host){ const h = t.dataset.host, i = h==='bed' ? -1 : space.things.findIndex(q=>q.u===h); RM.sel = h==='bed' ? {t:'item',id:'bed'} : i>=0 ? {t:'thing',i} : null; RM.pv = null; rmRedraw(); return renderDrawer(); }   // from a thing on furniture to the furniture itself
   if(t.dataset.choose){ RM.choose = t.dataset.choose; return renderDrawer(); }
   if(t.dataset.filter){ RM.filter = t.dataset.filter; return renderDrawer(); }
   if(t.dataset.pick){ const c = catOf(t.dataset.pick), f = firstFreeCell(c, -1); RM.list = null; RM.choose = null; RM.pl = {k:c.id, i:-1, x:f[0], y:f[1]}; rmRedraw(); return renderDrawer(); }
   if(t.dataset.unstow){ const i = +t.dataset.unstow, f = firstFreeCell(catOf(space.things[i].k), i); RM.list = null; RM.choose = null; RM.pl = {k:space.things[i].k, i, x:f[0], y:f[1]}; rmRedraw(); return renderDrawer(); }
-  if(t.dataset.move){ const i = +t.dataset.move, th = space.things[i]; RM.sel = null; RM.pl = {k:th.k, i, x:th.x, y:th.y}; rmRedraw(); return renderDrawer(); }
+  if(t.dataset.move){ const i = +t.dataset.move, th = space.things[i]; RM.sel = null; RM.pl = {k:th.k, i, x:th.x, y:th.y}; if(th.on) RM.pl.on = {...th.on}; rmRedraw(); return renderDrawer(); }
   if(t.dataset.away){ const th = space.things[+t.dataset.away]; th.x = -1; th.y = -1; delete th.on; settleSurfaces(); RM.sel = null; saveState(); rmRedraw(); return renderDrawer(); }
   if(t.dataset.place){
-    const pl = RM.pl; if(!pl || !footFree(catOf(pl.k),pl.x,pl.y,pl.i)) return;
-    if(pl.i<0){ const c = catOf(pl.k); if(tokenBalance()<c.p) return; space.spent += c.p; space.things.push({k:pl.k, x:pl.x, y:pl.y, u:newUid()}); burstConfetti(10); }
-    else { const th = space.things[pl.i]; th.x = pl.x; th.y = pl.y; delete th.on; settleSurfaces(); }   // moved to the floor; whatever stands on it comes along
+    const pl = RM.pl; if(!pl || (pl.on ? !surfFree(catOf(pl.k), pl.on.h, pl.on.dx, pl.on.dy, pl.i) : !footFree(catOf(pl.k),pl.x,pl.y,pl.i))) return;
+    if(pl.i<0){ const c = catOf(pl.k); if(tokenBalance()<c.p) return; space.spent += c.p; const th = {k:pl.k, x:pl.x, y:pl.y, u:newUid()}; if(pl.on) th.on = {...pl.on}; space.things.push(th); burstConfetti(10); }
+    else { const th = space.things[pl.i]; th.x = pl.x; th.y = pl.y; if(pl.on) th.on = {...pl.on}; else delete th.on; settleSurfaces(); }   // moved to the floor; whatever stands on it comes along
     RM.pl = null; saveState(); rmRedraw(); return renderDrawer();
   }
   if(t.dataset.sw){ const [id,l] = t.dataset.sw.split(':'); space.lv[id] = +l; RM.pv = null; stowBlocked(); saveState(); rmRedraw(); return renderDrawer(); }   // an owned level: switch for free
