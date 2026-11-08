@@ -33,6 +33,7 @@ const TESTS = [
   ['groundtest','groundtest.js','grounding: from the real sprite pixels, every floor item and bed level stands on its footprint corners (no floating)'],
   ['colortest','colortest.js','colors of parts: bed blanket/sheet/pillow/curtains, pots, furniture; palette, pattern, prices, free switching, repainting, saving'],
   ['spacetest','spacetest.js','personal space: locked teaser, unlock ceremony, poof, room, zoom/pan, upgrades and colors cost tokens'],
+  ['roomfiltertest','roomfiltertest.js','gift room: one section with a filter (all, current, past)'],
   ['layerstest','layerstest.js','layered rewards: item format, one-time migration, rarity, remembered merges and looks, every combination fits'],
   ['loctest','loctest.js','selection screen and locations: levels only at home, backdrop and title per game, back button, neutral background without backdrop'],
   ['sprtest','sprtest.js','no broken images'],

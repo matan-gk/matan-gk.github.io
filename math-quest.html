@@ -206,7 +206,7 @@ h1{
 .gfall::after{content:'✨'; position:absolute; top:-6px; right:-8px; font-size:.55em}
 .vault{display:grid; grid-template-columns:repeat(5,1fr); gap:6px; margin-top:10px; justify-items:center}
 .vitem{display:flex; align-items:center; justify-content:center}
-.allgrid{display:grid; grid-template-columns:repeat(5,1fr); gap:6px; justify-items:center}
+.roomfilt{margin:0 0 8px}
 .alltap{cursor:pointer}
 .ritem.merged{position:relative}
 .wardskt{position:absolute; top:-6px; right:-6px; font-size:.7em; filter:drop-shadow(0 0 3px #ffc93c); animation:wardpop .8s ease-out}
@@ -2234,7 +2234,7 @@ function cloudProfileFromDoc(C, helpers){
 // ===== CLOUD (Google sign-in, cloud progress, problem reports) =====
 // Local-first: the game always works from this device's storage. The cloud is a mirror, so no internet / no account / no quota never blocks play.
 // Everything here is off while CLOUD_CONFIG is null. See firebase/SETUP.md for how to create the (free) Firebase project and paste its settings below.
-const APP_VERSION = '2026.11.07g';       // keep equal to VERSION in sw.js (a test checks it)
+const APP_VERSION = '2026.11.08b';       // keep equal to VERSION in sw.js (a test checks it)
 const CLOUD_CONFIG = {apiKey:"AIzaSyAlq_TJNGvWPJpUrpbdq_hkAoURydqMzm0", authDomain:"learning-quest-1.firebaseapp.com", projectId:"learning-quest-1", appId:"1:98931179722:web:78fb00084ccba3efb53433"};   // e.g. {apiKey:'...', authDomain:'xxx.firebaseapp.com', projectId:'xxx', appId:'...'}
 const CLOUD_LIMITS = {
   pushDelayMs: 60000,          // at most one upload per profile per minute while playing
@@ -5419,6 +5419,7 @@ function viewTokens(){
   showCeleb(`<div class="cbig view" style="min-height:${px}px">${tokenHTML(n,px)||'<span class="tokzero" style="font-size:4rem">🪙</span>'}</div><div class="ctitle">${n} ${n===1?'מטבע':'מטבעות'}</div><div class="csub">${esc(tokenHint())}</div>`, [{label:'סגירה', fn:closeCeleb}]);
 }
 function tokenHint(){ return space.unlocked ? 'מטבעות פותחים פריטים ושדרוגים בחדר של קאפקייק' : G('אספי','אסוף','אספו')+' מספיק מטבעות לפרס מיוחד!'; }
+let roomFilter = 'all';
 function renderRoom(){
   const body = document.getElementById('roomBody');
   if(!collection.length && !golden.length){ body.innerHTML=`<div class="roomempty">${TX('roomEmpty', ()=>`עוד אין מתנות. ${G('פתרי','פתור','פתרו')} שאלה כדי לקבל את הראשונה! 🎀`)}</div>`; return; }
@@ -5436,17 +5437,21 @@ function renderRoom(){
     const gs = golden.slice().sort((p,q)=>rank(p)-rank(q));
     h += `<div class="roomsec">${TX('upSec','פריטים משודרגים')} · ${gs.length}</div><div class="roomhint">${TX('upHint', ()=>`${G('לחצי','לחץ','לחצו')} על פריט משודרג כדי לראות את ${MERGE_COST} המתנות שמהן הוא נוצר.`)}</div><div class="roomgrid">` + gs.map(k=>`<div class="ritem gold" data-act="vault" data-kind="${kOf(k)}" data-g="${k}" role="button">${itemHTML(k,true,40)}</div>`).join('') + '</div>';
   }
-  const all = allRewardsList();
-  if(all.length){
-    h += `<div class="roomsec">${TX('allSec','כל מתנות העבר')} · ${all.length}</div><div class="roomhint">${TX('allHint',()=>`${G('לחצי','לחץ','לחצו')} על כל מתנה כדי להציג אותה.`)}</div><div class="roomgrid allgrid">` + all.map((r,i)=>`<div class="ritem alltap ${r.merged ? 'merged' : ''}" data-act="viewItem" data-item="${String(r.item)}" role="button" title="${esc(rewardName(kOf(r.item),'one')||'')}">${itemHTML(r.item,false,38)}${r.merged ? '<span class="wardskt">✨</span>' : ''}</div>`).join('') + '</div>';
-  }
-  if(collection.length){
-    const sorted = collection.map((x,i)=>[x,i]).reverse();   // newest first: the order they were received
-    h += `<div class="roomsec">${TX('baseSec','מתנות קסומות')} · ${sorted.length}</div><div class="roomgrid">` + sorted.map(([x,i])=>`<div class="ritem tap" data-act="view" data-i="${i}" role="button" title="${esc(rewardName(x,'one')||'')}"><span class="remoji">${rewardGlyph(x,38)}</span></div>`).join('') + '</div>';
+  // one section for the gifts, with a filter: all (default), current (in the collection), past (the ones that were merged into an upgrade)
+  const cur = collection.map((x,i)=>[x,i]).reverse();   // newest first: the order they were received
+  const past = allRewardsList().filter(r=>r.merged);
+  if(cur.length || past.length){
+    const f = roomFilter, showCur = f!=='past', showPast = f!=='cur';
+    const tiles = (showCur ? cur.map(([x,i])=>`<div class="ritem tap" data-act="view" data-i="${i}" role="button" title="${esc(rewardName(x,'one')||'')}"><span class="remoji">${rewardGlyph(x,38)}</span></div>`) : [])
+      .concat(showPast ? past.map(r=>`<div class="ritem alltap merged" data-act="viewItem" data-item="${String(r.item)}" role="button" title="${esc(rewardName(kOf(r.item),'one')||'')}">${itemHTML(r.item,false,38)}<span class="wardskt">✨</span></div>`) : []);
+    const chips = `<div class="catchips roomfilt" role="group" aria-label="סינון">${[['all','הכל',cur.length+past.length],['cur','נוכחיות',cur.length],['past','מהעבר',past.length]].map(([k,n,c])=>`<button type="button" class="chip${f===k?' on':''}" data-act="rfilt" data-f="${k}" aria-pressed="${f===k}">${n} · ${c}</button>`).join('')}</div>`;
+    h += `<div class="roomsec">${TX('baseSec','מתנות קסומות')} · ${tiles.length}</div>${chips}`
+      + (showPast && past.length ? `<div class="roomhint">${TX('allHint',()=>`${G('לחצי','לחץ','לחצו')} על כל מתנה כדי להציג אותה. ✨ = מתנה שהתמזגה לשדרוג.`)}</div>` : '')
+      + (tiles.length ? `<div class="roomgrid">${tiles.join('')}</div>` : `<div class="roomhint">אין כאן מתנות עדיין.</div>`);
   }
   body.innerHTML = h;
 }
-function openRoom(){ document.getElementById('roomOverlay').hidden=false; renderRoom(); }
+function openRoom(){ roomFilter = 'all'; document.getElementById('roomOverlay').hidden=false; renderRoom(); }
 function closeRoom(){ document.getElementById('roomOverlay').hidden=true; }
 
 // ---- celebrations & merging ----
@@ -6704,6 +6709,7 @@ document.getElementById('roomBody').addEventListener('click', e=>{
   const act = t.dataset.act;
   if(act==='merge') showReadyCeleb(t.dataset.kind);
   else if(act==='view') viewReward(Number(t.dataset.i));
+  else if(act==='rfilt'){ roomFilter = t.dataset.f; renderRoom(); }
   else if(act==='vault') viewGold(t.dataset.kind, t.dataset.g);
   else if(act==='viewItem') viewItem(String(t.dataset.item));
   else if(act==='space'){ closeRoom(); openSpace(); }
