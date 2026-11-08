@@ -31,6 +31,7 @@ const TESTS = [
   ['flattest','flattest.js','personal space: rugs and other flat floor things (stand-on rule, draw order, no shadow, shared rug colour)'],
   ['surfacetest','surfacetest.js','personal space: things on furniture, phase 1 (rules, data, save cleaning, carry and put away)'],
   ['surfaceuitest','surfaceuitest.js','personal space: things on furniture, phase 2 (drawing, lit tops, placing, tapping, moving)'],
+  ['surfacemsgtest','surfacemsgtest.js','personal space: things on furniture, phase 4 (bed level preview, inventory notices, save and reload)'],
   ['surfacegroundtest','surfacegroundtest.js','personal space: the tops of tables, desk, toy boxes and beds match their pictures (tools/surfaces.py --check)'],
   ['groundtest','groundtest.js','grounding: from the real sprite pixels, every floor item and bed level stands on its footprint corners (no floating)'],
   ['colortest','colortest.js','colors of parts: bed blanket/sheet/pillow/curtains, pots, furniture; palette, pattern, prices, free switching, repainting, saving'],

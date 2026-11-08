@@ -431,3 +431,7 @@ Drawing and interaction (details in `docs/ITEMS_ON_FURNITURE.md`): sitters drawn
 ## Step 14: things on furniture, phase 3 (branch `items-on-furniture-p3`, off phase 2)
 
 Calibration from the pictures (details in `docs/ITEMS_ON_FURNITURE.md`): `tools/surfaces.py` replaces the estimated heights with measured ones (table 27, desk 110, toy boxes 53/56/53) and measures the bed: per level a height `z`, a sideways shift `ox` and the list of visible cells (`BED_TOP[level].cells`, so the pillow end is out and levels 4-5 take only 3-4 cells). New: `top.ox`, `top.cells` honoured by `topOf`, `surfFree`, sitter drawing, lit cells, the placing preview and `topCellAt`. Tests: `surfacegroundtest.js` (numbers against pictures, via `tools/surfaces.py --check`); `surfacetest`/`surfaceuitest` updated for the bed's irregular top. Version 2026.11.07i.
+
+## Step 11: things on furniture, phase 4 (branch `items-on-furniture-p4`, off phase 3)
+
+Polish. Previewing a bed level upgrade now draws the bed's sitters on that level's top and hides those that would not fit (`wouldStow(to)`); the preview drawer says how many things will go to the inventory; after switching or buying a bed level a one-time notice (`RM.note`, `.rmnote`) says how many did. New test `tests/surfacemsgtest.js` (preview, notices, save and reload). Version 2026.11.07j.
