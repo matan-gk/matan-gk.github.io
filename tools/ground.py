@@ -55,12 +55,13 @@ def rect(src,sx,sy,tx,ty):
     return [round(tx-500,1),round(ty-400,1),round(W*sx,1),round(H*sy,1)]
 report=[]
 # ---- catalog
+GU=int(re.search(r'const GU = (\d+);',s).group(1))
 m=re.search(r'const ROOM_CATALOG = \[\n(.*?)\n\];',s,re.S)
 ents=[json.loads(re.sub(r'([{,])([a-z]+):',r'\1"\2":',l.strip().rstrip(','))) for l in m.group(1).split('\n') if l.strip().startswith('{')]
 FILL={'toybox1','toybox2','toybox3','desk','desk_turn','cloud','armchair','piano'}
 out=[]
 for e in ents:
-    fw,fd=e.get('fw',1),e.get('fd',1)
+    fw,fd=e.get('fw',1)/GU,e.get('fd',1)/GU   # catalog sizes are in grid units; the fitting below is in cells
     if e['id'] in FILL:
         P,sl=sil_pts(e['src'])
         if e['id'] in('desk','desk_turn'):
