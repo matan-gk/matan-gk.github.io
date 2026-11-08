@@ -1,0 +1,48 @@
+// gift room: one section with a filter (all by default, current, past)
+const T=require('./lib.js');
+const {chromium}=require('playwright');
+let f=0;const ok=(c,m)=>{console.log((c?'ok   ':'FAIL ')+m);if(!c)f++;};
+(async()=>{const b=await chromium.launch({...T.launchOpts});
+const p=await (await b.newContext({viewport:{width:430,height:900}})).newPage();const errs=[];p.on('pageerror',e=>errs.push(e.message));
+const ev=(fn,a)=>p.evaluate(fn,a);
+await p.goto(T.URL);await ev(()=>localStorage.clear());await p.reload();
+await p.fill('#pfName','X');await p.click('.gopt:has(input[value=f])');await p.click('[data-pact=save]');await p.waitForTimeout(500);
+const st=()=>ev(()=>({secs:document.querySelectorAll('#roomBody .roomsec').length,on:[...document.querySelectorAll('#roomBody .roomfilt .chip.on')].map(e=>e.dataset.f).join(),chips:[...document.querySelectorAll('#roomBody .roomfilt .chip')].map(e=>e.textContent.trim()),cur:document.querySelectorAll('#roomBody .ritem[data-act=view]').length,past:document.querySelectorAll('#roomBody .ritem[data-act=viewItem]').length,grids:document.querySelectorAll('#roomBody .roomgrid').length}));
+await ev(()=>{collection=['🧁:0.0.0','🍩:1.0.0','🍭:0.0.0'];golden=['🧁'];lollipops=[];renderRewards();openRoom();});
+const n=await ev(()=>allRewardsList().filter(r=>r.merged).length);
+let s=await st();
+ok(n>0&&s.on==='all'&&s.cur===3&&s.past===n,'all is the default: the current gifts and the past ones together ('+s.cur+' + '+s.past+')');
+ok(s.chips.length===3&&s.chips[1].endsWith('· 3')&&s.chips[2].endsWith('· '+n),'the chips show the counts: '+s.chips.join(' | '));
+await p.click('[data-act=rfilt][data-f=cur]');s=await st();
+ok(s.on==='cur'&&s.cur===3&&s.past===0,'current: only what is in the collection');
+await p.click('[data-act=rfilt][data-f=past]');s=await st();
+ok(s.on==='past'&&s.cur===0&&s.past===n,'past: only the gifts that were merged into upgrades');
+await p.click('#roomBody .ritem[data-act=viewItem] >> nth=0');await p.waitForTimeout(250);
+ok(await ev(()=>!!document.querySelector('#viewPic')),'a past gift opens as a big picture');
+await ev(()=>closeCeleb());
+await ev(()=>{closeRoom();openRoom();});s=await st();
+ok(s.on==='all','opening the room again starts on all');
+await ev(()=>{golden=[];renderRoom();});await p.click('[data-act=rfilt][data-f=past]');
+ok(await ev(()=>/אין כאן/.test(document.getElementById('roomBody').textContent)),'an empty filter says so');
+ok(await ev(()=>document.querySelectorAll('#roomBody .roomsec').length)===1,'one section only');
+// merging does not move gifts in the list
+await ev(()=>{closeRoom();golden=[];lollipops=[];collection=[];const o=['🧁:0.0.0','🍩:0.0.0','🧁:1.0.0','🧁:2.0.0','🍭:0.0.0','🧁:0.1.0','🧁:0.2.0','🧁:0.0.1','🍩:1.0.0','🧁:0.0.2','🧁:1.1.0','🧁:2.2.0','🍭:1.0.0','🧁:1.2.0','🍩:2.0.0'];o.forEach(x=>collection.push(x));});
+const seq=()=>ev(()=>allRewardsList().map(r=>r.item).join('|'));
+const before=await seq();
+await ev(()=>{doMerge('🧁');});await p.waitForTimeout(100);await ev(()=>closeCeleb());
+ok(await ev(()=>golden.length===1&&/@/.test(golden[0])),'the upgraded item remembers where its gifts were: '+await ev(()=>golden[0]));
+ok(await seq()===before,'after merging ten of one kind the list is in the same order as before');
+await ev(()=>{collection.push('🍭:2.0.0');});
+ok((await seq()).endsWith('|🍭:2.0.0')&&(await seq()).startsWith(before),'a gift received after the merge goes to the end (newest first in the room)');
+await ev(()=>{openRoom();});
+ok(await ev(()=>document.querySelector('#roomBody .roomgrid:last-of-type .ritem')&&[...document.querySelectorAll('#roomBody .ritem')].length>0),'the room shows the list');
+// saving keeps the places; an old upgraded item (no places) is listed first, as before
+const rt=await ev(()=>{const c=cleanProgress(JSON.parse(JSON.stringify(captureProgress())));return c.golden[0]===golden[0];});
+ok(rt,'save and load keeps the places');
+await ev(()=>{golden=[golden[0].split('@')[0]];});
+const old=await ev(()=>allRewardsList().map(r=>r.merged?'m':'c').join(''));
+ok(/^m{10}c+$/.test(old),'an upgraded item without places is listed first: '+old);
+await ev(()=>{golden=['🧁@1,1,2,3,4,5,6,7,8,9'];});
+ok(await ev(()=>{const l=allRewardsList();return l.length===10+collection.length&&new Set(l.map(x=>x)).size===l.length;}),'damaged places (a repeated one) are ignored, nothing is lost or doubled');
+ok(errs.length===0,'no page errors '+errs.join('|'));
+await b.close();process.exit(f?1:0);})();
