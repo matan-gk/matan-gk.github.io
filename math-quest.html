@@ -794,6 +794,7 @@ body[data-view="space"] #spaceView{box-sizing:border-box; display:flex; flex-dir
 .rmdrawer.mini .btn{white-space:nowrap; min-height:44px; padding:0 14px}
 .rmdrawer.mini .mini-max{min-width:44px; padding:0 10px}
 @media (min-width:900px){
+  body[data-view="space"] #spaceView{max-width:none}   /* the room takes all the width that the drawer leaves */
   .rmdrawer{position:static; width:340px; max-height:none; flex:none; border-radius:18px; box-shadow:0 4px 14px var(--shadow); overflow:auto}
   .rmdrawer[hidden]{display:flex}
   .rmdrawer.idle{justify-content:center; opacity:.8}
@@ -2272,7 +2273,7 @@ function cloudProfileFromDoc(C, helpers){
 // ===== CLOUD (Google sign-in, cloud progress, problem reports) =====
 // Local-first: the game always works from this device's storage. The cloud is a mirror, so no internet / no account / no quota never blocks play.
 // Everything here is off while CLOUD_CONFIG is null. See firebase/SETUP.md for how to create the (free) Firebase project and paste its settings below.
-const APP_VERSION = '2026.11.08h';       // keep equal to VERSION in sw.js (a test checks it)
+const APP_VERSION = '2026.11.08i';       // keep equal to VERSION in sw.js (a test checks it)
 const CLOUD_CONFIG = {apiKey:"AIzaSyAlq_TJNGvWPJpUrpbdq_hkAoURydqMzm0", authDomain:"learning-quest-1.firebaseapp.com", projectId:"learning-quest-1", appId:"1:98931179722:web:78fb00084ccba3efb53433"};   // e.g. {apiKey:'...', authDomain:'xxx.firebaseapp.com', projectId:'xxx', appId:'...'}
 const CLOUD_LIMITS = {
   pushDelayMs: 60000,          // at most one upload per profile per minute while playing
