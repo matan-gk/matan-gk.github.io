@@ -1312,8 +1312,21 @@ const GU = 2;
 const ROOM_CELLS = 10*GU;
 // the bed's footprint is per level (ROOM_ART.bed[l].fp = [cells along x, cells along y], from the back corner); its art is fitted to exactly that block
 const bedFp = l => ROOM_ART.bed[(l||1)-1].fp.map(v=>v*GU);   // authored in old cells
-const roomBlocked = (x,y,l) => { const f = bedFp(l || (space && space.lv && space.lv.bed)); return x<f[0] && y<f[1]; };
-function stowBlocked(){ for(const t of space.things){ if(t.x<0 || t.on) continue;   // things standing on furniture are checked by settleSurfaces
+// THE FIXTURES: the bed and the window start in their default places but can be moved or put away in the inventory (space.fix.bed = {x,y} the back corner, or null while put away;
+// space.fix.window = {w:'l'|'r' the wall, u: the centre along it in wall pixels}, or null). Their levels, colours and upgrades are kept while they are away.
+const WIN_U = 300, WIN_SILL = 235, WIN_STEP = 50/GU;   // window: default centre along the wall, sill height above the floor, one step along the wall (one grid unit)
+const bedAtFor = (l, p) => { if(!p) return null; const f = bedFp(l); return {x:Math.max(0,Math.min(ROOM_CELLS-f[0],p.x)), y:Math.max(0,Math.min(ROOM_CELLS-f[1],p.y))}; };   // a bigger level is pushed back into the room
+const bedPos = (l, ctx) => { const s = ctx || space; return s && s.fix ? bedAtFor(l || s.lv.bed || 1, s.fix.bed) : null; };
+const winAtFor = (l, w) => { if(!w) return null; const a = ROOM_ART.window[l-1], u = Math.max(a.ax, Math.min(500-(a.w-a.ax), w.u)); return {w:w.w, u}; };
+const roomBlocked = (x,y,l,p) => { const lv = l || (space && space.lv && space.lv.bed), q = p===undefined ? bedPos(lv) : p; if(!q) return false; const f = bedFp(lv); return x>=q.x && x<q.x+f[0] && y>=q.y && y<q.y+f[1]; };
+// can the bed (level l) stand with its back corner at p? inside the room and not on a floor thing (things lying on the bed itself come along)
+function bedFits(p, l){
+  const f = bedFp(l); if(!p || p.x<0 || p.y<0 || p.x+f[0]>ROOM_CELLS || p.y+f[1]>ROOM_CELLS) return false;
+  return !space.things.some(t=>{ if(t.x<0 || t.on) return false; const c = catOf(t.k); return t.x<p.x+f[0] && p.x<t.x+fwOf(c) && t.y<p.y+f[1] && p.y<t.y+fdOf(c); });
+}
+function stowBlocked(){
+  if(space.fix){ if(space.fix.bed) space.fix.bed = bedAtFor(space.lv.bed, space.fix.bed); if(space.fix.window) space.fix.window = winAtFor(space.lv.window, space.fix.window); }   // a bigger level may not fit where it was
+  for(const t of space.things){ if(t.x<0 || t.on) continue;   // things standing on furniture are checked by settleSurfaces
     const c = catOf(t.k); let hit = false; for(let a=0;a<fwOf(c);a++) for(let b=0;b<fdOf(c);b++) if(roomBlocked(t.x+a,t.y+b)) hit = true; if(hit){ t.x = -1; t.y = -1; } } settleSurfaces(); }
 function roomMaxCost(){   // everything buyable in the room today (the catalog grows in later steps)
   let t = 0; for(const id in ROOM_ITEMS) t += ROOM_ITEMS[id].up.reduce((a,b)=>a+b,0);
@@ -1340,7 +1353,7 @@ const newUid = () => { let u; do { u = Math.random().toString(36).slice(2,8); } 
 const hostThing = (h, ctx) => h==='bed' ? 'bed' : (ctx||space).things.find(t=>t.u===h);
 // the host's top: {x,y: world cell of its back corner, c: [dx,dy,w,d] in cells inside the host, z} (null if it has none or is put away)
 function topOf(h, ctx){
-  if(h==='bed'){ const b = BED_TOP[(ctx||space).lv.bed||1]; return b ? {x:0, y:0, c:b.c.map(v=>v*GU), z:b.z, ox:b.ox||0, cells:b.cells} : null; }
+  if(h==='bed'){ const l = (ctx||space).lv.bed||1, b = BED_TOP[l], p = bedPos(l, ctx); return b && p ? {x:p.x, y:p.y, c:b.c.map(v=>v*GU), z:b.z, ox:b.ox||0, cells:b.cells} : null; }
   const t = typeof h==='string' ? hostThing(h, ctx) : h, c = t && catOf(t.k);
   return (t && c && c.top && t.x>=0 && !t.on) ? {x:t.x, y:t.y, c:c.top.c.map(v=>v*GU), z:c.top.z, ox:c.top.ox||0, cells:c.top.cells} : null;
 }
@@ -1388,7 +1401,14 @@ function spaceClean(sp, gold, legacy){
   for(const n of ['blanket','sheet','pillow','curtain']){ const v = sp.bc && sp.bc[n]; if(v!=='d' && optOk(v) && (po['bed.'+n]||[]).includes(v)) bc[n] = v; }
   const lv = {};
   for(const id in ROOM_ITEMS){ const v = sp.lv && sp.lv[id]; lv[id] = (Number.isInteger(v) && v>=1 && v<=roomMax(id)) ? v : 1; }
-  const bedLv = lv.bed || 1, things = [], occ = new Set(), occF = new Set();   // bought copies: x,y = their cell, or -1,-1 while put away in the stock
+  const bedLv = lv.bed || 1;
+  const fx = sp.fix && typeof sp.fix==='object' ? sp.fix : null, sub0 = (Number.isInteger(sp.sub) && sp.sub>=1 && GU%sp.sub===0) ? sp.sub : 1;   // an older save has no fixtures: both stand where they always stood
+  let fbed = {x:0, y:0}, fwin = {w:'r', u:WIN_U};
+  if(fx){
+    if(fx.bed===null) fbed = null; else if(fx.bed && Number.isInteger(fx.bed.x) && Number.isInteger(fx.bed.y)) fbed = bedAtFor(bedLv, {x:fx.bed.x*GU/sub0, y:fx.bed.y*GU/sub0});
+    if(fx.window===null) fwin = null; else if(fx.window && (fx.window.w==='l' || fx.window.w==='r') && Number.isFinite(fx.window.u)) fwin = winAtFor(lv.window||1, {w:fx.window.w, u:Math.round(fx.window.u/WIN_STEP)*WIN_STEP});
+  }
+  const things = [], occ = new Set(), occF = new Set();   // bought copies: x,y = their cell, or -1,-1 while put away in the stock
   const raw = (Array.isArray(sp.things) ? sp.things : []).slice(0,300).filter(t=>t && catOf(t.k)), uids = new Set();
   const sub = (Number.isInteger(sp.sub) && sp.sub>=1 && GU%sp.sub===0) ? sp.sub : 1, kx = GU/sub;   // the unit the saved positions are counted in; they are multiplied up to GU
   for(const t of raw){   // pass 1: every thing gets a unique id u and a place on the floor (or the stock); things standing on furniture wait for pass 2
@@ -1397,14 +1417,14 @@ function spaceClean(sp, gold, legacy){
     if(!sits && tx>=0 && ty>=0 && tx+fw<=ROOM_CELLS && ty+fd<=ROOM_CELLS){
       const cells = []; for(let a=0;a<fw;a++) for(let b=0;b<fd;b++) cells.push((tx+a)+','+(ty+b));
       const taken = isFlat(c) ? occF : occ;   // flat things (rugs) only exclude each other
-      if(!cells.some(q=>taken.has(q)) && !cells.some(q=>roomBlocked(+q.split(',')[0], +q.split(',')[1], bedLv))){ x = tx; y = ty; cells.forEach(q=>taken.add(q)); }
+      if(!cells.some(q=>taken.has(q)) && !cells.some(q=>roomBlocked(+q.split(',')[0], +q.split(',')[1], bedLv, fbed))){ x = tx; y = ty; cells.forEach(q=>taken.add(q)); }
     }
     let u = (typeof t.u==='string' && /^[a-z0-9]{4,12}$/.test(t.u) && !uids.has(t.u)) ? t.u : null;
     if(!u) do { u = Math.random().toString(36).slice(2,8); } while(u.length<4 || uids.has(u));
     uids.add(u);
     const th = {k:t.k, x, y, u}; if(t.c!=='d' && optOk(t.c) && (po[partKeyOf(c)]||[]).includes(t.c)) th.c = t.c; things.push(th);
   }
-  const ctx = {things, lv};   // pass 2 uses the same rules as play (surfFree, topOf), against the cleaned list
+  const ctx = {things, lv, fix:{bed:fbed, window:fwin}};   // pass 2 uses the same rules as play (surfFree, topOf), against the cleaned list
   raw.forEach((t,i)=>{
     const o = t.on; if(!o || typeof o.h!=='string' || !Number.isInteger(o.dx) || !Number.isInteger(o.dy)) return;
     const dx = o.dx*kx, dy = o.dy*kx;
@@ -1415,7 +1435,7 @@ function spaceClean(sp, gold, legacy){
   });
   const top = {};   // the highest level bought of each item: every level up to it stays owned and can be switched to for free
   for(const id in ROOM_ITEMS){ const v = sp.top && sp.top[id]; top[id] = Math.max(lv[id], (Number.isInteger(v) && v>=1 && v<=roomMax(id)) ? v : 1); }
-  return {earned, spent:Math.min(spent,earned), trued:true, unlocked:sp.unlocked===true, surf, own, po, bc, lv, top, things, sub:GU};
+  return {earned, spent:Math.min(spent,earned), trued:true, unlocked:sp.unlocked===true, surf, own, po, bc, lv, top, things, fix:{bed:fbed, window:fwin}, sub:GU};
 }
 function spaceSnap(){ return JSON.parse(JSON.stringify(space)); }
 let space = spaceClean({},[],0);   // personal-space tokens: earned once per upgrade (stored, never derived), spent in the shop later; trued = the one-time true-up for old players was done
@@ -2252,7 +2272,7 @@ function cloudProfileFromDoc(C, helpers){
 // ===== CLOUD (Google sign-in, cloud progress, problem reports) =====
 // Local-first: the game always works from this device's storage. The cloud is a mirror, so no internet / no account / no quota never blocks play.
 // Everything here is off while CLOUD_CONFIG is null. See firebase/SETUP.md for how to create the (free) Firebase project and paste its settings below.
-const APP_VERSION = '2026.11.08g';       // keep equal to VERSION in sw.js (a test checks it)
+const APP_VERSION = '2026.11.08h';       // keep equal to VERSION in sw.js (a test checks it)
 const CLOUD_CONFIG = {apiKey:"AIzaSyAlq_TJNGvWPJpUrpbdq_hkAoURydqMzm0", authDomain:"learning-quest-1.firebaseapp.com", projectId:"learning-quest-1", appId:"1:98931179722:web:78fb00084ccba3efb53433"};   // e.g. {apiKey:'...', authDomain:'xxx.firebaseapp.com', projectId:'xxx', appId:'...'}
 const CLOUD_LIMITS = {
   pushDelayMs: 60000,          // at most one upload per profile per minute while playing
@@ -5143,7 +5163,6 @@ const surfFill = idx => ROOM_COLORS[idx].h==='rainbow' ? 'url(#rmRainbow)' : ROO
 // room item pictures: w,h in room units, (ax,ay) = the point of the picture that sits on the floor corner (bed) or the sill centre (window)
 const ROOM_ART = {bed:[{src:'assets/f079c2224879.webp',mask:'assets/d7e337ab5221.webp',fp:[3,4],r:[-206.3,-167.9,363.6,338.3]},{src:'assets/8c9bc6b7b540.webp',mask:'assets/76a3893f6ba5.webp',fp:[3,4],r:[-209.1,-166.4,367.7,336.8]},{src:'assets/fc72ab74c218.webp',mask:'assets/2055d7d914ad.webp',fp:[3,4],r:[-212.7,-240.0,372.1,412.2]},{src:'assets/4312fd9e048e.webp',mask:'assets/68b62a12908f.webp',fp:[3,3],r:[-150.9,-324.7,320.3,470.1]},{src:'assets/a0f555cc03e3.webp',mask:'assets/914ea6ebcbdc.webp',fp:[3,4],r:[-168.6,-355.4,320.4,503.1]}],
   window:[{src:'assets/ab4b2e4250e6.webp',w:210.7,h:214.9,ax:105.0,ay:210.0},{src:'assets/a725113aac4b.webp',w:226.2,h:229.1,ax:113.9,ay:224.1},{src:'assets/ea204b751610.webp',w:217.8,h:270.1,ax:109.0,ay:264.4},{src:'assets/eb3fe20bb9dd.webp',w:225.5,h:294.8,ax:112.7,ay:289.9},{src:'assets/eb13d2dccaf9.webp',w:253.1,h:311.1,ax:126.6,ay:306.1}]};
-const WIN_U = 300, WIN_SILL = 235;   // window: centre along the wall and sill height above the floor
 // GROUNDING: every floor sprite carries r = [dx,dy,w,h], where its picture goes relative to gx2s(x,y) (the back corner of its footprint).
 // r is fitted per picture (tools/ground.py) so the sprite's contact points land on the footprint's corners; nothing is positioned by hand
 const footPoly = (x,y,fw,fd,e) => [[e,e],[fw-e,e],[fw-e,fd-e],[e,fd-e]].map(q=>gx2s(x+q[0],y+q[1]).map(v=>+v.toFixed(1)).join(',')).join(' ');
@@ -5151,8 +5170,8 @@ function spriteSVG(src, r, x, y, fw, fd, op){
   const o = gx2s(x,y);
   return (op ? `<polygon points="${footPoly(x,y,fw,fd,.12/GU)}" fill="#3b1d10" opacity="${op}" filter="url(#rmBlur)"/>` : '') + `<image href="${src}" x="${(o[0]+r[0]).toFixed(1)}" y="${(o[1]+r[1]).toFixed(1)}" width="${r[2]}" height="${r[3]}"/>`;
 }
-function bedSVG(lv){ const a = ROOM_ART.bed[lv-1]; return spriteSVG(bedSrc(lv), a.r, 0, 0, a.fp[0]*GU, a.fp[1]*GU, .3); }
-function windowSVG(lv){ const a = ROOM_ART.window[lv-1]; return `<image href="${a.src}" x="${(WIN_U-a.ax).toFixed(1)}" y="${(-WIN_SILL-a.ay).toFixed(1)}" width="${a.w}" height="${a.h}"/>`; }   // flat in wall units: it grows up the wall with each level
+function bedSVG(lv, p){ const a = ROOM_ART.bed[lv-1]; return spriteSVG(bedSrc(lv), a.r, p.x, p.y, a.fp[0]*GU, a.fp[1]*GU, .3); }
+function windowSVG(lv, u){ const a = ROOM_ART.window[lv-1]; return `<image href="${a.src}" x="${(u-a.ax).toFixed(1)}" y="${(-WIN_SILL-a.ay).toFixed(1)}" width="${a.w}" height="${a.h}"/>`; }   // flat in wall units: it grows up the wall with each level
 function thingSVG(c, x, y, i){ return spriteSVG(thingSrc(c, i), c.r, x, y, fwOf(c), fdOf(c), isFlat(c) ? 0 : fwOf(c)*fdOf(c)>GU*GU ? .28 : .22); }
 // the grid unit (0..ROOM_CELLS-1) under a pointer, or null off the floor
 function cellAt(e){
@@ -5163,7 +5182,7 @@ function cellAt(e){
 // ---- things on furniture: drawing and tapping (phase 2)
 // how many things would go to the inventory if the bed were at level `to`: floor things on cells the new bed covers, and things lying on a bed top that no longer holds them
 function wouldStow(to){
-  const ctx = {things: space.things, lv: {...space.lv, bed: to}};
+  const ctx = {things: space.things, lv: {...space.lv, bed: to}, fix: space.fix};
   return space.things.reduce((n,t,i)=>{
     if(t.x<0) return n; const c = catOf(t.k);
     if(t.on) return n + ((t.on.h==='bed' && !surfFree(c, 'bed', t.on.dx, t.on.dy, i, ctx)) ? 1 : 0);
@@ -5283,6 +5302,15 @@ function bedSrc(lv){ const a = ROOM_ART.bed[lv-1], names = bedParts(lv), ch = {}
   if(names.every(n=>ch[n]==='d')) return a.src;
   return paintedSrc('bed|'+lv+'|'+names.map(n=>ch[n]).join(','), a.src, ()=>paintBed(a, ch)); }
 function thingSrc(c, i){ const o = i==null ? 'd' : thingOpt(i); if(o==='d' || !hasParts(c) || isPat(o)) return c.src; return paintedSrc(c.id+'|'+o, c.src, ()=>paintItem(c, o)); }
+// moving the bed or the window (RM.pl = {fx:'bed', x, y} or {fx:'window', w, u}): the ghost where it would stand
+function fxPreviewSVG(pl){
+  if(pl.fx==='bed'){ const l = space.lv.bed, f = bedFp(l), p = {x:pl.x, y:pl.y}, ok = bedFits(p, l), ctx = {things:space.things, lv:space.lv, fix:{bed:p, window:space.fix.window}}, tp = topOf('bed', ctx);
+    const q = [[0,0],[f[0],0],[f[0],f[1]],[0,f[1]]].map(d=>gx2s(p.x+d[0],p.y+d[1]).join(',')).join(' ');
+    return `<polygon class="rmtile" points="${q}" fill="${ok?'#7ee08a':'#ff8a8a'}" fill-opacity=".45" stroke="${ok?'#2e9d45':'#c0392b'}" stroke-width="3"/><g class="rmghost" opacity=".85">${bedSVG(l, p)}</g>`
+      + (tp ? `<g opacity=".85">${sittersSVG('bed', tp.x, tp.y, tp.z, tp.ox, -1, (t,i)=>surfFree(catOf(t.k), 'bed', t.on.dx, t.on.dy, i, ctx))}</g>` : ''); }
+  const l = space.lv.window, a = ROOM_ART.window[l-1], q = winAtFor(l, pl);
+  return `<g class="rmghost" opacity=".85" transform="matrix(${q.w==='l'?-1:1} .5 0 1 500 400)">${windowSVG(l, q.u)}<rect class="rmtile" x="${(q.u-a.ax).toFixed(1)}" y="${(-WIN_SILL-a.ay).toFixed(1)}" width="${a.w}" height="${a.h}" fill="#7ee08a" fill-opacity=".25" stroke="#2e9d45" stroke-width="3" stroke-dasharray="8 6"/></g>`;
+}
 function roomSVG(){
   const cl = effCol('wl'), cr = effCol('wr'), cf = effCol('fl');
   const sel = (t,id) => RM.sel && RM.sel.t===t && (RM.sel.id||RM.sel.k)===id ? ' sel' : '';
@@ -5291,16 +5319,17 @@ function roomSVG(){
   s += `<g data-hit="surf:wr" class="rmh${sel('surf','wr')}"><polygon points="500,-200 1000,50 1000,650 500,400" fill="${surfFill(cr)}" stroke="#5b3a2a" stroke-width="4" stroke-linejoin="round"/><polygon points="500,-200 1000,50 1000,650 500,400" fill="#000" opacity=".10"/><polygon points="500,360 1000,610 1000,650 500,400" fill="#000" opacity=".08"/></g>`;
   let grid = ''; for(let i=1;i<10;i++){ const a=gx2s(i*GU,0),b=gx2s(i*GU,ROOM_CELLS),c=gx2s(0,i*GU),d=gx2s(ROOM_CELLS,i*GU); grid += `M${a} L${b} M${c} L${d} `; }
   s += `<g data-hit="surf:fl" class="rmh${sel('surf','fl')}"><polygon points="500,400 1000,650 500,900 0,650" fill="${surfFill(cf)}" stroke="#5b3a2a" stroke-width="4" stroke-linejoin="round"/><path d="${grid}" stroke="#5b3a2a" stroke-opacity=".16" stroke-width="2" fill="none"/></g>`;
-  s += `<g data-hit="item:window" class="rmh${sel('item','window')}" transform="matrix(1 .5 0 1 500 400)">${windowSVG(effLv('window'))}</g>`;
-  s += `<g data-hit="item:bed" class="rmh${sel('item','bed')}">${bedSVG(effLv('bed'))}</g>`;
-  const pl = RM.pl, order = [], shown = effLv('bed'), bctx = {things: space.things, lv: {...space.lv, bed: shown}}, bt = topOf('bed', bctx);
-  if(bt) s += sittersSVG('bed', 0, 0, bt.z, bt.ox, -1, (t,i)=>surfFree(catOf(t.k), 'bed', t.on.dx, t.on.dy, i, bctx));   // what lies on the bed, right after the bed (while previewing another level: on that level's top, and only what would still fit)
-  space.things.forEach((t,i)=>{ if(t.x>=0 && !t.on && !(pl && pl.i===i)) order.push(i); });
-  const depth = i=>{ const t = space.things[i], c = catOf(t.k); return t.x+fwOf(c)+t.y+fdOf(c); };
-  const flatFirst = i => isFlat(catOf(space.things[i].k)) ? 0 : 1;
-  order.sort((a,b)=>flatFirst(a)-flatFirst(b) || depth(a)-depth(b));   // rugs and other flat things first, then further back first
-  order.forEach(i=>{ const t = space.things[i], tp = topOf(t); s += `<g data-hit="thing:${i}" class="rmh${RM.sel && RM.sel.t==='thing' && RM.sel.i===i ? ' sel' : ''}">${thingSVG(catOf(t.k), t.x, t.y, i)}</g>` + (tp && t.u ? sittersSVG(t.u, tp.x, tp.y, tp.z, tp.ox) : ''); });   // a host and what is on it are drawn as one group
-  if(pl){ const c = catOf(pl.k), fw = fwOf(c), fd = fdOf(c);
+  const pl = RM.pl, shown = effLv('bed'), wl = effLv('window'), wp = winAtFor(wl, space.fix.window), bp = bedPos(shown);
+  if(wp && !(pl && pl.fx==='window')) s += `<g data-hit="item:window" class="rmh${sel('item','window')}" transform="matrix(${wp.w==='l'?-1:1} .5 0 1 500 400)">${windowSVG(wl, wp.u)}</g>`;
+  const bctx = {things: space.things, lv: {...space.lv, bed: shown}, fix: space.fix}, bt = topOf('bed', bctx), ents = [];   // everything standing on the floor, sorted back to front (the bed too, with what lies on it)
+  if(bp && !(pl && pl.fx==='bed')){ const f = bedFp(shown);
+    ents.push({f:1, d:bp.x+f[0]+bp.y+f[1], svg:`<g data-hit="item:bed" class="rmh${sel('item','bed')}">${bedSVG(shown, bp)}</g>` + (bt ? sittersSVG('bed', bt.x, bt.y, bt.z, bt.ox, -1, (t,i)=>surfFree(catOf(t.k), 'bed', t.on.dx, t.on.dy, i, bctx)) : '')}); }   // what lies on the bed, right after it (while previewing another level: on that level's top, and only what would still fit)
+  space.things.forEach((t,i)=>{ if(t.x<0 || t.on || (pl && pl.i===i)) return; const c = catOf(t.k), tp = topOf(t);
+    ents.push({f:isFlat(c)?0:1, d:t.x+fwOf(c)+t.y+fdOf(c), svg:`<g data-hit="thing:${i}" class="rmh${RM.sel && RM.sel.t==='thing' && RM.sel.i===i ? ' sel' : ''}">${thingSVG(c, t.x, t.y, i)}</g>` + (tp && t.u ? sittersSVG(t.u, tp.x, tp.y, tp.z, tp.ox) : '')}); });   // a host and what is on it are drawn as one group
+  ents.sort((a,b)=>a.f-b.f || a.d-b.d);   // rugs and other flat things first, then further back first
+  s += ents.map(q=>q.svg).join('');
+  if(pl && pl.fx) s += fxPreviewSVG(pl);
+  else if(pl){ const c = catOf(pl.k), fw = fwOf(c), fd = fdOf(c);
     if(canSit(c)) for(const sf of surfaces(pl.i)){   // a small thing can also go on furniture: the units where it could stand are lit
       const lit = new Set();
       for(let dx=sf.tp.c[0]; dx<sf.tp.c[0]+sf.tp.c[2]; dx++) for(let dy=sf.tp.c[1]; dy<sf.tp.c[1]+sf.tp.c[3]; dy++)
@@ -5334,6 +5363,7 @@ function rmVB(e){ const svg=document.getElementById('rmSvg'); const r=svg.getBou
 
 // ---- the drawer: floats over the room on phones, sits beside it on wide screens; shows the coins and every price ----
 function pvCost(){
+  if(RM.pl && RM.pl.fx) return 0;
   if(RM.pl) return RM.pl.i<0 ? catOf(RM.pl.k).p : 0;
   if(!RM.pv) return 0;
   return RM.pv.t==='lv' ? ROOM_ITEMS[RM.pv.id].up[RM.pv.to-1] : RM.pv.t==='part' ? optPrice(RM.pv.o) : ROOM_COLORS[RM.pv.idx].p;
@@ -5374,7 +5404,7 @@ function renderDrawer(){
   const mini = prev && narrowRoom() && !RM.big;
   d.classList.toggle('mini', mini);
   if(mini){
-    const keep = ['.rmsh-t', '.rmsh-need', '.rmsh-s.lost', '.rmnudge', '.rmsh-btns'].map(s=>d.querySelector(s)).filter(Boolean);
+    const keep = ['.rmsh-t', '.rmsh-need', '.rmsh-s.lost', '.rmnudge', '.rmsh-btns:not(.fxbtns)'].map(s=>d.querySelector(s)).filter(Boolean);
     if(keep.length){ d.replaceChildren(...keep); const b = document.createElement('button'); b.type = 'button'; b.className = 'btn ghost mini-max'; b.dataset.max = '1'; b.setAttribute('aria-label', 'הצגת המגירה המלאה'); b.textContent = '⬆'; d.append(b); }
   } else if(prev && narrowRoom() && !d.querySelector('[data-min]')){
     const b = document.createElement('button'); b.type = 'button'; b.className = 'btn ghost'; b.dataset.min = '1'; b.textContent = 'הקטנה כדי לראות את החדר'; d.append(b);
@@ -5382,15 +5412,24 @@ function renderDrawer(){
   if(RM.note){ d.insertAdjacentHTML('afterbegin', `<div class="rmnote" role="status">${RM.note}</div>`); }
   RM.note = null;
 }
+const nudgeHTML = () => `<div class="rmnudge" role="group" aria-label="הזזה קטנה">${[['↖','-1,0','למעלה ושמאלה'],['↗','0,-1','למעלה וימינה'],['↙','0,1','למטה ושמאלה'],['↘','1,0','למטה וימינה']].map(([g,v,l])=>`<button type="button" class="btn ghost" data-nudge="${v}" aria-label="הזיזו צעד אחד ${l}">${g}</button>`).join('')}</div>`;
+const FX_IDS = ['bed','window'], fxAway = () => FX_IDS.filter(id=>!space.fix[id]);   // the bed and the window that are put away in the inventory
 function renderDrawerBody(){
   const d = document.getElementById('rmDrawer'); if(!d) return;
   const bal = tokenBalance(), sel = RM.sel;
   const head = (title) => `<div class="rmsh-h"><div class="rmsh-t">${title}</div><div class="rmcoins" id="rmCoins">${tokenHTML(bal,26)||'<span class="tokzero">🪙</span>'}<b>${bal}</b></div></div>`;
   const stock = space.things.map((t,i)=>[t,i]).filter(([t])=>t.x<0);
+  if(RM.pl && RM.pl.fx){   // moving the bed or the window
+    const pl = RM.pl, bed = pl.fx==='bed', ok = !bed || bedFits({x:pl.x, y:pl.y}, space.lv.bed);
+    d.classList.remove('idle'); d.hidden = false;
+    d.innerHTML = head(ROOM_ITEMS[pl.fx].n) + `<div class="rmsh-s">${bed ? 'הקישו על הרצפה כדי לבחור מקום' : 'הקישו על הקיר כדי לבחור מקום'}</div>` + (bed ? nudgeHTML() : `<div class="rmnudge" role="group" aria-label="הזזה קטנה"><button type="button" class="btn ghost" data-wnudge="-1" aria-label="הזיזו צעד שמאלה">←</button><button type="button" class="btn ghost" data-wnudge="1" aria-label="הזיזו צעד ימינה">→</button></div>`)
+      + `<div class="rmsh-btns"><button type="button" class="btn" data-place="1"${ok?'':' disabled'}>הציבו כאן</button><button type="button" class="btn ghost" data-cancel="1">ביטול</button></div>`;
+    return;
+  }
   if(RM.pl){   // placing a floor item: tap a cell of the floor to choose where it stands
     const pl = RM.pl, c = catOf(pl.k), cost = pvCost(), poor = bal<cost;
     d.classList.remove('idle'); d.hidden = false;
-    const nudge = `<div class="rmnudge" role="group" aria-label="הזזה קטנה">${[['↖','-1,0','למעלה ושמאלה'],['↗','0,-1','למעלה וימינה'],['↙','0,1','למטה ושמאלה'],['↘','1,0','למטה וימינה']].map(([g,v,l])=>`<button type="button" class="btn ghost" data-nudge="${v}" aria-label="הזיזו צעד אחד ${l}">${g}</button>`).join('')}</div>`;
+    const nudge = nudgeHTML();
     d.innerHTML = head(c.n) + `<div class="rmsh-s">${pl.on ? 'הפריט יעמוד על המשטח המסומן. אפשר גם להקיש על הרצפה' : 'הקישו על הרצפה כדי לבחור מקום'}</div>${canSit(c) && !pl.on && surfaces(pl.i).length ? `<div class="rmsh-s small">אפשר גם להציב על שולחן, ארגז או מיטה: הקישו על משטח מואר</div>` : ''}${nudge}`
       + (pl.i<0 ? `<div class="rmsh-need${poor?' poor':''}">${needTxt(cost,bal)}</div><div class="rmsh-btns"><button type="button" class="btn" data-place="1"${poor?' disabled':''}>קנו · ${cost} 🪙</button><button type="button" class="btn ghost" data-cancel="1">ביטול</button></div><div class="rmsh-s small">אי אפשר להחזיר או למכור אחר כך</div>`
         : `<div class="rmsh-btns"><button type="button" class="btn" data-place="1">הציבו כאן</button><button type="button" class="btn ghost" data-cancel="1">ביטול</button></div>`);
@@ -5404,15 +5443,17 @@ function renderDrawerBody(){
       return;
     }
     const f = RM.filter||'all';
-    const cards = ROOM_CATALOG.filter(c=>f==='all'||(f==='own'?thingCount(c.id)>0:catGroup(c)===f)).map(c=>{
+    const fxCards = (f==='all'||f==='own'||f==='furniture') ? fxAway().map(id=>`<button type="button" class="catcard owned" data-fxopen="${id}" aria-label="${ROOM_ITEMS[id].n} · במלאי"><img src="${ROOM_ART[id][space.lv[id]-1].src}" alt=""><span class="cst">🎒 1</span><span class="cname">${ROOM_ITEMS[id].n}</span><span class="cp">רמה ${space.lv[id]}</span></button>`).join('') : '';
+    const cards = fxCards + ROOM_CATALOG.filter(c=>f==='all'||(f==='own'?thingCount(c.id)>0:catGroup(c)===f)).map(c=>{
       const n = thingCount(c.id), st = stock.filter(([t])=>t.k===c.id).length, poor = bal<c.p;
       return `<button type="button" class="catcard${n?' owned':''}${!st&&poor?' poor':''}" ${st?`data-choose="${c.id}"`:`data-pick="${c.id}"`} aria-label="${c.n}${n?' · שלכם ×'+n:' · '+coinsTxt(c.p)}${st?' · במלאי '+st:''}"><img src="${c.src}" alt="">${n?`<span class="cn">✓ ×${n}</span>`:''}${st?`<span class="cst">🎒 ${st}</span>`:''}<span class="cname">${c.n}</span><span class="cp">${c.p} 🪙</span></button>`; }).join('') || `<div class="rmsh-s">עוד לא קניתם פריטים</div>`;
     const chips = `<div class="catchips">${[['all','הכל'],['own','שלי'],...Object.entries(ROOM_GROUPS)].map(([k,n])=>`<button type="button" class="chip${f===k?' on':''}" data-filter="${k}">${n}</button>`).join('')}</div>`;
-    d.innerHTML = head(`פריטים${stock.length?` · ${stock.length} במלאי`:''}`) + chips + `<div class="catgrid">${cards}</div><button type="button" class="btn ghost" data-close="1">סגירה</button>`;
+    const nStock = stock.length + fxAway().length;
+    d.innerHTML = head(`פריטים${nStock?` · ${nStock} במלאי`:''}`) + chips + `<div class="catgrid">${cards}</div><button type="button" class="btn ghost" data-close="1">סגירה</button>`;
     return;
   }
   if(!sel){ d.classList.remove('idle'); d.hidden = false;
-    d.innerHTML = head('החדר') + `<div class="rmsh-s">בחרו משהו בחדר כדי לשנות אותו</div><div class="rmsh-btns"><button type="button" class="btn" data-list="cat">🛍️ פריטים ומלאי${stock.length?` · ${stock.length} במלאי`:''}</button></div>`; return; }
+    d.innerHTML = head('החדר') + `<div class="rmsh-s">בחרו משהו בחדר כדי לשנות אותו</div><div class="rmsh-btns"><button type="button" class="btn" data-list="cat">🛍️ פריטים ומלאי${stock.length+fxAway().length?` · ${stock.length+fxAway().length} במלאי`:''}</button></div>`; return; }
   d.classList.remove('idle'); d.hidden = false;
   if(sel.part){ const pi = partInfo(); if(!pi){ sel.part = null; } else {
       const pv = pvPart(), cost = pv ? optPrice(pv.o) : 0, buyH = !pv ? '' : `<div class="rmsh-need${bal<cost?' poor':''}">${needTxt(cost,bal)}</div><div class="rmsh-btns"><button type="button" class="btn" data-buy="1"${bal<cost?' disabled':''}>קנו · ${cost} 🪙</button><button type="button" class="btn ghost" data-cancel="1">ביטול</button></div><div class="rmsh-s small">אי אפשר להחזיר או למכור אחר כך</div>`;
@@ -5430,9 +5471,12 @@ function renderDrawerBody(){
     const id = sel.id, it = ROOM_ITEMS[id], lv = space.lv[id], mx = roomMax(id), top = topLv(id);
     let th = ''; for(let l=1; l<=mx; l++){ const art = ROOM_ART[id][l-1], owned = l<=top, open = l===top+1, shown = pv && pv.t==='lv' && pv.id===id ? pv.to : lv;
       th += `<button type="button" class="lvthumb${owned||open?'':' locked'}${shown===l?' cur':''}${owned?' owned':''}"${owned?` data-sw="${id}:${l}"`:open?` data-prev="${id}"`:' disabled'} aria-label="רמה ${l}${owned?(l===lv?' · בשימוש':' · בבעלותך'):open?'':' · נעול'}"><img src="${art.src}" alt=""><span class="ln">רמה ${l}</span><span class="lt">${owned?(l===lv?'✔':'בחרו'):open?it.up[top]+' 🪙':'🔒'}</span></button>`; }
-    d.innerHTML = head(`${it.n} · רמה ${lv} מתוך ${mx}`)
+    const away = !space.fix[id], showL = pv && pv.t==='lv' && pv.id===id ? pv.to : lv, nOn = id==='bed' ? sitters('bed').length : 0;
+    const fxRow = away ? `<div class="catone"><img src="${ROOM_ART[id][showL-1].src}" alt=""></div><div class="rmsh-s">${it.n} במלאי. אפשר לשדרג אותו גם כאן ולהציב אותו בחדר מתי שרוצים</div><div class="rmsh-btns fxbtns"><button type="button" class="btn" data-fxmove="${id}">הציבו בחדר</button></div>`
+      : `<div class="rmsh-btns fxbtns"><button type="button" class="btn" data-fxmove="${id}">העבירו</button><button type="button" class="btn ghost" data-fxaway="${id}">מחיקה</button></div><div class="rmsh-s small">${it.n} נשאר שלכם ואפשר להציב אותו שוב מרשימת הפריטים${nOn ? ` · ${nOn===1?'הפריט שעליה יעבור':nOn+' הפריטים שעליה יעברו'} למלאי אם מוחקים` : ''}</div>`;
+    d.innerHTML = head(`${it.n} · רמה ${lv} מתוך ${mx}`) + fxRow
       + `<div class="lvthumbs">${th}</div>` + (top>=mx ? `<div class="rmmax">כל הרמות בבעלותך ✨</div>` : '')
-      + (pv && pv.t==='lv' ? `<div class="rmsh-s">תצוגה מקדימה: רמה ${pv.to}</div>` + buy : '') + (id==='bed' ? partsRowHTML() : '')
+      + (pv && pv.t==='lv' ? `<div class="rmsh-s">תצוגה מקדימה: רמה ${pv.to}</div>` + buy : '') + (id==='bed' && !away ? partsRowHTML() : '')
       + `<button type="button" class="btn ghost" data-close="1">סגירה</button>`;
   } else {
     const k = sel.k;
@@ -5443,6 +5487,13 @@ function renderDrawerBody(){
   }
 }
 function onRoomTap(hit, e){
+  if(RM.pl && RM.pl.fx){   // choosing where the bed or the window goes
+    const pl = RM.pl;
+    if(pl.fx==='bed'){ const c = e && cellAt(e); if(!c || hit==='surf:wl' || hit==='surf:wr') return; const l = space.lv.bed, f = bedFp(l), q = bedAtFor(l, {x:c[0]-(f[0]>>1), y:c[1]-(f[1]>>1)});   // the tapped unit is the middle of the bed
+      if(bedFits(q, l)){ pl.x = q.x; pl.y = q.y; rmRedraw(); return renderDrawer(); } return; }
+    if(e && (hit==='surf:wl' || hit==='surf:wr' || hit==='item:window')){ const rx = (rmVB(e)[0]-RM.tx)/RM.k, q = winAtFor(space.lv.window, {w:rx<500?'l':'r', u:Math.round(Math.abs(rx-500)/WIN_STEP)*WIN_STEP}); pl.w = q.w; pl.u = q.u; rmRedraw(); return renderDrawer(); }
+    return;
+  }
   if(RM.pl){   // choosing a cell for a floor item
     const c = e && cellAt(e), it = catOf(RM.pl.k), on = e && canSit(it) && topCellAt(e, it, RM.pl.i);   // a free cell on a top wins over the floor behind it
     if(on){ const cell = sitCell(on.h, on.dx, on.dy); RM.pl.on = on; RM.pl.x = cell[0]; RM.pl.y = cell[1]; rmRedraw(); return renderDrawer(); }
@@ -5467,6 +5518,19 @@ function onDrawerClick(e){
   if(t.dataset.filter){ RM.filter = t.dataset.filter; return renderDrawer(); }
   if(t.dataset.pick){ const c = catOf(t.dataset.pick), f = firstFreeCell(c, -1); RM.list = null; RM.choose = null; RM.pl = {k:c.id, i:-1, x:f[0], y:f[1]}; rmRedraw(); return renderDrawer(); }
   if(t.dataset.unstow){ const i = +t.dataset.unstow, f = firstFreeCell(catOf(space.things[i].k), i); RM.list = null; RM.choose = null; RM.pl = {k:space.things[i].k, i, x:f[0], y:f[1]}; rmRedraw(); return renderDrawer(); }
+  if(t.dataset.fxopen){ RM.sel = {t:'item', id:t.dataset.fxopen}; RM.list = null; RM.pv = null; rmRedraw(); return renderDrawer(); }   // a fixture in the inventory: its own drawer (upgrades, place)
+  if(t.dataset.fxmove){ const id = t.dataset.fxmove, f = space.fix[id]; RM.sel = null; RM.pv = null;
+    if(id==='bed'){ let q = f; if(!q){ q = null; const l = space.lv.bed; for(let y=0; y+bedFp(l)[1]<=ROOM_CELLS && !q; y++) for(let x=0; x+bedFp(l)[0]<=ROOM_CELLS && !q; x++) if(bedFits({x,y}, l)) q = {x,y}; } RM.pl = {fx:'bed', x:q?q.x:0, y:q?q.y:0}; }   // from the inventory: the first free spot from the back corner
+    else RM.pl = {fx:'window', w:f?f.w:'r', u:f?f.u:WIN_U};
+    rmRedraw(); return renderDrawer(); }
+  if(t.dataset.fxaway){ const id = t.dataset.fxaway, n0 = stowedCount(); space.fix[id] = null; if(id==='bed') settleSurfaces(); const n = stowedCount()-n0;
+    RM.note = n ? (n===1 ? 'פריט אחד' : n+' פריטים')+' שהיו על המיטה עברו למלאי' : ''; RM.sel = null; saveState(); rmRedraw(); return renderDrawer(); }
+  if(t.dataset.wnudge && RM.pl && RM.pl.fx==='window'){ const pl = RM.pl, q = winAtFor(space.lv.window, {w:pl.w, u:pl.u + (+t.dataset.wnudge)*(pl.w==='l'?-1:1)*WIN_STEP}); pl.u = q.u; rmRedraw(); return renderDrawer(); }   // the arrows follow the screen
+  if(t.dataset.nudge && RM.pl && RM.pl.fx==='bed'){ const [a,b] = t.dataset.nudge.split(',').map(Number), pl = RM.pl; if(bedFits({x:pl.x+a, y:pl.y+b}, space.lv.bed)){ pl.x += a; pl.y += b; } rmRedraw(); return renderDrawer(); }
+  if(t.dataset.place && RM.pl && RM.pl.fx){ const pl = RM.pl;
+    if(pl.fx==='bed'){ if(!bedFits({x:pl.x, y:pl.y}, space.lv.bed)) return; space.fix.bed = {x:pl.x, y:pl.y}; settleSurfaces(); }   // what lay on the bed comes along
+    else space.fix.window = winAtFor(space.lv.window, {w:pl.w, u:pl.u});
+    RM.pl = null; saveState(); rmRedraw(); return renderDrawer(); }
   if(t.dataset.move){ const i = +t.dataset.move, th = space.things[i]; RM.sel = null; RM.pl = {k:th.k, i, x:th.x, y:th.y}; if(th.on) RM.pl.on = {...th.on}; rmRedraw(); return renderDrawer(); }
   if(t.dataset.away){ const th = space.things[+t.dataset.away]; th.x = -1; th.y = -1; delete th.on; settleSurfaces(); RM.sel = null; saveState(); rmRedraw(); return renderDrawer(); }
   if(t.dataset.nudge && RM.pl){   // one grid unit at a time: the arrows follow the screen (down-right is +x, down-left is +y)
