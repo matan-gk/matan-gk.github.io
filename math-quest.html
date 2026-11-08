@@ -1071,7 +1071,7 @@ LAYERS['✨'] = {"uni":1,"bw":300,"bases":[{"w":298,"h":241,"r":"c","s":"assets/
 const LAYER_DEFAULT = {'🧁':'0.0.0','🍩':'0.0.0','🍨':'0.0.0','🍭':'0.0.0','🧋':'0.0.0','🎀':'0.0.0','🍦':'0.0.0','🍓':'0.0.0','🩷':'0.12.14','☁️':'0.0.0','🌈':'0.10.6','🍬':'0.0.0','🦄':'0.0.0','✨':'1.1.14'};   // the fixed look old rewards get when the game first upgrades them
 // "no topping" is a valid choice for every kind: the last entry of each kind's toppings
 for(const k in LAYERS){ const L=LAYERS[k]; if(!L.tops.some(t=>t.n)) L.tops.push({r:'c',n:1,w:0,h:0}); }
-const kOf = x => String(x).split(/[:#]/)[0];
+const kOf = x => String(x).split(/[:#@]/)[0];
 const RARITY_W = {c:6,u:3,r:1};   // common / uncommon / rare weights
 function mulberry(a){ return ()=>{ a|=0; a=a+0x6D2B79F5|0; let t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
 function parseCombo(kind, c){
@@ -1082,7 +1082,9 @@ function parseCombo(kind, c){
 function pickWeighted(list, rnd){ const w=list.map(p=>RARITY_W[p.r]||1); let x=rnd()*w.reduce((a,b)=>a+b,0); for(let i=0;i<w.length;i++){ x-=w[i]; if(x<0) return i; } return w.length-1; }
 function randomCombo(kind, rnd){ const L=LAYERS[kind]; return pickWeighted(L.bases,rnd)+'.'+pickWeighted(L.fros,rnd)+'.'+pickWeighted(L.tops,rnd); }
 function comboOfItem(x){ const k=kOf(x), i=String(x).indexOf(':'); return (i<0) ? null : (parseCombo(k, String(x).slice(i+1)) ? String(x).slice(i+1) : null); }
-function goldCombos(g){ const k=kOf(g), i=String(g).indexOf('#'); return (i<0||!LAYERS[k]) ? [] : String(g).slice(i+1).split(',').filter(c=>parseCombo(k,c)); }
+function goldCombos(g){ const k=kOf(g), s=String(g).split('@')[0], i=s.indexOf('#'); return (i<0||!LAYERS[k]) ? [] : s.slice(i+1).split(',').filter(c=>parseCombo(k,c)); }
+// an upgraded item also remembers where its ten gifts were in the order received ("@3,7,..." = their places in the list of every gift), so merging never moves a gift in the list; older ones have no places and are listed first
+function goldSlots(g){ const i=String(g).indexOf('@'); if(i<0) return null; const a=String(g).slice(i+1).split(',').map(Number); return (a.length===MERGE_COST && a.every(n=>Number.isInteger(n)&&n>=0&&n<1e6) && new Set(a).size===a.length) ? a : null; }
 function ownedCombos(kind){
   const o = new Set();
   collection.forEach(x=>{ if(kOf(x)===kind){ const c=comboOfItem(x); if(c) o.add(c); } });
@@ -1548,7 +1550,7 @@ function cleanProgress(d){
   for(let i=0;i<nCot;i++) col.push('☁️');
   // layered kinds: an old single-picture item gets the same fixed parts every time (LAYER_DEFAULT); broken ones are fixed the same way
   col = col.map((x,i)=>{ const k=kOf(x); if(!LAYERS[k]) return x; if(comboOfItem(x)) return k+':'+comboOfItem(x); return k+':'+LAYER_DEFAULT[k]; });
-  gold = gold.map(g=>{ const k=kOf(g); if(!LAYERS[k]) return g; const cs=goldCombos(g); return cs.length===MERGE_COST ? k+'#'+cs.join(',') : k; });
+  gold = gold.map(g=>{ const k=kOf(g), sl=goldSlots(g), at=sl?'@'+sl.join(','):''; if(!LAYERS[k]) return k+at; const cs=goldCombos(g); return (cs.length===MERGE_COST ? k+'#'+cs.join(',') : k)+at; });
   // the looks were retired (their 16 pictures joined the mascot's pictures): only the number opened is kept, for the token true-up
   const oldLooks = Array.isArray(d.looks) ? new Set(d.looks.filter(i=>Number.isInteger(i)&&i>=0&&i<LOOKS.length)).size : 0;
   const legacy = Math.max(oldLooks, (Number.isInteger(d.legacyLooks)&&d.legacyLooks>0) ? Math.min(d.legacyLooks,LOOKS.length) : 0);
@@ -2234,7 +2236,7 @@ function cloudProfileFromDoc(C, helpers){
 // ===== CLOUD (Google sign-in, cloud progress, problem reports) =====
 // Local-first: the game always works from this device's storage. The cloud is a mirror, so no internet / no account / no quota never blocks play.
 // Everything here is off while CLOUD_CONFIG is null. See firebase/SETUP.md for how to create the (free) Firebase project and paste its settings below.
-const APP_VERSION = '2026.11.08b';       // keep equal to VERSION in sw.js (a test checks it)
+const APP_VERSION = '2026.11.08c';       // keep equal to VERSION in sw.js (a test checks it)
 const CLOUD_CONFIG = {apiKey:"AIzaSyAlq_TJNGvWPJpUrpbdq_hkAoURydqMzm0", authDomain:"learning-quest-1.firebaseapp.com", projectId:"learning-quest-1", appId:"1:98931179722:web:78fb00084ccba3efb53433"};   // e.g. {apiKey:'...', authDomain:'xxx.firebaseapp.com', projectId:'xxx', appId:'...'}
 const CLOUD_LIMITS = {
   pushDelayMs: 60000,          // at most one upload per profile per minute while playing
@@ -5438,12 +5440,14 @@ function renderRoom(){
     h += `<div class="roomsec">${TX('upSec','פריטים משודרגים')} · ${gs.length}</div><div class="roomhint">${TX('upHint', ()=>`${G('לחצי','לחץ','לחצו')} על פריט משודרג כדי לראות את ${MERGE_COST} המתנות שמהן הוא נוצר.`)}</div><div class="roomgrid">` + gs.map(k=>`<div class="ritem gold" data-act="vault" data-kind="${kOf(k)}" data-g="${k}" role="button">${itemHTML(k,true,40)}</div>`).join('') + '</div>';
   }
   // one section for the gifts, with a filter: all (default), current (in the collection), past (the ones that were merged into an upgrade)
-  const cur = collection.map((x,i)=>[x,i]).reverse();   // newest first: the order they were received
-  const past = allRewardsList().filter(r=>r.merged);
+  const allR = allRewardsList().reverse();   // newest first: the order they were received (merging does not move a gift)
+  const cur = allR.filter(r=>!r.merged), past = allR.filter(r=>r.merged);
   if(cur.length || past.length){
-    const f = roomFilter, showCur = f!=='past', showPast = f!=='cur';
-    const tiles = (showCur ? cur.map(([x,i])=>`<div class="ritem tap" data-act="view" data-i="${i}" role="button" title="${esc(rewardName(x,'one')||'')}"><span class="remoji">${rewardGlyph(x,38)}</span></div>`) : [])
-      .concat(showPast ? past.map(r=>`<div class="ritem alltap merged" data-act="viewItem" data-item="${String(r.item)}" role="button" title="${esc(rewardName(kOf(r.item),'one')||'')}">${itemHTML(r.item,false,38)}<span class="wardskt">✨</span></div>`) : []);
+    const f = roomFilter;
+    const tiles = allR.filter(r=>f==='all' || (f==='cur' ? !r.merged : r.merged)).map(r=> r.merged
+      ? `<div class="ritem alltap merged" data-act="viewItem" data-item="${String(r.item)}" role="button" title="${esc(rewardName(kOf(r.item),'one')||'')}">${itemHTML(r.item,false,38)}<span class="wardskt">✨</span></div>`
+      : `<div class="ritem tap" data-act="view" data-i="${r.ci}" role="button" title="${esc(rewardName(r.item,'one')||'')}"><span class="remoji">${rewardGlyph(r.item,38)}</span></div>`);
+    const showPast = f!=='cur';
     const chips = `<div class="catchips roomfilt" role="group" aria-label="סינון">${[['all','הכל',cur.length+past.length],['cur','נוכחיות',cur.length],['past','מהעבר',past.length]].map(([k,n,c])=>`<button type="button" class="chip${f===k?' on':''}" data-act="rfilt" data-f="${k}" aria-pressed="${f===k}">${n} · ${c}</button>`).join('')}</div>`;
     h += `<div class="roomsec">${TX('baseSec','מתנות קסומות')} · ${tiles.length}</div>${chips}`
       + (showPast && past.length ? `<div class="roomhint">${TX('allHint',()=>`${G('לחצי','לחץ','לחצו')} על כל מתנה כדי להציג אותה. ✨ = מתנה שהתמזגה לשדרוג.`)}</div>` : '')
@@ -5495,10 +5499,11 @@ function showReadyCeleb(kind){
     [{label:TX('mergeNow', ()=>`✨ ${G('מזגי','מזג','מזגו')} עכשיו`), fn:()=>doMerge(kind)}, {label:'אחר כך', ghost:true, fn:closeCeleb}]);
 }
 function doMerge(kind){
+  const slots = allRewardsList().filter(r=>!r.merged && kOf(r.item)===kind).slice(0,MERGE_COST).map(r=>r.slot);   // where the gifts that are used up stand in the list
   const used = removeBase(kind, MERGE_COST);
-  // an upgraded item remembers the combinations it was made from
+  // an upgraded item remembers the combinations it was made from, and where they were in the list
   space.earned++;   // one token per upgrade
-  golden.push(LAYERS[kind] ? kind+'#'+used.map(x=>comboOfItem(x)||LAYER_DEFAULT[kind]).join(',') : kind);
+  golden.push((LAYERS[kind] ? kind+'#'+used.map(x=>comboOfItem(x)||LAYER_DEFAULT[kind]).join(',') : kind) + (slots.length===MERGE_COST ? '@'+slots.join(',') : ''));
   saveState(); renderRewards();
   const small = Array.from({length:MERGE_COST},(_,i)=>`<span>${itemHTML(used[i]||kind,false,32)}</span>`).join('');
   showCeleb(`<div class="cmerge" id="cmerge">${small}</div><div class="ctitle">${TX('mergingTitle','מתמזגים...')}</div>`, []);
@@ -5529,9 +5534,14 @@ function mergedTag(merged){ return merged ? '<span class="wardskt">✨</span>' :
 // the ten items inside each upgraded item (the ones it was merged from, in the order they were merged = the order received),
 // then the rewards still sitting in the room (in the order they were received)
 function allRewardsList(){
-  const out=[];
-  golden.forEach(g=>{ const k=kOf(g); goldItems(k,g).forEach(x=>out.push({item:x,gold:g,merged:true})); });
-  collection.forEach(x=>out.push({item:x,gold:null,merged:false}));
+  const merged=[], taken=new Set();
+  golden.forEach(g=>{ const k=kOf(g), sl=goldSlots(g); let ok = !!sl && sl.every(n=>!taken.has(n)); if(ok) sl.forEach(n=>taken.add(n));
+    goldItems(k,g).forEach((x,i)=>merged.push({item:x,gold:g,merged:true,slot:ok?sl[i]:-1})); });
+  // upgraded items without (usable) places come first, as before: they take the earliest free places
+  let free=0; merged.forEach(m=>{ if(m.slot<0){ while(taken.has(free)) free++; m.slot=free; taken.add(free); } });
+  const bySlot=new Map(merged.map(m=>[m.slot,m])), out=[]; let ci=0, n=merged.length+collection.length;
+  for(let s=0;out.length<n;s++){ if(bySlot.has(s)) out.push(bySlot.get(s)); else if(ci<collection.length){ out.push({item:collection[ci],gold:null,merged:false,slot:s,ci}); ci++; } else break; }
+  merged.forEach(m=>{ if(!out.includes(m)) out.push(m); });   // places beyond the end (e.g. after gifts were removed): at the end
   return out;
 }
 function renderStickerbook(){ renderRewards(); }
