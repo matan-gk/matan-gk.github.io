@@ -97,7 +97,7 @@ ok(await ev(()=>space.lv.bed===1&&space.top.bed===2&&space.spent===3&&!RM.pv&&do
 await ev(()=>document.querySelectorAll('#rmDrawer .lvthumb')[1].click());
 ok(await ev(()=>space.lv.bed===2&&space.spent===3),'and back to level 2, still free');
 await ev(()=>document.querySelector('#rmDrawer .lvthumb:not(.locked):not(.owned)').click());
-ok(await ev(()=>RM.pv&&RM.pv.to===3&&document.querySelector('#rmDrawer .lvthumb.cur')&&!!document.querySelector('[data-buy]')),'tapping the open one previews it and offers Buy / Cancel');
+ok(await ev(()=>{if(!RM.pv||RM.pv.to!==3||!document.querySelector('[data-buy]')||!document.querySelector('[data-cancel]'))return false;const m=document.getElementById('rmDrawer').classList.contains('mini');if(m)document.querySelector('[data-max]').click();const ok=!!document.querySelector('#rmDrawer .lvthumb.cur');if(m)document.querySelector('[data-min]').click();return ok;}),'tapping the open one previews it and offers Buy / Cancel (on a phone the drawer is minimized, the thumbnails show after maximizing)');
 // view level 1 and buy level 3: the next is top+1, not current+1
 await ev(()=>{RM.pv=null;space.lv.bed=1;onRoomTap('item:bed');document.querySelector('#rmDrawer .lvthumb:not(.locked):not(.owned)').click();});
 ok(await ev(()=>RM.pv.to===3),'viewing level 1 with 2 bought, the open level is still 3');
