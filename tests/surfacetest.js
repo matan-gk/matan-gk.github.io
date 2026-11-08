@@ -17,7 +17,7 @@ ok(await ev(()=>{const c={id:'x',fw:1,fd:1,r:[0,0,10,10],sm:0};const d={id:'y',f
 // hosts
 ok(await ev(()=>['table','desk','desk_turn','toybox1','toybox2','toybox3'].every(k=>{const c=catOf(k),tp=c.top;return tp&&tp.c[0]>=0&&tp.c[1]>=0&&tp.c[0]+tp.c[2]<=fwOf(c)&&tp.c[1]+tp.c[3]<=fdOf(c)&&tp.z>0;})&&ROOM_CATALOG.filter(c=>c.top).length===6),'6 hosts (low table, desk and its turn, 3 toy boxes) with a top inside their footprint');
 ok(await ev(()=>[1,2,3,4,5].every(l=>{const b=BED_TOP[l],fp=bedFp(l);return b.c[0]+b.c[2]<=fp[0]&&b.c[1]+b.c[3]<=fp[1]&&b.z>0&&b.cells.length>=3&&b.cells.every(q=>q[0]>=b.c[0]&&q[0]<b.c[0]+b.c[2]&&q[1]>=b.c[1]&&q[1]<b.c[1]+b.c[3]);})),'the bed has a list of visible top cells inside its footprint on every level');
-ok(await ev(()=>SURF_SUB===1&&surfSize(catOf('teddy')).join()==='1,1'),'one surface unit = one cell today, items are one unit');
+ok(await ev(()=>surfSize(catOf('teddy')).join()===fwOf(catOf('teddy'))+','+fdOf(catOf('teddy'))&&canSit(catOf('teddy'))),'what an item takes up on a top is its own footprint');
 
 // rules
 await set([{k:'table',x:4,y:4,u:'tab1'},{k:'teddy',x:-1,y:-1,u:'ted1'},{k:'pl00',x:-1,y:-1,u:'pla1'},{k:'rug_sq',x:-1,y:-1,u:'rug1'},{k:'chair',x:-1,y:-1,u:'cha1'}]);
@@ -80,7 +80,7 @@ ok(cl.floorOnBed.join()==='teddy|-1|-1|-','a floor thing under the bed still goe
 ok(cl.uid[0]&&cl.uid[1]==='same'&&cl.uid[2]!=='same'&&cl.uid[3]!=='BAD ID'&&new Set(cl.uid).size===4&&cl.uid.every(u=>/^[a-z0-9]{4,12}$/.test(u)),'every thing gets a unique, valid id (old saves have none): '+cl.uid);
 ok(cl.sub.join()===cl.ok.join()&&cl.saved===1,'a save made with the same surface unit loads as is, and space.sub records the unit');
 // a finer grid later: saved offsets are rescaled
-ok(await ev(()=>{const S=SURF_SUB;return S===1;}),'(SURF_SUB is 1; rescaling of saved offsets is in spaceClean: dx,dy *= SURF_SUB/sub)');
+ok(await ev(()=>GU>=1&&ROOM_CELLS===10*GU&&spaceClean({},[],0).sub===GU),'the grid unit is saved with the room (space.sub), so older saves can be converted');
 // new things get an id; the delete note
 await ev(()=>{space.things=[];space.spent=0;RM.pl={k:'teddy',i:-1,x:6,y:6};rmRedraw();renderDrawer();});
 await ev(()=>document.querySelector('[data-place]').click());

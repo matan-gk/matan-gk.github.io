@@ -1301,11 +1301,15 @@ const ROOM_CATALOG = [
 const ROOM_GROUPS = {plants:'צמחים', furniture:'רהיטים', rugs:'שטיחים', play:'צעצועים וקישוטים'};
 const isFlat = c => !!c.flat;   // rugs, floor games and tracks lie on the floor: other items can stand on them, they only exclude other flat things
 const catGroup = c => c.g || 'plants';
-const fwOf = c => c.fw || 1, fdOf = c => c.fd || 1;
+const fwOf = c => c.fw || 1, fdOf = c => c.fd || 1;   // the catalog's fw x fd are in grid units (see GU)
 const catOf = k => ROOM_CATALOG.find(c=>c.id===k);
-const ROOM_CELLS = 10;
+// THE GRID: the room is ROOM_CELLS x ROOM_CELLS grid units; a unit is 1/GU of the old whole cell (GU = 2: every old cell is 2x2 units, so a jar of crayons can be 1x1 and a chair 4x4).
+// Everything that is placed (floor things, things on furniture, the bed's footprint, the tops) is counted in these units. The art is in pixels, so it does not change with GU.
+// Saved games record the unit their positions were counted in (space.sub) and are converted on load.
+const GU = 1;
+const ROOM_CELLS = 10*GU;
 // the bed's footprint is per level (ROOM_ART.bed[l].fp = [cells along x, cells along y], from the back corner); its art is fitted to exactly that block
-const bedFp = l => ROOM_ART.bed[(l||1)-1].fp;
+const bedFp = l => ROOM_ART.bed[(l||1)-1].fp.map(v=>v*GU);   // authored in old cells
 const roomBlocked = (x,y,l) => { const f = bedFp(l || (space && space.lv && space.lv.bed)); return x<f[0] && y<f[1]; };
 function stowBlocked(){ for(const t of space.things){ if(t.x<0 || t.on) continue;   // things standing on furniture are checked by settleSurfaces
     const c = catOf(t.k); let hit = false; for(let a=0;a<fwOf(c);a++) for(let b=0;b<fdOf(c);b++) if(roomBlocked(t.x+a,t.y+b)) hit = true; if(hit){ t.x = -1; t.y = -1; } } settleSurfaces(); }
@@ -1320,24 +1324,23 @@ function roomMaxCost(){   // everything buyable in the room today (the catalog g
 // ---- things on furniture (phase 1: the rules and the data; nothing is drawn or tapped yet)
 // A small thing can stand on the top of a table, a desk, a toy box or the visible part of the bed. It is stored as thing.on = {h, dx, dy}:
 // h = the host (the id u of another thing, or 'bed'), dx,dy = its place on the host's top in SURFACE UNITS counted from the host's back corner.
-// One surface unit is one cell today (SURF_SUB = 1). To get a finer grid later (e.g. a 2x2 sub-grid per cell, so a jar of crayons and a pile of books differ in size)
-// raise SURF_SUB to 2: saved dx,dy are rescaled by spaceClean (space.sub remembers the unit they were saved in) and an item's size on a surface is c.ss = [w,d] in surface units
-// (default: one cell). The thing's own x,y always stay whole cells: the cell that holds its surface unit.
-const SURF_SUB = 1, SIT_MAX_H = 160;
+// dx,dy are grid units (GU) like everything else; a thing standing on furniture has x,y = its host's back corner + dx,dy (its own back corner in the room), and takes up its own footprint
+// (fw x fd units) on the top. The tops are authored in old cells (BED_TOP, catalog `top`) and turned into units by topOf.
+const SIT_MAX_H = 160;
 // the bed's top per level, measured from the pictures by tools/surfaces.py: z = its height above the floor and ox = how far the picture's mattress is shifted sideways (room units),
 // cells = the visible part of it, in cells from the bed's back corner (the pillow end, the frame, curtains and footboard cover the rest). A host in the catalog has the same `top` (c, z, ox).
 const BED_TOP = {1:{c:[0,0,3,4], z:66, ox:32, cells:[[0,1],[1,1],[2,1],[0,2],[1,2],[2,2],[0,3],[1,3],[2,3]]}, 2:{c:[0,0,3,4], z:64, ox:30, cells:[[0,1],[1,1],[2,1],[0,2],[1,2],[2,2],[0,3],[1,3],[2,3]]}, 3:{c:[0,0,3,4], z:84, ox:18, cells:[[0,1],[1,1],[2,1],[0,2],[1,2],[2,2],[0,3],[1,3],[2,3]]}, 4:{c:[0,0,3,3], z:52, ox:39, cells:[[1,1],[2,1],[0,2],[2,2]]}, 5:{c:[0,0,3,4], z:82, ox:40, cells:[[1,1],[0,2],[2,2]]}};
-const surfSize = c => c.ss || [SURF_SUB, SURF_SUB];
-// what may stand on a surface: one-cell solid things not taller than SIT_MAX_H (plants included); c.sm = 1 / 0 forces yes / no
-const canSit = c => !!c && (c.sm===0 ? false : c.sm===1 ? true : (!isFlat(c) && fwOf(c)===1 && fdOf(c)===1 && c.r[3]<=SIT_MAX_H));
+const surfSize = c => [fwOf(c), fdOf(c)];   // what a thing takes up on a top: its own footprint
+// what may stand on a surface: solid things no bigger than one old cell (GU x GU units) and not taller than SIT_MAX_H (plants included); c.sm = 1 / 0 forces yes / no
+const canSit = c => !!c && (c.sm===0 ? false : c.sm===1 ? true : (!isFlat(c) && fwOf(c)<=GU && fdOf(c)<=GU && c.r[3]<=SIT_MAX_H));
 const newUid = () => { let u; do { u = Math.random().toString(36).slice(2,8); } while(u.length<4 || space.things.some(t=>t.u===u)); return u; };
 // (the helpers below take an optional ctx = {things, lv} so that spaceClean can check a save against the same rules before it becomes `space`)
 const hostThing = (h, ctx) => h==='bed' ? 'bed' : (ctx||space).things.find(t=>t.u===h);
 // the host's top: {x,y: world cell of its back corner, c: [dx,dy,w,d] in cells inside the host, z} (null if it has none or is put away)
 function topOf(h, ctx){
-  if(h==='bed'){ const b = BED_TOP[(ctx||space).lv.bed||1]; return b ? {x:0, y:0, c:b.c, z:b.z, ox:b.ox||0, cells:b.cells} : null; }
+  if(h==='bed'){ const b = BED_TOP[(ctx||space).lv.bed||1]; return b ? {x:0, y:0, c:b.c.map(v=>v*GU), z:b.z, ox:b.ox||0, cells:b.cells} : null; }
   const t = typeof h==='string' ? hostThing(h, ctx) : h, c = t && catOf(t.k);
-  return (t && c && c.top && t.x>=0 && !t.on) ? {x:t.x, y:t.y, c:c.top.c, z:c.top.z, ox:c.top.ox||0, cells:c.top.cells} : null;
+  return (t && c && c.top && t.x>=0 && !t.on) ? {x:t.x, y:t.y, c:c.top.c.map(v=>v*GU), z:c.top.z, ox:c.top.ox||0, cells:c.top.cells} : null;
 }
 const sitters = (h, except, ctx) => (ctx||space).things.filter((t,i)=>i!==except && t.on && t.on.h===h);
 const overlapSU = (a,as,b,bs) => a[0]<b[0]+bs[0] && b[0]<a[0]+as[0] && a[1]<b[1]+bs[1] && b[1]<a[1]+as[1];
@@ -1345,13 +1348,13 @@ const overlapSU = (a,as,b,bs) => a[0]<b[0]+bs[0] && b[0]<a[0]+as[0] && a[1]<b[1]
 function surfFree(c, h, dx, dy, except, ctx){
   if(!canSit(c) || !Number.isInteger(dx) || !Number.isInteger(dy)) return false;
   const tp = topOf(h, ctx); if(!tp) return false;
-  const sz = surfSize(c), S = SURF_SUB, [cx,cy,cw,cd] = tp.c;
-  if(dx<cx*S || dy<cy*S || dx+sz[0]>(cx+cw)*S || dy+sz[1]>(cy+cd)*S) return false;
+  const sz = surfSize(c), S = GU, [cx,cy,cw,cd] = tp.c;
+  if(dx<cx || dy<cy || dx+sz[0]>cx+cw || dy+sz[1]>cy+cd) return false;
   if(tp.cells) for(let a=Math.floor(dx/S); a<=Math.floor((dx+sz[0]-1)/S); a++) for(let b=Math.floor(dy/S); b<=Math.floor((dy+sz[1]-1)/S); b++) if(!tp.cells.some(q=>q[0]===a && q[1]===b)) return false;   // an irregular top: only these cells (the visible part of the bed)
   return !sitters(h, except, ctx).some(t=>overlapSU([dx,dy],sz,[t.on.dx,t.on.dy],surfSize(catOf(t.k))));
 }
-// the whole cells a sitting thing is on (its world cell), from its host
-function sitCell(h, dx, dy, ctx){ const tp = topOf(h, ctx); return tp ? [tp.x+Math.floor(dx/SURF_SUB), tp.y+Math.floor(dy/SURF_SUB)] : null; }
+// where a sitting thing's back corner is in the room (grid units), from its host
+function sitCell(h, dx, dy, ctx){ const tp = topOf(h, ctx); return tp ? [tp.x+dx, tp.y+dy] : null; }
 // after anything changed (a host moved, put away or upgraded): things that no longer have a valid place on their host go to the inventory; the others follow their host
 function settleSurfaces(){
   space.things.forEach((t,i)=>{
@@ -1383,14 +1386,14 @@ function spaceClean(sp, gold, legacy){
   for(const id in ROOM_ITEMS){ const v = sp.lv && sp.lv[id]; lv[id] = (Number.isInteger(v) && v>=1 && v<=roomMax(id)) ? v : 1; }
   const bedLv = lv.bed || 1, things = [], occ = new Set(), occF = new Set();   // bought copies: x,y = their cell, or -1,-1 while put away in the stock
   const raw = (Array.isArray(sp.things) ? sp.things : []).slice(0,300).filter(t=>t && catOf(t.k)), uids = new Set();
-  const sub = (Number.isInteger(sp.sub) && sp.sub>=1) ? sp.sub : 1;   // the surface unit the saved dx,dy are counted in
+  const sub = (Number.isInteger(sp.sub) && sp.sub>=1 && GU%sp.sub===0) ? sp.sub : 1, kx = GU/sub;   // the unit the saved positions are counted in; they are multiplied up to GU
   for(const t of raw){   // pass 1: every thing gets a unique id u and a place on the floor (or the stock); things standing on furniture wait for pass 2
-    const c = catOf(t.k), fw = fwOf(c), fd = fdOf(c); let x = -1, y = -1;
+    const c = catOf(t.k), fw = fwOf(c), fd = fdOf(c); let x = -1, y = -1; const tx = Number.isInteger(t.x) ? t.x*kx : -1, ty = Number.isInteger(t.y) ? t.y*kx : -1;
     const sits = !!t.on && typeof t.on==='object' && typeof t.on.h==='string' && Number.isInteger(t.on.dx) && Number.isInteger(t.on.dy);   // a well-formed link is checked in pass 2 and never falls back to the floor
-    if(!sits && Number.isInteger(t.x) && Number.isInteger(t.y) && t.x>=0 && t.y>=0 && t.x+fw<=ROOM_CELLS && t.y+fd<=ROOM_CELLS){
-      const cells = []; for(let a=0;a<fw;a++) for(let b=0;b<fd;b++) cells.push((t.x+a)+','+(t.y+b));
+    if(!sits && tx>=0 && ty>=0 && tx+fw<=ROOM_CELLS && ty+fd<=ROOM_CELLS){
+      const cells = []; for(let a=0;a<fw;a++) for(let b=0;b<fd;b++) cells.push((tx+a)+','+(ty+b));
       const taken = isFlat(c) ? occF : occ;   // flat things (rugs) only exclude each other
-      if(!cells.some(q=>taken.has(q)) && !cells.some(q=>roomBlocked(+q.split(',')[0], +q.split(',')[1], bedLv))){ x = t.x; y = t.y; cells.forEach(q=>taken.add(q)); }
+      if(!cells.some(q=>taken.has(q)) && !cells.some(q=>roomBlocked(+q.split(',')[0], +q.split(',')[1], bedLv))){ x = tx; y = ty; cells.forEach(q=>taken.add(q)); }
     }
     let u = (typeof t.u==='string' && /^[a-z0-9]{4,12}$/.test(t.u) && !uids.has(t.u)) ? t.u : null;
     if(!u) do { u = Math.random().toString(36).slice(2,8); } while(u.length<4 || uids.has(u));
@@ -1400,7 +1403,7 @@ function spaceClean(sp, gold, legacy){
   const ctx = {things, lv};   // pass 2 uses the same rules as play (surfFree, topOf), against the cleaned list
   raw.forEach((t,i)=>{
     const o = t.on; if(!o || typeof o.h!=='string' || !Number.isInteger(o.dx) || !Number.isInteger(o.dy)) return;
-    let dx = o.dx, dy = o.dy; if(sub!==SURF_SUB){ if(SURF_SUB%sub) return; dx *= SURF_SUB/sub; dy *= SURF_SUB/sub; }
+    const dx = o.dx*kx, dy = o.dy*kx;
     const h = o.h==='bed' ? 'bed' : o.h, host = h==='bed' ? null : things.find(q=>q.u===h);
     if(h!=='bed' && (!host || host.x<0 || host===things[i])) return;
     if(!surfFree(catOf(t.k), h, dx, dy, i, ctx)) return;
@@ -1408,7 +1411,7 @@ function spaceClean(sp, gold, legacy){
   });
   const top = {};   // the highest level bought of each item: every level up to it stays owned and can be switched to for free
   for(const id in ROOM_ITEMS){ const v = sp.top && sp.top[id]; top[id] = Math.max(lv[id], (Number.isInteger(v) && v>=1 && v<=roomMax(id)) ? v : 1); }
-  return {earned, spent:Math.min(spent,earned), trued:true, unlocked:sp.unlocked===true, surf, own, po, bc, lv, top, things, sub:SURF_SUB};
+  return {earned, spent:Math.min(spent,earned), trued:true, unlocked:sp.unlocked===true, surf, own, po, bc, lv, top, things, sub:GU};
 }
 function spaceSnap(){ return JSON.parse(JSON.stringify(space)); }
 let space = spaceClean({},[],0);   // personal-space tokens: earned once per upgrade (stored, never derived), spent in the shop later; trued = the one-time true-up for old players was done
@@ -5129,7 +5132,8 @@ const RM = {W:1000, H:1150, k:1, tx:0, ty:0, sel:null, pv:null, pl:null, list:nu
 const topLv = id => Math.max(space.top && space.top[id] || 1, space.lv[id]);
 const effLv = id => (RM.pv && RM.pv.t==='lv' && RM.pv.id===id) ? RM.pv.to : space.lv[id];
 const effCol = k => (RM.pv && RM.pv.t==='col' && RM.pv.k===k) ? RM.pv.idx : space.surf[k];
-const gx2s = (x,y) => [500+(x-y)*50, 400+(x+y)*25];
+const UX = 50/GU, UY = 25/GU;   // one grid unit on screen
+const gx2s = (x,y) => [500+(x-y)*UX, 400+(x+y)*UY];
 const pts = a => a.map(p=>p.join(',')).join(' ');
 const surfFill = idx => ROOM_COLORS[idx].h==='rainbow' ? 'url(#rmRainbow)' : ROOM_COLORS[idx].h;
 // room item pictures: w,h in room units, (ax,ay) = the point of the picture that sits on the floor corner (bed) or the sill centre (window)
@@ -5141,14 +5145,14 @@ const WIN_U = 300, WIN_SILL = 235;   // window: centre along the wall and sill h
 const footPoly = (x,y,fw,fd,e) => [[e,e],[fw-e,e],[fw-e,fd-e],[e,fd-e]].map(q=>gx2s(x+q[0],y+q[1]).map(v=>+v.toFixed(1)).join(',')).join(' ');
 function spriteSVG(src, r, x, y, fw, fd, op){
   const o = gx2s(x,y);
-  return (op ? `<polygon points="${footPoly(x,y,fw,fd,.12)}" fill="#3b1d10" opacity="${op}" filter="url(#rmBlur)"/>` : '') + `<image href="${src}" x="${(o[0]+r[0]).toFixed(1)}" y="${(o[1]+r[1]).toFixed(1)}" width="${r[2]}" height="${r[3]}"/>`;
+  return (op ? `<polygon points="${footPoly(x,y,fw,fd,.12/GU)}" fill="#3b1d10" opacity="${op}" filter="url(#rmBlur)"/>` : '') + `<image href="${src}" x="${(o[0]+r[0]).toFixed(1)}" y="${(o[1]+r[1]).toFixed(1)}" width="${r[2]}" height="${r[3]}"/>`;
 }
-function bedSVG(lv){ const a = ROOM_ART.bed[lv-1]; return spriteSVG(bedSrc(lv), a.r, 0, 0, a.fp[0], a.fp[1], .3); }
+function bedSVG(lv){ const a = ROOM_ART.bed[lv-1]; return spriteSVG(bedSrc(lv), a.r, 0, 0, a.fp[0]*GU, a.fp[1]*GU, .3); }
 function windowSVG(lv){ const a = ROOM_ART.window[lv-1]; return `<image href="${a.src}" x="${(WIN_U-a.ax).toFixed(1)}" y="${(-WIN_SILL-a.ay).toFixed(1)}" width="${a.w}" height="${a.h}"/>`; }   // flat in wall units: it grows up the wall with each level
-function thingSVG(c, x, y, i){ return spriteSVG(thingSrc(c, i), c.r, x, y, fwOf(c), fdOf(c), isFlat(c) ? 0 : fwOf(c)*fdOf(c)>1 ? .28 : .22); }
-// the cell (0..9) under a pointer, or null off the floor
+function thingSVG(c, x, y, i){ return spriteSVG(thingSrc(c, i), c.r, x, y, fwOf(c), fdOf(c), isFlat(c) ? 0 : fwOf(c)*fdOf(c)>GU*GU ? .28 : .22); }
+// the grid unit (0..ROOM_CELLS-1) under a pointer, or null off the floor
 function cellAt(e){
-  const v = rmVB(e), rx = (v[0]-RM.tx)/RM.k, ry = (v[1]-RM.ty)/RM.k-RM_DY, X = (rx-500)/50, Y = (ry-400)/25;
+  const v = rmVB(e), rx = (v[0]-RM.tx)/RM.k, ry = (v[1]-RM.ty)/RM.k-RM_DY, X = (rx-500)/UX, Y = (ry-400)/UY;
   const x = Math.floor((Y+X)/2), y = Math.floor((Y-X)/2);
   return (x>=0 && x<ROOM_CELLS && y>=0 && y<ROOM_CELLS) ? [x,y] : null;
 }
@@ -5171,19 +5175,22 @@ function surfaces(skipIdx){
   return o;
 }
 const raised = (pts, z, ox) => pts.map(q=>[q[0]+(ox||0), q[1]-z]);
-// the top cell under a pointer that item c could stand on (the one in front wins where tops overlap on screen), or null
+// the offsets of the tapped unit inside a footprint, the middle first
+const offsets = (fw,fd) => { const o = []; for(let a=0;a<fw;a++) for(let b=0;b<fd;b++) o.push([a,b]); const m = [fw>>1,fd>>1]; return o.sort((p,q)=>Math.hypot(p[0]-m[0],p[1]-m[1])-Math.hypot(q[0]-m[0],q[1]-m[1])); };
+// the top spot under a pointer that item c could stand on (the one in front wins where tops overlap on screen), or null
 function topCellAt(e, c, except){
   const v = rmVB(e), rx = (v[0]-RM.tx)/RM.k, ry = (v[1]-RM.ty)/RM.k-RM_DY; let best = null;
   for(const s of surfaces(except)){
-    const X = (rx-s.tp.ox-500)/50, Y = (ry+s.tp.z-400)/25, x = Math.floor((Y+X)/2), y = Math.floor((Y-X)/2);   // the pointer, brought back down to the floor plane
-    const dx = (x-s.tp.x)*SURF_SUB, dy = (y-s.tp.y)*SURF_SUB;
-    if(surfFree(c, s.h, dx, dy, except) && (!best || s.depth>best.depth)) best = {h:s.h, dx, dy, depth:s.depth};
+    const X = (rx-s.tp.ox-500)/UX, Y = (ry+s.tp.z-400)/UY, ux = Math.floor((Y+X)/2)-s.tp.x, uy = Math.floor((Y-X)/2)-s.tp.y;   // the pointer, brought back down to the floor plane: the unit it is over
+    const fw = fwOf(c), fd = fdOf(c); let hit = null;   // the tapped unit is the middle of the item; if that does not fit, any placement that covers the tapped unit
+    for(const [a,b] of offsets(fw,fd)){ const dx = ux-a, dy = uy-b; if(surfFree(c, s.h, dx, dy, except)){ hit = {dx, dy}; break; } }
+    if(hit && (!best || s.depth>best.depth)) best = {h:s.h, dx:hit.dx, dy:hit.dy, depth:s.depth};
   }
   return best && {h:best.h, dx:best.dx, dy:best.dy};
 }
 // a sitter, drawn on its host's top (hx,hy = the host's back corner; z = the top's height)
 function sitterSVG(t, i, hx, hy, z, ox){
-  const c = catOf(t.k), cx = hx + Math.floor(t.on.dx/SURF_SUB), cy = hy + Math.floor(t.on.dy/SURF_SUB);
+  const c = catOf(t.k), cx = hx + t.on.dx, cy = hy + t.on.dy;
   return `<g data-hit="thing:${i}" class="rmh${RM.sel && RM.sel.t==='thing' && RM.sel.i===i ? ' sel' : ''}"><g transform="translate(${ox||0} ${-z})">${thingSVG(c, cx, cy, i)}</g></g>`;
 }
 const sittersSVG = (h, hx, hy, z, ox, skip, fits) => space.things.map((t,i)=>[t,i]).filter(([t,i])=>t.on && t.on.h===h && i!==skip && t.x>=0 && !(RM.pl && RM.pl.i===i) && (!fits || fits(t,i)))
@@ -5198,7 +5205,7 @@ function footFree(c, x, y, except){
 // the free spot nearest the front of the room
 function firstFreeCell(c, except){
   let best = null, bd = 1e9;
-  for(let y=0;y<ROOM_CELLS;y++) for(let x=0;x<ROOM_CELLS;x++) if(footFree(c,x,y,except)){ const d = Math.hypot(x+fwOf(c)/2-6.5,y+fdOf(c)/2-6.5); if(d<bd){ bd = d; best = [x,y]; } }
+  for(let y=0;y<ROOM_CELLS;y++) for(let x=0;x<ROOM_CELLS;x++) if(footFree(c,x,y,except)){ const d = Math.hypot(x+fwOf(c)/2-6.5*GU,y+fdOf(c)/2-6.5*GU); if(d<bd){ bd = d; best = [x,y]; } }
   return best || [ROOM_CELLS-fwOf(c), ROOM_CELLS-fdOf(c)];
 }
 const thingCount = k => space.things.filter(t=>t.k===k).length;
@@ -5278,7 +5285,7 @@ function roomSVG(){
   let s = `<defs><filter id="rmBlur" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="6"/></filter><filter id="rmBlur2" x="-40%" y="-80%" width="180%" height="260%"><feGaussianBlur stdDeviation="2.5"/></filter><linearGradient id="rmRainbow" x1="0" y1="0" x2="1" y2="0.35"><stop offset="0" stop-color="#ff8f9c"/><stop offset=".17" stop-color="#ffae6e"/><stop offset=".34" stop-color="#ffe46b"/><stop offset=".5" stop-color="#8fe08a"/><stop offset=".67" stop-color="#6cc6f5"/><stop offset=".84" stop-color="#8f8cf0"/><stop offset="1" stop-color="#d48cf0"/></linearGradient></defs><g id="rmG" transform="translate(${RM.tx} ${RM.ty}) scale(${RM.k})"><g id="rmR" transform="translate(0 ${RM_DY})">`;
   s += `<g data-hit="surf:wl" class="rmh${sel('surf','wl')}"><polygon points="0,50 500,-200 500,400 0,650" fill="${surfFill(cl)}" stroke="#5b3a2a" stroke-width="4" stroke-linejoin="round"/><polygon points="0,610 500,360 500,400 0,650" fill="#000" opacity=".08"/></g>`;
   s += `<g data-hit="surf:wr" class="rmh${sel('surf','wr')}"><polygon points="500,-200 1000,50 1000,650 500,400" fill="${surfFill(cr)}" stroke="#5b3a2a" stroke-width="4" stroke-linejoin="round"/><polygon points="500,-200 1000,50 1000,650 500,400" fill="#000" opacity=".10"/><polygon points="500,360 1000,610 1000,650 500,400" fill="#000" opacity=".08"/></g>`;
-  let grid = ''; for(let i=1;i<10;i++){ const a=gx2s(i,0),b=gx2s(i,10),c=gx2s(0,i),d=gx2s(10,i); grid += `M${a} L${b} M${c} L${d} `; }
+  let grid = ''; for(let i=1;i<10;i++){ const a=gx2s(i*GU,0),b=gx2s(i*GU,ROOM_CELLS),c=gx2s(0,i*GU),d=gx2s(ROOM_CELLS,i*GU); grid += `M${a} L${b} M${c} L${d} `; }
   s += `<g data-hit="surf:fl" class="rmh${sel('surf','fl')}"><polygon points="500,400 1000,650 500,900 0,650" fill="${surfFill(cf)}" stroke="#5b3a2a" stroke-width="4" stroke-linejoin="round"/><path d="${grid}" stroke="#5b3a2a" stroke-opacity=".16" stroke-width="2" fill="none"/></g>`;
   s += `<g data-hit="item:window" class="rmh${sel('item','window')}" transform="matrix(1 .5 0 1 500 400)">${windowSVG(effLv('window'))}</g>`;
   s += `<g data-hit="item:bed" class="rmh${sel('item','bed')}">${bedSVG(effLv('bed'))}</g>`;
@@ -5290,12 +5297,14 @@ function roomSVG(){
   order.sort((a,b)=>flatFirst(a)-flatFirst(b) || depth(a)-depth(b));   // rugs and other flat things first, then further back first
   order.forEach(i=>{ const t = space.things[i], tp = topOf(t); s += `<g data-hit="thing:${i}" class="rmh${RM.sel && RM.sel.t==='thing' && RM.sel.i===i ? ' sel' : ''}">${thingSVG(catOf(t.k), t.x, t.y, i)}</g>` + (tp && t.u ? sittersSVG(t.u, tp.x, tp.y, tp.z, tp.ox) : ''); });   // a host and what is on it are drawn as one group
   if(pl){ const c = catOf(pl.k), fw = fwOf(c), fd = fdOf(c);
-    if(canSit(c)) for(const sf of surfaces(pl.i)){   // a small thing can also go on furniture: the free cells of every top are lit
-      for(let dx=sf.tp.c[0]*SURF_SUB; dx<(sf.tp.c[0]+sf.tp.c[2])*SURF_SUB; dx++) for(let dy=sf.tp.c[1]*SURF_SUB; dy<(sf.tp.c[1]+sf.tp.c[3])*SURF_SUB; dy++){
-        if(!surfFree(c, sf.h, dx, dy, pl.i)) continue; const cx = sf.tp.x+dx/SURF_SUB, cy = sf.tp.y+dy/SURF_SUB;
-        s += `<polygon class="rmtop" points="${pts(raised([[0,0],[1,0],[1,1],[0,1]].map(d=>gx2s(cx+d[0]/SURF_SUB*1,cy+d[1]/SURF_SUB*1)), sf.tp.z, sf.tp.ox))}" fill="#fff" fill-opacity=".28" stroke="#fff" stroke-opacity=".9" stroke-width="2" stroke-dasharray="6 5"/>`; } }
-    if(pl.on){ const tp = topOf(pl.on.h), cx = tp.x+Math.floor(pl.on.dx/SURF_SUB), cy = tp.y+Math.floor(pl.on.dy/SURF_SUB);
-      s += `<polygon class="rmtile" points="${pts(raised([[0,0],[1,0],[1,1],[0,1]].map(d=>gx2s(cx+d[0],cy+d[1])), tp.z, tp.ox))}" fill="#7ee08a" fill-opacity=".55" stroke="#2e9d45" stroke-width="3"/><g class="rmghost" opacity=".9" transform="translate(${tp.ox} ${-tp.z})">${thingSVG(c, cx, cy)}</g>`; }
+    if(canSit(c)) for(const sf of surfaces(pl.i)){   // a small thing can also go on furniture: the units where it could stand are lit
+      const lit = new Set();
+      for(let dx=sf.tp.c[0]; dx<sf.tp.c[0]+sf.tp.c[2]; dx++) for(let dy=sf.tp.c[1]; dy<sf.tp.c[1]+sf.tp.c[3]; dy++)
+        if(surfFree(c, sf.h, dx, dy, pl.i)) for(let a=0;a<fw;a++) for(let b=0;b<fd;b++) lit.add((dx+a)+','+(dy+b));
+      lit.forEach(k=>{ const [dx,dy] = k.split(',').map(Number), cx = sf.tp.x+dx, cy = sf.tp.y+dy;
+        s += `<polygon class="rmtop" points="${pts(raised([[0,0],[1,0],[1,1],[0,1]].map(d=>gx2s(cx+d[0],cy+d[1])), sf.tp.z, sf.tp.ox))}" fill="#fff" fill-opacity=".28" stroke="#fff" stroke-opacity=".9" stroke-width="2" stroke-dasharray="6 5"/>`; }); }
+    if(pl.on){ const tp = topOf(pl.on.h), cx = tp.x+pl.on.dx, cy = tp.y+pl.on.dy;
+      s += `<polygon class="rmtile" points="${pts(raised([[0,0],[fw,0],[fw,fd],[0,fd]].map(d=>gx2s(cx+d[0],cy+d[1])), tp.z, tp.ox))}" fill="#7ee08a" fill-opacity=".55" stroke="#2e9d45" stroke-width="3"/><g class="rmghost" opacity=".9" transform="translate(${tp.ox} ${-tp.z})">${thingSVG(c, cx, cy)}</g>`; }
     else { const q = [[0,0],[fw,0],[fw,fd],[0,fd]].map(d=>gx2s(pl.x+d[0],pl.y+d[1]).join(',')).join(' ');
       s += `<polygon class="rmtile" points="${q}" fill="#7ee08a" fill-opacity=".45" stroke="#2e9d45" stroke-width="3"/><g class="rmghost" opacity=".85">${thingSVG(c, pl.x, pl.y)}</g>`;
       const mv = pl.i>=0 ? space.things[pl.i] : null, tp = mv && mv.u ? topOf({k:mv.k, x:pl.x, y:pl.y, u:mv.u}) : null;   // a host being moved brings its things along in the preview
