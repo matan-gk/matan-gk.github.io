@@ -1203,51 +1203,67 @@ const ROOM_COLORS = [
 // ===== colorable parts (step 4): the bed's blanket, sheet, pillow and curtains; the pot of every plant; the colored surface of a furniture item =====
 // an option is 'd' (the original picture), a colour index into ROOM_COLORS, or 'p:<id>' for a pattern. A part is bought per option, like the walls; owned options switch for free.
 const PART_NAMES = {blanket:'שמיכה', sheet:'סדין', pillow:'כרית', curtain:'וילונות', pot:'עציץ', dollhouse:'גג', wardrobe:'ארון', chair:'כיסא', slide:'מגלשה', track:'רכבת', guitar:'גיטרה', rug:'שטיח', dressbox:'ארגז', car:'מכונית', laptop:'מחשב', monkey:'קוף', ladybug:'חיפושית', bunny:'ארנב'};
-// patterns: sc = sprite pixels per tile pixel (bed parts); parts = where the pattern is offered (wl/wr/fl = the walls and the floor, bed.* = the bed's parts).
+// patterns: the walls and the floor share one set (owned once, usable on all three); the bed has its own. sc = sprite pixels per tile pixel (bed parts); parts = where the pattern is offered (wl/wr/fl = the walls and the floor, bed.* = the bed's parts).
 // The tiles after the unicorn are mirrored 2x2 so that they repeat without a seam; on the walls and floor they are laid in perspective (SVG pattern transform)
 const ROOM_PATTERNS = [{id:'unicorn', n:'חד קרן וקשת', src:'assets/17d0ef6255cb.webp', sc:.36, p:2, parts:['bed.blanket']},
-  {id:'checkblue', n:'משבצות כחולות', src:'assets/40aa6d9a5b68.webp', sc:.45, p:2, parts:['wl', 'wr', 'fl', 'bed.blanket', 'bed.sheet', 'bed.curtain']},
-  {id:'moons', n:'ירח וכוכבים', src:'assets/16c53308210f.webp', sc:.45, p:2, parts:['wl', 'wr', 'bed.blanket', 'bed.sheet', 'bed.curtain']},
+  {id:'checkblue', n:'משבצות כחולות', src:'assets/40aa6d9a5b68.webp', sc:.45, p:2, parts:['wl', 'wr', 'fl']},
+  {id:'moons', n:'ירח וכוכבים', src:'assets/16c53308210f.webp', sc:.45, p:2, parts:['wl', 'wr']},
   {id:'parquet', n:'פרקט', src:'assets/3814e4123f04.webp', sc:.45, p:2, parts:['fl']},
-  {id:'pastelclouds', n:'ענני פסטל', src:'assets/3f8cdd3b28b6.webp', sc:.45, p:2, parts:['wl', 'wr', 'bed.blanket', 'bed.sheet', 'bed.curtain']},
-  {id:'planes', n:'מטוסי נייר', src:'assets/6625b17efe6f.webp', sc:.45, p:2, parts:['wl', 'wr', 'bed.blanket', 'bed.sheet', 'bed.curtain']},
-  {id:'hexpastel', n:'משושים צבעוניים', src:'assets/46bf783806a7.webp', sc:.45, p:2, parts:['wl', 'wr', 'fl', 'bed.blanket', 'bed.sheet', 'bed.curtain']},
-  {id:'stripes', n:'פסים אפורים', src:'assets/8f00708a0e42.webp', sc:.45, p:2, parts:['wl', 'wr', 'fl', 'bed.blanket', 'bed.sheet', 'bed.curtain']},
-  {id:'balloons', n:'בלונים קטנים', src:'assets/8374678005ff.webp', sc:.45, p:2, parts:['wl', 'wr', 'bed.blanket', 'bed.sheet', 'bed.curtain']},
-  {id:'safari', n:'ספארי', src:'assets/bdaabdefd1ef.webp', sc:.45, p:2, parts:['wl', 'wr', 'bed.blanket', 'bed.sheet', 'bed.curtain']},
-  {id:'checkpink', n:'משבצות ורודות', src:'assets/31ccaf7b7c49.webp', sc:.45, p:2, parts:['wl', 'wr', 'fl', 'bed.blanket', 'bed.sheet', 'bed.curtain']},
-  {id:'abcblocks', n:'קוביות אותיות', src:'assets/45886241f07f.webp', sc:.45, p:2, parts:['wl', 'wr', 'bed.blanket', 'bed.sheet', 'bed.curtain']},
-  {id:'vehicles', n:'כלי תחבורה', src:'assets/2e58d3776906.webp', sc:.45, p:2, parts:['wl', 'wr', 'bed.blanket', 'bed.sheet', 'bed.curtain']},
-  {id:'hexblue', n:'משושים כחולים', src:'assets/9a64a1515d55.webp', sc:.45, p:2, parts:['wl', 'wr', 'fl', 'bed.blanket', 'bed.sheet', 'bed.curtain']},
-  {id:'paws', n:'כפות וחתולים', src:'assets/7760bba7da1c.webp', sc:.45, p:2, parts:['wl', 'wr', 'bed.blanket', 'bed.sheet', 'bed.curtain']},
-  {id:'flowers', n:'פרחים', src:'assets/446e3c31e64f.webp', sc:.45, p:2, parts:['wl', 'wr', 'bed.blanket', 'bed.sheet', 'bed.curtain']},
-  {id:'dots', n:'נקודות צבעוניות', src:'assets/f1056fcabd24.webp', sc:.45, p:2, parts:['wl', 'wr', 'bed.blanket', 'bed.sheet', 'bed.curtain']},
+  {id:'pastelclouds', n:'ענני פסטל', src:'assets/3f8cdd3b28b6.webp', sc:.45, p:2, parts:['wl', 'wr']},
+  {id:'planes', n:'מטוסי נייר', src:'assets/6625b17efe6f.webp', sc:.45, p:2, parts:['wl', 'wr']},
+  {id:'hexpastel', n:'משושים צבעוניים', src:'assets/46bf783806a7.webp', sc:.45, p:2, parts:['wl', 'wr', 'fl']},
+  {id:'stripes', n:'פסים אפורים', src:'assets/8f00708a0e42.webp', sc:.45, p:2, parts:['wl', 'wr', 'fl']},
+  {id:'balloons', n:'בלונים קטנים', src:'assets/8374678005ff.webp', sc:.45, p:2, parts:['wl', 'wr']},
+  {id:'safari', n:'ספארי', src:'assets/bdaabdefd1ef.webp', sc:.45, p:2, parts:['wl', 'wr']},
+  {id:'checkpink', n:'משבצות ורודות', src:'assets/31ccaf7b7c49.webp', sc:.45, p:2, parts:['wl', 'wr', 'fl']},
+  {id:'abcblocks', n:'קוביות אותיות', src:'assets/45886241f07f.webp', sc:.45, p:2, parts:['wl', 'wr']},
+  {id:'vehicles', n:'כלי תחבורה', src:'assets/2e58d3776906.webp', sc:.45, p:2, parts:['wl', 'wr']},
+  {id:'hexblue', n:'משושים כחולים', src:'assets/9a64a1515d55.webp', sc:.45, p:2, parts:['wl', 'wr', 'fl']},
+  {id:'paws', n:'כפות וחתולים', src:'assets/7760bba7da1c.webp', sc:.45, p:2, parts:['wl', 'wr']},
+  {id:'flowers', n:'פרחים', src:'assets/446e3c31e64f.webp', sc:.45, p:2, parts:['wl', 'wr']},
+  {id:'dots', n:'נקודות צבעוניות', src:'assets/f1056fcabd24.webp', sc:.45, p:2, parts:['wl', 'wr']},
   {id:'bluewood', n:'פרקט כחול', src:'assets/5f70599fdcb9.webp', sc:.45, p:2, parts:['fl']},
-  {id:'shapes', n:'צורות', src:'assets/783b5749a9ed.webp', sc:.45, p:2, parts:['wl', 'wr', 'bed.blanket', 'bed.sheet', 'bed.curtain']},
-  {id:'pstars', n:'כוכבי פסטל', src:'assets/8fbc7e9ce635.webp', sc:.45, p:2, parts:['wl', 'wr', 'bed.blanket', 'bed.sheet', 'bed.curtain']},
-  {id:'graycloud', n:'עננים אפורים', src:'assets/d3174e70581b.webp', sc:.45, p:2, parts:['wl', 'wr', 'bed.blanket', 'bed.sheet', 'bed.curtain']},
-  {id:'suns', n:'שמשות', src:'assets/fc954c3ecca4.webp', sc:.45, p:2, parts:['wl', 'wr', 'bed.blanket', 'bed.sheet', 'bed.curtain']},
+  {id:'shapes', n:'צורות', src:'assets/783b5749a9ed.webp', sc:.45, p:2, parts:['wl', 'wr']},
+  {id:'pstars', n:'כוכבי פסטל', src:'assets/8fbc7e9ce635.webp', sc:.45, p:2, parts:['wl', 'wr']},
+  {id:'graycloud', n:'עננים אפורים', src:'assets/d3174e70581b.webp', sc:.45, p:2, parts:['wl', 'wr']},
+  {id:'suns', n:'שמשות', src:'assets/fc954c3ecca4.webp', sc:.45, p:2, parts:['wl', 'wr']},
   {id:'tedwood', n:'פרקט דובים', src:'assets/71df2d7a1e9c.webp', sc:.45, p:2, parts:['fl']},
-  {id:'fish', n:'דגים', src:'assets/2beee54273a7.webp', sc:.45, p:2, parts:['wl', 'wr', 'bed.blanket', 'bed.sheet', 'bed.curtain']},
+  {id:'fish', n:'דגים', src:'assets/2beee54273a7.webp', sc:.45, p:2, parts:['wl', 'wr']},
   {id:'greentile', n:'אריחים ירוקים', src:'assets/f18bacd425b3.webp', sc:.45, p:2, parts:['fl']},
-  {id:'hearts', n:'לבבות ורודים', src:'assets/b997362ff78d.webp', sc:.45, p:2, parts:['wl', 'wr', 'bed.blanket', 'bed.sheet', 'bed.curtain']},
+  {id:'hearts', n:'לבבות ורודים', src:'assets/b997362ff78d.webp', sc:.45, p:2, parts:['wl', 'wr']},
   {id:'carwood', n:'פרקט מכוניות', src:'assets/f79e96b8e87c.webp', sc:.45, p:2, parts:['fl']},
-  {id:'night', n:'לילה', src:'assets/7ed9bfaf9bac.webp', sc:.45, p:2, parts:['wl', 'wr', 'bed.blanket', 'bed.sheet', 'bed.curtain']},
+  {id:'night', n:'לילה', src:'assets/7ed9bfaf9bac.webp', sc:.45, p:2, parts:['wl', 'wr']},
   {id:'flowertile', n:'אריחי פרחים', src:'assets/27173ba7359d.webp', sc:.45, p:2, parts:['fl']},
   {id:'treewood', n:'פרקט עצים', src:'assets/c9e127d7f8c4.webp', sc:.45, p:2, parts:['fl']},
-  {id:'skyclouds', n:'עננים בשמיים', src:'assets/e826da1ce50c.webp', sc:.45, p:2, parts:['wl', 'wr', 'bed.blanket', 'bed.sheet', 'bed.curtain']},
-  {id:'pdots', n:'נקודות פסטל', src:'assets/5f01a5a503fa.webp', sc:.45, p:2, parts:['wl', 'wr', 'bed.blanket', 'bed.sheet', 'bed.curtain']},
-  {id:'grid', n:'משבצות רשת', src:'assets/9d3bc6edf7e1.webp', sc:.45, p:2, parts:['wl', 'wr', 'fl', 'bed.blanket', 'bed.sheet', 'bed.curtain']},
-  {id:'clover', n:'תלתן וצבעונים', src:'assets/04291cf37950.webp', sc:.45, p:2, parts:['wl', 'wr', 'bed.blanket', 'bed.sheet', 'bed.curtain']},
-  {id:'wstars', n:'כוכבים לבנים', src:'assets/766cfeac337b.webp', sc:.45, p:2, parts:['wl', 'wr', 'bed.blanket', 'bed.sheet', 'bed.curtain']},
-  {id:'hearts2', n:'לבבות קטנים', src:'assets/9266c64639e3.webp', sc:.45, p:2, parts:['wl', 'wr', 'bed.blanket', 'bed.sheet', 'bed.curtain']},
-  {id:'confetti', n:'קונפטי', src:'assets/1b6d7d54d94d.webp', sc:.45, p:2, parts:['wl', 'wr', 'bed.blanket', 'bed.sheet', 'bed.curtain']},
-  {id:'prints', n:'עקבות', src:'assets/68d519112d9d.webp', sc:.45, p:2, parts:['wl', 'wr', 'bed.blanket', 'bed.sheet', 'bed.curtain']},
-  {id:'bricks', n:'קוביות בנייה', src:'assets/d94631a04aa3.webp', sc:.45, p:2, parts:['wl', 'wr', 'bed.blanket', 'bed.sheet', 'bed.curtain']},
-  {id:'boats', n:'ספינות', src:'assets/e0a48a5f5b2d.webp', sc:.45, p:2, parts:['wl', 'wr', 'bed.blanket', 'bed.sheet', 'bed.curtain']},
-  {id:'planes2', n:'מטוסי נייר בשמיים', src:'assets/9a4ee90d64c4.webp', sc:.45, p:2, parts:['wl', 'wr', 'bed.blanket', 'bed.sheet', 'bed.curtain']},
-  {id:'mush', n:'פטריות', src:'assets/f32e9ad400d9.webp', sc:.45, p:2, parts:['wl', 'wr', 'bed.blanket', 'bed.sheet', 'bed.curtain']},
-  {id:'balloons2', n:'בלונים גדולים', src:'assets/2fa19d7a14d2.webp', sc:.45, p:2, parts:['wl', 'wr', 'bed.blanket', 'bed.sheet', 'bed.curtain']}
+  {id:'skyclouds', n:'עננים בשמיים', src:'assets/e826da1ce50c.webp', sc:.45, p:2, parts:['wl', 'wr']},
+  {id:'pdots', n:'נקודות פסטל', src:'assets/5f01a5a503fa.webp', sc:.45, p:2, parts:['wl', 'wr']},
+  {id:'grid', n:'משבצות רשת', src:'assets/9d3bc6edf7e1.webp', sc:.45, p:2, parts:['wl', 'wr', 'fl']},
+  {id:'clover', n:'תלתן וצבעונים', src:'assets/04291cf37950.webp', sc:.45, p:2, parts:['wl', 'wr']},
+  {id:'wstars', n:'כוכבים לבנים', src:'assets/766cfeac337b.webp', sc:.45, p:2, parts:['wl', 'wr']},
+  {id:'hearts2', n:'לבבות קטנים', src:'assets/9266c64639e3.webp', sc:.45, p:2, parts:['wl', 'wr']},
+  {id:'confetti', n:'קונפטי', src:'assets/1b6d7d54d94d.webp', sc:.45, p:2, parts:['wl', 'wr']},
+  {id:'prints', n:'עקבות', src:'assets/68d519112d9d.webp', sc:.45, p:2, parts:['wl', 'wr']},
+  {id:'bricks', n:'קוביות בנייה', src:'assets/d94631a04aa3.webp', sc:.45, p:2, parts:['wl', 'wr']},
+  {id:'boats', n:'ספינות', src:'assets/e0a48a5f5b2d.webp', sc:.45, p:2, parts:['wl', 'wr']},
+  {id:'planes2', n:'מטוסי נייר בשמיים', src:'assets/9a4ee90d64c4.webp', sc:.45, p:2, parts:['wl', 'wr']},
+  {id:'mush', n:'פטריות', src:'assets/f32e9ad400d9.webp', sc:.45, p:2, parts:['wl', 'wr']},
+  {id:'balloons2', n:'בלונים גדולים', src:'assets/2fa19d7a14d2.webp', sc:.45, p:2, parts:['wl', 'wr']},
+  {id:'b_dinos', n:'דינוזאורים', src:'assets/98563ae1d5f6.webp', sc:.4, p:2, parts:['bed.blanket','bed.sheet','bed.curtain']},
+  {id:'b_racecars', n:'מכוניות מירוץ', src:'assets/013211f1b5a4.webp', sc:.4, p:2, parts:['bed.blanket','bed.sheet','bed.curtain']},
+  {id:'b_waves', n:'גלים ודגים', src:'assets/cc87c7ba0168.webp', sc:.4, p:2, parts:['bed.blanket','bed.sheet','bed.curtain']},
+  {id:'b_teddy', n:'דובונים', src:'assets/28084a149ce6.webp', sc:.4, p:2, parts:['bed.blanket','bed.sheet','bed.curtain']},
+  {id:'b_space', n:'חלל', src:'assets/ea1f5f35b53a.webp', sc:.4, p:2, parts:['bed.blanket','bed.sheet','bed.curtain']},
+  {id:'b_wildflowers', n:'פרחי בר', src:'assets/55e71ee57141.webp', sc:.4, p:2, parts:['bed.blanket','bed.sheet','bed.curtain']},
+  {id:'b_bedclouds', n:'עננים', src:'assets/5a845c92a719.webp', sc:.4, p:2, parts:['bed.blanket','bed.sheet','bed.curtain']},
+  {id:'b_sunrain', n:'שמש וקשת', src:'assets/5f99ebe1677f.webp', sc:.4, p:2, parts:['bed.blanket','bed.sheet','bed.curtain']},
+  {id:'b_toys', n:'צעצועים', src:'assets/52b651e55cae.webp', sc:.4, p:2, parts:['bed.blanket','bed.sheet','bed.curtain']},
+  {id:'b_forest', n:'חיות היער', src:'assets/de0a90b90c91.webp', sc:.4, p:2, parts:['bed.blanket','bed.sheet','bed.curtain']},
+  {id:'b_sweets', n:'גלידות וקאפקייקס', src:'assets/0ca1fec052de.webp', sc:.4, p:2, parts:['bed.blanket','bed.sheet','bed.curtain']},
+  {id:'b_fruit', n:'פירות מחייכים', src:'assets/debfca55dc95.webp', sc:.4, p:2, parts:['bed.blanket','bed.sheet','bed.curtain']},
+  {id:'b_music', n:'כלי נגינה', src:'assets/2ea244f1054f.webp', sc:.4, p:2, parts:['bed.blanket','bed.sheet','bed.curtain']},
+  {id:'b_monsters', n:'מפלצות חביבות', src:'assets/657216b264db.webp', sc:.4, p:2, parts:['bed.blanket','bed.sheet','bed.curtain']},
+  {id:'b_unicorns', n:'חד קרנים', src:'assets/a9b0f42951f2.webp', sc:.4, p:2, parts:['bed.blanket','bed.sheet','bed.curtain']},
+  {id:'b_butterflies', n:'פרפרים', src:'assets/72bb148377eb.webp', sc:.4, p:2, parts:['bed.blanket','bed.sheet','bed.curtain']}
 ];
 const optOk = v => v==='d' || (Number.isInteger(v) && v>=0 && v<ROOM_COLORS.length) || (typeof v==='string' && ROOM_PATTERNS.some(q=>'p:'+q.id===v));
 const optPrice = v => typeof v==='number' ? ROOM_COLORS[v].p : ROOM_PATTERNS.find(q=>'p:'+q.id===v).p;
@@ -1378,7 +1394,7 @@ function roomMaxCost(){   // everything buyable in the room today (the catalog g
   let t = 0; for(const id in ROOM_ITEMS) t += ROOM_ITEMS[id].up.reduce((a,b)=>a+b,0);
   t += ROOM_CATALOG.reduce((a,c)=>a+c.p,0);   // one copy of each floor item
   const all = ROOM_COLORS.reduce((a,c)=>a+c.p,0);
-  for(const k in ROOM_DEFAULT) t += all - ROOM_COLORS[ROOM_DEFAULT[k]].p + ROOM_PATTERNS.filter(q=>q.parts.includes(k)).reduce((a,q)=>a+q.p,0);
+  t += all - [...new Set(Object.values(ROOM_DEFAULT))].reduce((a,i)=>a+ROOM_COLORS[i].p,0) + ROOM_PATTERNS.filter(q=>Object.keys(ROOM_DEFAULT).some(k=>q.parts.includes(k))).reduce((a,q)=>a+q.p,0);   // one shared set for the three surfaces
   for(const k of partKeys()) t += all + ROOM_PATTERNS.filter(q=>q.parts.includes(k)).reduce((a,q)=>a+q.p,0);   // every colour and pattern of every colorable part
   return t;
 }
@@ -1440,8 +1456,10 @@ function spaceClean(sp, gold, legacy){
     const c = okc(sp.surf && sp.surf[k]) ? sp.surf[k] : ROOM_DEFAULT[k];
     const o = (Array.isArray(sp.own && sp.own[k]) ? sp.own[k] : []).filter(okc);
     [ROOM_DEFAULT[k], c].forEach(v=>{ if(!o.includes(v)) o.push(v); });
-    surf[k] = c; own[k] = [...new Set(o)].sort((a,b)=>typeof a===typeof b ? (typeof a==='number' ? a-b : (a<b?-1:1)) : (typeof a==='number' ? -1 : 1));
+    surf[k] = c; own[k] = [...new Set(o)];
   }
+  const shared = [...new Set(Object.values(own).flat())].sort((a,b)=>typeof a===typeof b ? (typeof a==='number' ? a-b : (a<b?-1:1)) : (typeof a==='number' ? -1 : 1));
+  for(const k in ROOM_DEFAULT) own[k] = shared.slice();   // the walls and the floor share what was bought: buy once, use on all three
   const po = {}, bc = {};   // po: the options bought for each part key; bc: the bed's chosen option per part
   if(sp.po && typeof sp.po==='object') for(const k of Object.keys(sp.po).slice(0,80)){ if(PART_KEY_RX.test(k) && Array.isArray(sp.po[k])) po[k] = [...new Set(sp.po[k].filter(v=>v!=='d' && optOk(v)))]; }
   for(const n of ['blanket','sheet','pillow','curtain']){ const v = sp.bc && sp.bc[n]; if(v!=='d' && optOk(v) && (po['bed.'+n]||[]).includes(v)) bc[n] = v; }
@@ -2318,7 +2336,7 @@ function cloudProfileFromDoc(C, helpers){
 // ===== CLOUD (Google sign-in, cloud progress, problem reports) =====
 // Local-first: the game always works from this device's storage. The cloud is a mirror, so no internet / no account / no quota never blocks play.
 // Everything here is off while CLOUD_CONFIG is null. See firebase/SETUP.md for how to create the (free) Firebase project and paste its settings below.
-const APP_VERSION = '2026.11.08j';       // keep equal to VERSION in sw.js (a test checks it)
+const APP_VERSION = '2026.11.08k';       // keep equal to VERSION in sw.js (a test checks it)
 const CLOUD_CONFIG = {apiKey:"AIzaSyAlq_TJNGvWPJpUrpbdq_hkAoURydqMzm0", authDomain:"learning-quest-1.firebaseapp.com", projectId:"learning-quest-1", appId:"1:98931179722:web:78fb00084ccba3efb53433"};   // e.g. {apiKey:'...', authDomain:'xxx.firebaseapp.com', projectId:'xxx', appId:'...'}
 const CLOUD_LIMITS = {
   pushDelayMs: 60000,          // at most one upload per profile per minute while playing
@@ -5610,7 +5628,7 @@ function onDrawerClick(e){
     const c = pvCost(), pv = RM.pv; if(!pv || tokenBalance() < c) return;
     space.spent += c;
     if(pv.t==='part'){ const pi = partInfo(); if(!pi){ space.spent -= c; return; } (space.po[pi.key] = space.po[pi.key] || []).push(pv.o); pi.set(pv.o); RM.pv = null; saveState(); rmRedraw(); renderDrawer(); burstConfetti(10); return; }
-    if(pv.t==='lv'){ const n0 = stowedCount(); space.lv[pv.id] = pv.to; space.top[pv.id] = pv.to; stowBlocked(); RM.note = stowNote(stowedCount()-n0); } else { space.own[pv.k].push(pv.idx); space.surf[pv.k] = pv.idx; }
+    if(pv.t==='lv'){ const n0 = stowedCount(); space.lv[pv.id] = pv.to; space.top[pv.id] = pv.to; stowBlocked(); RM.note = stowNote(stowedCount()-n0); } else { for(const k2 in ROOM_DEFAULT) if(!space.own[k2].includes(pv.idx)) space.own[k2].push(pv.idx); space.surf[pv.k] = pv.idx; }
     RM.pv = null; saveState(); rmRedraw(); renderDrawer(); burstConfetti(10); return;
   }
   if(t.dataset.col){ const k = RM.sel.k, idx = /^\d+$/.test(t.dataset.col) ? +t.dataset.col : t.dataset.col;

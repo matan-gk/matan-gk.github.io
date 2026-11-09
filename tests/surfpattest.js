@@ -32,10 +32,19 @@ const b2=await ev(()=>tokenBalance());
 await ev(()=>{document.querySelector('[data-col="p:parquet"]').click();});
 ok(await ev(()=>space.surf.fl==='p:parquet')&&await ev(()=>tokenBalance())===b2,'an owned pattern switches for free');
 // bed parts
-ok(await ev(()=>optsFor('bed.blanket').includes('p:dots')&&!optsFor('bed.blanket').includes('p:parquet')),'bed parts get the cute patterns');
+ok(await ev(()=>optsFor('bed.blanket').includes('p:b_dinos')&&!optsFor('bed.blanket').includes('p:dots')&&!optsFor('bed.blanket').includes('p:parquet')),'the bed has its own patterns, not the wall ones');
+ok(await ev(()=>ROOM_PATTERNS.filter(q=>q.parts.some(k=>k.startsWith('bed.'))).every(q=>q.parts.every(k=>k.startsWith('bed.')))&&ROOM_PATTERNS.filter(q=>q.id.startsWith('b_')).length===16),'a pattern is for the bed or for the walls and floor, never both; 16 new bed patterns');
+// what was bought for one wall or the floor is owned on all three
+ok(await ev(()=>['wl','wr','fl'].every(k=>space.own[k].includes('p:skyclouds')&&space.own[k].includes('p:balloons')&&space.own[k].includes('p:parquet'))),'a pattern bought for one surface is owned on all three');
+await ev(()=>{RM.sel={t:'surf',k:'wr'};rmRedraw();renderDrawer();});
+const b3=await ev(()=>tokenBalance());
+await ev(()=>{document.querySelector('[data-col="p:skyclouds"]').click();});
+ok(await ev(()=>space.surf.wr==='p:skyclouds')&&await ev(()=>tokenBalance())===b3,'and is free to use on another wall');
+await ev(()=>{RM.sel={t:'surf',k:'fl'};rmRedraw();renderDrawer();document.querySelector('[data-col="9"]').click();document.querySelector('[data-buy]').click();});
+ok(await ev(()=>space.own.wl.includes(9)&&space.own.wr.includes(9)),'colours are shared the same way');
 // save and load
 const rt=await ev(()=>{const s=spaceClean(JSON.parse(JSON.stringify(space)),[],0);return [s.surf.wl,s.surf.wr,s.surf.fl,s.own.fl.join()].join('|');});
-ok(rt==='p:skyclouds|p:balloons|p:parquet|3,12,p:parquet'||rt.startsWith('p:skyclouds|p:balloons|p:parquet|'),'patterns survive saving and loading '+rt);
+ok(rt.startsWith('p:skyclouds|p:skyclouds|9|')&&rt.includes('p:parquet'),'patterns survive saving and loading '+rt);
 ok(await ev(()=>{const s=spaceClean({earned:1,surf:{wl:'p:parquet',wr:'p:nonsense',fl:'p:skyclouds'}},[],0);return s.surf.wl===ROOM_DEFAULT.wl&&s.surf.wr===ROOM_DEFAULT.wr&&s.surf.fl===ROOM_DEFAULT.fl;}),'a pattern that is not offered on that surface is refused');
 ok(await ev(()=>roomMaxCost()>0),'the total price still adds up');
 ok(errs.length===0,'no page errors '+errs.join('|'));
