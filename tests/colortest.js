@@ -26,7 +26,7 @@ const md=await ev(async()=>{const out=[];for(let l=1;l<=5;l++){const a=ROOM_ART.
 ok(md.every(m=>m.parts.every(n=>m.cnt[n]>=250)),'every bed level has its parts in the mask: '+md.map(m=>m.l+':'+Object.values(m.cnt).join('/')).join(' '));
 ok(md.every(m=>(m.l>=4)===(m.cnt.curtain>0)),'curtains exist only on levels 4 and 5');
 ok(md.every(m=>m.dark<m.cnt.blanket*0.02),'the masks cover only light linen, never wood or outlines: '+md.map(m=>m.dark).join(','));
-ok(await ev(()=>ROOM_PATTERNS.length===1&&ROOM_PATTERNS[0].parts.join()==='bed.blanket'&&/^assets\//.test(ROOM_PATTERNS[0].src)),'one pattern (rainbow unicorn), offered on the bed blanket only');
+ok(await ev(()=>ROOM_PATTERNS[0].id==='unicorn'&&ROOM_PATTERNS[0].parts.join()==='bed.blanket'&&ROOM_PATTERNS.every(q=>/^assets\//.test(q.src))),'the rainbow unicorn pattern is offered on the bed blanket only (the others are in surfpattest)');
 ok(await ev(()=>{const k=partKeys();return k.includes('pot')&&k.includes('bed.pillow')&&k.length===25&&ROOM_CATALOG.filter(hasParts).every(c=>c.base)&&ROOM_CATALOG.filter(c=>!c.base).every(c=>!hasParts(c));}),'12 colorable parts: 4 bed parts, the plants\' pot, 7 furniture surfaces; items without a magenta surface have none');
 ok(await ev(()=>[1,2,3,4,5].every(l=>{space.lv.bed=l;return bedSrc(l)===ROOM_ART.bed[l-1].src;})&&(space.lv.bed=1,true)),'the default bed draws the original picture');
 
@@ -44,10 +44,10 @@ ok(await ev(()=>document.querySelectorAll('#rmDrawer .partbtn').length===0&&!!do
 
 // the palette: original + 16 colours (+ patterns where offered); prices; patterns only on the blanket
 await ev(()=>{space.lv.bed=1;RM.sel={t:'item',id:'bed'};renderDrawer();});await click('#rmDrawer [data-part=blanket]');
-ok(await ev(()=>document.querySelectorAll('#rmDrawer [data-popt]').length===17),'blanket palette: original (as the brush closest to it) + the other 15 colours + the unicorn pattern');
+ok(await ev(()=>document.querySelectorAll('#rmDrawer [data-popt]').length===16+ROOM_PATTERNS.filter(q=>q.parts.includes('bed.blanket')).length),'blanket palette: original (as the brush closest to it) + the other 15 colours + the unicorn pattern');
 ok(await ev(()=>{const q=document.querySelector('#rmDrawer [data-popt="p:unicorn"] .bp');return !!q&&q.textContent.startsWith('2');}),'the pattern costs 2 tokens and shows its price');
 await click('#rmDrawer [data-pback]');await click('#rmDrawer [data-part=sheet]');
-ok(await ev(()=>document.querySelectorAll('#rmDrawer [data-popt]').length===16&&!document.querySelector('#rmDrawer [data-popt="p:unicorn"]')),'the sheet palette has no pattern (a pattern may be offered in one place and not another)');
+ok(await ev(()=>document.querySelectorAll('#rmDrawer [data-popt]').length===16+ROOM_PATTERNS.filter(q=>q.parts.includes('bed.sheet')).length&&!document.querySelector('#rmDrawer [data-popt="p:unicorn"]')),'the sheet palette has no pattern (a pattern may be offered in one place and not another)');
 await click('#rmDrawer [data-pback]');
 
 // the original colour is shown as a brush (pre-purchased with the item), never a coloured square; the part buttons are readable in dark mode

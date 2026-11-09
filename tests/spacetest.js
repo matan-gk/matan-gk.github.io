@@ -154,7 +154,7 @@ ok(await ev(()=>space.unlocked&&space.lv.bed===2&&space.surf.wl===2&&space.spent
 const cl=await ev(()=>cleanProgress({space:{earned:50,spent:2,trued:true,unlocked:true,surf:{wl:99,wr:'x',fl:5},own:{fl:[5,5,77,1]},lv:{bed:9,window:2,ghost:3}}}).space);
 ok(cl.surf.wl===3&&cl.surf.wr===3&&cl.surf.fl===5&&cl.lv.bed===1&&cl.lv.window===2&&!('ghost' in cl.lv)&&JSON.stringify(cl.own.fl)==='[1,5,12]','bad colors and levels fall back; current and starting colors are always owned: '+JSON.stringify(cl.own));
 const mc=await ev(()=>roomMaxCost());
-ok(mc===(3+4+5+6)+(2+3+4+5)+3*(13+6-1)+297+25*19+2,'room max-out cost = bed 18 + window 14 + 3 surfaces (54) + 83 floor items (297) + 25 colorable parts x 19 + 2 (blanket pattern) = 860, got '+mc);
+ok(mc===(3+4+5+6)+(2+3+4+5)+3*(13+6-1)+297+25*19+(await ev(()=>ROOM_PATTERNS.reduce((a,q)=>a+q.p*q.parts.length,0))),'room max-out cost = bed 18 + window 14 + 3 surfaces (54) + 83 floor items (297) + 25 colorable parts x 19 + 2 (blanket pattern) = 860, got '+mc);
 ok(await ev(()=>JSON.stringify(ROOM_ITEMS.bed.up)==='[0,3,4,5,6]'&&JSON.stringify(ROOM_ITEMS.window.up)==='[0,2,3,4,5]'),'upgrade prices: bed 3,4,5,6 and window 2,3,4,5');
 ok(await ev(()=>{onRoomTap(null);space.surf.wl=15;rmRedraw();const st=[...document.querySelectorAll('#rmRainbow stop')];return st.length>=6&&document.querySelector('[data-hit="surf:wl"] polygon').getAttribute('fill')==='url(#rmRainbow)'&&new Set(st.map(x=>x.getAttribute('stop-color'))).size===st.length;}),'the rainbow is a real rainbow: 6+ different color stops on every surface');
 // a profile already above 10 tokens: ceremony gate on first start

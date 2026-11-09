@@ -448,3 +448,7 @@ The bed and the window are still in the default room, but can now be moved, put 
 ## Step 18: room fills wide screens (branch `room-fill-large-screen`, off `movable-bed-window`)
 
 On screens 900px wide and up the room page no longer stops at 1200px: the room uses all the width and height left beside the fixed-width drawer.
+
+## Step 19: patterns for walls, floor and bed (branch `more-patterns`, off `room-fill-large-screen`)
+
+41 new patterns (from three Gemini sheets; 6 duplicates removed; each tile is mirrored 2x2 so it repeats without a seam, stored as `assets/<sha1>.webp`) are added to `ROOM_PATTERNS`. `parts` says where each is offered: wood/tile ones only on the floor (`fl`); checkers, hexagons, stripes and grid on walls, floor and bed; the rest on the walls (`wl`, `wr`) and the bed's blanket, sheet and curtain. A wall or floor value (`space.surf[k]`, `space.own[k]`) is now a colour index or a pattern `'p:id'` (validated per surface in `spaceClean`). Walls and floor draw it as an SVG `<pattern>` with a `patternTransform` matching the surface (floor `matrix(T*UX T*UY -T*UX T*UY 500 400)`, right wall `matrix(T T/2 0 T ...)`, left wall mirrored), so no perspective-corrected art is needed. Sizes: `FLOOR_TILE` (grid units), `WALL_TILE` (pixels). Price 2 coins each. Test: `tests/surfpattest.js`. Not done: the 16 patterned beds sheet (different bed art; its blanket themes could be made as flat tiles).
