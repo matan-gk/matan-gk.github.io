@@ -14,7 +14,7 @@ const U=await ev(()=>GU);   // grid units per old cell: the cases below are writ
 const tapCell=async(x,y,w=U,d=U)=>{const pt=await ev(([x,y,w,d])=>{const g=document.getElementById('rmR'),m=g.getScreenCTM(),ux=(x-((w/GU)>>1))*GU+(w>>1)+.5,uy=(y-((d/GU)>>1))*GU+(d>>1)+.5,sx=500+(ux-uy)*UX,sy=400+(ux+uy)*UY;return [m.a*sx+m.c*sy+m.e,m.b*sx+m.d*sy+m.f];},[x,y,w,d]);await p.mouse.click(pt[0],pt[1]);};
 
 // catalog data
-ok(await ev(()=>ROOM_CATALOG.length===83&&ROOM_CATALOG.every(c=>c.n&&(c.id.startsWith('pl')?c.p<=3:c.p<=8)&&c.p>=1&&/^assets\//.test(c.src)&&(c.base?(c.src!==c.base&&c.ref>0):!c.dc)&&c.r&&c.r[2]>0&&c.r[3]>0&&true)&&new Set(ROOM_CATALOG.map(c=>c.id)).size===83),'catalog: 83 items; plants cost 1-3; colorable ones keep their magenta original');
+ok(await ev(()=>ROOM_CATALOG.length===79&&ROOM_CATALOG.every(c=>c.n&&(c.id.startsWith('pl')?c.p<=3:c.p<=8)&&c.p>=1&&/^assets\//.test(c.src)&&(c.base?(c.src!==c.base&&c.ref>0):!c.dc)&&c.r&&c.r[2]>0&&c.r[3]>0&&true)&&new Set(ROOM_CATALOG.map(c=>c.id)).size===79),'catalog: 79 items; plants cost 1-3; colorable ones keep their magenta original');
 ok(await ev(()=>/^pl/.test(ROOM_CATALOG[0].id)&&Object.keys(ROOM_GROUPS).includes('plants')),'plants are the first group');
 // default pot is brown, original magenta
 const px=await ev(async()=>{const get=src=>new Promise(r=>{const i=new Image();i.onload=()=>{const c=document.createElement('canvas');c.width=i.naturalWidth;c.height=i.naturalHeight;const x=c.getContext('2d');x.drawImage(i,0,0);r(x.getImageData(0,0,c.width,c.height).data);};i.src=src;});
@@ -34,7 +34,7 @@ ok(rc.blue>0.9&&rc.leaf>0.97,'recolor to blue turns the pot blue and leaves the 
 // drawer: idle buttons; catalog opens with filter chips and cards
 ok(await ev(()=>/פריטים ומלאי/.test(document.querySelector('#rmDrawer [data-list="cat"]').textContent)&&!document.querySelector('#rmDrawer [data-list="stock"]')&&!/במלאי/.test(document.getElementById('rmDrawer').textContent)),'idle drawer: one list button for shop and inventory (no separate stock button, no stock count while nothing is put away)');
 await click('[data-list="cat"]');
-ok(await ev(()=>document.querySelectorAll('#rmDrawer .catcard').length===83&&document.querySelectorAll('#rmDrawer .catchips .chip').length>=4&&!!document.querySelector('#rmDrawer .catchips [data-filter=own]')),'list: 83 cards and filter chips incl. "mine"');
+ok(await ev(()=>document.querySelectorAll('#rmDrawer .catcard').length===79&&document.querySelectorAll('#rmDrawer .catchips .chip').length>=4&&!!document.querySelector('#rmDrawer .catchips [data-filter=own]')),'list: 79 cards and filter chips incl. "mine"');
 ok(await ev(()=>{const c=document.querySelector('#rmDrawer .catcard');return /1 🪙/.test(c.textContent)&&c.querySelector('img').getAttribute('src')===ROOM_CATALOG[0].src;}),'a card shows the plant picture, its name and its price');
 await click('[data-filter="plants"]');
 ok(await ev(()=>document.querySelectorAll('#rmDrawer .catcard').length===21&&document.querySelector('.chip.on').dataset.filter==='plants'),'the plants filter works');
@@ -79,7 +79,7 @@ await ev(()=>onRoomTap('thing:0'));await click('[data-away]');
 ok(await ev(()=>space.things[0].x===-1&&space.things.length===3&&!document.querySelector('[data-hit="thing:0"]')&&space.spent===2),'put away: leaves the room, stays owned, nothing refunded');
 ok(await ev(()=>!document.querySelector('#rmDrawer [data-list="stock"]')&&/1 במלאי/.test(document.querySelector('#rmDrawer [data-list="cat"]').textContent)),'the single list button counts what is put away');
 await click('[data-list="cat"]');
-ok(await ev(()=>{const own=document.querySelectorAll('#rmDrawer .catcard.owned');const st=document.querySelectorAll('#rmDrawer .catcard[data-choose]');return own.length>=1&&st.length===1&&/🎒 1/.test(st[0].textContent)&&document.querySelectorAll('#rmDrawer .catcard').length===83;}),'the list shows everything; what you own is marked, and a card with a copy put away is marked 🎒');
+ok(await ev(()=>{const own=document.querySelectorAll('#rmDrawer .catcard.owned');const st=document.querySelectorAll('#rmDrawer .catcard[data-choose]');return own.length>=1&&st.length===1&&/🎒 1/.test(st[0].textContent)&&document.querySelectorAll('#rmDrawer .catcard').length===79;}),'the list shows everything; what you own is marked, and a card with a copy put away is marked 🎒');
 await click('[data-filter=own]');
 ok(await ev(()=>{const n=document.querySelectorAll('#rmDrawer .catcard').length;return n>=1&&n<10&&[...document.querySelectorAll('#rmDrawer .catcard')].every(c=>c.classList.contains('owned'));}),'"mine" filter lists only what you own');
 await click('[data-choose]');
@@ -96,7 +96,7 @@ const cl=await ev(()=>cleanProgress({space:{earned:50,spent:0,trued:true,unlocke
 ok(cl.length===5&&cl[0].x===5*U&&cl[1].x===-1&&cl[2].x===-1&&cl[3].x===-1&&cl[4].x===-1&&!cl.some(t=>t.k==='nope'),'bad things are dropped; double, blocked and off-floor cells go to the stock: '+JSON.stringify(cl));
 const mc=await ev(()=>roomMaxCost());
 const pcs=await ev(()=>ROOM_PATTERNS.reduce((a,q)=>a+q.p,0));   // every pattern once: bought once, usable everywhere
-ok(mc===18+14+17+297+25*19+pcs,'max-out cost = 86 (bed, window, 3 surfaces sharing one set of colours (17)) + 83 floor items (297) + 25 colorable parts x 19 + 2 for the bed blanket pattern = 860: '+mc);
+ok(mc===18+14+17+278+25*19+pcs,'max-out cost = 86 (bed, window, 3 surfaces sharing one set of colours (17)) + 79 floor items (278) + 25 colorable parts x 19 + 2 for the bed blanket pattern = 860: '+mc);
 // bed footprint: 3 x 4 cells, and the code tracks it that way
 ok(await ev(()=>{const cnt=l=>{let n=0,all=true;for(let y=0;y<ROOM_CELLS;y++)for(let x=0;x<ROOM_CELLS;x++)if(roomBlocked(x,y,l)){n++;if(!(x<bedFp(l)[0]&&y<bedFp(l)[1]))all=false;}return [n,all];};return JSON.stringify([1,2,3,4,5].map(cnt))===JSON.stringify([[12,true],[12,true],[12,true],[9,true],[12,true]].map(([n,a])=>[n*GU*GU,a]));}),'the bed blocks its own footprint at the back corner: 3 x 4 = 12 cells for levels 1-3 and 5, 3 x 3 = 9 for level 4');
 // switching to a smaller bed frees cells; switching back stows what is in the way
@@ -120,8 +120,8 @@ await ev(()=>{RM.list=null;RM.pl={k:'pl00',i:-1,x:6,y:6};rmRedraw();renderDrawer
 ok(await ev(()=>!!RM.pl&&!RM.sel),'placing a floor item is a mode: tapping the bed does not select it');
 // ---- furniture and toys: footprints bigger than one cell (a wide screen, so the drawer does not cover the floor)
 await p.setViewportSize({width:1200,height:1000});await ev(()=>{golden=['🍪'];renderLevels();space.earned=Math.max(space.earned,100);openSpace();});await p.waitForTimeout(300);
-ok(await ev(()=>{const f=k=>[fwOf(catOf(k))/GU,fdOf(catOf(k))/GU].join('x');return ['toybox1','toybox2','toybox3','cloud','armchair','telescope'].every(k=>f(k)==='2x2')&&f('desk')==='2x4'&&f('desk_turn')==='4x2'&&f('piano')==='4x2'&&['mirror','tablet','book','unicorn','teddy','heart','star','pl00'].every(k=>f(k)==='1x1')&&['markers','lego','chess','tictac','puzzle','puzzle2','trainset','track','track2'].every(k=>f(k)===(0.5+'x'+0.5));}),'footprints: toy boxes, both couches and the telescope 2x2, desk 2x4 and its turned version 4x2, piano 4 long, the rest 1x1');
-ok(await ev(()=>['toybox1','toybox2','toybox3','armchair','heart','star','desk','desk_turn'].every(k=>catOf(k).dc&&catOf(k).base&&catOf(k).ref>0)&&['cloud','piano','teddy','unicorn'].every(k=>!catOf(k).base)),'items with magenta parts have a default color, the magenta original and a light level; the others do not');
+ok(await ev(()=>{const f=k=>[fwOf(catOf(k))/GU,fdOf(catOf(k))/GU].join('x');return ['toybox1','toybox2','toybox3','cloud','armchair','telescope'].every(k=>f(k)==='2x2')&&f('desk')==='2x4'&&fpOf(catOf('desk'),1).map(v=>v/GU).join('x')==='4x2'&&f('piano')==='4x2'&&['mirror','tablet','book','unicorn','teddy','heart','star','pl00'].every(k=>f(k)==='1x1')&&['markers','lego','chess','tictac','puzzle','puzzle2','trainset','track','track2'].every(k=>f(k)===(0.5+'x'+0.5));}),'footprints: toy boxes, both couches and the telescope 2x2, desk 2x4 (turned 4x2), piano 4 long, the rest 1x1');
+ok(await ev(()=>['toybox1','toybox2','toybox3','armchair','heart','star','desk'].every(k=>catOf(k).dc&&catOf(k).base&&catOf(k).ref>0)&&['cloud','piano','teddy','unicorn'].every(k=>!catOf(k).base)),'items with magenta parts have a default color, the magenta original and a light level; the others do not');
 const rc2=await ev(async()=>{const c=catOf('heart');const load=s=>new Promise(r=>{const i=new Image();i.onload=()=>r(i);i.src=s;});const data=i=>{const k=document.createElement('canvas');k.width=i.naturalWidth;k.height=i.naturalHeight;const x=k.getContext('2d');x.drawImage(i,0,0);return x.getImageData(0,0,k.width,k.height).data;};
   const B=data(await load(c.src)),A=data(await load(c.base)),R=data(await load(await recolorSprite(c,c.dc)));let n=0,d=0;for(let i=0;i<B.length;i+=4){if(A[i+3]<200)continue;if(Math.abs(A[i]-B[i])+Math.abs(A[i+1]-B[i+1])+Math.abs(A[i+2]-B[i+2])>24){n++;d+=Math.abs(R[i]-B[i])+Math.abs(R[i+1]-B[i+1])+Math.abs(R[i+2]-B[i+2]);}}return {n,mean:d/n/3};});
 ok(rc2.n>2000&&rc2.mean<14,'the heart cushion: recoloring with its default color reproduces the shown picture '+JSON.stringify(rc2));
@@ -149,7 +149,7 @@ await tapCell(1,6,2*U,4*U);
 ok(await ev(()=>RM.pl.x===0&&RM.pl.y===4*GU),'desk 2x4 right in front of the bed: back cell 0,4');
 await click('[data-place]');
 ok(await ev(()=>space.things[0].k==='desk'&&space.spent===6),'desk bought for 6');
-await ev(()=>{RM.list='cat';renderDrawer();});await click('[data-pick="desk_turn"]');await tapCell(6,7,4*U,2*U);
+await ev(()=>{RM.list='cat';renderDrawer();});await click('[data-pick="desk"]');await click('[data-pturn]');await tapCell(6,7,4*U,2*U);
 ok(await ev(()=>RM.pl.x===4*GU&&RM.pl.y===6*GU),'the turned desk is 4 wide, 2 deep (tap 6,7 -> back cell 4,6)');
 await click('[data-place]');
 await ev(()=>{RM.list='cat';renderDrawer();});await click('[data-pick="piano"]');await tapCell(9,0,4*U,2*U);

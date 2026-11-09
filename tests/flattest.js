@@ -14,7 +14,7 @@ ok(await ev(()=>!!ROOM_GROUPS.rugs&&partLabel&&PART_NAMES.rug==='שטיח'),'rug
 ok(await ev(()=>partKeyOf(catOf('rug_rd'))==='rug'&&partKeyOf(catOf('rug_sq2'))==='rug'&&partKeyOf(catOf('car'))==='car'),'partKeyOf uses pk when given');
 // train toys, chess, lego, puzzles and tic-tac-toe are 1x1 and solid: nothing can be placed on them; chair, telescope and costume box are 2x2
 ok(await ev(()=>['track','track2','trainset','chess','lego','puzzle','puzzle2','tictac'].every(k=>{const c=catOf(k);return fwOf(c)===1&&fdOf(c)===1&&!isFlat(c);})),'train toys, chess, lego, puzzles, tic-tac-toe: 1x1 units (small) and not flat');
-ok(await ev(()=>['chair','chair2','telescope','dressbox'].every(k=>fwOf(catOf(k))===2*GU&&fdOf(catOf(k))===2*GU)),'chair, telescope, costume box: 2x2 cells');
+ok(await ev(()=>['chair','telescope','dressbox'].every(k=>fwOf(catOf(k))===2*GU&&fdOf(catOf(k))===2*GU)),'chair, telescope, costume box: 2x2 cells');
 ok(await ev(()=>{space.things=[{k:'chess',x:6,y:6}];return !footFree(catOf('chair'),6,6,-1)&&!footFree(catOf('chair'),5,5,-1)&&footFree(catOf('chair'),7,6,-1)&&!footFree(catOf('track'),6,6,-1)&&!footFree(catOf('teddy'),6,6,-1);}),'nothing can be placed on a 1x1 game or train (a 2x2 chair next to it is fine)');
 // placement
 const r=await ev(()=>{
