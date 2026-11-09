@@ -34,6 +34,20 @@ Walls and floor are drawn by the game (colors from the paintbrush palette; patte
 4. Ask Gemini to also send a second version of the sheet with the footprint diamond drawn in cyan under each item: it helps to see its drift, and the game ignores it.
 The game's `groundtest` re-measures every picture from its pixels, so art that drifts is caught when it is added.
 
+## G. Back views, for turning items (see `docs/ROTATION_PLAN.md`)
+The game mirrors every picture for the second facing; for turning an item all the way round it also needs the BACK view: the same object turned 180 degrees about its vertical axis (the game mirrors that for the fourth facing). Attach, per request, the current pictures of the items (one reference image per item, each cut from the game, front-right facing) and the `room_template.png`.
+
+Prompt (fill in the item list, one batch per request; sheet of 3 columns x N rows, in the order of the attached reference images):
+
+"I attach reference pictures of children's-room items, each drawn facing front-right, and the isometric grid template. For EACH reference picture draw the SAME object turned 180 degrees around its vertical axis, so that I see it from the opposite side: what was its front is now facing away from the viewer, and I see its back and the opposite sides. Keep everything else identical to its reference: the same camera (isometric 2:1, every horizontal edge at exactly 26.57 degrees, no perspective convergence), the same scale, the same footprint diamond with the same four feet/corners on the same pixels (so the back view can replace the front view without the item moving), the same height, the same colours, outline thickness, sticker style, soft lighting from the top-left, the right side a little darker than the left, plain white background, no ground shadow, 15% empty margin, nothing cropped. Do not add or remove parts that exist on both sides (legs, handles, lids); show what the back really looks like (a plain back panel, the back of the backrest, the other end of a slide, the back of a laptop screen, the reverse of the frame and so on); keep the back simple and symmetric, with no text, no logos, no one-sided details. Parts that are painted flat magenta (#FF00FF) in the reference stay flat magenta with their shading in lighter and darker magenta; linen that is plain white in the reference stays plain white; do not use magenta anywhere else. One item per cell, centred on its diamond, in the same order as the references. Also send the same sheet again with each footprint diamond drawn in cyan under the item (for my checking only)."
+
+Batches (each item's footprint in tiles of the template's 10 x 10 floor, as the game uses it):
+- A, furniture (14): chair 2x2, armchair 2x2, cloud sofa 2x2, writing desk 2x4, wardrobe 2x1, big wardrobe 2x1, bookshelf 2x1, piano 4x2, dollhouse 2x2, standing mirror 1x1, toy box 2x2 (three versions), costume box 2x2.
+- B, bed levels 1-5 (5): all 3x4 (level 4: 3x3), the four feet on the same pixels as the front view of the same level; the blanket, sheet, pillow and curtains stay plain white linen (the game cuts the masks from it), the pillow end is now toward the viewer.
+- C, play items (14): slide 1x3, low slide 1x3, big easel 1x1, easel 1x1, telescope on tripod 2x2, two laptops 1x1, drawing tablet 1x1, toy car with driver 1x1, toy car 1x1, two guitars 1x1, saxophone 1x1, magic diary 1x1.
+- D, characters (6): monkey, two bunnies, teddy, unicorn doll, ladybug (all 1x1): the back of the character, no face.
+Ask for 4 to 6 items per sheet (for example batch A as three sheets) so the pictures stay large; the order of the cells must follow the order of the attached references.
+
 ## What the sheets you sent are good for
 - **Furniture sheet 1 (isometric beds, tables, desk, mirror, telescope):** the right camera. Facings differ between items (some face left); redraw with "all face front-right".
 - **Furniture sheet 2 (front-on):** a different projection; usable only for wall items (windows, shelves, mirror), not for floor items.
