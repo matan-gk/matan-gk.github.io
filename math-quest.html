@@ -1209,7 +1209,7 @@ const PAT_PARTS = ['wl','wr','fl','bed.blanket','bed.sheet','bed.curtain'];
 const ROOM_PATTERNS = [{id:'unicorn', n:'חד קרן וקשת', src:'assets/17d0ef6255cb.webp', sc:.36, p:2, parts:PAT_PARTS},
   {id:'checkblue', n:'משבצות כחולות', src:'assets/40aa6d9a5b68.webp', sc:.45, p:2, parts:PAT_PARTS},
   {id:'moons', n:'ירח וכוכבים', src:'assets/16c53308210f.webp', sc:.45, p:2, parts:PAT_PARTS},
-  {id:'parquet', n:'פרקט', src:'assets/3814e4123f04.webp', sc:.45, p:2, parts:PAT_PARTS},
+  {id:'parquet', n:'פרקט', src:'assets/3814e4123f04.webp', sc:.45, p:2, parts:['fl']},
   {id:'pastelclouds', n:'ענני פסטל', src:'assets/3f8cdd3b28b6.webp', sc:.45, p:2, parts:PAT_PARTS},
   {id:'planes', n:'מטוסי נייר', src:'assets/6625b17efe6f.webp', sc:.45, p:2, parts:PAT_PARTS},
   {id:'hexpastel', n:'משושים צבעוניים', src:'assets/46bf783806a7.webp', sc:.45, p:2, parts:PAT_PARTS},
@@ -1223,19 +1223,19 @@ const ROOM_PATTERNS = [{id:'unicorn', n:'חד קרן וקשת', src:'assets/17d0
   {id:'paws', n:'כפות וחתולים', src:'assets/7760bba7da1c.webp', sc:.45, p:2, parts:PAT_PARTS},
   {id:'flowers', n:'פרחים', src:'assets/446e3c31e64f.webp', sc:.45, p:2, parts:PAT_PARTS},
   {id:'dots', n:'נקודות צבעוניות', src:'assets/f1056fcabd24.webp', sc:.45, p:2, parts:PAT_PARTS},
-  {id:'bluewood', n:'פרקט כחול', src:'assets/5f70599fdcb9.webp', sc:.45, p:2, parts:PAT_PARTS},
+  {id:'bluewood', n:'פרקט כחול', src:'assets/5f70599fdcb9.webp', sc:.45, p:2, parts:['fl']},
   {id:'shapes', n:'צורות', src:'assets/783b5749a9ed.webp', sc:.45, p:2, parts:PAT_PARTS},
   {id:'pstars', n:'כוכבי פסטל', src:'assets/8fbc7e9ce635.webp', sc:.45, p:2, parts:PAT_PARTS},
   {id:'graycloud', n:'עננים אפורים', src:'assets/d3174e70581b.webp', sc:.45, p:2, parts:PAT_PARTS},
   {id:'suns', n:'שמשות', src:'assets/fc954c3ecca4.webp', sc:.45, p:2, parts:PAT_PARTS},
-  {id:'tedwood', n:'פרקט דובים', src:'assets/71df2d7a1e9c.webp', sc:.45, p:2, parts:PAT_PARTS},
+  {id:'tedwood', n:'פרקט דובים', src:'assets/71df2d7a1e9c.webp', sc:.45, p:2, parts:['fl']},
   {id:'fish', n:'דגים', src:'assets/2beee54273a7.webp', sc:.45, p:2, parts:PAT_PARTS},
   {id:'greentile', n:'אריחים ירוקים', src:'assets/f18bacd425b3.webp', sc:.45, p:2, parts:PAT_PARTS},
   {id:'hearts', n:'לבבות ורודים', src:'assets/b997362ff78d.webp', sc:.45, p:2, parts:PAT_PARTS},
-  {id:'carwood', n:'פרקט מכוניות', src:'assets/f79e96b8e87c.webp', sc:.45, p:2, parts:PAT_PARTS},
+  {id:'carwood', n:'פרקט מכוניות', src:'assets/f79e96b8e87c.webp', sc:.45, p:2, parts:['fl']},
   {id:'night', n:'לילה', src:'assets/7ed9bfaf9bac.webp', sc:.45, p:2, parts:PAT_PARTS},
   {id:'flowertile', n:'אריחי פרחים', src:'assets/27173ba7359d.webp', sc:.45, p:2, parts:PAT_PARTS},
-  {id:'treewood', n:'פרקט עצים', src:'assets/c9e127d7f8c4.webp', sc:.45, p:2, parts:PAT_PARTS},
+  {id:'treewood', n:'פרקט עצים', src:'assets/c9e127d7f8c4.webp', sc:.45, p:2, parts:['fl']},
   {id:'skyclouds', n:'עננים בשמיים', src:'assets/e826da1ce50c.webp', sc:.45, p:2, parts:PAT_PARTS},
   {id:'pdots', n:'נקודות פסטל', src:'assets/5f01a5a503fa.webp', sc:.45, p:2, parts:PAT_PARTS},
   {id:'grid', n:'משבצות רשת', src:'assets/9d3bc6edf7e1.webp', sc:.45, p:2, parts:PAT_PARTS},
@@ -1266,6 +1266,7 @@ const ROOM_PATTERNS = [{id:'unicorn', n:'חד קרן וקשת', src:'assets/17d0
   {id:'b_unicorns', n:'חד קרנים', src:'assets/a9b0f42951f2.webp', sc:.4, p:2, parts:PAT_PARTS},
   {id:'b_butterflies', n:'פרפרים', src:'assets/72bb148377eb.webp', sc:.4, p:2, parts:PAT_PARTS}
 ];
+const patOn = (o, k) => ROOM_PATTERNS.some(q=>'p:'+q.id===o && q.parts.includes(k));   // is this pattern offered on this surface or bed part (wood floors: the floor only)
 const optOk = v => v==='d' || (Number.isInteger(v) && v>=0 && v<ROOM_COLORS.length) || (typeof v==='string' && ROOM_PATTERNS.some(q=>'p:'+q.id===v));
 const optPrice = v => typeof v==='number' ? ROOM_COLORS[v].p : ROOM_PATTERNS.find(q=>'p:'+q.id===v).p;
 const PART_KEY_RX = /^[a-z0-9]+(\.[a-z]+)?$/;
@@ -1462,13 +1463,13 @@ function spaceClean(sp, gold, legacy){
   const shared = [...new Set(Object.values(own).flat())].sort((a,b)=>typeof a===typeof b ? (typeof a==='number' ? a-b : (a<b?-1:1)) : (typeof a==='number' ? -1 : 1));
   for(const k in ROOM_DEFAULT) own[k] = shared.slice();   // the walls and the floor share the colours they bought
   const po = {}, bc = {};   // po: the options bought for each part key; bc: the bed's chosen option per part
-  if(sp.po && typeof sp.po==='object') for(const k of Object.keys(sp.po).slice(0,80)){ if(PART_KEY_RX.test(k) && Array.isArray(sp.po[k])) po[k] = [...new Set(sp.po[k].filter(v=>v!=='d' && optOk(v)))]; }
+  if(sp.po && typeof sp.po==='object') for(const k of Object.keys(sp.po).slice(0,80)){ if(PART_KEY_RX.test(k) && Array.isArray(sp.po[k])) po[k] = [...new Set(sp.po[k].filter(v=>v!=='d' && optOk(v) && (typeof v!=='string' || patOn(v,k))))]; }
   for(const n of ['blanket','sheet','pillow','curtain']){ const v = sp.bc && sp.bc[n]; if(v!=='d' && optOk(v) && (po['bed.'+n]||[]).includes(v)) bc[n] = v; }
   {   // a pattern is bought once and can go anywhere it is offered: the walls, the floor and the bed's parts
     const isPat = v => typeof v==='string', patKeys = PAT_PARTS.filter(k=>k.startsWith('bed.'));
     const pats = [...new Set([...shared.filter(isPat), ...patKeys.flatMap(k=>(po[k]||[]).filter(isPat))])].sort(), cols = shared.filter(v=>!isPat(v));
     for(const k in ROOM_DEFAULT) own[k] = [...cols, ...pats];
-    if(pats.length) for(const k of patKeys) po[k] = [...new Set([...(po[k]||[]), ...pats])];
+    for(const k of patKeys){ const a = pats.filter(o=>patOn(o,k)); if(a.length) po[k] = [...new Set([...(po[k]||[]), ...a])]; }
   }
   const lv = {};
   for(const id in ROOM_ITEMS){ const v = sp.lv && sp.lv[id]; lv[id] = (Number.isInteger(v) && v>=1 && v<=roomMax(id)) ? v : 1; }
@@ -2343,7 +2344,7 @@ function cloudProfileFromDoc(C, helpers){
 // ===== CLOUD (Google sign-in, cloud progress, problem reports) =====
 // Local-first: the game always works from this device's storage. The cloud is a mirror, so no internet / no account / no quota never blocks play.
 // Everything here is off while CLOUD_CONFIG is null. See firebase/SETUP.md for how to create the (free) Firebase project and paste its settings below.
-const APP_VERSION = '2026.11.08l';       // keep equal to VERSION in sw.js (a test checks it)
+const APP_VERSION = '2026.11.08m';       // keep equal to VERSION in sw.js (a test checks it)
 const CLOUD_CONFIG = {apiKey:"AIzaSyAlq_TJNGvWPJpUrpbdq_hkAoURydqMzm0", authDomain:"learning-quest-1.firebaseapp.com", projectId:"learning-quest-1", appId:"1:98931179722:web:78fb00084ccba3efb53433"};   // e.g. {apiKey:'...', authDomain:'xxx.firebaseapp.com', projectId:'xxx', appId:'...'}
 const CLOUD_LIMITS = {
   pushDelayMs: 60000,          // at most one upload per profile per minute while playing
@@ -5231,10 +5232,10 @@ const UX = 50/GU, UY = 25/GU;   // one grid unit on screen
 const gx2s = (x,y) => [500+(x-y)*UX, 400+(x+y)*UY];
 const pts = a => a.map(p=>p.join(',')).join(' ');
 const surfFill = (idx, k) => typeof idx==='string' ? `url(#rmP_${k})` : ROOM_COLORS[idx].h==='rainbow' ? 'url(#rmRainbow)' : ROOM_COLORS[idx].h;
-// a pattern on a surface: one tile (the mirrored 2x2 picture) is SURF_TILE grid units on the floor, WALL_TILE pixels on a wall, laid in the surface's own perspective
+// a pattern on a surface: one tile (the mirrored 2x2 picture) is FLOOR_TILE grid units on the floor, WALL_TILE pixels on a wall, laid in the surface's own perspective
 const FLOOR_TILE = 12, WALL_TILE = 440;
 const surfPatDef = (k, idx) => { if(typeof idx!=='string') return ''; const q = ROOM_PATTERNS.find(z=>'p:'+z.id===idx), T = k==='fl' ? FLOOR_TILE : WALL_TILE,
-  m = k==='fl' ? [T*UX, T*UY, -T*UX, T*UY] : k==='wr' ? [T, T/2, 0, T] : [-T, T/2, 0, T];
+  m = k==='fl' ? [T*UX, T*UY, -T*UX, T*UY] : k==='wr' ? [T, T/2, 0, T] : [T, -T/2, 0, T];   // the left wall carries on from the right wall round the corner, as one wallpaper (same direction, not mirrored)
   return `<pattern id="rmP_${k}" width="1" height="1" patternUnits="userSpaceOnUse" patternTransform="matrix(${m.join(' ')} 500 400)"><image href="${q.src}" width="1" height="1" preserveAspectRatio="none"/></pattern>`; };
 // room item pictures: w,h in room units, (ax,ay) = the point of the picture that sits on the floor corner (bed) or the sill centre (window)
 const ROOM_ART = {bed:[{src:'assets/f079c2224879.webp',mask:'assets/d7e337ab5221.webp',fp:[3,4],r:[-206.3,-167.9,363.6,338.3]},{src:'assets/8c9bc6b7b540.webp',mask:'assets/76a3893f6ba5.webp',fp:[3,4],r:[-209.1,-166.4,367.7,336.8]},{src:'assets/fc72ab74c218.webp',mask:'assets/2055d7d914ad.webp',fp:[3,4],r:[-212.7,-240.0,372.1,412.2]},{src:'assets/4312fd9e048e.webp',mask:'assets/68b62a12908f.webp',fp:[3,3],r:[-150.9,-324.7,320.3,470.1]},{src:'assets/a0f555cc03e3.webp',mask:'assets/914ea6ebcbdc.webp',fp:[3,4],r:[-168.6,-355.4,320.4,503.1]}],
@@ -5334,7 +5335,7 @@ const hasParts = c => !!c.base;
 const bedParts = lv => lv>=4 ? ['blanket','sheet','pillow','curtain'] : ['blanket','sheet','pillow'];
 const partKeys = () => ['bed.blanket','bed.sheet','bed.pillow','bed.curtain', ...new Set(ROOM_CATALOG.filter(hasParts).map(partKeyOf))];
 // a bought pattern is owned everywhere (walls, floor, bed parts); a colour is shared by the walls and the floor
-const sharePattern = o => { if(typeof o!=='string') return; for(const k in ROOM_DEFAULT) if(!space.own[k].includes(o)) space.own[k].push(o); for(const k of PAT_PARTS.filter(k=>k.startsWith('bed.'))){ const a = space.po[k] = space.po[k] || []; if(!a.includes(o)) a.push(o); } };
+const sharePattern = o => { if(typeof o!=='string') return; for(const k in ROOM_DEFAULT) if(!space.own[k].includes(o)) space.own[k].push(o); for(const k of PAT_PARTS.filter(k=>k.startsWith('bed.'))){ if(!patOn(o,k)) continue; const a = space.po[k] = space.po[k] || []; if(!a.includes(o)) a.push(o); } };
 const partOwned = (key, o) => o==='d' || (space.po[key]||[]).includes(o);
 const optsFor = key => [...ROOM_COLORS.map((c,i)=>i), ...ROOM_PATTERNS.filter(q=>q.parts.includes(key)).map(q=>'p:'+q.id)];
 const isPat = o => typeof o==='string' && o!=='d';

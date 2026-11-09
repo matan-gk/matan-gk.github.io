@@ -16,7 +16,7 @@ const nWall=await ev(()=>document.querySelectorAll('#rmDrawer [data-col]').lengt
 ok(nWall===await ev(()=>ROOM_COLORS.length+ROOM_PATTERNS.filter(q=>q.parts.includes('wl')).length),'the wall palette has the colours and its patterns');
 await ev(()=>document.querySelector('[data-col="p:skyclouds"]').click());
 ok(await ev(()=>RM.pv&&RM.pv.idx==='p:skyclouds'&&!!document.querySelector('#rmSvg pattern#rmP_wl')&&document.querySelector('#rmR [data-hit="surf:wl"] polygon').getAttribute('fill')==='url(#rmP_wl)'),'tapping a new pattern previews it on the wall');
-ok(await ev(()=>/matrix\(-440 220 0 440 500 400\)/.test(document.querySelector('#rmP_wl').getAttribute('patternTransform'))),'laid in the left wall\'s perspective');
+ok(await ev(()=>/matrix\(440 -220 0 440 500 400\)/.test(document.querySelector('#rmP_wl').getAttribute('patternTransform'))),'laid in the left wall\'s perspective, carrying on from the right wall');
 const bal=await ev(()=>tokenBalance());
 await ev(()=>document.querySelector('[data-buy]').click());
 ok(await ev(()=>space.surf.wl==='p:skyclouds'&&space.own.wl.includes('p:skyclouds')),'bought');
@@ -26,7 +26,7 @@ ok(await ev(()=>/matrix\(440 220 0 440 500 400\)/.test(document.querySelector('#
 await ev(()=>{RM.sel={t:'surf',k:'fl'};rmRedraw();renderDrawer();document.querySelector('[data-col="p:parquet"]').click();document.querySelector('[data-buy]').click();});
 ok(await ev(()=>/matrix\(300 150 -300 150 500 400\)/.test(document.querySelector('#rmP_fl').getAttribute('patternTransform'))),'the floor pattern follows the floor\'s axes');
 // ...and with the bed's parts: buy once, use everywhere
-ok(await ev(()=>partOwned('bed.blanket','p:parquet')&&partOwned('bed.sheet','p:skyclouds')&&partOwned('bed.curtain','p:balloons')),'a pattern bought for a wall or the floor is owned on the bed too');
+ok(await ev(()=>!partOwned('bed.blanket','p:parquet')&&partOwned('bed.sheet','p:skyclouds')&&partOwned('bed.curtain','p:balloons')),'a pattern bought for a wall or the floor is owned on the bed too (not the wood floors)');
 await ev(()=>{RM.sel={t:'item',id:'bed'};rmRedraw();renderDrawer();});
 // buy a bed pattern through the real flow
 await ev(()=>{space.lv.bed=1;RM.sel={t:'item',id:'bed'};renderDrawer();document.querySelector('#rmDrawer [data-part=blanket]').click();});
@@ -42,7 +42,8 @@ const b2=await ev(()=>tokenBalance());
 await ev(()=>{document.querySelector('[data-col="p:parquet"]').click();});
 ok(await ev(()=>space.surf.fl==='p:parquet')&&await ev(()=>tokenBalance())===b2,'an owned pattern switches for free');
 // bed parts
-ok(await ev(()=>PAT_PARTS.every(k=>ROOM_PATTERNS.every(q=>q.parts.includes(k)))&&optsFor('bed.blanket').includes('p:parquet')&&optsFor('bed.blanket').includes('p:b_dinos')),'every pattern is offered on the walls, the floor and the bed');
+ok(await ev(()=>{const wood=['parquet','bluewood','tedwood','carwood','treewood'];return PAT_PARTS.every(k=>ROOM_PATTERNS.filter(q=>!wood.includes(q.id)).every(q=>q.parts.includes(k)))&&wood.every(i=>ROOM_PATTERNS.find(q=>q.id===i).parts.join()==='fl')&&optsFor('bed.blanket').includes('p:b_dinos')&&!optsFor('bed.blanket').includes('p:parquet');}),'every pattern is offered on the walls, the floor and the bed, except the wood floors (floor only)');
+ok(await ev(()=>{const s=spaceClean({earned:1,surf:{wl:'p:parquet'},own:{fl:['p:parquet']},po:{'bed.blanket':['p:parquet','p:b_dinos']}},[],0);return s.surf.wl===ROOM_DEFAULT.wl&&!s.po['bed.blanket'].includes('p:parquet')&&s.po['bed.blanket'].includes('p:b_dinos')?true:JSON.stringify([s.surf.wl,s.po]);}),'a wood floor is refused on a wall and on the bed');
 // what was bought for one wall or the floor is owned on all three
 ok(await ev(()=>['wl','wr','fl'].every(k=>space.own[k].includes('p:skyclouds')&&space.own[k].includes('p:balloons')&&space.own[k].includes('p:parquet'))),'a pattern bought for one surface is owned on all three');
 await ev(()=>{RM.sel={t:'surf',k:'wr'};rmRedraw();renderDrawer();});
@@ -54,7 +55,7 @@ ok(await ev(()=>space.own.wl.includes(9)&&space.own.wr.includes(9)),'colours are
 // save and load
 const rt=await ev(()=>{const s=spaceClean(JSON.parse(JSON.stringify(space)),[],0);return [s.surf.wl,s.surf.wr,s.surf.fl,s.own.fl.join()].join('|');});
 ok(rt.startsWith('p:skyclouds|p:skyclouds|9|')&&rt.includes('p:parquet'),'patterns survive saving and loading '+rt);
-ok(await ev(()=>{const s=spaceClean({earned:1,surf:{wl:'p:parquet',wr:'p:nonsense',fl:7}},[],0);return s.surf.wl==='p:parquet'&&s.surf.wr===ROOM_DEFAULT.wr&&s.surf.fl===7;}),'any pattern may be on any surface; an unknown pattern is refused');
+ok(await ev(()=>{const s=spaceClean({earned:1,surf:{wl:'p:skyclouds',wr:'p:nonsense',fl:7}},[],0);return s.surf.wl==='p:skyclouds'&&s.surf.wr===ROOM_DEFAULT.wr&&s.surf.fl===7;}),'any pattern may be on any surface; an unknown pattern is refused');
 ok(await ev(()=>roomMaxCost()>0),'the total price still adds up');
 ok(errs.length===0,'no page errors '+errs.join('|'));
 await b.close();process.exit(f?1:0);})();
