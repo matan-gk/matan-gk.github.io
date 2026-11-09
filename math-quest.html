@@ -2352,7 +2352,7 @@ function cloudProfileFromDoc(C, helpers){
 // ===== CLOUD (Google sign-in, cloud progress, problem reports) =====
 // Local-first: the game always works from this device's storage. The cloud is a mirror, so no internet / no account / no quota never blocks play.
 // Everything here is off while CLOUD_CONFIG is null. See firebase/SETUP.md for how to create the (free) Firebase project and paste its settings below.
-const APP_VERSION = '2026.11.09a';       // keep equal to VERSION in sw.js (a test checks it)
+const APP_VERSION = '2026.11.09b';       // keep equal to VERSION in sw.js (a test checks it)
 const CLOUD_CONFIG = {apiKey:"AIzaSyAlq_TJNGvWPJpUrpbdq_hkAoURydqMzm0", authDomain:"learning-quest-1.firebaseapp.com", projectId:"learning-quest-1", appId:"1:98931179722:web:78fb00084ccba3efb53433"};   // e.g. {apiKey:'...', authDomain:'xxx.firebaseapp.com', projectId:'xxx', appId:'...'}
 const CLOUD_LIMITS = {
   pushDelayMs: 60000,          // at most one upload per profile per minute while playing
@@ -5605,6 +5605,7 @@ function renderDrawerBody(){
       + `<button type="button" class="btn ghost" data-close="1">סגירה</button>`;
   }
 }
+const GHOST_MS = 600;   // how long after a touch on the room a click on the drawer is taken to be the same touch
 function onRoomTap(hit, e){
   if(RM.pl && RM.pl.fx){   // choosing where the bed or the window goes
     const pl = RM.pl;
@@ -5691,13 +5692,14 @@ function onDrawerClick(e){
 function spaceInit(){
   const ov = document.getElementById('spaceView');
   document.getElementById('spaceBack').onclick = closeSpace;
-  ov.addEventListener('click', e=>{ if(e.target.closest('#rmDrawer')) onDrawerClick(e); const z=e.target.closest('.rmz'); if(z){ const d=+z.dataset.z; if(d===0){RM.k=1;RM.tx=0;RM.ty=0;rmApply();} else rmZoomAt(RM.k*(d>0?1.4:1/1.4), RM.W/2, RM.H/2); } });
+  ov.addEventListener('click', e=>{ if(e.target.closest('#rmDrawer')){ if(RM.tapTouch && performance.now()-RM.tapAt<GHOST_MS) return; onDrawerClick(e); }   // a touch on the room opens the drawer under the finger, and the browser then sends its click to whatever is there now: ignore it
+   const z=e.target.closest('.rmz'); if(z){ const d=+z.dataset.z; if(d===0){RM.k=1;RM.tx=0;RM.ty=0;rmApply();} else rmZoomAt(RM.k*(d>0?1.4:1/1.4), RM.W/2, RM.H/2); } });
   const ptr = new Map(); let moved = false, last = null, pinch = 0, startHit = null;
   ov.addEventListener('pointerdown', e=>{ const v=e.target.closest('#rmView'); if(!v) return; v.setPointerCapture && v.setPointerCapture(e.pointerId); ptr.set(e.pointerId,[e.clientX,e.clientY]); moved=false; startHit=(e.target.closest('[data-hit]')||{dataset:{}}).dataset.hit||null; if(ptr.size===2){ const [a,b]=[...ptr.values()]; pinch=Math.hypot(a[0]-b[0],a[1]-b[1]); } last=[e.clientX,e.clientY]; });
   ov.addEventListener('pointermove', e=>{ if(!ptr.has(e.pointerId)) return; const old=ptr.get(e.pointerId); ptr.set(e.pointerId,[e.clientX,e.clientY]);
     if(ptr.size===2){ const [a,b]=[...ptr.values()], d=Math.hypot(a[0]-b[0],a[1]-b[1]); if(pinch){ const m=rmVB({clientX:(a[0]+b[0])/2,clientY:(a[1]+b[1])/2}); rmZoomAt(RM.k*d/pinch, m[0], m[1]); } pinch=d; moved=true; return; }
     const dx=e.clientX-old[0], dy=e.clientY-old[1]; if(!moved && Math.hypot(e.clientX-last[0],e.clientY-last[1])<8) return; moved=true; const s=rmVB(e)[2]; rmPan(dx*s, dy*s); });
-  const up = e=>{ if(!ptr.has(e.pointerId)) return; ptr.delete(e.pointerId); if(ptr.size<2) pinch=0; if(!moved && ptr.size===0) onRoomTap(startHit, e); };
+  const up = e=>{ if(!ptr.has(e.pointerId)) return; ptr.delete(e.pointerId); if(ptr.size<2) pinch=0; if(!moved && ptr.size===0){ RM.tapAt = performance.now(); RM.tapTouch = e.pointerType!=='mouse'; onRoomTap(startHit, e); } };
   ov.addEventListener('pointerup', up); ov.addEventListener('pointercancel', e=>{ ptr.delete(e.pointerId); pinch=0; });
   ov.addEventListener('wheel', e=>{ if(!e.target.closest('#rmView')) return; e.preventDefault(); const m=rmVB(e); rmZoomAt(RM.k*(e.deltaY<0?1.15:1/1.15), m[0], m[1]); }, {passive:false});
 }
