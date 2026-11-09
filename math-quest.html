@@ -1203,7 +1203,70 @@ const ROOM_COLORS = [
 // ===== colorable parts (step 4): the bed's blanket, sheet, pillow and curtains; the pot of every plant; the colored surface of a furniture item =====
 // an option is 'd' (the original picture), a colour index into ROOM_COLORS, or 'p:<id>' for a pattern. A part is bought per option, like the walls; owned options switch for free.
 const PART_NAMES = {blanket:'שמיכה', sheet:'סדין', pillow:'כרית', curtain:'וילונות', pot:'עציץ', dollhouse:'גג', wardrobe:'ארון', chair:'כיסא', slide:'מגלשה', track:'רכבת', guitar:'גיטרה', rug:'שטיח', dressbox:'ארגז', car:'מכונית', laptop:'מחשב', monkey:'קוף', ladybug:'חיפושית', bunny:'ארנב'};
-const ROOM_PATTERNS = [{id:'unicorn', n:'חד קרן וקשת', src:'assets/17d0ef6255cb.webp', sc:.36, p:2, parts:['bed.blanket']}];   // sc = sprite pixels per tile pixel; parts = where the pattern is offered
+// patterns: every pattern can go on the walls, the floor and the bed's blanket, sheet and curtain, and is bought once for all of them. sc = sprite pixels per tile pixel (bed parts); parts = where the pattern is offered (wl/wr/fl = the walls and the floor, bed.* = the bed's parts).
+// The tiles after the unicorn are mirrored 2x2 so that they repeat without a seam; on the walls and floor they are laid in perspective (SVG pattern transform)
+const PAT_PARTS = ['wl','wr','fl','bed.blanket','bed.sheet','bed.curtain'];
+const ROOM_PATTERNS = [{id:'unicorn', n:'חד קרן וקשת', src:'assets/17d0ef6255cb.webp', sc:.36, p:2, parts:PAT_PARTS},
+  {id:'checkblue', n:'משבצות כחולות', src:'assets/40aa6d9a5b68.webp', sc:.45, p:2, parts:PAT_PARTS},
+  {id:'moons', n:'ירח וכוכבים', src:'assets/16c53308210f.webp', sc:.45, p:2, parts:PAT_PARTS},
+  {id:'parquet', n:'פרקט', src:'assets/3814e4123f04.webp', sc:.45, p:2, parts:['fl']},
+  {id:'pastelclouds', n:'ענני פסטל', src:'assets/3f8cdd3b28b6.webp', sc:.45, p:2, parts:PAT_PARTS},
+  {id:'planes', n:'מטוסי נייר', src:'assets/6625b17efe6f.webp', sc:.45, p:2, parts:PAT_PARTS},
+  {id:'hexpastel', n:'משושים צבעוניים', src:'assets/46bf783806a7.webp', sc:.45, p:2, parts:PAT_PARTS},
+  {id:'stripes', n:'פסים אפורים', src:'assets/8f00708a0e42.webp', sc:.45, p:2, parts:PAT_PARTS},
+  {id:'balloons', n:'בלונים קטנים', src:'assets/8374678005ff.webp', sc:.45, p:2, parts:PAT_PARTS},
+  {id:'safari', n:'ספארי', src:'assets/bdaabdefd1ef.webp', sc:.45, p:2, parts:PAT_PARTS},
+  {id:'checkpink', n:'משבצות ורודות', src:'assets/31ccaf7b7c49.webp', sc:.45, p:2, parts:PAT_PARTS},
+  {id:'abcblocks', n:'קוביות אותיות', src:'assets/45886241f07f.webp', sc:.45, p:2, parts:PAT_PARTS},
+  {id:'vehicles', n:'כלי תחבורה', src:'assets/2e58d3776906.webp', sc:.45, p:2, parts:PAT_PARTS},
+  {id:'hexblue', n:'משושים כחולים', src:'assets/9a64a1515d55.webp', sc:.45, p:2, parts:PAT_PARTS},
+  {id:'paws', n:'כפות וחתולים', src:'assets/7760bba7da1c.webp', sc:.45, p:2, parts:PAT_PARTS},
+  {id:'flowers', n:'פרחים', src:'assets/446e3c31e64f.webp', sc:.45, p:2, parts:PAT_PARTS},
+  {id:'dots', n:'נקודות צבעוניות', src:'assets/f1056fcabd24.webp', sc:.45, p:2, parts:PAT_PARTS},
+  {id:'bluewood', n:'פרקט כחול', src:'assets/5f70599fdcb9.webp', sc:.45, p:2, parts:['fl']},
+  {id:'shapes', n:'צורות', src:'assets/783b5749a9ed.webp', sc:.45, p:2, parts:PAT_PARTS},
+  {id:'pstars', n:'כוכבי פסטל', src:'assets/8fbc7e9ce635.webp', sc:.45, p:2, parts:PAT_PARTS},
+  {id:'graycloud', n:'עננים אפורים', src:'assets/d3174e70581b.webp', sc:.45, p:2, parts:PAT_PARTS},
+  {id:'suns', n:'שמשות', src:'assets/fc954c3ecca4.webp', sc:.45, p:2, parts:PAT_PARTS},
+  {id:'tedwood', n:'פרקט דובים', src:'assets/71df2d7a1e9c.webp', sc:.45, p:2, parts:['fl']},
+  {id:'fish', n:'דגים', src:'assets/2beee54273a7.webp', sc:.45, p:2, parts:PAT_PARTS},
+  {id:'greentile', n:'אריחים ירוקים', src:'assets/f18bacd425b3.webp', sc:.45, p:2, parts:PAT_PARTS},
+  {id:'hearts', n:'לבבות ורודים', src:'assets/b997362ff78d.webp', sc:.45, p:2, parts:PAT_PARTS},
+  {id:'carwood', n:'פרקט מכוניות', src:'assets/f79e96b8e87c.webp', sc:.45, p:2, parts:['fl']},
+  {id:'night', n:'לילה', src:'assets/7ed9bfaf9bac.webp', sc:.45, p:2, parts:PAT_PARTS},
+  {id:'flowertile', n:'אריחי פרחים', src:'assets/27173ba7359d.webp', sc:.45, p:2, parts:PAT_PARTS},
+  {id:'treewood', n:'פרקט עצים', src:'assets/c9e127d7f8c4.webp', sc:.45, p:2, parts:['fl']},
+  {id:'skyclouds', n:'עננים בשמיים', src:'assets/e826da1ce50c.webp', sc:.45, p:2, parts:PAT_PARTS},
+  {id:'pdots', n:'נקודות פסטל', src:'assets/5f01a5a503fa.webp', sc:.45, p:2, parts:PAT_PARTS},
+  {id:'grid', n:'משבצות רשת', src:'assets/9d3bc6edf7e1.webp', sc:.45, p:2, parts:PAT_PARTS},
+  {id:'clover', n:'תלתן וצבעונים', src:'assets/04291cf37950.webp', sc:.45, p:2, parts:PAT_PARTS},
+  {id:'wstars', n:'כוכבים לבנים', src:'assets/766cfeac337b.webp', sc:.45, p:2, parts:PAT_PARTS},
+  {id:'hearts2', n:'לבבות קטנים', src:'assets/9266c64639e3.webp', sc:.45, p:2, parts:PAT_PARTS},
+  {id:'confetti', n:'קונפטי', src:'assets/1b6d7d54d94d.webp', sc:.45, p:2, parts:PAT_PARTS},
+  {id:'prints', n:'עקבות', src:'assets/68d519112d9d.webp', sc:.45, p:2, parts:PAT_PARTS},
+  {id:'bricks', n:'קוביות בנייה', src:'assets/d94631a04aa3.webp', sc:.45, p:2, parts:PAT_PARTS},
+  {id:'boats', n:'ספינות', src:'assets/e0a48a5f5b2d.webp', sc:.45, p:2, parts:PAT_PARTS},
+  {id:'planes2', n:'מטוסי נייר בשמיים', src:'assets/9a4ee90d64c4.webp', sc:.45, p:2, parts:PAT_PARTS},
+  {id:'mush', n:'פטריות', src:'assets/f32e9ad400d9.webp', sc:.45, p:2, parts:PAT_PARTS},
+  {id:'balloons2', n:'בלונים גדולים', src:'assets/2fa19d7a14d2.webp', sc:.45, p:2, parts:PAT_PARTS},
+  {id:'b_dinos', n:'דינוזאורים', src:'assets/98563ae1d5f6.webp', sc:.4, p:2, parts:PAT_PARTS},
+  {id:'b_racecars', n:'מכוניות מירוץ', src:'assets/013211f1b5a4.webp', sc:.4, p:2, parts:PAT_PARTS},
+  {id:'b_waves', n:'גלים ודגים', src:'assets/cc87c7ba0168.webp', sc:.4, p:2, parts:PAT_PARTS},
+  {id:'b_teddy', n:'דובונים', src:'assets/28084a149ce6.webp', sc:.4, p:2, parts:PAT_PARTS},
+  {id:'b_space', n:'חלל', src:'assets/ea1f5f35b53a.webp', sc:.4, p:2, parts:PAT_PARTS},
+  {id:'b_wildflowers', n:'פרחי בר', src:'assets/55e71ee57141.webp', sc:.4, p:2, parts:PAT_PARTS},
+  {id:'b_bedclouds', n:'עננים', src:'assets/5a845c92a719.webp', sc:.4, p:2, parts:PAT_PARTS},
+  {id:'b_sunrain', n:'שמש וקשת', src:'assets/5f99ebe1677f.webp', sc:.4, p:2, parts:PAT_PARTS},
+  {id:'b_toys', n:'צעצועים', src:'assets/52b651e55cae.webp', sc:.4, p:2, parts:PAT_PARTS},
+  {id:'b_forest', n:'חיות היער', src:'assets/de0a90b90c91.webp', sc:.4, p:2, parts:PAT_PARTS},
+  {id:'b_sweets', n:'גלידות וקאפקייקס', src:'assets/0ca1fec052de.webp', sc:.4, p:2, parts:PAT_PARTS},
+  {id:'b_fruit', n:'פירות מחייכים', src:'assets/debfca55dc95.webp', sc:.4, p:2, parts:PAT_PARTS},
+  {id:'b_music', n:'כלי נגינה', src:'assets/2ea244f1054f.webp', sc:.4, p:2, parts:PAT_PARTS},
+  {id:'b_monsters', n:'מפלצות חביבות', src:'assets/657216b264db.webp', sc:.4, p:2, parts:PAT_PARTS},
+  {id:'b_unicorns', n:'חד קרנים', src:'assets/a9b0f42951f2.webp', sc:.4, p:2, parts:PAT_PARTS},
+  {id:'b_butterflies', n:'פרפרים', src:'assets/72bb148377eb.webp', sc:.4, p:2, parts:PAT_PARTS}
+];
+const patOn = (o, k) => ROOM_PATTERNS.some(q=>'p:'+q.id===o && q.parts.includes(k));   // is this pattern offered on this surface or bed part (wood floors: the floor only)
 const optOk = v => v==='d' || (Number.isInteger(v) && v>=0 && v<ROOM_COLORS.length) || (typeof v==='string' && ROOM_PATTERNS.some(q=>'p:'+q.id===v));
 const optPrice = v => typeof v==='number' ? ROOM_COLORS[v].p : ROOM_PATTERNS.find(q=>'p:'+q.id===v).p;
 const PART_KEY_RX = /^[a-z0-9]+(\.[a-z]+)?$/;
@@ -1333,8 +1396,8 @@ function roomMaxCost(){   // everything buyable in the room today (the catalog g
   let t = 0; for(const id in ROOM_ITEMS) t += ROOM_ITEMS[id].up.reduce((a,b)=>a+b,0);
   t += ROOM_CATALOG.reduce((a,c)=>a+c.p,0);   // one copy of each floor item
   const all = ROOM_COLORS.reduce((a,c)=>a+c.p,0);
-  for(const k in ROOM_DEFAULT) t += all - ROOM_COLORS[ROOM_DEFAULT[k]].p;
-  for(const k of partKeys()) t += all + ROOM_PATTERNS.filter(q=>q.parts.includes(k)).reduce((a,q)=>a+q.p,0);   // every colour and pattern of every colorable part
+  t += all - [...new Set(Object.values(ROOM_DEFAULT))].reduce((a,i)=>a+ROOM_COLORS[i].p,0) + ROOM_PATTERNS.reduce((a,q)=>a+q.p,0);   // one shared set of colours for the three surfaces, and every pattern once
+  for(const k of partKeys()) t += all;   // every colour of every colorable part
   return t;
 }
 // ---- things on furniture (phase 1: the rules and the data; nothing is drawn or tapped yet)
@@ -1391,15 +1454,23 @@ function spaceClean(sp, gold, legacy){
   if(!trued) earned = Math.max(earned, gold.length + legacy*MERGE_COST);
   const surf = {}, own = {};
   for(const k in ROOM_DEFAULT){
-    const okc = v => Number.isInteger(v) && v>=0 && v<ROOM_COLORS.length;
+    const okc = v => (Number.isInteger(v) && v>=0 && v<ROOM_COLORS.length) || (typeof v==='string' && ROOM_PATTERNS.some(q=>'p:'+q.id===v && q.parts.includes(k)));   // a colour, or a pattern offered for this surface
     const c = okc(sp.surf && sp.surf[k]) ? sp.surf[k] : ROOM_DEFAULT[k];
     const o = (Array.isArray(sp.own && sp.own[k]) ? sp.own[k] : []).filter(okc);
     [ROOM_DEFAULT[k], c].forEach(v=>{ if(!o.includes(v)) o.push(v); });
-    surf[k] = c; own[k] = [...new Set(o)].sort((a,b)=>a-b);
+    surf[k] = c; own[k] = [...new Set(o)];
   }
+  const shared = [...new Set(Object.values(own).flat())].sort((a,b)=>typeof a===typeof b ? (typeof a==='number' ? a-b : (a<b?-1:1)) : (typeof a==='number' ? -1 : 1));
+  for(const k in ROOM_DEFAULT) own[k] = shared.slice();   // the walls and the floor share the colours they bought
   const po = {}, bc = {};   // po: the options bought for each part key; bc: the bed's chosen option per part
-  if(sp.po && typeof sp.po==='object') for(const k of Object.keys(sp.po).slice(0,80)){ if(PART_KEY_RX.test(k) && Array.isArray(sp.po[k])) po[k] = [...new Set(sp.po[k].filter(v=>v!=='d' && optOk(v)))]; }
+  if(sp.po && typeof sp.po==='object') for(const k of Object.keys(sp.po).slice(0,80)){ if(PART_KEY_RX.test(k) && Array.isArray(sp.po[k])) po[k] = [...new Set(sp.po[k].filter(v=>v!=='d' && optOk(v) && (typeof v!=='string' || patOn(v,k))))]; }
   for(const n of ['blanket','sheet','pillow','curtain']){ const v = sp.bc && sp.bc[n]; if(v!=='d' && optOk(v) && (po['bed.'+n]||[]).includes(v)) bc[n] = v; }
+  {   // a pattern is bought once and can go anywhere it is offered: the walls, the floor and the bed's parts
+    const isPat = v => typeof v==='string', patKeys = PAT_PARTS.filter(k=>k.startsWith('bed.'));
+    const pats = [...new Set([...shared.filter(isPat), ...patKeys.flatMap(k=>(po[k]||[]).filter(isPat))])].sort(), cols = shared.filter(v=>!isPat(v));
+    for(const k in ROOM_DEFAULT) own[k] = [...cols, ...pats];
+    for(const k of patKeys){ const a = pats.filter(o=>patOn(o,k)); if(a.length) po[k] = [...new Set([...(po[k]||[]), ...a])]; }
+  }
   const lv = {};
   for(const id in ROOM_ITEMS){ const v = sp.lv && sp.lv[id]; lv[id] = (Number.isInteger(v) && v>=1 && v<=roomMax(id)) ? v : 1; }
   const bedLv = lv.bed || 1;
@@ -2273,7 +2344,7 @@ function cloudProfileFromDoc(C, helpers){
 // ===== CLOUD (Google sign-in, cloud progress, problem reports) =====
 // Local-first: the game always works from this device's storage. The cloud is a mirror, so no internet / no account / no quota never blocks play.
 // Everything here is off while CLOUD_CONFIG is null. See firebase/SETUP.md for how to create the (free) Firebase project and paste its settings below.
-const APP_VERSION = '2026.11.08i';       // keep equal to VERSION in sw.js (a test checks it)
+const APP_VERSION = '2026.11.08m';       // keep equal to VERSION in sw.js (a test checks it)
 const CLOUD_CONFIG = {apiKey:"AIzaSyAlq_TJNGvWPJpUrpbdq_hkAoURydqMzm0", authDomain:"learning-quest-1.firebaseapp.com", projectId:"learning-quest-1", appId:"1:98931179722:web:78fb00084ccba3efb53433"};   // e.g. {apiKey:'...', authDomain:'xxx.firebaseapp.com', projectId:'xxx', appId:'...'}
 const CLOUD_LIMITS = {
   pushDelayMs: 60000,          // at most one upload per profile per minute while playing
@@ -5156,11 +5227,16 @@ const RM_DY = 250;   // the room is drawn this far down inside the frame: the wa
 const RM = {W:1000, H:1150, k:1, tx:0, ty:0, sel:null, pv:null, pl:null, list:null, choose:null, note:null, filter:'all'};   // sel: {t:'item',id}|{t:'surf',k}|{t:'thing',i}; pv: purchase being previewed; pl: floor item being placed {k,i,x,y}; list: 'cat'|'stock'
 const topLv = id => Math.max(space.top && space.top[id] || 1, space.lv[id]);
 const effLv = id => (RM.pv && RM.pv.t==='lv' && RM.pv.id===id) ? RM.pv.to : space.lv[id];
-const effCol = k => (RM.pv && RM.pv.t==='col' && RM.pv.k===k) ? RM.pv.idx : space.surf[k];
+const effCol = k => (RM.pv && RM.pv.t==='col' && RM.pv.k===k) ? RM.pv.idx : space.surf[k];   // a colour index or a pattern 'p:id'
 const UX = 50/GU, UY = 25/GU;   // one grid unit on screen
 const gx2s = (x,y) => [500+(x-y)*UX, 400+(x+y)*UY];
 const pts = a => a.map(p=>p.join(',')).join(' ');
-const surfFill = idx => ROOM_COLORS[idx].h==='rainbow' ? 'url(#rmRainbow)' : ROOM_COLORS[idx].h;
+const surfFill = (idx, k) => typeof idx==='string' ? `url(#rmP_${k})` : ROOM_COLORS[idx].h==='rainbow' ? 'url(#rmRainbow)' : ROOM_COLORS[idx].h;
+// a pattern on a surface: one tile (the mirrored 2x2 picture) is FLOOR_TILE grid units on the floor, WALL_TILE pixels on a wall, laid in the surface's own perspective
+const FLOOR_TILE = 12, WALL_TILE = 440;
+const surfPatDef = (k, idx) => { if(typeof idx!=='string') return ''; const q = ROOM_PATTERNS.find(z=>'p:'+z.id===idx), T = k==='fl' ? FLOOR_TILE : WALL_TILE,
+  m = k==='fl' ? [T*UX, T*UY, -T*UX, T*UY] : k==='wr' ? [T, T/2, 0, T] : [T, -T/2, 0, T];   // the left wall carries on from the right wall round the corner, as one wallpaper (same direction, not mirrored)
+  return `<pattern id="rmP_${k}" width="1" height="1" patternUnits="userSpaceOnUse" patternTransform="matrix(${m.join(' ')} 500 400)"><image href="${q.src}" width="1" height="1" preserveAspectRatio="none"/></pattern>`; };
 // room item pictures: w,h in room units, (ax,ay) = the point of the picture that sits on the floor corner (bed) or the sill centre (window)
 const ROOM_ART = {bed:[{src:'assets/f079c2224879.webp',mask:'assets/d7e337ab5221.webp',fp:[3,4],r:[-206.3,-167.9,363.6,338.3]},{src:'assets/8c9bc6b7b540.webp',mask:'assets/76a3893f6ba5.webp',fp:[3,4],r:[-209.1,-166.4,367.7,336.8]},{src:'assets/fc72ab74c218.webp',mask:'assets/2055d7d914ad.webp',fp:[3,4],r:[-212.7,-240.0,372.1,412.2]},{src:'assets/4312fd9e048e.webp',mask:'assets/68b62a12908f.webp',fp:[3,3],r:[-150.9,-324.7,320.3,470.1]},{src:'assets/a0f555cc03e3.webp',mask:'assets/914ea6ebcbdc.webp',fp:[3,4],r:[-168.6,-355.4,320.4,503.1]}],
   window:[{src:'assets/ab4b2e4250e6.webp',w:210.7,h:214.9,ax:105.0,ay:210.0},{src:'assets/a725113aac4b.webp',w:226.2,h:229.1,ax:113.9,ay:224.1},{src:'assets/ea204b751610.webp',w:217.8,h:270.1,ax:109.0,ay:264.4},{src:'assets/eb3fe20bb9dd.webp',w:225.5,h:294.8,ax:112.7,ay:289.9},{src:'assets/eb13d2dccaf9.webp',w:253.1,h:311.1,ax:126.6,ay:306.1}]};
@@ -5258,6 +5334,8 @@ const partLabel = c => PART_NAMES[partKeyOf(c)] || 'הפריט';
 const hasParts = c => !!c.base;
 const bedParts = lv => lv>=4 ? ['blanket','sheet','pillow','curtain'] : ['blanket','sheet','pillow'];
 const partKeys = () => ['bed.blanket','bed.sheet','bed.pillow','bed.curtain', ...new Set(ROOM_CATALOG.filter(hasParts).map(partKeyOf))];
+// a bought pattern is owned everywhere (walls, floor, bed parts); a colour is shared by the walls and the floor
+const sharePattern = o => { if(typeof o!=='string') return; for(const k in ROOM_DEFAULT) if(!space.own[k].includes(o)) space.own[k].push(o); for(const k of PAT_PARTS.filter(k=>k.startsWith('bed.'))){ if(!patOn(o,k)) continue; const a = space.po[k] = space.po[k] || []; if(!a.includes(o)) a.push(o); } };
 const partOwned = (key, o) => o==='d' || (space.po[key]||[]).includes(o);
 const optsFor = key => [...ROOM_COLORS.map((c,i)=>i), ...ROOM_PATTERNS.filter(q=>q.parts.includes(key)).map(q=>'p:'+q.id)];
 const isPat = o => typeof o==='string' && o!=='d';
@@ -5315,11 +5393,11 @@ function fxPreviewSVG(pl){
 function roomSVG(){
   const cl = effCol('wl'), cr = effCol('wr'), cf = effCol('fl');
   const sel = (t,id) => RM.sel && RM.sel.t===t && (RM.sel.id||RM.sel.k)===id ? ' sel' : '';
-  let s = `<defs><filter id="rmBlur" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="6"/></filter><filter id="rmBlur2" x="-40%" y="-80%" width="180%" height="260%"><feGaussianBlur stdDeviation="2.5"/></filter><linearGradient id="rmRainbow" x1="0" y1="0" x2="1" y2="0.35"><stop offset="0" stop-color="#ff8f9c"/><stop offset=".17" stop-color="#ffae6e"/><stop offset=".34" stop-color="#ffe46b"/><stop offset=".5" stop-color="#8fe08a"/><stop offset=".67" stop-color="#6cc6f5"/><stop offset=".84" stop-color="#8f8cf0"/><stop offset="1" stop-color="#d48cf0"/></linearGradient></defs><g id="rmG" transform="translate(${RM.tx} ${RM.ty}) scale(${RM.k})"><g id="rmR" transform="translate(0 ${RM_DY})">`;
-  s += `<g data-hit="surf:wl" class="rmh${sel('surf','wl')}"><polygon points="0,50 500,-200 500,400 0,650" fill="${surfFill(cl)}" stroke="#5b3a2a" stroke-width="4" stroke-linejoin="round"/><polygon points="0,610 500,360 500,400 0,650" fill="#000" opacity=".08"/></g>`;
-  s += `<g data-hit="surf:wr" class="rmh${sel('surf','wr')}"><polygon points="500,-200 1000,50 1000,650 500,400" fill="${surfFill(cr)}" stroke="#5b3a2a" stroke-width="4" stroke-linejoin="round"/><polygon points="500,-200 1000,50 1000,650 500,400" fill="#000" opacity=".10"/><polygon points="500,360 1000,610 1000,650 500,400" fill="#000" opacity=".08"/></g>`;
+  let s = `<defs><filter id="rmBlur" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="6"/></filter><filter id="rmBlur2" x="-40%" y="-80%" width="180%" height="260%"><feGaussianBlur stdDeviation="2.5"/></filter><linearGradient id="rmRainbow" x1="0" y1="0" x2="1" y2="0.35"><stop offset="0" stop-color="#ff8f9c"/><stop offset=".17" stop-color="#ffae6e"/><stop offset=".34" stop-color="#ffe46b"/><stop offset=".5" stop-color="#8fe08a"/><stop offset=".67" stop-color="#6cc6f5"/><stop offset=".84" stop-color="#8f8cf0"/><stop offset="1" stop-color="#d48cf0"/></linearGradient>${surfPatDef('wl',cl)}${surfPatDef('wr',cr)}${surfPatDef('fl',cf)}</defs><g id="rmG" transform="translate(${RM.tx} ${RM.ty}) scale(${RM.k})"><g id="rmR" transform="translate(0 ${RM_DY})">`;
+  s += `<g data-hit="surf:wl" class="rmh${sel('surf','wl')}"><polygon points="0,50 500,-200 500,400 0,650" fill="${surfFill(cl,'wl')}" stroke="#5b3a2a" stroke-width="4" stroke-linejoin="round"/><polygon points="0,610 500,360 500,400 0,650" fill="#000" opacity=".08"/></g>`;
+  s += `<g data-hit="surf:wr" class="rmh${sel('surf','wr')}"><polygon points="500,-200 1000,50 1000,650 500,400" fill="${surfFill(cr,'wr')}" stroke="#5b3a2a" stroke-width="4" stroke-linejoin="round"/><polygon points="500,-200 1000,50 1000,650 500,400" fill="#000" opacity=".10"/><polygon points="500,360 1000,610 1000,650 500,400" fill="#000" opacity=".08"/></g>`;
   let grid = ''; for(let i=1;i<10;i++){ const a=gx2s(i*GU,0),b=gx2s(i*GU,ROOM_CELLS),c=gx2s(0,i*GU),d=gx2s(ROOM_CELLS,i*GU); grid += `M${a} L${b} M${c} L${d} `; }
-  s += `<g data-hit="surf:fl" class="rmh${sel('surf','fl')}"><polygon points="500,400 1000,650 500,900 0,650" fill="${surfFill(cf)}" stroke="#5b3a2a" stroke-width="4" stroke-linejoin="round"/><path d="${grid}" stroke="#5b3a2a" stroke-opacity=".16" stroke-width="2" fill="none"/></g>`;
+  s += `<g data-hit="surf:fl" class="rmh${sel('surf','fl')}"><polygon points="500,400 1000,650 500,900 0,650" fill="${surfFill(cf,'fl')}" stroke="#5b3a2a" stroke-width="4" stroke-linejoin="round"/><path d="${grid}" stroke="#5b3a2a" stroke-opacity=".16" stroke-width="2" fill="none"/></g>`;
   const pl = RM.pl, shown = effLv('bed'), wl = effLv('window'), wp = winAtFor(wl, space.fix.window), bp = bedPos(shown);
   if(wp && !(pl && pl.fx==='window')) s += `<g data-hit="item:window" class="rmh${sel('item','window')}" transform="matrix(${wp.w==='l'?-1:1} .5 0 1 500 400)">${windowSVG(wl, wp.u)}</g>`;
   const bctx = {things: space.things, lv: {...space.lv, bed: shown}, fix: space.fix}, bt = topOf('bed', bctx), ents = [];   // everything standing on the floor, sorted back to front (the bed too, with what lies on it)
@@ -5367,7 +5445,7 @@ function pvCost(){
   if(RM.pl && RM.pl.fx) return 0;
   if(RM.pl) return RM.pl.i<0 ? catOf(RM.pl.k).p : 0;
   if(!RM.pv) return 0;
-  return RM.pv.t==='lv' ? ROOM_ITEMS[RM.pv.id].up[RM.pv.to-1] : RM.pv.t==='part' ? optPrice(RM.pv.o) : ROOM_COLORS[RM.pv.idx].p;
+  return RM.pv.t==='lv' ? ROOM_ITEMS[RM.pv.id].up[RM.pv.to-1] : RM.pv.t==='part' ? optPrice(RM.pv.o) : optPrice(RM.pv.idx);
 }
 // the part pickers (step 4): a row of parts under the item's other buttons, and the palette of one part
 // the colour an item comes in is pre-purchased: shown as the brush closest to it, like the walls' starting brush (never a plain coloured square)
@@ -5481,8 +5559,11 @@ function renderDrawerBody(){
       + `<button type="button" class="btn ghost" data-close="1">סגירה</button>`;
   } else {
     const k = sel.k;
-    const br = ROOM_COLORS.map((c,i)=>{ const own = space.own[k].includes(i), cur = (pv && pv.t==='col' && pv.k===k) ? pv.idx===i : space.surf[k]===i;
-      return `<button type="button" class="brush${cur?' cur':''}${own?'':' new'}" data-col="${i}" aria-label="${c.n}${own?'':' · '+coinsTxt(c.p)}"><img src="${BRUSH_IMG[i]}" alt="">${own?'':`<span class="bp">${c.p}🪙</span>`}</button>`; }).join('');
+    const cur0 = o => (pv && pv.t==='col' && pv.k===k) ? pv.idx===o : space.surf[k]===o, own0 = o => space.own[k].includes(o);
+    const br = ROOM_COLORS.map((c,i)=>{ const own = own0(i), cur = cur0(i);
+      return `<button type="button" class="brush${cur?' cur':''}${own?'':' new'}" data-col="${i}" aria-label="${c.n}${own?'':' · '+coinsTxt(c.p)}"><img src="${BRUSH_IMG[i]}" alt="">${own?'':`<span class="bp">${c.p}🪙</span>`}</button>`; }).join('')
+      + ROOM_PATTERNS.filter(q=>q.parts.includes(k)).map(q=>{ const o = 'p:'+q.id, own = own0(o), cur = cur0(o);
+      return `<button type="button" class="brush${cur?' cur':''}${own?'':' new'}" data-col="${o}" aria-label="${q.n}${own?'':' · '+coinsTxt(q.p)}"><span class="bsw"><span class="pdot pat" style="background-image:url(${q.src})"></span></span>${own?'':`<span class="bp">${q.p}🪙</span>`}</button>`; }).join('');
     d.innerHTML = head(`צבע ${ROOM_SURF_TO[k]}`) + `<div class="brushes">${br}</div>` + (pv ? buy : `<div class="rmsh-s">צבע שכבר נקנה אפשר להחליף בחינם. צבע חדש עולה על כל משטח בנפרד.</div>`)
       + `<button type="button" class="btn ghost" data-close="1">סגירה</button>`;
   }
@@ -5556,11 +5637,11 @@ function onDrawerClick(e){
   if(t.dataset.buy){
     const c = pvCost(), pv = RM.pv; if(!pv || tokenBalance() < c) return;
     space.spent += c;
-    if(pv.t==='part'){ const pi = partInfo(); if(!pi){ space.spent -= c; return; } (space.po[pi.key] = space.po[pi.key] || []).push(pv.o); pi.set(pv.o); RM.pv = null; saveState(); rmRedraw(); renderDrawer(); burstConfetti(10); return; }
-    if(pv.t==='lv'){ const n0 = stowedCount(); space.lv[pv.id] = pv.to; space.top[pv.id] = pv.to; stowBlocked(); RM.note = stowNote(stowedCount()-n0); } else { space.own[pv.k].push(pv.idx); space.surf[pv.k] = pv.idx; }
+    if(pv.t==='part'){ const pi = partInfo(); if(!pi){ space.spent -= c; return; } (space.po[pi.key] = space.po[pi.key] || []).push(pv.o); sharePattern(pv.o); pi.set(pv.o); RM.pv = null; saveState(); rmRedraw(); renderDrawer(); burstConfetti(10); return; }
+    if(pv.t==='lv'){ const n0 = stowedCount(); space.lv[pv.id] = pv.to; space.top[pv.id] = pv.to; stowBlocked(); RM.note = stowNote(stowedCount()-n0); } else { for(const k2 in ROOM_DEFAULT) if(!space.own[k2].includes(pv.idx)) space.own[k2].push(pv.idx); sharePattern(pv.idx); space.surf[pv.k] = pv.idx; }
     RM.pv = null; saveState(); rmRedraw(); renderDrawer(); burstConfetti(10); return;
   }
-  if(t.dataset.col){ const k = RM.sel.k, idx = +t.dataset.col;
+  if(t.dataset.col){ const k = RM.sel.k, idx = /^\d+$/.test(t.dataset.col) ? +t.dataset.col : t.dataset.col;
     if(space.own[k].includes(idx)){ space.surf[k] = idx; RM.pv = null; saveState(); }   // already bought: free to switch
     else RM.pv = {t:'col', k, idx};                                                     // new: preview, then buy or cancel
     rmRedraw(); return renderDrawer(); }
