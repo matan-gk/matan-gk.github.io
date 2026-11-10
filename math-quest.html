@@ -779,7 +779,26 @@ body[data-view="space"] #spaceView{box-sizing:border-box; display:flex; flex-dir
 .rmview svg{width:100%; height:100%; display:block; user-select:none; -webkit-user-select:none}
 .rmh{cursor:pointer}
 .rmnote{background:var(--good); color:#06322c; border-radius:10px; padding:6px 10px; font-weight:700; font-size:13px; margin-bottom:6px}
-.rmtop,.rmtile{pointer-events:none}
+.rmtop,.rmtile,.pendbase,.rmtag{pointer-events:none}
+/* something that is not placed yet (a preview, an item being placed or moved) is drawn with the same marching dashes everywhere; a placed thing never has them */
+.pend{stroke-dasharray:9 7; vector-effect:non-scaling-stroke; animation:rmants .8s linear infinite}
+.pendbase{fill:none; vector-effect:non-scaling-stroke}
+@keyframes rmants{to{stroke-dashoffset:-16}}
+.rmghost{animation:rmpulse 1.4s ease-in-out infinite}
+@keyframes rmpulse{0%,100%{opacity:.52} 50%{opacity:.74}}
+.rmtag rect{fill:#7a3fd0} .rmtag text{fill:#fff; font-weight:800; font-size:24px; font-family:inherit}
+.rmsh-btns{position:relative}
+.rmsh-btns:has([data-cancel]){padding-top:9px}
+.rmsh-btns:has([data-cancel])::before{content:''; position:absolute; inset-inline:0; top:0; height:3px; background:repeating-linear-gradient(90deg,#5b3a2a 0 9px,transparent 9px 16px); animation:rmantsbar .8s linear infinite}
+@keyframes rmantsbar{to{background-position-x:16px}}
+.rmsettle{transform-box:fill-box; transform-origin:50% 100%; animation:rmsettle .55s ease-out}
+@keyframes rmsettle{0%{transform:scale(1.07,.93)} 35%{transform:scale(.96,1.06)} 65%{transform:scale(1.02,.99)} 100%{transform:none}}
+.rmflash{animation:rmflash .7s ease-out}
+@keyframes rmflash{0%{filter:brightness(1.45) saturate(1.3)} 100%{filter:none}}
+.rmspark{position:fixed; width:0; height:0; z-index:60; pointer-events:none}
+.rmspark i{position:absolute; left:-.5em; top:-.5em; font-style:normal; font-size:18px; color:#ffd23f; text-shadow:0 0 4px #fff; animation:rmspark .75s ease-out forwards; opacity:0}
+@keyframes rmspark{0%{opacity:1; transform:translate(0,0) scale(.4)} 100%{opacity:0; transform:translate(var(--dx),var(--dy)) scale(1.2) rotate(90deg)}}
+@media (prefers-reduced-motion:reduce){.pend,.rmghost,.rmsettle,.rmflash,.rmspark i,.rmsh-btns:has([data-cancel])::before{animation:none}.rmghost{opacity:.65}}
 .rmh.sel{filter:drop-shadow(0 0 6px #fff) drop-shadow(0 0 10px var(--purple,#9b5de5))}
 .rmzoom{position:absolute; top:10px; inset-inline-start:10px; display:flex; flex-direction:column; gap:6px; z-index:2}
 .rmz{border:0; background:var(--card); color:var(--text); width:40px; height:40px; border-radius:50%; font-size:1.1rem; font-weight:800; cursor:pointer; box-shadow:0 2px 6px var(--shadow)}
@@ -2353,7 +2372,7 @@ function cloudProfileFromDoc(C, helpers){
 // ===== CLOUD (Google sign-in, cloud progress, problem reports) =====
 // Local-first: the game always works from this device's storage. The cloud is a mirror, so no internet / no account / no quota never blocks play.
 // Everything here is off while CLOUD_CONFIG is null. See firebase/SETUP.md for how to create the (free) Firebase project and paste its settings below.
-const APP_VERSION = '2026.11.10a';       // keep equal to VERSION in sw.js (a test checks it)
+const APP_VERSION = '2026.11.10b';       // keep equal to VERSION in sw.js (a test checks it)
 const CLOUD_CONFIG = {apiKey:"AIzaSyAlq_TJNGvWPJpUrpbdq_hkAoURydqMzm0", authDomain:"learning-quest-1.firebaseapp.com", projectId:"learning-quest-1", appId:"1:98931179722:web:78fb00084ccba3efb53433"};   // e.g. {apiKey:'...', authDomain:'xxx.firebaseapp.com', projectId:'xxx', appId:'...'}
 const CLOUD_LIMITS = {
   pushDelayMs: 60000,          // at most one upload per profile per minute while playing
@@ -5419,30 +5438,37 @@ function bedSrc(lv){ const a = ROOM_ART.bed[lv-1], names = bedParts(lv), ch = {}
   if(names.every(n=>ch[n]==='d')) return a.src;
   return paintedSrc('bed|'+lv+'|'+names.map(n=>ch[n]).join(','), a.src, ()=>paintBed(a, ch)); }
 function thingSrc(c, i){ const o = i==null ? 'd' : thingOpt(i); if(o==='d' || !hasParts(c) || isPat(o)) return c.src; return paintedSrc(c.id+'|'+o, c.src, ()=>paintItem(c, o)); }
+// not placed yet: a white line under a dashed one, so the marching dashes show on any colour; the same lines (class pend) are used for every preview
+const pendEdge = (q, col) => `<polygon class="pendbase" points="${q}" stroke="#fff" stroke-opacity=".9" stroke-width="6" stroke-linejoin="round"/><polygon class="pend" points="${q}" fill="none" stroke="${col||'#5b3a2a'}" stroke-width="3" stroke-linejoin="round" pointer-events="none"/>`;
+const pendTile = (q, ok, fo) => `<polygon class="pendbase" points="${q}" stroke="#fff" stroke-opacity=".9" stroke-width="6" stroke-linejoin="round"/><polygon class="rmtile pend" points="${q}" fill="${ok?'#7ee08a':'#ff8a8a'}" fill-opacity="${fo||.45}" stroke="${ok?'#2e9d45':'#c0392b'}" stroke-width="3"/>`;
+const footPts = (x, y, fw, fd) => [[0,0],[fw,0],[fw,fd],[0,fd]].map(d=>gx2s(x+d[0],y+d[1]).join(',')).join(' ');
+const pendTag = (cx, cy) => `<g class="rmtag"><rect x="${cx-95}" y="${cy-20}" width="190" height="40" rx="20"/><text x="${cx}" y="${cy+8}" text-anchor="middle">תצוגה מקדימה</text></g>`;
 // moving the bed or the window (RM.pl = {fx:'bed', x, y} or {fx:'window', w, u}): the ghost where it would stand
 function fxPreviewSVG(pl){
   if(pl.fx==='bed'){ const l = space.lv.bed, f = bedFp(l, pl.o), p = {x:pl.x, y:pl.y, ...(oddO(pl.o) ? {o:1} : {})}, ok = bedFits(p, l), ctx = {things:space.things, lv:space.lv, fix:{bed:p, window:space.fix.window}}, tp = topOf('bed', ctx);
     const q = [[0,0],[f[0],0],[f[0],f[1]],[0,f[1]]].map(d=>gx2s(p.x+d[0],p.y+d[1]).join(',')).join(' ');
-    return `<polygon class="rmtile" points="${q}" fill="${ok?'#7ee08a':'#ff8a8a'}" fill-opacity=".45" stroke="${ok?'#2e9d45':'#c0392b'}" stroke-width="3"/><g class="rmghost" opacity=".85">${bedSVG(l, p)}</g>`
-      + (tp ? `<g opacity=".85">${sittersSVG('bed', tp.x, tp.y, tp.z, tp.ox, -1, (t,i)=>surfFree(catOf(t.k), 'bed', t.on.dx, t.on.dy, i, ctx))}</g>` : ''); }
+    return pendTile(q, ok) + `<g class="rmghost" opacity=".62">${bedSVG(l, p)}</g>`
+      + (tp ? `<g class="rmghost" opacity=".62">${sittersSVG('bed', tp.x, tp.y, tp.z, tp.ox, -1, (t,i)=>surfFree(catOf(t.k), 'bed', t.on.dx, t.on.dy, i, ctx))}</g>` : ''); }
   const l = space.lv.window, a = ROOM_ART.window[l-1], q = winAtFor(l, pl);
-  return `<g class="rmghost" opacity=".85" transform="matrix(${q.w==='l'?-1:1} .5 0 1 500 400)">${windowSVG(l, q.u)}<rect class="rmtile" x="${(q.u-a.ax).toFixed(1)}" y="${(-WIN_SILL-a.ay).toFixed(1)}" width="${a.w}" height="${a.h}" fill="#7ee08a" fill-opacity=".25" stroke="#2e9d45" stroke-width="3" stroke-dasharray="8 6"/></g>`;
+  return `<g class="rmghost" opacity=".62" transform="matrix(${q.w==='l'?-1:1} .5 0 1 500 400)">${windowSVG(l, q.u)}<rect class="rmtile pend" x="${(q.u-a.ax).toFixed(1)}" y="${(-WIN_SILL-a.ay).toFixed(1)}" width="${a.w}" height="${a.h}" fill="#7ee08a" fill-opacity=".25" stroke="#2e9d45" stroke-width="3"/></g>`;
 }
 function roomSVG(){
   const cl = effCol('wl'), cr = effCol('wr'), cf = effCol('fl');
   const sel = (t,id) => RM.sel && RM.sel.t===t && (RM.sel.id||RM.sel.k)===id ? ' sel' : '';
   let s = `<defs><filter id="rmBlur" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="6"/></filter><filter id="rmBlur2" x="-40%" y="-80%" width="180%" height="260%"><feGaussianBlur stdDeviation="2.5"/></filter><linearGradient id="rmRainbow" x1="0" y1="0" x2="1" y2="0.35"><stop offset="0" stop-color="#ff8f9c"/><stop offset=".17" stop-color="#ffae6e"/><stop offset=".34" stop-color="#ffe46b"/><stop offset=".5" stop-color="#8fe08a"/><stop offset=".67" stop-color="#6cc6f5"/><stop offset=".84" stop-color="#8f8cf0"/><stop offset="1" stop-color="#d48cf0"/></linearGradient>${surfPatDef('wl',cl)}${surfPatDef('wr',cr)}${surfPatDef('fl',cf)}</defs><g id="rmG" transform="translate(${RM.tx} ${RM.ty}) scale(${RM.k})"><g id="rmR" transform="translate(0 ${RM_DY})">`;
-  s += `<g data-hit="surf:wl" class="rmh${sel('surf','wl')}"><polygon points="0,50 500,-200 500,400 0,650" fill="${surfFill(cl,'wl')}" stroke="#5b3a2a" stroke-width="4" stroke-linejoin="round"/><polygon points="0,610 500,360 500,400 0,650" fill="#000" opacity=".08"/></g>`;
-  s += `<g data-hit="surf:wr" class="rmh${sel('surf','wr')}"><polygon points="500,-200 1000,50 1000,650 500,400" fill="${surfFill(cr,'wr')}" stroke="#5b3a2a" stroke-width="4" stroke-linejoin="round"/><polygon points="500,-200 1000,50 1000,650 500,400" fill="#000" opacity=".10"/><polygon points="500,360 1000,610 1000,650 500,400" fill="#000" opacity=".08"/></g>`;
+  const pvk = RM.pv && RM.pv.t==='col' ? RM.pv.k : null;   // a wall or the floor shown in a colour or pattern that is not bought yet
+  s += `<g data-hit="surf:wl" class="rmh${sel('surf','wl')}"><polygon points="0,50 500,-200 500,400 0,650" fill="${surfFill(cl,'wl')}" stroke="#5b3a2a" stroke-width="4" stroke-linejoin="round"/><polygon points="0,610 500,360 500,400 0,650" fill="#000" opacity=".08"/>${pvk==='wl' ? pendEdge('0,50 500,-200 500,400 0,650') + pendTag(250,225) : ''}</g>`;
+  s += `<g data-hit="surf:wr" class="rmh${sel('surf','wr')}"><polygon points="500,-200 1000,50 1000,650 500,400" fill="${surfFill(cr,'wr')}" stroke="#5b3a2a" stroke-width="4" stroke-linejoin="round"/><polygon points="500,-200 1000,50 1000,650 500,400" fill="#000" opacity=".10"/><polygon points="500,360 1000,610 1000,650 500,400" fill="#000" opacity=".08"/>${pvk==='wr' ? pendEdge('500,-200 1000,50 1000,650 500,400') + pendTag(750,225) : ''}</g>`;
   let grid = ''; for(let i=1;i<10;i++){ const a=gx2s(i*GU,0),b=gx2s(i*GU,ROOM_CELLS),c=gx2s(0,i*GU),d=gx2s(ROOM_CELLS,i*GU); grid += `M${a} L${b} M${c} L${d} `; }
-  s += `<g data-hit="surf:fl" class="rmh${sel('surf','fl')}"><polygon points="500,400 1000,650 500,900 0,650" fill="${surfFill(cf,'fl')}" stroke="#5b3a2a" stroke-width="4" stroke-linejoin="round"/><path d="${grid}" stroke="#5b3a2a" stroke-opacity=".16" stroke-width="2" fill="none"/></g>`;
+  s += `<g data-hit="surf:fl" class="rmh${sel('surf','fl')}"><polygon points="500,400 1000,650 500,900 0,650" fill="${surfFill(cf,'fl')}" stroke="#5b3a2a" stroke-width="4" stroke-linejoin="round"/><path d="${grid}" stroke="#5b3a2a" stroke-opacity=".16" stroke-width="2" fill="none"/>${pvk==='fl' ? pendEdge('500,400 1000,650 500,900 0,650') + pendTag(500,650) : ''}</g>`;
   const pl = RM.pl, shown = effLv('bed'), wl = effLv('window'), wp = winAtFor(wl, space.fix.window), bp = bedPos(shown);
   if(wp && !(pl && pl.fx==='window')) s += `<g data-hit="item:window" class="rmh${sel('item','window')}" transform="matrix(${wp.w==='l'?-1:1} .5 0 1 500 400)">${windowSVG(wl, wp.u)}</g>`;
+  const pvp = pvPart(), bedPend = !!(RM.pv && ((RM.pv.t==='lv' && RM.pv.id==='bed') || (pvp && RM.sel && RM.sel.t==='item' && RM.sel.id==='bed')));   // an upgrade or colour of the bed that is only previewed
   const bctx = {things: space.things, lv: {...space.lv, bed: shown}, fix: space.fix}, bt = topOf('bed', bctx), ents = [];   // everything standing on the floor, sorted back to front (the bed too, with what lies on it)
   if(bp && !(pl && pl.fx==='bed')){ const f = bedFp(shown, bp.o);
-    ents.push({f:1, d:bp.x+f[0]+bp.y+f[1], svg:`<g data-hit="item:bed" class="rmh${sel('item','bed')}">${bedSVG(shown, bp)}</g>` + (bt ? sittersSVG('bed', bt.x, bt.y, bt.z, bt.ox, -1, (t,i)=>surfFree(catOf(t.k), 'bed', t.on.dx, t.on.dy, i, bctx)) : '')}); }   // what lies on the bed, right after it (while previewing another level: on that level's top, and only what would still fit)
+    ents.push({f:1, d:bp.x+f[0]+bp.y+f[1], svg:`<g data-hit="item:bed" class="rmh${sel('item','bed')}">${bedSVG(shown, bp)}${bedPend ? pendEdge(footPts(bp.x, bp.y, f[0], f[1])) : ''}</g>` + (bt ? sittersSVG('bed', bt.x, bt.y, bt.z, bt.ox, -1, (t,i)=>surfFree(catOf(t.k), 'bed', t.on.dx, t.on.dy, i, bctx)) : '')}); }   // what lies on the bed, right after it (while previewing another level: on that level's top, and only what would still fit)
   space.things.forEach((t,i)=>{ if(t.x<0 || t.on || (pl && pl.i===i)) return; const c = catOf(t.k), tp = topOf(t);
-    const q = footOf(t); ents.push({f:isFlat(c)?0:1, d:t.x+q[0]+t.y+q[1], svg:`<g data-hit="thing:${i}" class="rmh${RM.sel && RM.sel.t==='thing' && RM.sel.i===i ? ' sel' : ''}">${thingSVG(c, t.x, t.y, i, t.o)}</g>` + (tp && t.u ? sittersSVG(t.u, tp.x, tp.y, tp.z, tp.ox) : '')}); });   // a host and what is on it are drawn as one group
+    const q = footOf(t); ents.push({f:isFlat(c)?0:1, d:t.x+q[0]+t.y+q[1], svg:`<g data-hit="thing:${i}" class="rmh${RM.sel && RM.sel.t==='thing' && RM.sel.i===i ? ' sel' : ''}">${thingSVG(c, t.x, t.y, i, t.o)}${pvp && RM.sel && RM.sel.t==='thing' && RM.sel.i===i ? pendEdge(footPts(t.x, t.y, q[0], q[1])) : ''}</g>` + (tp && t.u ? sittersSVG(t.u, tp.x, tp.y, tp.z, tp.ox) : '')}); });   // a host and what is on it are drawn as one group
   ents.sort((a,b)=>a.f-b.f || a.d-b.d);   // rugs and other flat things first, then further back first
   s += ents.map(q=>q.svg).join('');
   if(pl && pl.fx) s += fxPreviewSVG(pl);
@@ -5452,13 +5478,13 @@ function roomSVG(){
       for(let dx=sf.tp.c[0]; dx<sf.tp.c[0]+sf.tp.c[2]; dx++) for(let dy=sf.tp.c[1]; dy<sf.tp.c[1]+sf.tp.c[3]; dy++)
         if(surfFree(c, sf.h, dx, dy, pl.i)) for(let a=0;a<fw;a++) for(let b=0;b<fd;b++) lit.add((dx+a)+','+(dy+b));
       lit.forEach(k=>{ const [dx,dy] = k.split(',').map(Number), cx = sf.tp.x+dx, cy = sf.tp.y+dy;
-        s += `<polygon class="rmtop" points="${pts(raised([[0,0],[1,0],[1,1],[0,1]].map(d=>gx2s(cx+d[0],cy+d[1])), sf.tp.z, sf.tp.ox))}" fill="#fff" fill-opacity=".28" stroke="#fff" stroke-opacity=".9" stroke-width="2" stroke-dasharray="6 5"/>`; }); }
+        s += `<polygon class="rmtop pend" points="${pts(raised([[0,0],[1,0],[1,1],[0,1]].map(d=>gx2s(cx+d[0],cy+d[1])), sf.tp.z, sf.tp.ox))}" fill="#fff" fill-opacity=".28" stroke="#fff" stroke-opacity=".9" stroke-width="2" stroke-dasharray="6 5"/>`; }); }
     if(pl.on){ const tp = topOf(pl.on.h), cx = tp.x+pl.on.dx, cy = tp.y+pl.on.dy;
-      s += `<polygon class="rmtile" points="${pts(raised([[0,0],[fw,0],[fw,fd],[0,fd]].map(d=>gx2s(cx+d[0],cy+d[1])), tp.z, tp.ox))}" fill="#7ee08a" fill-opacity=".55" stroke="#2e9d45" stroke-width="3"/><g class="rmghost" opacity=".9" transform="translate(${tp.ox} ${-tp.z})">${thingSVG(c, cx, cy, undefined, pl.o)}</g>`; }
+      s += pendTile(pts(raised([[0,0],[fw,0],[fw,fd],[0,fd]].map(d=>gx2s(cx+d[0],cy+d[1])), tp.z, tp.ox)), true, .55) + `<g class="rmghost" opacity=".62" transform="translate(${tp.ox} ${-tp.z})">${thingSVG(c, cx, cy, undefined, pl.o)}</g>`; }
     else { const q = [[0,0],[fw,0],[fw,fd],[0,fd]].map(d=>gx2s(pl.x+d[0],pl.y+d[1]).join(',')).join(' ');
-      s += `<polygon class="rmtile" points="${q}" fill="#7ee08a" fill-opacity=".45" stroke="#2e9d45" stroke-width="3"/><g class="rmghost" opacity=".85">${thingSVG(c, pl.x, pl.y, undefined, pl.o)}</g>`;
+      s += pendTile(q, true) + `<g class="rmghost" opacity=".62">${thingSVG(c, pl.x, pl.y, undefined, pl.o)}</g>`;
       const mv = pl.i>=0 ? space.things[pl.i] : null, tp = mv && mv.u ? topOf({k:mv.k, x:pl.x, y:pl.y, u:mv.u, o:pl.o}) : null;   // a host being moved brings its things along in the preview
-      if(tp) s += `<g opacity=".85">${sittersSVG(mv.u, tp.x, tp.y, tp.z, tp.ox)}</g>`; } }
+      if(tp) s += `<g class="rmghost" opacity=".62">${sittersSVG(mv.u, tp.x, tp.y, tp.z, tp.ox)}</g>`; } }
   s += `</g></g>`;
   return `<svg id="rmSvg" viewBox="0 0 ${RM.W} ${RM.H}" role="img" aria-label="החדר">${s}</svg>`;
 }
@@ -5510,6 +5536,16 @@ function paletteHTML(pi){
     const inner = typeof o==='number' ? `<img src="${BRUSH_IMG[o]}" alt="">` : `<span class="bsw">${dotHTML(o)}</span>`;
     return h + `<button type="button" class="brush${cur?' cur':''}${own?'':' new'}" data-popt="${o}" aria-label="${ar}${own?'':' · '+coinsTxt(optPrice(o))}">${inner}${own?'':`<span class="bp">${optPrice(o)}🪙</span>`}</button>`; },
     `<button type="button" class="brush${shown==='d'||shown===nb?' cur':''}" data-popt="d" aria-label="הצבע המקורי"><img src="${BRUSH_IMG[nb]}" alt=""></button>`);
+}
+// a confirmed thing settles: items bob into place, surfaces and windows flash, and a few sparkles fly out
+function settleFx(sel, flash){
+  requestAnimationFrame(()=>{ const el = document.querySelector('#rmSvg '+sel); if(!el) return;
+    const cls = flash ? 'rmflash' : 'rmsettle'; el.classList.add(cls); setTimeout(()=>el.classList.remove(cls), 800);
+    if(window.matchMedia && window.matchMedia('(prefers-reduced-motion:reduce)').matches) return;
+    const r = el.getBoundingClientRect(), d = document.createElement('div'); d.className = 'rmspark'; d.style.left = (r.left+r.width/2)+'px'; d.style.top = (r.top+r.height/2)+'px';
+    const sp = Math.min(70, Math.max(30, Math.min(r.width, r.height)/2));
+    for(let i=0;i<7;i++){ const a = i/7*Math.PI*2 + .4, e = document.createElement('i'); e.textContent = '✦'; e.style.setProperty('--dx', (Math.cos(a)*sp).toFixed(0)+'px'); e.style.setProperty('--dy', (Math.sin(a)*sp).toFixed(0)+'px'); e.style.animationDelay = (i%3*40)+'ms'; d.append(e); }
+    document.body.append(d); setTimeout(()=>d.remove(), 950); });
 }
 // on a narrow screen the drawer covers the room, so while a purchase or a placement is being previewed it shrinks to a bar with just buy / cancel and a button to open it again
 const narrowRoom = () => !window.matchMedia('(min-width:900px)').matches;
@@ -5651,7 +5687,7 @@ function onDrawerClick(e){
   if(t.dataset.place && RM.pl && RM.pl.fx){ const pl = RM.pl;
     if(pl.fx==='bed'){ if(!bedFits({x:pl.x, y:pl.y, o:pl.o}, space.lv.bed)) return; space.fix.bed = bedAtFor(space.lv.bed, {x:pl.x, y:pl.y, o:pl.o}); settleSurfaces(); }   // what lay on the bed comes along
     else space.fix.window = winAtFor(space.lv.window, {w:pl.w, u:pl.u});
-    RM.pl = null; saveState(); rmRedraw(); return renderDrawer(); }
+    RM.pl = null; saveState(); rmRedraw(); settleFx(pl.fx==='bed' ? '[data-hit="item:bed"]' : '[data-hit="item:window"]', pl.fx!=='bed'); return renderDrawer(); }
   if(t.dataset.turn){ const i = +t.dataset.turn, n0 = stowedCount(); if(turnThing(i)){ RM.note = stowNote(stowedCount()-n0); saveState(); } else RM.note = 'אין מקום לסובב כאן'; rmRedraw(); return renderDrawer(); }
   if(t.dataset.fxturn){ const n0 = stowedCount(); if(turnBed()){ RM.note = stowNote(stowedCount()-n0); saveState(); } else RM.note = 'אין מקום לסובב כאן'; rmRedraw(); return renderDrawer(); }
   if(t.dataset.pturn && RM.pl && !RM.pl.fx){ const pl = RM.pl, c = catOf(pl.k), no = nextO(c, pl.o);   // turning while placing: where it can stand turned
@@ -5669,7 +5705,7 @@ function onDrawerClick(e){
     const pl = RM.pl; if(!pl || (pl.on ? !surfFree(catOf(pl.k), pl.on.h, pl.on.dx, pl.on.dy, pl.i) : !footFree(catOf(pl.k),pl.x,pl.y,pl.i,pl.o))) return;
     if(pl.i<0){ const c = catOf(pl.k); if(tokenBalance()<c.p) return; space.spent += c.p; const th = {k:pl.k, x:pl.x, y:pl.y, u:newUid()}; if(pl.o) th.o = pl.o; if(pl.on) th.on = {...pl.on}; space.things.push(th); burstConfetti(10); }
     else { const th = space.things[pl.i]; th.x = pl.x; th.y = pl.y; if(pl.o) th.o = pl.o; else delete th.o; if(pl.on) th.on = {...pl.on}; else delete th.on; settleSurfaces(); }   // moved to the floor; whatever stands on it comes along
-    RM.pl = null; saveState(); rmRedraw(); return renderDrawer();
+    const at = pl.i<0 ? space.things.length-1 : pl.i; RM.pl = null; saveState(); rmRedraw(); settleFx('[data-hit="thing:'+at+'"]'); return renderDrawer();
   }
   if(t.dataset.sw){ const [id,l] = t.dataset.sw.split(':'); const n0 = stowedCount(); space.lv[id] = +l; RM.pv = null; stowBlocked(); RM.note = stowNote(stowedCount()-n0); saveState(); rmRedraw(); return renderDrawer(); }   // an owned level: switch for free
   if(t.dataset.prev){ const id = t.dataset.prev; RM.pv = {t:'lv', id, to:topLv(id)+1}; rmRedraw(); return renderDrawer(); }
@@ -5681,14 +5717,15 @@ function onDrawerClick(e){
   if(t.dataset.buy){
     const c = pvCost(), pv = RM.pv; if(!pv || tokenBalance() < c) return;
     space.spent += c;
-    if(pv.t==='part'){ const pi = partInfo(); if(!pi){ space.spent -= c; return; } (space.po[pi.key] = space.po[pi.key] || []).push(pv.o); sharePattern(pv.o); pi.set(pv.o); RM.pv = null; saveState(); rmRedraw(); renderDrawer(); burstConfetti(10); return; }
+    if(pv.t==='part'){ const pi = partInfo(); if(!pi){ space.spent -= c; return; } (space.po[pi.key] = space.po[pi.key] || []).push(pv.o); sharePattern(pv.o); pi.set(pv.o); RM.pv = null; saveState(); rmRedraw(); settleFx(RM.sel && RM.sel.t==='thing' ? '[data-hit="thing:'+RM.sel.i+'"]' : '[data-hit="item:bed"]', true); renderDrawer(); burstConfetti(10); return; }
     if(pv.t==='lv'){ const n0 = stowedCount(); space.lv[pv.id] = pv.to; space.top[pv.id] = pv.to; stowBlocked(); RM.note = stowNote(stowedCount()-n0); } else { for(const k2 in ROOM_DEFAULT) if(!space.own[k2].includes(pv.idx)) space.own[k2].push(pv.idx); sharePattern(pv.idx); space.surf[pv.k] = pv.idx; }
-    RM.pv = null; saveState(); rmRedraw(); renderDrawer(); burstConfetti(10); return;
+    RM.pv = null; saveState(); rmRedraw(); settleFx(pv.t==='lv' ? (pv.id==='bed' ? '[data-hit="item:bed"]' : '[data-hit="item:'+pv.id+'"]') : '[data-hit="surf:'+pv.k+'"]', pv.t!=='lv' || pv.id!=='bed'); renderDrawer(); burstConfetti(10); return;
   }
   if(t.dataset.col){ const k = RM.sel.k, idx = /^\d+$/.test(t.dataset.col) ? +t.dataset.col : t.dataset.col;
-    if(space.own[k].includes(idx)){ space.surf[k] = idx; RM.pv = null; saveState(); }   // already bought: free to switch
+    const was = space.surf[k], mine = space.own[k].includes(idx);
+    if(mine){ space.surf[k] = idx; RM.pv = null; saveState(); }   // already bought: free to switch
     else RM.pv = {t:'col', k, idx};                                                     // new: preview, then buy or cancel
-    rmRedraw(); return renderDrawer(); }
+    rmRedraw(); if(mine && was!==idx) settleFx('[data-hit="surf:'+k+'"]', true); return renderDrawer(); }
 }
 function spaceInit(){
   const ov = document.getElementById('spaceView');

@@ -92,7 +92,7 @@ ok(await ev(()=>{const t=space.things[1];return t.on&&t.on.h==='bed'&&t.on.dx===
 await set([{k:'table',x:6,y:6,u:'tab1'},{k:'teddy',x:7,y:6,u:'ted1',on:{h:'tab1',dx:1,dy:0}}]);
 await ev(()=>{RM.sel={t:'thing',i:0};renderDrawer();document.querySelector('[data-move]').click();});
 await tapW(5.5,9.5,0);
-ok(await ev(()=>!!document.querySelector('#rmR .rmghost')&&document.querySelectorAll('#rmR [data-hit="thing:1"]').length===1&&document.querySelectorAll('#rmR g[opacity=".85"] [data-hit="thing:1"]').length===1),'moving a host: the preview carries its things');
+ok(await ev(()=>!!document.querySelector('#rmR .rmghost')&&document.querySelectorAll('#rmR [data-hit="thing:1"]').length===1&&document.querySelectorAll('#rmR g.rmghost [data-hit="thing:1"]').length===1),'moving a host: the preview carries its things');
 await ev(()=>document.querySelector('[data-place]').click());
 ok(await ev(()=>space.things[0].x===9&&space.things[0].y===16&&space.things[1].x===9+GU&&space.things[1].y===16&&space.things[1].on.h==='tab1'),'placed: the things came along');
 ok(errs.length===0,'no page errors '+errs.join('|'));
