@@ -1270,6 +1270,7 @@ const patOn = (o, k) => ROOM_PATTERNS.some(q=>'p:'+q.id===o && q.parts.includes(
 const optOk = v => v==='d' || (Number.isInteger(v) && v>=0 && v<ROOM_COLORS.length) || (typeof v==='string' && ROOM_PATTERNS.some(q=>'p:'+q.id===v));
 const optPrice = v => typeof v==='number' ? ROOM_COLORS[v].p : ROOM_PATTERNS.find(q=>'p:'+q.id===v).p;
 const PART_KEY_RX = /^[a-z0-9]+(\.[a-z]+)?$/;
+const ROOM_DEFAULT_NEW = {wl:0, wr:0, fl:12};            // profiles made from 2026.11.10 on (save field dw:1): white walls
 const ROOM_DEFAULT = {wl:3, wr:3, fl:12};                    // wall left, wall right, floor start purple / purple / brown
 const ROOM_SURF = {wl:'הקיר השמאלי', wr:'הקיר הימני', fl:'הרצפה'};
 const ROOM_SURF_TO = {wl:'לקיר השמאלי', wr:'לקיר הימני', fl:'לרצפה'};
@@ -1460,12 +1461,12 @@ function spaceClean(sp, gold, legacy){
   let earned = nn(sp.earned); const spent = nn(sp.spent), trued = sp.trued===true;
   // one-time true-up for old players: what they already upgraded (and 10 per look opened before) counts
   if(!trued) earned = Math.max(earned, gold.length + legacy*MERGE_COST);
-  const surf = {}, own = {};
+  const surf = {}, own = {}, dw = sp.dw===1, DEF = dw ? ROOM_DEFAULT_NEW : ROOM_DEFAULT;   // a save without dw is an older profile: it keeps its purple walls
   for(const k in ROOM_DEFAULT){
     const okc = v => (Number.isInteger(v) && v>=0 && v<ROOM_COLORS.length) || (typeof v==='string' && ROOM_PATTERNS.some(q=>'p:'+q.id===v && q.parts.includes(k)));   // a colour, or a pattern offered for this surface
-    const c = okc(sp.surf && sp.surf[k]) ? sp.surf[k] : ROOM_DEFAULT[k];
+    const c = okc(sp.surf && sp.surf[k]) ? sp.surf[k] : DEF[k];
     const o = (Array.isArray(sp.own && sp.own[k]) ? sp.own[k] : []).filter(okc);
-    [ROOM_DEFAULT[k], c].forEach(v=>{ if(!o.includes(v)) o.push(v); });
+    [DEF[k], c].forEach(v=>{ if(!o.includes(v)) o.push(v); });
     surf[k] = c; own[k] = [...new Set(o)];
   }
   const shared = [...new Set(Object.values(own).flat())].sort((a,b)=>typeof a===typeof b ? (typeof a==='number' ? a-b : (a<b?-1:1)) : (typeof a==='number' ? -1 : 1));
@@ -1515,7 +1516,7 @@ function spaceClean(sp, gold, legacy){
   });
   const top = {};   // the highest level bought of each item: every level up to it stays owned and can be switched to for free
   for(const id in ROOM_ITEMS){ const v = sp.top && sp.top[id]; top[id] = Math.max(lv[id], (Number.isInteger(v) && v>=1 && v<=roomMax(id)) ? v : 1); }
-  return {earned, spent:Math.min(spent,earned), trued:true, unlocked:sp.unlocked===true, surf, own, po, bc, lv, top, things, fix:{bed:fbed, window:fwin}, sub:GU};
+  return {earned, spent:Math.min(spent,earned), trued:true, unlocked:sp.unlocked===true, ...(dw?{dw:1}:{}), surf, own, po, bc, lv, top, things, fix:{bed:fbed, window:fwin}, sub:GU};
 }
 function spaceSnap(){ return JSON.parse(JSON.stringify(space)); }
 let space = spaceClean({},[],0);   // personal-space tokens: earned once per upgrade (stored, never derived), spent in the shop later; trued = the one-time true-up for old players was done
@@ -2352,7 +2353,7 @@ function cloudProfileFromDoc(C, helpers){
 // ===== CLOUD (Google sign-in, cloud progress, problem reports) =====
 // Local-first: the game always works from this device's storage. The cloud is a mirror, so no internet / no account / no quota never blocks play.
 // Everything here is off while CLOUD_CONFIG is null. See firebase/SETUP.md for how to create the (free) Firebase project and paste its settings below.
-const APP_VERSION = '2026.11.09b';       // keep equal to VERSION in sw.js (a test checks it)
+const APP_VERSION = '2026.11.10a';       // keep equal to VERSION in sw.js (a test checks it)
 const CLOUD_CONFIG = {apiKey:"AIzaSyAlq_TJNGvWPJpUrpbdq_hkAoURydqMzm0", authDomain:"learning-quest-1.firebaseapp.com", projectId:"learning-quest-1", appId:"1:98931179722:web:78fb00084ccba3efb53433"};   // e.g. {apiKey:'...', authDomain:'xxx.firebaseapp.com', projectId:'xxx', appId:'...'}
 const CLOUD_LIMITS = {
   pushDelayMs: 60000,          // at most one upload per profile per minute while playing
@@ -6909,7 +6910,7 @@ function profileAction(act, id){
       profMode={view:'list',editId:null,first:false,confirmDel:null,error:''};
     } else {
       const first = !store.profiles.length;
-      const np = makeProfile(name, g, {});
+      const np = makeProfile(name, g, {space:{dw:1}});
       store.profiles.push(np);
       if(first){ store.activeId = np.id; enterProfile(); persist(); refreshAll(); document.getElementById('profOverlay').hidden = true; return; }
       switchProfile(np.id);

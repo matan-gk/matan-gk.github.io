@@ -128,9 +128,9 @@ ok(await ev(()=>space.lv.bed===2&&space.spent===3&&tokenBalance()===7&&document.
 // 10. grammar
 await ev(()=>{space.spent=space.earned;onRoomTap('item:window');document.querySelector('[data-prev="window"]').click();});
 ok(await ev(()=>/צריך 2 מטבעות\. יש לך 0/.test(document.getElementById('rmDrawer').textContent)&&document.querySelector('[data-buy]').disabled),'too poor: "צריך 2 מטבעות. יש לך 0", buy disabled');
-await ev(()=>{space.spent=space.earned-1;onRoomTap('surf:wl');document.querySelector('[data-col="0"]').click();});
+await ev(()=>{space.spent=space.earned-1;onRoomTap('surf:wl');document.querySelector('[data-col="3"]').click();});
 ok(await ev(()=>/צריך מטבע אחד\. יש לך 1/.test(document.getElementById('rmDrawer').textContent)&&!document.querySelector('[data-buy]').disabled),'one token: "צריך מטבע אחד. יש לך 1"');
-await ev(()=>{space.spent=space.earned;onRoomTap('surf:wl');document.querySelector('[data-col="0"]').click();});
+await ev(()=>{space.spent=space.earned;onRoomTap('surf:wl');document.querySelector('[data-col="3"]').click();});
 ok(await ev(()=>/צריך מטבע אחד\. יש לך 0/.test(document.getElementById('rmDrawer').textContent)),'zero tokens, 1-token color: "צריך מטבע אחד. יש לך 0" (not the old wording)');
 // 12. titles
 await ev(()=>onRoomTap('surf:wr'));ok(await ev(()=>/צבע לקיר הימני/.test(document.querySelector('#rmDrawer .rmsh-t').textContent)&&!/להקיר/.test(document.getElementById('rmDrawer').textContent)),'title "צבע לקיר הימני"');
@@ -139,10 +139,10 @@ await ev(()=>onRoomTap('surf:fl'));ok(await ev(()=>/צבע לרצפה/.test(docu
 ok(await ev(()=>document.querySelectorAll('#rmDrawer .brush img').length===16&&[...document.querySelectorAll('#rmDrawer .brush img')].every(i=>/^assets\//.test(i.getAttribute('src')))),'16 brush pictures as the color buttons');
 // colors: preview, buy 1 token, switch back free, premium 2
 await ev(()=>{space.spent=0;onRoomTap('surf:wl');document.querySelector('[data-col="2"]').click();});
-ok(await ev(()=>RM.pv&&RM.pv.idx===2&&space.surf.wl===3&&document.querySelector('[data-hit="surf:wl"] polygon').getAttribute('fill')===ROOM_COLORS[2].h),'a new color is previewed on the wall first');
+ok(await ev(()=>RM.pv&&RM.pv.idx===2&&space.surf.wl===0&&document.querySelector('[data-hit="surf:wl"] polygon').getAttribute('fill')===ROOM_COLORS[2].h),'a new color is previewed on the wall first');
 await ev(()=>document.querySelector('[data-buy]').click());
 ok(await ev(()=>space.surf.wl===2&&space.spent===1&&space.own.wl.includes(2)),'bought: 1 token');
-await ev(()=>document.querySelector('[data-col="3"]').click());await ev(()=>document.querySelector('[data-col="2"]').click());
+await ev(()=>document.querySelector('[data-col="0"]').click());await ev(()=>document.querySelector('[data-col="2"]').click());
 ok(await ev(()=>space.surf.wl===2&&space.spent===1),'switching between owned colors is free');
 await ev(()=>document.querySelector('[data-col="15"]').click());
 ok(await ev(()=>RM.pv.idx===15&&/צריך 2 מטבעות/.test(document.getElementById('rmDrawer').textContent)&&document.querySelector('[data-hit="surf:wl"] polygon').getAttribute('fill')==='url(#rmRainbow)'),'rainbow costs 2 and previews as a gradient');

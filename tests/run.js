@@ -38,6 +38,7 @@ const TESTS = [
   ['surfpattest','surfpattest.js','patterns on the walls and floor'],
   ['rotatetest','rotatetest.js','turning items and the bed'],
   ['ghosttaptest','ghosttaptest.js','a tap on the room does not tap the drawer that appears (touch)'],
+  ['whitedefaulttest','whitedefaulttest.js','new profiles start with white walls; older saves keep purple'],
   ['groundtest','groundtest.js','grounding: from the real sprite pixels, every floor item and bed level stands on its footprint corners (no floating)'],
   ['colortest','colortest.js','colors of parts: bed blanket/sheet/pillow/curtains, pots, furniture; palette, pattern, prices, free switching, repainting, saving'],
   ['spacetest','spacetest.js','personal space: locked teaser, unlock ceremony, poof, room, zoom/pan, upgrades and colors cost tokens'],
