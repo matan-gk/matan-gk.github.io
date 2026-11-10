@@ -466,3 +466,11 @@ Plan: `docs/ROTATION_PLAN.md`. A placed thing has `o` (saved only when not 0): 0
 ## Step 21: no ghost tap on small screens (branch `fix-drawer-ghost-tap`, off `rotate-mirror`; version 2026.11.09b)
 
 Bug: on a phone, touching a room item opened the drawer (a bottom sheet) at once, and the browser's click for that same touch then landed on whatever button was now under the finger: the bed was deleted, or the floor got a pattern. Fix: the room's `pointerup` handler records `RM.tapAt` and `RM.tapTouch` (any pointer that is not a mouse); the drawer click handler ignores clicks for `GHOST_MS` (600 ms) after such a tap. A mouse is never delayed. Test: `tests/ghosttaptest.js`.
+
+## Automatic tests on GitHub (branch `ci-tests`, off main; no version change)
+
+`.github/workflows/tests.yml` runs the whole suite (`tests/`, about 5 minutes) on every pull request, every push to `main` and by hand (Actions tab, "Run workflow"). It installs Node, Playwright and Chromium on a fresh Ubuntu runner, runs `node run.js`, and retries a failed test once (a few checks, such as one in `layerstest`, are random); logs and screenshots of a failed run are kept for 7 days as the `test-output` download.
+
+To make a failing run block a merge: Settings > Branches > add a rule for `main` > "Require status checks to pass" > choose `test`.
+
+Optional gated deploy: the workflow also has a `deploy` job that publishes the site (the repository root, as today) only after `test` passes. It is off until the repository variable `PAGES_VIA_ACTIONS` is `true` (Settings > Secrets and variables > Actions > Variables) and Settings > Pages > Source is "GitHub Actions". Until then Pages keeps deploying from the branch as before. To go back, set Source to "Deploy from a branch". Hosting stays free and the address does not change; with this source Jekyll is not run, so files are served as they are.
