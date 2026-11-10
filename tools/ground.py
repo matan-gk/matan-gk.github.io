@@ -58,13 +58,13 @@ report=[]
 GU=int(re.search(r'const GU = (\d+);',s).group(1))
 m=re.search(r'const ROOM_CATALOG = \[\n(.*?)\n\];',s,re.S)
 ents=[json.loads(re.sub(r'([{,])([a-z]+):',r'\1"\2":',l.strip().rstrip(','))) for l in m.group(1).split('\n') if l.strip().startswith('{')]
-FILL={'toybox1','toybox2','toybox3','desk','desk_turn','cloud','armchair','piano'}
+FILL={'toybox1','toybox2','toybox3','desk','cloud','armchair','piano'}
 out=[]
 for e in ents:
     fw,fd=e.get('fw',1)/GU,e.get('fd',1)/GU   # catalog sizes are in grid units; the fitting below is in cells
     if e['id'] in FILL:
         P,sl=sil_pts(e['src'])
-        if e['id'] in('desk','desk_turn'):
+        if e['id'] in('desk',):
             L,F,R=legs(e['src'],4,6); P={'left':L,'front':F,'right':R,'back':(L[0]+R[0]-F[0],L[1]+R[1]-F[1])}
             sx,sy,tx,ty,res=wfit(P,fw,fd,.12,{'front':3}); how='legs'
         else:

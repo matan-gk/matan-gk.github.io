@@ -16,7 +16,7 @@ ok(await ev(()=>['teddy','laptop','chess','globe','pl00','pl18','mirror','guitar
 ok(await ev(()=>['rug_sq','mat','chair','telescope','dressbox','piano','desk','slide','easel','easel2','toybox1'].every(k=>!canSit(catOf(k)))),'rugs, 2x2 and bigger things, and tall easels cannot');
 ok(await ev(()=>{const c={id:'x',fw:1,fd:1,r:[0,0,10,10],sm:0};const d={id:'y',fw:2*GU,fd:2*GU,r:[0,0,10,10],sm:1};return !canSit(c)&&canSit(d);}),'c.sm forces no / yes');
 // hosts
-ok(await ev(()=>['table','desk','desk_turn','toybox1','toybox2','toybox3'].every(k=>{const c=catOf(k),tp=c.top;return tp&&tp.c[0]>=0&&tp.c[1]>=0&&(tp.c[0]+tp.c[2])*GU<=fwOf(c)&&(tp.c[1]+tp.c[3])*GU<=fdOf(c)&&tp.z>0;})&&ROOM_CATALOG.filter(c=>c.top).length===6),'6 hosts (low table, desk and its turn, 3 toy boxes) with a top inside their footprint');
+ok(await ev(()=>['table','desk','toybox1','toybox2','toybox3'].every(k=>{const c=catOf(k),tp=c.top;return tp&&tp.c[0]>=0&&tp.c[1]>=0&&(tp.c[0]+tp.c[2])*GU<=fwOf(c)&&(tp.c[1]+tp.c[3])*GU<=fdOf(c)&&tp.z>0;})&&ROOM_CATALOG.filter(c=>c.top).length===5),'5 hosts (low table, desk, 3 toy boxes) with a top inside their footprint');
 ok(await ev(()=>[1,2,3,4,5].every(l=>{const b=BED_TOP[l],fp=ROOM_ART.bed[l-1].fp;return b.c[0]+b.c[2]<=fp[0]&&b.c[1]+b.c[3]<=fp[1]&&b.z>0&&b.cells.length>=3&&b.cells.every(q=>q[0]>=b.c[0]&&q[0]<b.c[0]+b.c[2]&&q[1]>=b.c[1]&&q[1]<b.c[1]+b.c[3]);})),'the bed has a list of visible top cells inside its footprint on every level');
 ok(await ev(()=>surfSize(catOf('teddy')).join()===fwOf(catOf('teddy'))+','+fdOf(catOf('teddy'))&&canSit(catOf('teddy'))),'what an item takes up on a top is its own footprint');
 

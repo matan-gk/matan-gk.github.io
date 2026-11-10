@@ -1,4 +1,6 @@
-# Turning items: plan (branch `rotate-plan`, a plan only, no code yet)
+# Turning items: plan (branch `rotate-plan`)
+
+**Status:** phase 1 is built (branch `rotate-mirror`, ENHANCEMENTS Step 20). Differences from the plan: the old turned pictures were not kept as the `o: 1` art (the mirror is used for all, they differ by about 2%), so the four duplicates are simply removed and migrated; the turn button is in the thing's drawer, the placing drawer and the bed's drawer.
 
 Goal: any placed item, and the bed, can be turned (a turn button in its drawer and while placing). The table and bed are the first cases; everything directional should work.
 

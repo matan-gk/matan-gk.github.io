@@ -19,7 +19,7 @@ ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..') + '/'
 HTML = ROOT + 'math-quest.html'
 GU = int(re.search(r'const GU = (\d+);', open(HTML, encoding='utf-8').read()).group(1))   # grid units per old cell: catalog fw x fd are in units, the measuring is in cells
 # seed (fraction of the picture width, height) inside each top face; tol = colour tolerance, grad = outline barrier (None: dark pixels only)
-HOSTS = {'table': dict(seed=None, tol=28), 'desk': dict(seed=None, tol=28), 'desk_turn': dict(seed=None, tol=28),
+HOSTS = {'table': dict(seed=None, tol=28), 'desk': dict(seed=None, tol=28),
          'toybox1': dict(seed=(.49, .29), tol=22, grad=10), 'toybox2': dict(seed=(.49, .27), tol=22, grad=10), 'toybox3': dict(seed='purple', tol=30)}
 TOL_Z = {'toybox3': 10}      # the strapped chest's lid is cut in pieces; its two estimates differ a little
 # the bed's top plane per level (z, ox), found by matching the diamond to the mattress (see bed_fit) and checked by eye
