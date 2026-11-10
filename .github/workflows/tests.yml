@@ -1,0 +1,72 @@
+# Runs the whole test suite (tests/) on every pull request and on every push to main.
+# Optional: when the repository variable PAGES_VIA_ACTIONS is 'true' (and Settings > Pages > Source is
+# "GitHub Actions"), the site is deployed from here, and only after the tests pass. See docs/ENHANCEMENTS.md.
+name: tests
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: tests/package.json
+      - name: Install Playwright and its Chromium
+        working-directory: tests
+        run: |
+          npm install
+          npx playwright install --with-deps chromium
+      - name: Run the suite, retrying a failed test once (a few checks are random)
+        working-directory: tests
+        run: |
+          node run.js 2>&1 | tee suite.txt || {
+            failed=$(grep -oP 'FAILED: \K.*' suite.txt | tail -1 | tr -d ' ')
+            [ -n "$failed" ] || exit 1
+            echo "::warning::retrying once: $failed"
+            node run.js --only "$failed"
+          }
+      - name: Keep the logs and screenshots of a failed run
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-output
+          path: tests/_out/
+          retention-days: 7
+
+  deploy:
+    # off until the repository variable PAGES_VIA_ACTIONS is set to 'true'
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main' && vars.PAGES_VIA_ACTIONS == 'true'
+    needs: test
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+      - id: deployment
+        uses: actions/deploy-pages@v4
