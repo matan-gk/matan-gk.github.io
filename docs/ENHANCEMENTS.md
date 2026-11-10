@@ -474,3 +474,5 @@ Bug: on a phone, touching a room item opened the drawer (a bottom sheet) at once
 To make a failing run block a merge: Settings > Branches > add a rule for `main` > "Require status checks to pass" > choose `test`.
 
 Optional gated deploy: the workflow also has a `deploy` job that publishes the site (the repository root, as today) only after `test` passes. It is off until the repository variable `PAGES_VIA_ACTIONS` is `true` (Settings > Secrets and variables > Actions > Variables) and Settings > Pages > Source is "GitHub Actions". Until then Pages keeps deploying from the branch as before. To go back, set Source to "Deploy from a branch". Hosting stays free and the address does not change; with this source Jekyll is not run, so files are served as they are.
+
+Update (branch `ci-node24`, off main): the workflow's actions are moved to the versions that run on Node 24 (GitHub is retiring Node 20 for actions): checkout v5, setup-node v5, upload-artifact v6, upload-pages-artifact v5, deploy-pages v5, configure-pages v6. This is separate from the Node 22 the tests themselves run on. The deploy job can only be seen running after a merge to main.
