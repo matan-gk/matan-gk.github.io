@@ -367,6 +367,8 @@ h1{
 .mdot{display:inline-block; width:8px; height:8px; border-radius:50%; background:var(--good); margin-inline-start:6px}
 .mdiv{height:1px; background:var(--card2); margin:5px 4px}
 .mver{font-size:.72rem; color:var(--muted); padding:6px 10px 4px}
+.pa-ver{margin-top:18px; padding:6px 0; font-size:.75rem; color:var(--muted); text-align:center}
+.pa-ver a{color:inherit}
 .pshell{display:flex; gap:10px; align-items:flex-start}
 .vtabs{flex:none; width:82px; display:flex; flex-direction:column; gap:4px; position:sticky; top:0}
 .vtab{border:0; background:transparent; color:var(--muted); font-family:'Rubik',sans-serif; font-weight:800; font-size:.8rem; line-height:1.25; text-align:start; padding:10px 8px; border-radius:12px; cursor:pointer}
@@ -2372,7 +2374,9 @@ function cloudProfileFromDoc(C, helpers){
 // ===== CLOUD (Google sign-in, cloud progress, problem reports) =====
 // Local-first: the game always works from this device's storage. The cloud is a mirror, so no internet / no account / no quota never blocks play.
 // Everything here is off while CLOUD_CONFIG is null. See firebase/SETUP.md for how to create the (free) Firebase project and paste its settings below.
-const APP_VERSION = '2026.11.10b';       // keep equal to VERSION in sw.js (a test checks it)
+const APP_VERSION = '2026.11.10c';       // keep equal to VERSION in sw.js (a test checks it)
+const BUILD_COMMIT = '';                 // the full id of the commit this page was built from: the deploy workflow (.github/workflows/tests.yml) fills it in; empty in a plain checkout
+const REPO_URL = 'https://github.com/matan-gk/matan-gk.github.io';
 const CLOUD_CONFIG = {apiKey:"AIzaSyAlq_TJNGvWPJpUrpbdq_hkAoURydqMzm0", authDomain:"learning-quest-1.firebaseapp.com", projectId:"learning-quest-1", appId:"1:98931179722:web:78fb00084ccba3efb53433"};   // e.g. {apiKey:'...', authDomain:'xxx.firebaseapp.com', projectId:'xxx', appId:'...'}
 const CLOUD_LIMITS = {
   pushDelayMs: 60000,          // at most one upload per profile per minute while playing
@@ -2758,9 +2762,14 @@ function renderCloudAnonHTML(){
     <div class="pa-actions"><button type="button" class="pa-btn" data-pact="famnew" ${cloud.status==='signingin'?'disabled':''}>התחלת גיבוי אנונימי</button></div></section>
     <section class="pa-card"><h2 class="pa-h">יש לי קוד</h2><p class="pa-sub">מצטרפים לגיבוי שכבר נוצר במכשיר אחר.</p>${famJoinForm(false)}</section>`;
 }
+// the version, and (on the deployed site) the commit it was built from, as a link; tools/version_commit.py finds the commit from a version
+function versionHTML(){
+  const c = /^[0-9a-f]{40}$/.test(BUILD_COMMIT) ? BUILD_COMMIT : '';
+  return `גרסה <b dir="ltr">${esc(APP_VERSION)}</b>` + (c ? ` · <a href="${REPO_URL}/commit/${c}" target="_blank" rel="noopener" dir="ltr">${c.slice(0,7)}</a>` : '');
+}
 function renderReportHTML(){
   return `<section class="pa-card"><h2 class="pa-h">דיווח על בעיה</h2><p class="pa-sub">משהו לא עובד, שאלה לא ברורה או שגויה? אפשר לשלוח דיווח.</p><div class="pa-actions" style="margin-top:0"><button type="button" class="pa-btn" data-pact="report">דיווח על בעיה</button></div>
-    <p class="pa-sub" style="margin-top:12px">גרסה ${esc(APP_VERSION)}</p></section>`;
+    <p class="pa-sub" style="margin-top:12px">${versionHTML()}</p></section>`;
 }
 
 
@@ -6167,7 +6176,7 @@ function renderProfiles(){
   }
   const keep = paLastTab===profTab ? prevTop : 0;
   const nav = Object.keys(PANEL_NAV).map(k=>`<button type="button" role="tab" class="vtab pa-tab ${profTab===k?'on':''}" aria-selected="${profTab===k}" data-pact="tab" data-id="${k}"><span class="pa-ico" aria-hidden="true">${PANEL_ICON[k]}</span><span class="pa-lbl">${PANEL_NAV[k]}</span><span class="pa-lbl-s">${PANEL_SHORT[k]}</span></button>`).join('');
-  body.innerHTML = `<div class="pa-shell"><nav class="pa-nav vtabs" role="tablist" aria-orientation="vertical" aria-label="חלקים">${nav}</nav><main class="pa-main" id="paMain"><div class="pa-page">${content}</div></main></div>`;
+  body.innerHTML = `<div class="pa-shell"><nav class="pa-nav vtabs" role="tablist" aria-orientation="vertical" aria-label="חלקים">${nav}</nav><main class="pa-main" id="paMain"><div class="pa-page">${content}<div class="pa-ver" id="paVer">${versionHTML()}</div></div></main></div>`;
   paLastTab = profTab;
   if(keep) document.getElementById('paMain').scrollTop = keep;
 }

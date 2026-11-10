@@ -490,3 +490,10 @@ Everything that is not placed yet is drawn the same way; a placed thing never is
 - **Settle:** when something is confirmed (placed, moved, bought, or an owned colour chosen) it settles: items bob into place (`rmsettle`), surfaces and windows flash (`rmflash`), and a few sparkles fly out (`settleFx`). All of it goes away by itself.
 - With "reduce motion" on in the device nothing moves; the dashes stay.
 Test: `tests/pendingtest.js`. No new artwork.
+
+## Step 24: the version in the parent area, and a way to the commit (branch `version-in-parent`, off `pending-look`; version 2026.11.10c)
+
+- **Parent area:** every tab ends with "גרסה <version>" (`versionHTML()`, element `#paVer`); the report tab shows it too, as before.
+- **From the deployed site to the commit:** `BUILD_COMMIT` in `math-quest.html` is empty in the repository. The deploy job in `.github/workflows/tests.yml` writes the full id of the commit being deployed into that line (and fails if it did not get in), so on the live site the version is followed by the short id as a link to `github.com/matan-gk/matan-gk.github.io/commit/<id>`. In a plain checkout or on any other host there is just the version.
+- **From a version to the commit:** `python3 tools/version_commit.py 2026.11.10b` prints the first and last commit that have that version and the merge that brought it into main (a version can span several commits when fixes are made before the next bump). `python3 tools/version_commit.py <short id>` gives the version of a commit; with no argument it uses the working copy's version. It needs the full history (`git fetch --unshallow` in a shallow clone).
+- Test: `tests/versiontest.js` runs the workflow's real stamp step on a copy of the page and checks the parent area with and without the stamp.
