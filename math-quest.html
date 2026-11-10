@@ -806,6 +806,10 @@ body[data-view="space"] #spaceView{box-sizing:border-box; display:flex; flex-dir
 .rmz{border:0; background:var(--card); color:var(--text); width:40px; height:40px; border-radius:50%; font-size:1.1rem; font-weight:800; cursor:pointer; box-shadow:0 2px 6px var(--shadow)}
 .rmdrawer{position:absolute; left:0; right:0; bottom:0; max-height:60%; overflow:auto; background:var(--card); border-radius:18px 18px 0 0; box-shadow:0 -6px 22px rgba(0,0,0,.25); padding:12px; z-index:3; display:flex; flex-direction:column; gap:8px; text-align:center}
 .rmdrawer[hidden]{display:none}
+.rmdrawer.struct{overflow:hidden; padding:0}
+.rmdrawer.struct .rmd-top{flex:none; padding:12px 12px 0}
+.rmdrawer.struct .rmd-body{flex:1 1 auto; min-height:0; overflow:auto; padding:8px 12px; display:flex; flex-direction:column; gap:8px; overscroll-behavior:contain}
+.rmdrawer.struct .rmd-foot{flex:none; display:flex; flex-direction:column; gap:8px; padding:8px 12px 12px; border-top:1px solid var(--card2); background:var(--card)}
 .rmdrawer.mini{flex-direction:row; flex-wrap:wrap; align-items:center; justify-content:center; gap:6px 10px; padding:8px 12px; max-height:none}
 .rmdrawer.mini .rmsh-t{font-weight:800; font-size:14px}
 .rmdrawer.mini .rmsh-need,.rmdrawer.mini .rmsh-s{margin:0; font-size:13px}
@@ -2374,7 +2378,7 @@ function cloudProfileFromDoc(C, helpers){
 // ===== CLOUD (Google sign-in, cloud progress, problem reports) =====
 // Local-first: the game always works from this device's storage. The cloud is a mirror, so no internet / no account / no quota never blocks play.
 // Everything here is off while CLOUD_CONFIG is null. See firebase/SETUP.md for how to create the (free) Firebase project and paste its settings below.
-const APP_VERSION = '2026.11.10c';       // keep equal to VERSION in sw.js (a test checks it)
+const APP_VERSION = '2026.11.11a';       // keep equal to VERSION in sw.js (a test checks it)
 const BUILD_COMMIT = '';                 // the full id of the commit this page was built from: the deploy workflow (.github/workflows/tests.yml) fills it in; empty in a plain checkout
 const REPO_URL = 'https://github.com/matan-gk/matan-gk.github.io';
 const CLOUD_CONFIG = {apiKey:"AIzaSyAlq_TJNGvWPJpUrpbdq_hkAoURydqMzm0", authDomain:"learning-quest-1.firebaseapp.com", projectId:"learning-quest-1", appId:"1:98931179722:web:78fb00084ccba3efb53433"};   // e.g. {apiKey:'...', authDomain:'xxx.firebaseapp.com', projectId:'xxx', appId:'...'}
@@ -5558,9 +5562,21 @@ function settleFx(sel, flash){
 }
 // on a narrow screen the drawer covers the room, so while a purchase or a placement is being previewed it shrinks to a bar with just buy / cancel and a button to open it again
 const narrowRoom = () => !window.matchMedia('(min-width:900px)').matches;
+// the drawer is three parts: the title and coins on top, the part that scrolls in the middle (the items, brushes, thumbnails), and the buttons that act on it (buy / place / cancel, close, shrink) pinned at the bottom
+function pinDrawerParts(d, keepTop){
+  const kids = [...d.children], top = kids.filter(e=>e.matches('.rmsh-h'));
+  const foot = kids.filter(e=>e.matches('.rmsh-need, .rmsh-s.lost, .rmsh-btns:not(.fxbtns), [data-close], [data-min]'));
+  if(!top.length && !foot.length) return;
+  const body = document.createElement('div'); body.className = 'rmd-body';
+  body.append(...kids.filter(e=>!top.includes(e) && !foot.includes(e)));
+  const t = document.createElement('div'); t.className = 'rmd-top'; t.append(...top);
+  const f = document.createElement('div'); f.className = 'rmd-foot'; f.append(...foot);
+  d.replaceChildren(t, body, f); d.classList.add('struct'); body.scrollTop = keepTop || 0;
+}
 function renderDrawer(){
+  const d0 = document.getElementById('rmDrawer'), keepTop = d0 && d0.querySelector('.rmd-body') ? d0.querySelector('.rmd-body').scrollTop : 0;
   renderDrawerBody();
-  const d = document.getElementById('rmDrawer'); if(!d) return;
+  const d = document.getElementById('rmDrawer'); if(!d) return; d.classList.remove('struct');
   const prev = !!(RM.pl || RM.pv);
   if(!prev) RM.big = false;
   const mini = prev && narrowRoom() && !RM.big;
@@ -5573,6 +5589,7 @@ function renderDrawer(){
   }
   if(RM.note){ d.insertAdjacentHTML('afterbegin', `<div class="rmnote" role="status">${RM.note}</div>`); }
   RM.note = null;
+  if(!mini) pinDrawerParts(d, keepTop);
 }
 const nudgeHTML = () => `<div class="rmnudge" role="group" aria-label="הזזה קטנה">${[['↖','-1,0','למעלה ושמאלה'],['↗','0,-1','למעלה וימינה'],['↙','0,1','למטה ושמאלה'],['↘','1,0','למטה וימינה']].map(([g,v,l])=>`<button type="button" class="btn ghost" data-nudge="${v}" aria-label="הזיזו צעד אחד ${l}">${g}</button>`).join('')}</div>`;
 const FX_IDS = ['bed','window'], fxAway = () => FX_IDS.filter(id=>!space.fix[id]);   // the bed and the window that are put away in the inventory

@@ -41,6 +41,7 @@ const TESTS = [
   ['whitedefaulttest','whitedefaulttest.js','new profiles start with white walls; older saves keep purple'],
   ['pendingtest','pendingtest.js','pending previews look different from placed things: marching dashes, pulsing ghost, dashed bar, settle animation'],
   ['versiontest','versiontest.js','version in the parent area, the commit stamp from the deploy workflow, tools/version_commit.py'],
+  ['drawerpintest','drawerpintest.js','the drawer: title, buy / place / cancel and close stay visible; only the middle scrolls'],
   ['groundtest','groundtest.js','grounding: from the real sprite pixels, every floor item and bed level stands on its footprint corners (no floating)'],
   ['colortest','colortest.js','colors of parts: bed blanket/sheet/pillow/curtains, pots, furniture; palette, pattern, prices, free switching, repainting, saving'],
   ['spacetest','spacetest.js','personal space: locked teaser, unlock ceremony, poof, room, zoom/pan, upgrades and colors cost tokens'],
