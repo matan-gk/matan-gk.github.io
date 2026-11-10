@@ -480,3 +480,13 @@ Update (branch `ci-node24`, off main): the workflow's actions are moved to the v
 ## Step 22: white walls for new profiles (branch `white-default-walls`, off main; version 2026.11.10a)
 
 A profile made from now on starts with both walls white (colour index 0): the white brush is selected and already owned, and purple is a normal purchase like the other colours. The floor stays brown. The profile is marked in its save with `space.dw = 1` (set where a new profile is made, kept by `spaceClean`, so save codes and cloud sync carry it). A save without `dw` is an older profile and keeps the old defaults (`ROOM_DEFAULT`, purple walls), whether or not it ever opened the room, so no existing profile or save changes. The marker only decides what a missing value falls back to and which default colour is always owned; anything the player chose or bought stays as saved. Test: `tests/whitedefaulttest.js`.
+
+## Step 23: placed vs. not placed yet (branch `pending-look`, off main; version 2026.11.10b)
+
+Everything that is not placed yet is drawn the same way; a placed thing never is.
+- **Marching dashes** (class `pend`, one animation `rmants` for all of them, constant size on screen at any zoom via `vector-effect`): around the footprint of an item, the bed or the window being placed or moved (the tile keeps green / red for fits / does not fit), around a wall or the floor shown in a colour or pattern that is not bought yet (with a "תצוגה מקדימה" tag in the middle of that surface), around the bed or an item while an upgrade or colour of it is previewed, and on the lit squares where a small thing could stand on furniture. A white line under the dashed one keeps them visible on any colour.
+- **Ghost:** an item being placed is see-through (about 60%) and pulses gently (`rmpulse`).
+- **Drawer:** the buy / place / cancel bar has the same dashed line on top (same speed).
+- **Settle:** when something is confirmed (placed, moved, bought, or an owned colour chosen) it settles: items bob into place (`rmsettle`), surfaces and windows flash (`rmflash`), and a few sparkles fly out (`settleFx`). All of it goes away by itself.
+- With "reduce motion" on in the device nothing moves; the dashes stay.
+Test: `tests/pendingtest.js`. No new artwork.
