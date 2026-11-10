@@ -64,6 +64,10 @@ jobs:
       cancel-in-progress: false
     steps:
       - uses: actions/checkout@v5
+      - name: Stamp the commit into the page (shown next to the version in the parent area)
+        run: |
+          sed -i "s/^const BUILD_COMMIT = '';/const BUILD_COMMIT = '${GITHUB_SHA}';/" math-quest.html
+          grep -q "^const BUILD_COMMIT = '${GITHUB_SHA}';" math-quest.html
       - uses: actions/configure-pages@v6
       - uses: actions/upload-pages-artifact@v5
         with:
