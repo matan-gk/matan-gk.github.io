@@ -48,6 +48,14 @@ Batches (each item's footprint in tiles of the template's 10 x 10 floor, as the 
 - D, characters (6): monkey, two bunnies, teddy, unicorn doll, ladybug (all 1x1): the back of the character, no face.
 Ask for 4 to 6 items per sheet (for example batch A as three sheets) so the pictures stay large; the order of the cells must follow the order of the attached references.
 
+### G.1 Corrections after the first back-view sheet (9 items: chair, cloud sofa, desk, wardrobe, big wardrobe, bookshelf, piano, dollhouse, mirror)
+Good and in the game: wardrobe, big wardrobe, bookshelf, piano, dollhouse, mirror, and the cloud sofa from the sheet with the cyan diamonds. What to ask again:
+- **Chair.** Both versions show the backrest BEHIND the seat, seen from the front, so it is the front view again (or its mirror). A back view is the chair turned half way round: the backrest is the nearest part, in front of the seat and hiding part of it, we see the BACK of the backrest, the seat's top beyond it, and the four legs. Prompt: "Draw this exact chair turned 180 degrees about its vertical axis, same camera, same size, same colours. We now see it from behind: the back of the backrest in the foreground (a plain flat panel, no cushion), the seat's top visible beyond it, the legs. The four feet stand on the same four points as in the reference. White background, no ground lines."
+- **Cloud sofa.** The sheet with the cyan footprints is right (a smooth back, a fold at the side). The clean sheet still shows the seat dent, which is the front.
+- **Desk.** Not needed: the desk is the same from both ends.
+- **Dollhouse.** Usable. Its back is about 12% lower than the front (the roof peak) and the left face is narrower than the right although the footprint is square. If it looks off when turning, ask for the same house with the roof peak as high as the reference.
+- **Both sheets in one go:** please send the clean version only (a footprint drawn in the picture has to be cut out afterwards); if a footprint is wanted, ask for it as a separate copy.
+
 ## What the sheets you sent are good for
 - **Furniture sheet 1 (isometric beds, tables, desk, mirror, telescope):** the right camera. Facings differ between items (some face left); redraw with "all face front-right".
 - **Furniture sheet 2 (front-on):** a different projection; usable only for wall items (windows, shelves, mirror), not for floor items.
