@@ -42,3 +42,10 @@ Goal: any placed item, and the bed, can be turned (a turn button in its drawer a
 
 ## Art for phase 2 and 3
 See `docs/personal-space/GEMINI_PROMPTS.md`, section G. Total 39 pictures: batch A (14 furniture), B (5 bed levels), C (14 play items), D (6 characters).
+
+## Phase 2 status (branch `rotate-art-1`, first sheet of batch A: 9 items)
+- **Wired (`back` in the catalog entry):** cloud sofa, wardrobe, big wardrobe, bookshelf, piano, dollhouse, standing mirror. Made by `tools/backart.py` from `art/back-views-a.jpg` (the cloud sofa's from `art/back-views-a-footprints.jpg`, its cyan diamond keyed out). A turn now cycles 0 as drawn, 1 mirrored, 2 back, 3 back mirrored.
+- **Desk: no back picture needed.** It is the same from both ends, so its half turn looks like the front; the picture on the sheet is drawn with its long side the other way, which is just the mirrored look (it would not fit the 4x8 footprint). The desk keeps its two looks.
+- **Chair: not wired, the picture is not a back view.** Both versions on the sheets show the backrest behind the seat, seen from the front (the clean one is the front-right look again, the other the mirrored one). From behind, the backrest is nearer than the seat and hides part of it. See GEMINI_PROMPTS.md, G.1.
+- **What lies on a host through the four looks:** the looks form a group (as drawn, mirror, half turn, both); a step is `a xor b`, and `turnKids` moves each thing and turns it the same way. Hosts with a back picture need their top measured on it (`back.top`, tools/surfaces.py); none of the seven is a host yet.
+- Remaining in batch A: chair, armchair, three toy boxes, costume box (and the chair again).

@@ -37,6 +37,7 @@ const TESTS = [
   ['fixturetest','fixturetest.js','moving, deleting and upgrading the bed and the window'],
   ['surfpattest','surfpattest.js','patterns on the walls and floor'],
   ['rotatetest','rotatetest.js','turning items and the bed'],
+  ['backtest','backtest.js','full turning: back pictures, four looks, what lies on a host, painting, saves'],
   ['ghosttaptest','ghosttaptest.js','a tap on the room does not tap the drawer that appears (touch)'],
   ['whitedefaulttest','whitedefaulttest.js','new profiles start with white walls; older saves keep purple'],
   ['pendingtest','pendingtest.js','pending previews look different from placed things: marching dashes, pulsing ghost, dashed bar, settle animation'],
