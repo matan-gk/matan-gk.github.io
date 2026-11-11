@@ -49,3 +49,8 @@ See `docs/personal-space/GEMINI_PROMPTS.md`, section G. Total 39 pictures: batch
 - **Chair: not wired, the picture is not a back view.** Both versions on the sheets show the backrest behind the seat, seen from the front (the clean one is the front-right look again, the other the mirrored one). From behind, the backrest is nearer than the seat and hides part of it. See GEMINI_PROMPTS.md, G.1.
 - **What lies on a host through the four looks:** the looks form a group (as drawn, mirror, half turn, both); a step is `a xor b`, and `turnKids` moves each thing and turns it the same way. Hosts with a back picture need their top measured on it (`back.top`, tools/surfaces.py); none of the seven is a host yet.
 - Remaining in batch A: chair, armchair, three toy boxes, costume box (and the chair again).
+
+## Phase 2 status, second batch (branch `rotate-art-2`)
+- **Wired:** the three toy boxes (strapped chest, plain box, rounded chest) from `art/back-views-b.jpg`; they are hosts, so each back picture also has its top measured (`back.top`, tools/surfaces.py).
+- **Art usable but not wired: beds 1-3.** The three plain beds are good back views. Beds are not catalog items (`ROOM_ART.bed`, five levels, with masks for the blanket, sheet, pillow and curtain, `bedSrc`, `turnBed` has two looks only), so they need their own step: a back picture and mask per level and a four-look `turnBed`.
+- **Still front views (art to redo, prompts in GEMINI_PROMPTS.md G.2):** chair (third try, `art/back-views-c-retry.jpg`), costume box, canopy beds level 4 and 5.

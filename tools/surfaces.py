@@ -21,6 +21,8 @@ GU = int(re.search(r'const GU = (\d+);', open(HTML, encoding='utf-8').read()).gr
 # seed (fraction of the picture width, height) inside each top face; tol = colour tolerance, grad = outline barrier (None: dark pixels only)
 HOSTS = {'table': dict(seed=None, tol=28), 'desk': dict(seed=None, tol=28),
          'toybox1': dict(seed=(.49, .29), tol=22, grad=10), 'toybox2': dict(seed=(.49, .27), tol=22, grad=10), 'toybox3': dict(seed='purple', tol=30)}
+# the same for the back pictures (`back` of the catalog entry): seed inside the lid of each
+HOSTS_BACK = {'toybox1': dict(seed=(.5, .25), tol=22, grad=10), 'toybox2': dict(seed=(.6, .2), tol=22, grad=10), 'toybox3': dict(seed='purple', tol=30, back=1)}
 TOL_Z = {'toybox3': 10}      # the strapped chest's lid is cut in pieces; its two estimates differ a little
 # the bed's top plane per level (z, ox), found by matching the diamond to the mattress (see bed_fit) and checked by eye
 BED_PARAMS = {1: (66, 32), 2: (64, 30), 3: (84, 18), 4: (52, 39), 5: (82, 40)}
@@ -39,7 +41,7 @@ def face(c, o):
     if o['seed'] is None:
         ys, xs = np.where(al); y0 = ys.min(); sx = int(xs[ys == y0].mean()); sy = int(y0 + 14 * S * .5 + 6)
     elif o['seed'] == 'purple':
-        sy, sx = int(.27 * im.shape[0]), int(.36 * im.shape[1])
+        sy, sx = int(.27 * im.shape[0]), int((.5 if o.get('back') else .36) * im.shape[1])
     else:
         sy, sx = int(o['seed'][1] * im.shape[0]), int(o['seed'][0] * im.shape[1])
     col = im[sy-2:sy+3, sx-2:sx+3, :3].reshape(-1, 3).mean(0); d = np.abs(im[..., :3] - col).max(2)
@@ -69,8 +71,9 @@ def _pip(poly, p):
 
 def cell_center(c_x, c_y, z, ox): return (50 * (c_x + .5 - c_y - .5) + ox, 25 * (c_x + .5 + c_y + .5) - z)
 
-def host_top(idn, c, cat):
-    hull = face(c, HOSTS[idn]); za, zb, _ = lift_est(c, hull); z = round((za + zb) / 2)
+def host_top(idn, c, cat, back=False):
+    if back: c = dict(c, src=c['back']['src'], r=c['back']['r'])
+    hull = face(c, (HOSTS_BACK if back else HOSTS)[idn]); za, zb, _ = lift_est(c, hull); z = round((za + zb) / 2)
     cx, cy, cw, cd = c['top']['c']
     bad = [(i, j) for i in range(cx, cx + cw) for j in range(cy, cy + cd) if not _pip(hull.tolist(), cell_center(i, j, z, 0))]
     return dict(z=z, za=za, zb=zb, hull=hull, bad_cells=bad)
@@ -93,7 +96,7 @@ def bed_cells(lv, arts):
 
 def main():
     check = '--check' in sys.argv
-    h, cat, arts = load(); fails = []; new = {}
+    h, cat, arts = load(); fails = []; new = {}; newb = {}
     for idn in HOSTS:
         c = cat[idn]; t = host_top(idn, c, cat); tol = TOL_Z.get(idn, 4)
         agree = abs(t['za'] - t['zb']) <= 2 * tol
@@ -102,6 +105,14 @@ def main():
         if abs(t['z'] - c['top']['z']) > tol: fails.append(f"{idn}: z on the page is {c['top']['z']}, the picture says {t['z']}")
         if t['bad_cells']: fails.append(f"{idn}: top cells {t['bad_cells']} are not on the top face")
         new[idn] = t['z']
+        if idn in HOSTS_BACK and c.get('back'):
+            t = host_top(idn, c, cat, True); old = (c['back'].get('top') or {}).get('z')
+            print(f"{idn:10s} BACK z by width {t['za']:.1f}, by depth {t['zb']:.1f} -> {t['z']}   page has {old}   cells off the face: {t['bad_cells']}")
+            if abs(t['za'] - t['zb']) > 2 * tol: fails.append(f'{idn} back: the two z estimates differ ({t["za"]:.1f} / {t["zb"]:.1f})')
+            if old is not None and abs(t['z'] - old) > tol: fails.append(f"{idn} back: z on the page is {old}, the picture says {t['z']}")
+            if old is None and check: fails.append(f'{idn} back: no top on the page: run python3 tools/surfaces.py')
+            if t['bad_cells']: fails.append(f"{idn} back: top cells {t['bad_cells']} are not on the top face")
+            newb[idn] = t['z']
     bed = {}
     for lv in range(1, 6):
         z, ox, cells, cov = bed_cells(lv, arts); bed[lv] = (z, ox, cells)
@@ -116,7 +127,9 @@ def main():
     for line in h.split('\n'):
         m = re.match(r'^  (\{"id":"([a-z0-9_]+)".*\}),?(\s*)$', line)
         if m and m.group(2) in new:
-            e = json.loads(m.group(1)); e['top']['z'] = new[m.group(2)]; line = '  ' + json.dumps(e, ensure_ascii=False, separators=(',', ':')) + (',' if line.rstrip().endswith(',') else '')
+            e = json.loads(m.group(1)); e['top']['z'] = new[m.group(2)]
+            if m.group(2) in newb and e.get('back'): e['back']['top'] = dict(e['top'], z=newb[m.group(2)])
+            line = '  ' + json.dumps(e, ensure_ascii=False, separators=(',', ':')) + (',' if line.rstrip().endswith(',') else '')
         out.append(line)
     h = '\n'.join(out); h = h.replace(page, want, 1)
     open(HTML, 'w', encoding='utf-8').write(h); print('written')

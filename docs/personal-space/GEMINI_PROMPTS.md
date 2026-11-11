@@ -56,6 +56,20 @@ Good and in the game: wardrobe, big wardrobe, bookshelf, piano, dollhouse, mirro
 - **Dollhouse.** Usable. Its back is about 12% lower than the front (the roof peak) and the left face is narrower than the right although the footprint is square. If it looks off when turning, ask for the same house with the roof peak as high as the reference.
 - **Both sheets in one go:** please send the clean version only (a footprint drawn in the picture has to be cut out afterwards); if a footprint is wanted, ask for it as a separate copy.
 
+### G.2 Second round (sheets b and the retry): what is left to draw
+Used from sheet b: the three toy boxes (wired). The three plain beds on sheet b are good back views (the pillow and headboard are nearest) but beds are not catalog items, so they wait for code, not art. Still front views, so they need a new drawing: the **chair** (third try), the **costume box**, **canopy bed level 4** and **canopy bed level 5**.
+
+Why the same mistake keeps coming back: the picture generator redraws the object it was shown, from the same side. Tell it where the CAMERA stays and which way the object FACES, and give it a check it can verify. Send each as its own image with the front picture attached, and ask for ONE item per image, on white, no ground lines, no sparkles or shadows added.
+
+Common opening (copy before each item): "The attached picture shows an item as seen by a fixed isometric camera, looking from above and from the lower front. Keep the camera, the scale, the line thickness and the colours exactly as they are. Do not move the camera. Instead turn the item itself 180 degrees about its vertical axis, so that what was facing the camera now faces away from it, and what was at the back is now nearest to us."
+
+1. **Chair.** "...Now the chair faces away from us (towards the upper left of the picture). Check list: (a) the BACKREST is the nearest part and is drawn LOWER in the picture than the seat; it hides the back half of the seat; (b) we see the back of the backrest: a flat plain panel with a thick edge, no cushion; (c) beyond it we see the top of the seat and its far edge; (d) the two back legs are nearest and the two front legs are farther, partly behind the seat. If the backrest is drawn higher in the picture than the seat, it is wrong."
+2. **Costume box.** "...Turn the box 180 degrees. The two visible sides are now the two sides that were hidden; draw the same star on each, a different colour from before is fine. The contents stay in the box but swapped front to back: the feather boa that was on the left is now on the right and the bunny ears that were on the right are now on the left; the crown is half hidden behind the nearest flap. The box lid flaps stay open in the same way."
+3. **Canopy bed, level 4.** "...Turn the bed 180 degrees. The HEADBOARD (the tall curved board with the pillow in front of it) is now the nearest end, at the lower left of the picture, and we see its outer side: plain, no carving. The pillow lies next to it on the mattress. The footboard (the lower, carved board) is now at the far end, upper right. All four posts, the canopy frame and the curtains are the same. If the pillow is at the far end of the bed, it is wrong."
+4. **Canopy bed, level 5 (unicorn).** same as level 4, and: "the unicorn carvings that were on the footboard are now on the far end, the nearest end is the plain back of the headboard. The unicorn on the canopy faces the same way as the bed, so it now looks away from us. No sparkles."
+
+If it still comes back as a front view, ask for the item **seen from directly behind in the same isometric camera**, and name the nearest and the farthest part in words; as a last resort, draw the item's mirror image (look 1) and I can use it as a back-mirrored look.
+
 ## What the sheets you sent are good for
 - **Furniture sheet 1 (isometric beds, tables, desk, mirror, telescope):** the right camera. Facings differ between items (some face left); redraw with "all face front-right".
 - **Furniture sheet 2 (front-on):** a different projection; usable only for wall items (windows, shelves, mirror), not for floor items.

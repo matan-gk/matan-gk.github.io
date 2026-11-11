@@ -1326,9 +1326,9 @@ const ROOM_CATALOG = [
   {"id":"pl18","n":"ערבת גבישים","p":3,"fw":2,"fd":2,"src":"assets/51189de144a4.webp","base":"assets/f857d337a7f7.webp","ref":0.902,"r":[-62.6,-127.2,125.9,158.3]},
   {"id":"pl19","n":"צמח הלב","p":3,"fw":2,"fd":2,"src":"assets/930d1b578640.webp","base":"assets/81b34c47c90c.webp","ref":0.8922,"r":[-50.1,-112.9,100.9,143.8]},
   {"id":"pl20","n":"צמח הקשת","p":3,"fw":2,"fd":2,"src":"assets/53c7b56432cb.webp","base":"assets/b4e8493a3b79.webp","ref":0.9,"r":[-49.8,-118.4,102.8,149.3]},
-  {"id":"toybox1","n":"ארגז צעצועים","p":4,"g":"furniture","fw":4,"fd":4,"src":"assets/38315132547c.webp","base":"assets/56f826e0ecdc.webp","dc":"#8fd3f4","ref":0.9588,"r":[-92.7,-61.4,185.3,160.5],"top":{"c":[0,0,2,2],"z":53}},
-  {"id":"toybox2","n":"תיבת צעצועים מעוגלת","p":5,"g":"furniture","fw":4,"fd":4,"src":"assets/987c8ae9c3b3.webp","base":"assets/31c9d55119c7.webp","dc":"#ff9fcb","ref":0.9706,"r":[-92.7,-65.1,185.3,164.3],"top":{"c":[0,0,2,2],"z":56}},
-  {"id":"toybox3","n":"תיבת אוצרות","p":6,"g":"furniture","fw":4,"fd":4,"src":"assets/02ae89f8d714.webp","base":"assets/a384fda6863b.webp","dc":"#c3a2f5","ref":0.9725,"r":[-92.0,-57.2,184.6,155.7],"top":{"c":[0,0,2,2],"z":53}},
+  {"id":"toybox1","n":"ארגז צעצועים","p":4,"g":"furniture","fw":4,"fd":4,"src":"assets/38315132547c.webp","base":"assets/56f826e0ecdc.webp","dc":"#8fd3f4","ref":0.9588,"r":[-92.7,-61.4,185.3,160.5],"top":{"c":[0,0,2,2],"z":53},"back":{"src":"assets/43865af62863.webp","base":"assets/69df3df5c113.webp","ref":0.9314,"r":[-92.0,-61.5,184.0,160.0],"top":{"c":[0,0,2,2],"z":54}}},
+  {"id":"toybox2","n":"תיבת צעצועים מעוגלת","p":5,"g":"furniture","fw":4,"fd":4,"src":"assets/987c8ae9c3b3.webp","base":"assets/31c9d55119c7.webp","dc":"#ff9fcb","ref":0.9706,"r":[-92.7,-65.1,185.3,164.3],"top":{"c":[0,0,2,2],"z":56},"back":{"src":"assets/1f04c85d0127.webp","base":"assets/9dc1368fb5ba.webp","ref":0.9549,"r":[-92.0,-62.5,184.0,161.1],"top":{"c":[0,0,2,2],"z":50}}},
+  {"id":"toybox3","n":"תיבת אוצרות","p":6,"g":"furniture","fw":4,"fd":4,"src":"assets/02ae89f8d714.webp","base":"assets/a384fda6863b.webp","dc":"#c3a2f5","ref":0.9725,"r":[-92.0,-57.2,184.6,155.7],"top":{"c":[0,0,2,2],"z":53},"back":{"src":"assets/e67ce8535f8d.webp","base":"assets/f0f53230f9d2.webp","ref":0.9588,"r":[-92.0,-58.2,184.0,156.7],"top":{"c":[0,0,2,2],"z":52}}},
   {"id":"desk","n":"שולחן כתיבה","p":6,"g":"furniture","fw":4,"fd":8,"src":"assets/534b527fc9f9.webp","base":"assets/3fad10c66f3a.webp","dc":"#f0d2a0","ref":0.9706,"r":[-216.0,-130.3,327.0,275.1],"top":{"c":[0,0,2,4],"z":110}},
   {"id":"cloud","n":"ספת ענן","p":6,"g":"furniture","fw":4,"fd":4,"src":"assets/6f352e5177c4.webp","base":null,"r":[-92.7,-89.1,185.4,188.6],"back":{"src":"assets/a36ef90f8e41.webp","r":[-92.0,-80.1,184.0,178.9]}},
   {"id":"mirror","n":"מראה","p":3,"g":"furniture","fw":2,"fd":2,"src":"assets/a0aa8e0fdffc.webp","base":null,"r":[-36.0,-88.6,72,125.6],"back":{"src":"assets/6b8626473156.webp","r":[-36.0,-94.8,72.0,131.8]}},
@@ -2380,7 +2380,7 @@ function cloudProfileFromDoc(C, helpers){
 // ===== CLOUD (Google sign-in, cloud progress, problem reports) =====
 // Local-first: the game always works from this device's storage. The cloud is a mirror, so no internet / no account / no quota never blocks play.
 // Everything here is off while CLOUD_CONFIG is null. See firebase/SETUP.md for how to create the (free) Firebase project and paste its settings below.
-const APP_VERSION = '2026.11.11b';       // keep equal to VERSION in sw.js (a test checks it)
+const APP_VERSION = '2026.11.11c';       // keep equal to VERSION in sw.js (a test checks it)
 const BUILD_COMMIT = '';                 // the full id of the commit this page was built from: the deploy workflow (.github/workflows/tests.yml) fills it in; empty in a plain checkout
 const REPO_URL = 'https://github.com/matan-gk/matan-gk.github.io';
 const CLOUD_CONFIG = {apiKey:"AIzaSyAlq_TJNGvWPJpUrpbdq_hkAoURydqMzm0", authDomain:"learning-quest-1.firebaseapp.com", projectId:"learning-quest-1", appId:"1:98931179722:web:78fb00084ccba3efb53433"};   // e.g. {apiKey:'...', authDomain:'xxx.firebaseapp.com', projectId:'xxx', appId:'...'}

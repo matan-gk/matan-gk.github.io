@@ -10,9 +10,9 @@ await p.fill('#pfName','X');await p.click('.gopt:has(input[value=f])');await p.c
 await ev(()=>{space.earned=2000;space.spent=0;space.unlocked=true;golden=['🍪'];renderLevels();openSpace();});
 const set=things=>ev(th=>{space.things=th;space.spent=0;space.fix={bed:{x:0,y:0},window:{w:'r',u:WIN_U}};space.lv.bed=1;space.top.bed=1;settleSurfaces();RM.sel=null;RM.pl=null;RM.list=null;RM.note=null;rmRedraw();renderDrawer();},things);
 const click=sel=>ev(s=>document.querySelector(s).click(),sel);
-const BACK=['cloud','wardrobe','wardrobe2','bookshelf','piano','dollhouse','mirror'];
+const BACK=['toybox1','toybox2','toybox3','cloud','wardrobe','wardrobe2','bookshelf','piano','dollhouse','mirror'];
 // the catalog
-ok(await ev(B=>B.every(id=>catOf(id).back&&oStates(catOf(id))===4)&&['chair','desk','table','toybox1'].every(id=>!catOf(id).back&&oStates(catOf(id))===2),BACK),'the '+BACK.length+' items with a back picture have four looks; the others two');
+ok(await ev(B=>B.every(id=>catOf(id).back&&oStates(catOf(id))===4)&&['chair','desk','table','armchair'].every(id=>!catOf(id).back&&oStates(catOf(id))===2),BACK),'the '+BACK.length+' items with a back picture have four looks; the others two');
 ok(await ev(async B=>{const load=s=>new Promise(r=>{const i=new Image();i.onload=()=>r(i.naturalWidth);i.onerror=()=>r(0);i.src=s;});for(const id of B){const k=catOf(id).back;if(!(await load(k.src)) || (k.base&&!(await load(k.base))) || !(k.r.length===4&&k.r[2]>0&&k.r[3]>0)) return false;}return true;},BACK),'every back picture loads and has a placement');
 ok(await ev(()=>ROOM_CATALOG.every(c=>!c.back||!c.top||c.back.top)),'a host with a back picture has its top measured on it');
 ok(await ev(()=>fpOf(catOf('wardrobe'),0).join('x')==='4x2'&&fpOf(catOf('wardrobe'),1).join('x')==='2x4'&&fpOf(catOf('wardrobe'),2).join('x')==='4x2'&&fpOf(catOf('wardrobe'),3).join('x')==='2x4'),'the back look has the same footprint, the mirrored back the swapped one');
