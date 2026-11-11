@@ -53,4 +53,4 @@ See `docs/personal-space/GEMINI_PROMPTS.md`, section G. Total 39 pictures: batch
 ## Phase 2 status, second batch (branch `rotate-art-2`)
 - **Wired:** the three toy boxes (strapped chest, plain box, rounded chest) from `art/back-views-b.jpg`; they are hosts, so each back picture also has its top measured (`back.top`, tools/surfaces.py).
 - **Art usable but not wired: beds 1-3.** The three plain beds are good back views. Beds are not catalog items (`ROOM_ART.bed`, five levels, with masks for the blanket, sheet, pillow and curtain, `bedSrc`, `turnBed` has two looks only), so they need their own step: a back picture and mask per level and a four-look `turnBed`.
-- **Still front views (art to redo, prompts in GEMINI_PROMPTS.md G.2):** chair (third try, `art/back-views-c-retry.jpg`), costume box, canopy beds level 4 and 5.
+- **Still front views (art to redo, prompts in GEMINI_PROMPTS.md G.2):** costume box, canopy beds level 4 and 5. (The chair on the retry sheet, `art/back-views-c-retry.jpg`, is a true back view and is wired; the two earlier chair pictures were judged front views.)

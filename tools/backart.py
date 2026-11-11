@@ -12,12 +12,14 @@ HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
 import items2, sheetcut
 ROOT = items2.ROOT; g = items2.g
 # the sheet, row by row. None = no usable picture yet (see docs/personal-space/GEMINI_PROMPTS.md, section G)
-BACK_A = ['chair', 'cloud', 'desk', 'wardrobe', 'wardrobe2', 'bookshelf', 'piano', 'dollhouse', 'mirror']
+BACK_A = [None, 'cloud', 'desk', 'wardrobe', 'wardrobe2', 'bookshelf', 'piano', 'dollhouse', 'mirror']
 # the second sheet (art/back-views-b.jpg): three toy boxes, the costume box, five beds. Only the toy boxes are usable (the costume box and the two canopy beds are front views; the beds are not catalog items)
 # the pictures of sheet B touch each other below the first row, so the usable ones are cut by their boxes (x0, y0, x1, y1)
-BOX_B = {'toybox3': (19, 0, 324, 321), 'toybox1': (355, 0, 669, 321), 'toybox2': (701, 4, 1006, 321)}
+# the chair is on a 2x2 retry sheet (art/back-views-c-retry.jpg, bottom right): a true back view, the backrest nearest
+BOX_B = {'chair': (619, 549, 922, 990), 'toybox3': (19, 0, 324, 321), 'toybox1': (355, 0, 669, 321), 'toybox2': (701, 4, 1006, 321)}
+BACK_C = [None, None, None, 'chair']
 BACK_B = ['toybox3', 'toybox1', 'toybox2', 'dressbox', 'bed1', 'bed2', 'bed3', 'bed4', 'bed5']
-SKIP = set(a for a in os.environ.get('BACK_SKIP', 'chair,desk,dressbox,bed1,bed2,bed3,bed4,bed5').split(',') if a)
+SKIP = set(a for a in os.environ.get('BACK_SKIP', 'desk,dressbox,bed1,bed2,bed3,bed4,bed5').split(',') if a)
 def cell(im, n):
     """the box of the n-th picture (row by row): each picture's own bounds, found as the 9 separate blobs on the white sheet (the pictures overlap the 3x3 grid lines a little)"""
     from scipy import ndimage as nd
@@ -36,7 +38,7 @@ def key_out_cyan(im):
     m = nd.binary_dilation(m, iterations=3) & (gg-r > 25) & (b-r > 25) & (r < 215)
     a[m] = 255; return Image.fromarray(a.astype('uint8'))
 def main():
-    sheets = [(Image.open(ROOT + 'art/back-views-a.jpg').convert('RGB'), BACK_A), (Image.open(ROOT + 'art/back-views-b.jpg').convert('RGB'), BACK_B)]
+    sheets = [(Image.open(ROOT + 'art/back-views-a.jpg').convert('RGB'), BACK_A), (Image.open(ROOT + 'art/back-views-b.jpg').convert('RGB'), BACK_B), (Image.open(ROOT + 'art/back-views-c-retry.jpg').convert('RGB'), BACK_C)]
     sheet2 = key_out_cyan(Image.open(ROOT + 'art/back-views-a-footprints.jpg').convert('RGB'))
     h = open(ROOT + 'math-quest.html', encoding='utf-8').read()
     i = h.index('const ROOM_CATALOG = ['); j = h.index('\n];', i); lines = h[i:j].split('\n')
@@ -47,7 +49,7 @@ def main():
     out = {}
     for sheet, order in sheets:
       for n, id_ in enumerate(order):
-          if id_ in SKIP: continue
+          if id_ is None or id_ in SKIP: continue
           k, e = cat[id_]; fw, fd = e['fw']/items2.GU if hasattr(items2,'GU') else e['fw']/2, e['fd']/2
           src_im = sheet2 if id_ in FOOTPRINT_SHEET else sheet
           a = np.array(sheetcut.cut(src_im, BOX_B[id_] if id_ in BOX_B else (cell_grid if id_ in FOOTPRINT_SHEET else cell)(src_im, n), False, 0.25)).astype(float); H0, Wd = a.shape[:2]
@@ -65,7 +67,7 @@ def main():
           if basep: b = {'src': srcp, 'base': basep, 'ref': round(float(ref), 4), 'r': r}
           out[id_] = b; print(id_, how, 'front r', e['r'], 'back r', r, 'colourable' if basep else '', file=sys.stderr)
     for id_, b in out.items():
-        k, e = cat[id_]; e['back'] = b; lines[k] = '  ' + json.dumps(e, ensure_ascii=False, separators=(',', ':')) + (',' if lines[k].rstrip().endswith(',') else '')
+        k, e = cat[id_]; (e.get('back') or {}).get('top') and b.update(top=e['back']['top']); e['back'] = b; lines[k] = '  ' + json.dumps(e, ensure_ascii=False, separators=(',', ':')) + (',' if lines[k].rstrip().endswith(',') else '')
     h = h[:i] + '\n'.join(lines) + h[j:]
     open(ROOT + 'math-quest.html', 'w', encoding='utf-8').write(h); print(json.dumps({'back': sorted(out)}))
 if __name__ == '__main__': main()
