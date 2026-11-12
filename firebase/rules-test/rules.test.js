@@ -57,6 +57,19 @@ const t = async (name, fn) => { try { await fn(); console.log('ok   ' + name); }
     await reset(); await assertFails(user().doc('families/short/profiles/p1').set(doc({ b: 0 })));
   });
 
+  // ---- daily safety copies ----
+  const SP = `families/${FID}/snaps/2026-11-13_p1`;
+  const snap = (o) => Object.assign({ day: '2026-11-13', pid: 'p1', n: 'x', g: 'f', p: '{}', s: '', u: 100, t: Date.now(), v: 2 }, o);
+  await t('a safety copy can be created', async () => { await reset(); await assertSucceeds(user().doc(SP).set(snap())); });
+  await t('a safety copy cannot be replaced', async () => { await reset(); await seed(SP, snap()); await assertFails(user().doc(SP).set(snap({ n: 'y' }))); });
+  await t('a safety copy stamped in the future is refused', async () => { await reset(); await assertFails(user().doc(SP).set(snap({ t: Date.now() + 86400000 }))); });
+  await t('a safety copy with unknown fields is refused', async () => { await reset(); await assertFails(user().doc(SP).set(Object.assign(snap(), { extra: 1 }))); });
+  await t('a young safety copy cannot be deleted', async () => { await reset(); await seed(SP, snap({ t: Date.now() - 86400000 })); await assertFails(user().doc(SP).delete()); });
+  await t('a safety copy older than 8 days can be deleted', async () => { await reset(); await seed(SP, snap({ t: Date.now() - 9 * 86400000 })); await assertSucceeds(user().doc(SP).delete()); });
+  await t('a safety copy can be read by the family, not by a signed-out visitor', async () => {
+    await reset(); await seed(SP, snap()); await assertSucceeds(user().doc(SP).get()); await assertFails(env.unauthenticatedContext().firestore().doc(SP).get());
+  });
+
   await env.cleanup();
   console.log(failed ? 'FAILURES ' + failed : 'ALL PASS');
   process.exit(failed ? 1 : 0);
