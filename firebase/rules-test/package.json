@@ -1,0 +1,7 @@
+{
+  "name": "cupcake-quest-rules-test",
+  "private": true,
+  "description": "Tests the Firestore security rules against the Firestore emulator. Run: npm install && npm test (needs Java).",
+  "scripts": { "test": "firebase emulators:exec --only firestore --project demo-cq \"node rules.test.js\"" },
+  "devDependencies": { "@firebase/rules-unit-testing": "3.0.4", "firebase": "10.14.1", "firebase-tools": "13.35.1" }
+}

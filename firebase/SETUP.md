@@ -122,3 +122,7 @@ This stores children's progress under a parent's account or under an anonymous f
 
 ## Home screen and offline (optional)
 Host these files in the same folder over https (GitHub Pages works): `math-quest.html`, `manifest.webmanifest`, `sw.js`, `icon-192.png`, `icon-512.png`, `icon-maskable-512.png`, `apple-touch-icon.png`. Keep the game's file name (the manifest's start_url points at it). It does not work from a local file or the Claude preview. For every new release, change `APP_VERSION` in the game and `VERSION` in `sw.js` to the same value so devices fetch the update.
+
+
+## Updating the rules after a format change
+The documents carry a format number (`CLOUD_DOC_V` in `math-quest.html`, `minDocVersion()` in `firestore.rules`). Raise both together; builds that write an older number then become read-only. Follow the order in `docs/SYNC_SAFETY_PLAN.md` (update every device first, check the admin page, then paste the rules). `firebase/rules-test` tests the rules against the emulator: `cd firebase/rules-test && npm install && npm test` (needs Java).

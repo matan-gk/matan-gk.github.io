@@ -2364,11 +2364,13 @@ function cloudPlan(local, gone, docs, maxProfiles){
   acts.forEach(a=>{ if(a.op==='adopt'){ if(room>0){ room--; out.push(a); } else out.push({op:'skipAdopt', id:a.id}); } else out.push(a); });
   return out;
 }
+// Version of the cloud document format. The security rules refuse any write below this number (and any write that would lower the stored one), so an older build can never overwrite a profile written by a newer one. Raise it only together with firebase/firestore.rules.
+const CLOUD_DOC_V = 2;
 // Profile <-> cloud document. Progress and stats are stored as JSON text: one field each, no per-field indexing, no nesting limits.
 function cloudDocFromProfile(p, maxStatsChars, base){
   let stats = p.stats ? JSON.parse(JSON.stringify(p.stats)) : null, s = stats ? JSON.stringify(stats) : '';
   while(stats && s.length > maxStatsChars && stats.log.length > 50){ stats.log = stats.log.slice(Math.ceil(stats.log.length*0.1)); s = JSON.stringify(stats); }
-  return {n:String(p.name||'').slice(0,20), g:p.gender, p:JSON.stringify(p.progress||{}), s, u:p.u||0, b:base||0, d:false, v:1};   // b = the cloud version this change builds on; the security rules reject the write if the cloud has moved on
+  return {n:String(p.name||'').slice(0,20), g:p.gender, p:JSON.stringify(p.progress||{}), s, u:p.u||0, b:base||0, d:false, v:CLOUD_DOC_V};   // b = the cloud version this change builds on; the security rules reject the write if the cloud has moved on
 }
 function cloudProfileFromDoc(C, helpers){
   let prog = {}, stats = null;
@@ -2380,7 +2382,7 @@ function cloudProfileFromDoc(C, helpers){
 // ===== CLOUD (Google sign-in, cloud progress, problem reports) =====
 // Local-first: the game always works from this device's storage. The cloud is a mirror, so no internet / no account / no quota never blocks play.
 // Everything here is off while CLOUD_CONFIG is null. See firebase/SETUP.md for how to create the (free) Firebase project and paste its settings below.
-const APP_VERSION = '2026.11.11d';       // keep equal to VERSION in sw.js (a test checks it)
+const APP_VERSION = '2026.11.13a';       // keep equal to VERSION in sw.js (a test checks it)
 const BUILD_COMMIT = '';                 // the full id of the commit this page was built from: the deploy workflow (.github/workflows/tests.yml) fills it in; empty in a plain checkout
 const REPO_URL = 'https://github.com/matan-gk/matan-gk.github.io';
 const CLOUD_CONFIG = {apiKey:"AIzaSyAlq_TJNGvWPJpUrpbdq_hkAoURydqMzm0", authDomain:"learning-quest-1.firebaseapp.com", projectId:"learning-quest-1", appId:"1:98931179722:web:78fb00084ccba3efb53433"};   // e.g. {apiKey:'...', authDomain:'xxx.firebaseapp.com', projectId:'xxx', appId:'...'}
@@ -2458,7 +2460,13 @@ function firebaseAdapter(cfg){
       try{ await M.setDoc(M.doc(db,'families',fid,'profiles',id), doc); return {ok:true}; }
       catch(e){ if(e && e.code==='permission-denied') return {conflict:true}; throw e; }
     },
-    async wipe(fid){ await wipeCol(famCol(fid)); },
+    async wipe(fid){   // the security rules only allow deleting a profile that is already marked deleted: blank every profile out as deleted, then remove it
+      const sn = await M.getDocs(famCol(fid)); if(!sn.docs.length) return;
+      const t = Date.now(), b1 = M.writeBatch(db);
+      sn.docs.forEach(d=>{ const o = d.data(); b1.set(d.ref, {n:'', g:'n', p:'{}', s:'', u:Math.max(t,(o.u||0)+1), b:o.u||0, d:true, v:CLOUD_DOC_V}); });
+      await b1.commit();
+      const b2 = M.writeBatch(db); sn.docs.forEach(d=>b2.delete(d.ref)); await b2.commit();
+    },
     // earlier versions kept profiles directly under the account: read once, move, delete
     async legacyList(uid){ const sn = await M.getDocs(oldCol(uid)); return sn.docs.map(d=>Object.assign({id:d.id}, d.data())); },
     async legacyDelete(uid){ await wipeCol(oldCol(uid)); },
@@ -2508,7 +2516,7 @@ async function cloudAttachRun(u){   // find (or create) the account's family, th
     if(!fid){
       fid = famValid(local) ? local : newFamilyId();
       const old = await cloud.ad.legacyList(u.uid);          // profiles saved by the previous version
-      for(const d of old){ const {id, ...doc} = d; await cloud.ad.put(fid, id, doc); }
+      for(const d of old){ const {id, ...doc} = d; await cloud.ad.put(fid, id, Object.assign({}, doc, {v:CLOUD_DOC_V})); }   // the old copy has the old format number; the rules only take the current one
       if(old.length) await cloud.ad.legacyDelete(u.uid);
       await cloud.ad.setFamily(u.uid, fid);
     } else if(local && local!==fid){
@@ -2635,7 +2643,7 @@ async function cloudSync(reason){
         const r = await cloudPutProfile(p, a.base||0); if(r.budget) stopBudget = true; else if(r.conflict) retryNeeded = true;
       } else if(a.op==='tombstone' && !stopBudget){
         if(!cloudBudget('w')){ stopBudget = true; cloud.status = 'budget'; }
-        else { const r = await cloud.ad.put(cloud.fid, a.id, {n:'', g:'n', p:'{}', s:'', u:a.u||Date.now(), b:a.base||0, d:true, v:1}); if(r && r.ok) store.gone = store.gone.filter(g=>g.id!==a.id); }
+        else { const r = await cloud.ad.put(cloud.fid, a.id, {n:'', g:'n', p:'{}', s:'', u:a.u||Date.now(), b:a.base||0, d:true, v:CLOUD_DOC_V}); if(r && r.ok) store.gone = store.gone.filter(g=>g.id!==a.id); }
       } else if(a.op==='forgetGone'){ store.gone = (store.gone||[]).filter(g=>g.id!==a.id); }
     }
     if(!store.profiles.some(x=>x.id===store.activeId)){ store.activeId = store.profiles[0] && store.profiles[0].id; if(store.activeId) refresh = true; }
