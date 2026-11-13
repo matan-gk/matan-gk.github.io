@@ -6,7 +6,7 @@ Last updated: 2026-11-01. This file is kept current with every change: what is b
 
 | Area | Status |
 |---|---|
-| Game: 8 levels (sections), 105 question types (14 bonus), help page for every type | Built |
+| Game: 8 levels (sections), 108 question types (14 bonus), help page for every type | Built |
 | Profiles (name optional, girl / boy / neutral wording), switching from the top menu (the menu holds only the switcher and "parent area") | Built |
 | Difficulty (easy / medium / hard) per type; parent switch per profile | Built |
 | Progress tab: per-skill strength labels, trend, activity, common wrong answers | Built |
@@ -533,3 +533,25 @@ Plan and rollout order: `docs/SYNC_SAFETY_PLAN.md`. Cloud documents are written 
 - **Limits:** a profile that is damaged and then synced every day will push good copies out after 7 days; the guard of Step 29 is what stops the damage from being synced in the first place. Restoring from a copy is not built yet (the copies can be read in the Firebase console, and the admin page can be extended).
 - Tests: `tests/cloud/backuptest.js` (new), `locktest.js` (rules and game agree on the 8 days), `firebase/rules-test/rules.test.js` (emulator, CI only).
 - **Rollout:** paste the new `firestore.rules` into the Firebase console (together with phase 1's), after every device runs version 2026.11.13c or newer; without the rules the copies are refused and silently skipped.
+
+## Step 31: math types from the gifted-students sample test (branch `test-math-types`, off `sync-backup-3`; version 2026.11.13d)
+
+Source: the Ministry of Education "מבחן סינון, כיתה ב'" sample (Part 2, the math tasks). Part 1 (reading passages) is a separate phase, see the plan below.
+
+Already covered, nothing built: two-digit add and subtract (`gAddCarry`, `gSubBorrow`), the "eggs in trays" remainder (`gRemainder`), the picture equations with two symbols (`gTwoSymbols`, `gSumDiff`).
+
+- **New `gMulFact`** (numbers, easy): a plain 2 to 9 times-table exercise, `8 × 3 = __`.
+- **Extended `gFillNumber`:** two new forms, `82 − __ = 11` (missing subtrahend) and `__ + 15 = 62` (missing first addend). Help page has the subtraction example.
+- **Extended `gInequality`:** besides the same-factor form, `47 + 15 < 47 + __` and `87 − __ > 87 − 15` (the direction flips when the subtracted number grows). Multiple-choice with exactly one valid choice, the equal value is always one of the wrong ones. Also fixed an old flaw: with a small first number the same-factor form offered only 3 choices.
+- **New `gCompareTotals`** (stories, hard): two kinds of animals with 2 and 4 legs, how much bigger one total is than the other.
+- **New `gRoundsTransfer`** (stories, hard): two players start equal, the loser of each round gives the winner a fixed amount; either one player lost every round or lost some and won some. Wrong choices are the usual slips (swapped, one round only, one side forgotten). The sum of the two is checked by the test.
+- **Extended `gThreeSymbols`:** a second form where the long line is the short line plus several copies of the third symbol (house + car = 19, four suns + house + car = 27).
+- Test: `tests/testmath.js` (800 draws per type: four distinct choices, the answer present, answers recomputed from the text, forms present, help and registration).
+
+### Plan: the reading section (phase 2, not built)
+
+Decisions from the owner (2026-11-13):
+- Line numbers, not quoted sentences, tie a question to the text. The numbers belong to the text's own lines, and the next number must sit next to the correct line even when a line wraps into 2 or 3 screen lines (a numbered-line layout, each text line a row with its own number gutter).
+- The reading passages are not part of the rainbow mix (5 to 7 questions per passage breaks its format). They live in a section of their own, with their own rules.
+- Passages cannot be generated, so the profile records which passages it has finished (every question answered), and a finished passage is never offered again; the section announces when the bank is used up.
+- Eight question types (cause, role of a word, meaning of a phrase, purpose of a sentence, what the text does not answer, word in context, motive, not-a-synonym pair), each its own skill id so the progress tab can show them.

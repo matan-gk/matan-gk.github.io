@@ -21,6 +21,7 @@ const TESTS = [
   ['settingtest','settingtest.js','difficulty setting per profile and the sample questions'],
   ['newtypes','newtypes.js','question types added after the first sample tests'],
   ['nt2test','nt2test.js','numbers-castle question types: semantics, labels, help, order of levels'],
+  ['testmath','testmath.js','math types from the gifted-test sample: multiplication facts, totals comparison, rounds, inequality and fill-in forms, symbol variant'],
   ['sections','sections.js','each type in exactly one section; areas match sections; bonus pools'],
   ['shoptest','shoptest.js','shop stories: wording, answers, variety, price questions'],
   ['shapetest','shapetest.js','shapes garden types: geometry, answers, help examples'],

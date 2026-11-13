@@ -1786,7 +1786,8 @@ gFillNumber:{
   think:['הפעולה ההפוכה מוצאת את המספר החסר: חיבור ← חיסור, חיסור ← חיבור, כפל ← חילוק, חילוק ← כפל.','כשהחסר הוא התוצאה (אחרי סימן =), פשוט מחשבים.','תמיד בודקים: מציבים את התשובה במקום הקו, והתרגיל צריך להסתדר.'],
   ex:[{q:'<span class="mono">8 + __ = 21</span>',steps:['מה צריך להוסיף ל-8 כדי להגיע ל-21? מחסירים: [[21 − 8 = 13]]','בודקים: [[8 + 13 = 21]] ✓'],a:'13'},
       {q:'<span class="mono">__ − 9 = 15</span>',steps:['לפני שהחסירו 9 היה מספר גדול יותר. מחזירים את ה-9: [[15 + 9 = 24]]','בודקים: [[24 − 9 = 15]] ✓'],a:'24'},
-      {q:'<span class="mono">4 × __ = 28</span>',steps:['כמה פעמים 4 נכנס ב-28? מחלקים: [[28 ÷ 4 = 7]]','בודקים: [[4 × 7 = 28]] ✓'],a:'7'}]},
+      {q:'<span class="mono">4 × __ = 28</span>',steps:['כמה פעמים 4 נכנס ב-28? מחלקים: [[28 ÷ 4 = 7]]','בודקים: [[4 × 7 = 28]] ✓'],a:'7'},
+      {q:'<span class="mono">82 − __ = 11</span>',steps:['82 פחות משהו נותן 11. כמה הורידו? מחסירים: [[82 − 11 = 71]]','בודקים: [[82 − 71 = 11]] ✓'],a:'71'}]},
 gDifferenceMore:{
   what:'בחנות יש כמות אחת. בכמות אחרת (יום אחר, מדף אחר או לקוח אחר) יש "יותר" ממנה. שואלים כמה יש בכמות השנייה.',
   think:['"יותר מ..." פירושו להוסיף. "פחות מ..." פירושו להחסיר.','המספר שאחרי המילה "יותר" הוא ההפרש, ולא הכמות עצמה. את הכמות מחשבים.','כדאי לשרטט: שורה של הכמות הראשונה ומעליה עוד כמה נוספים.'],
@@ -1812,19 +1813,39 @@ gThreeSymbols:{
   what:'שורה אחת עם שני סמלים, ושורה שנייה ארוכה שבה אותם שני סמלים חוזרים פעמיים ויש בה גם סמל שלישי.',
   think:['מחפשים בשורה הארוכה חלק שכבר ידוע מהשורה הקצרה.','מחליפים אותו במספר שלו, וכך השורה הארוכה מתקצרת.','מה שנשאר הוא הסמל החסר.'],
   ex:[{q:'<span class="eq">🦄 + 🍭 = 9</span><br><span class="eq">🦄 + 🍭 + 🧁 + 🦄 + 🍭 = 25</span><br>מה המספר של 🧁?',
-    steps:['בשורה הארוכה "🦄 + 🍭" מופיע פעמיים, וכל פעם הוא שווה 9.','לכן השורה היא: [[9 + 9 + 🧁 = 25]]','[[9 + 9 = 18]], ואז [[18 + 🧁 = 25]]','[[🧁 = 25 − 18 = 7]]'],a:'7'}]},
+    steps:['בשורה הארוכה "🦄 + 🍭" מופיע פעמיים, וכל פעם הוא שווה 9.','לכן השורה היא: [[9 + 9 + 🧁 = 25]]','[[9 + 9 = 18]], ואז [[18 + 🧁 = 25]]','[[🧁 = 25 − 18 = 7]]'],a:'7'},
+      {q:'<span class="eq">🏠 + 🚗 = 19</span><br><span class="eq">☀️ + ☀️ + ☀️ + ☀️ + 🏠 + 🚗 = 27</span><br>מה המספר של ☀️?',
+    steps:['בשורה השנייה מופיע "🏠 + 🚗", וידוע שהוא שווה 19.','לכן: [[☀️ + ☀️ + ☀️ + ☀️ + 19 = 27]]','ארבע שמשות הן [[27 − 19 = 8]]','[[8 ÷ 4 = 2]], אז ☀️ = 2'],a:'2'}]},
 gCirclePattern:{
   what:'בקשת אחת מוצגים שני מספרים והתוצאה שלהם. בקשת השנייה חסר אחד המספרים ויש אותו כלל.',
   think:['קודם מגלים את הכלל מהקשת הראשונה: מנסים לחבר, להחסיר או להכפיל עד שיוצא המספר שבפנים.','אחר כך מפעילים את הכלל על הקשת השנייה, אבל "הפוך": מחפשים את החסר.','בודקים שהמספר שמצאו עובד עם הכלל.'],
   ex:[{q:'<span class="mono">3 , 4 → 12</span><br><span class="mono">? , 4 → 20</span>',
     steps:['בודקים את הקשת הראשונה: [[3 × 4 = 12]], אז הכלל הוא כפל.','בקשת השנייה: [[? × 4 = 20]]','[[20 ÷ 4 = 5]]','בודקים: [[5 × 4 = 20]] ✓'],a:'5'}]},
 gInequality:{
-  what:'אי-שוויון (גדול או קטן) כשבשני הצדדים אותו מספר מוכפל. צריך להשלים מספר שמתאים.',
-  think:['בשני הצדדים מכפילים באותו מספר. לכן אין צורך להכפיל: משווים רק את המספרים שמוכפלים.','הסימן "&gt;" פירושו שהצד שלפניו גדול יותר, ו-"&lt;" פירושו שהוא קטן יותר.','בוחרים מספר שמתאים, ואז בודקים בעזרת כפל.'],
+  what:'אי-שוויון (גדול או קטן) כשבשני הצדדים אותו מספר מוכפל, מחובר או מחוסר. צריך להשלים מספר שמתאים.',
+  think:['בשני הצדדים עושים אותו דבר לאותו מספר (מכפילים, מוסיפים או מחסירים). לכן אין צורך לחשב: משווים רק את המספרים שמשתנים.','כשמחסירים מספר גדול יותר, נשאר פחות: הכיוון מתהפך. ‏47 − 15 קטן מ-47 − 5.','הסימן "&gt;" פירושו שהצד שלפניו גדול יותר, ו-"&lt;" פירושו שהוא קטן יותר.','בוחרים מספר שמתאים, ואז בודקים בעזרת כפל.'],
   ex:[{q:'<span class="mono">3 × 7 &gt; 3 × __</span>',
     steps:['משני הצדדים כופלים ב-3, לכן מספיק להשוות: [[7 &gt; __]]','המספר החסר צריך להיות קטן מ-7, למשל 5.','בודקים: [[3 × 7 = 21]] ו-[[3 × 5 = 15]], וגם [[21 &gt; 15]] ✓'],a:'מספר קטן מ-7, למשל 5'},
       {q:'<span class="mono">4 × 5 &lt; 4 × __</span>',
-    steps:['מספיק להשוות: [[5 &lt; __]]','המספר החסר צריך להיות גדול מ-5, למשל 8.','בודקים: [[20 &lt; 32]] ✓'],a:'מספר גדול מ-5, למשל 8'}]},
+    steps:['מספיק להשוות: [[5 &lt; __]]','המספר החסר צריך להיות גדול מ-5, למשל 8.','בודקים: [[20 &lt; 32]] ✓'],a:'מספר גדול מ-5, למשל 8'},
+      {q:'<span class="mono">47 + 15 &lt; 47 + __</span>',
+    steps:['בשני הצדדים מוסיפים ל-47, לכן מספיק להשוות: [[15 &lt; __]]','המספר החסר צריך להיות גדול מ-15, למשל 20.','בודקים: [[62 &lt; 67]] ✓'],a:'מספר גדול מ-15, למשל 20'},
+      {q:'<span class="mono">87 − __ &gt; 87 − 15</span>',
+    steps:['בשני הצדדים מחסירים מ-87. כשמחסירים פחות, נשאר יותר.','כדי שהצד השמאלי יהיה גדול יותר, צריך להחסיר פחות מ-15, למשל 10.','בודקים: [[87 − 10 = 77]] ו-[[87 − 15 = 72]], וגם [[77 &gt; 72]] ✓'],a:'מספר קטן מ-15, למשל 10'}]},
+gMulFact:{
+  what:'תרגיל כפל פשוט מלוח הכפל. מוצאים את התוצאה.',
+  think:['כפל הוא חיבור חוזר: 8 × 3 זה שלוש פעמים 8.','אפשר לספור בקפיצות: 8, 16, 24.','כפל אפשר להפוך: 8 × 3 הוא גם 3 × 8, ובוחרים את הדרך הנוחה.'],
+  ex:[{q:'<span class="eq">8 × 3 = __</span>',steps:['שלוש פעמים 8: [[8 + 8 + 8]]','[[8 + 8 = 16]], ואז [[16 + 8 = 24]]','בודקים בהפוך: [[3 × 8 = 24]] ✓'],a:'24'}]},
+gCompareTotals:{
+  what:'שני סוגים של חיות או חפצים, ולכל סוג יש מספר קבוע של רגליים (או גלגלים וכדומה). שואלים בכמה אחד הסכומים גדול מהשני.',
+  think:['לכל סוג מחשבים בנפרד: כמה יש × כמה רגליים לכל אחד.','אחר כך משווים את שני הסכומים. כדי לדעת בכמה אחד גדול מהשני, מחסירים.','לא מחסירים את מספר החיות. מחסירים את מספר הרגליים.'],
+  ex:[{q:'לתרנגולת יש 2 רגליים ולכבש יש 4 רגליים. בחצר יש 4 תרנגולות ו-5 כבשים. בכמה גדול מספר הרגליים של הכבשים ממספר הרגליים של התרנגולות?',
+    steps:['רגליים של תרנגולות: [[4 × 2 = 8]]','רגליים של כבשים: [[5 × 4 = 20]]','ההפרש: [[20 − 8 = 12]]'],a:'ב-12'}]},
+gRoundsTransfer:{
+  what:'שני שחקנים מתחילים עם אותה כמות, ובכל סבב המפסיד נותן למנצח כמות קבועה. שואלים כמה יש לכל אחד בסוף.',
+  think:['בכל סבב מה שאחד מקבל, השני מאבד. הסכום של שניהם לא משתנה.','סופרים כמה סבבים כל אחד הפסיד וכמה ניצח. סבב ניצחון מוסיף, סבב הפסד מחסיר.','בודקים בסוף: סכום שני השחקנים חייב להישאר כמו בהתחלה.'],
+  ex:[{q:'לאפרת ולנעמה היו 26 קלפים כל אחת. במשחק היו 3 סבבים, ובכל סבב המפסידה נתנה למנצחת 2 קלפים. אפרת הפסידה בכל הסבבים. כמה קלפים יש לכל אחת?',
+    steps:['אפרת הפסידה 3 פעמים, ובכל פעם נתנה 2: [[3 × 2 = 6]]','לאפרת: [[26 − 6 = 20]]. לנעמה: [[26 + 6 = 32]]','בודקים: [[20 + 32 = 52]], כמו [[26 + 26 = 52]] ✓'],a:'20 לאפרת, 32 לנעמה'}]},
 gSingleSymbolMul:{
   what:'אותו סמל חוזר כמה פעמים בחיבור, והסכום ידוע. שואלים מה המספר של הסמל.',
   think:['סופרים כמה פעמים מופיע הסמל.','חיבור של אותו מספר כמה פעמים הוא כפל, ולכן מחלקים את הסכום בכמות הסמלים.','בודקים: מחברים את המספר שמצאו כמה פעמים שצריך.'],
@@ -2413,7 +2434,7 @@ function cloudProfileFromDoc(C, helpers){
 // ===== CLOUD (Google sign-in, cloud progress, problem reports) =====
 // Local-first: the game always works from this device's storage. The cloud is a mirror, so no internet / no account / no quota never blocks play.
 // Everything here is off while CLOUD_CONFIG is null. See firebase/SETUP.md for how to create the (free) Firebase project and paste its settings below.
-const APP_VERSION = '2026.11.13c';       // keep equal to VERSION in sw.js (a test checks it)
+const APP_VERSION = '2026.11.13d';       // keep equal to VERSION in sw.js (a test checks it)
 const BUILD_COMMIT = '';                 // the full id of the commit this page was built from: the deploy workflow (.github/workflows/tests.yml) fills it in; empty in a plain checkout
 const REPO_URL = 'https://github.com/matan-gk/matan-gk.github.io';
 const CLOUD_CONFIG = {apiKey:"AIzaSyAlq_TJNGvWPJpUrpbdq_hkAoURydqMzm0", authDomain:"learning-quest-1.firebaseapp.com", projectId:"learning-quest-1", appId:"1:98931179722:web:78fb00084ccba3efb53433"};   // e.g. {apiKey:'...', authDomain:'xxx.firebaseapp.com', projectId:'xxx', appId:'...'}
@@ -3165,6 +3186,7 @@ const STATS_CONFIG = {
 // One entry per question generator. Optional per skill: bands:[...] (replaces the global bands) or bandShift:-0.05 (moves every threshold above 0).
 const SKILL_META = {
   gSharing:{area:'stories', he:'בעיית חלוקה'}, gMultiplyChain:{area:'stories', he:'בעיית כפל'}, gLeftover:{area:'stories', he:'בעיית שאריות'},
+  gMulFact:{area:'numbers', he:'לוח הכפל'}, gCompareTotals:{area:'stories', he:'השוואת סכומים'}, gRoundsTransfer:{area:'stories', he:'משחק בסבבים'},
   gFillNumber:{area:'numbers', he:'השלימו את המספר'}, gDifferenceMore:{area:'stories', he:'בעיית הפרש'}, gGroups:{area:'stories', he:'בעיית קבוצות'}, gRemainder:{area:'stories', he:'בעיית שארית'},
   gTwoSymbols:{area:'symbols', he:'חידת סמלים'}, gThreeSymbols:{area:'symbols', he:'חידת סמלים משולשת'}, gCirclePattern:{area:'symbols', he:'מספרים בקשת'}, gInequality:{area:'symbols', he:'אי-שוויון'},
   gSingleSymbolMul:{area:'symbols', he:'חידת סמל בודד'}, gSumDiff:{area:'symbols', he:'סכום והפרש'}, gCompareSymbols:{area:'symbols', he:'השוואת סמלים'},
@@ -3217,6 +3239,7 @@ const DIFFICULTY = {
 };
 const SKILL_DIFFICULTY = {
   // word problems
+  gCompareTotals:3, gRoundsTransfer:3, gMulFact:1,
   gLeftover:1, gDifferenceMore:1, gGroups:1, gSharing:2, gMultiplyChain:2, gRemainder:2,
   // symbol puzzles
   gSingleSymbolMul:1, gCompareSymbols:1, gTwoSymbols:2, gCirclePattern:2, gInequality:2, gSumDiff:2, gThreeSymbols:3,
@@ -3965,8 +3988,8 @@ function bL3_ComboMoneyChange(){
 function gFillNumber(){
   const ops=['+','-','×','÷']; const op=ops[ri(0,3)];
   let text, ans;
-  if(op==='+'){ const a=ri(2,30), b=ri(2,40); text=`${a} + __ = ${a+b}`; ans=b; }
-  else if(op==='-'){ const b=ri(2,30), r=ri(2,30); text=`__ − ${b} = ${r}`; ans=b+r; }
+  if(op==='+'){ const a=ri(2,30), b=ri(2,40); if(Math.random()<0.3){ text=`__ + ${b} = ${a+b}`; ans=a; } else { text=`${a} + __ = ${a+b}`; ans=b; } }
+  else if(op==='-'){ const b=ri(2,30), r=ri(2,30); if(Math.random()<0.45){ const a=b+r; text=`${a} − __ = ${r}`; ans=b; } else { text=`__ − ${b} = ${r}`; ans=b+r; } }
   else if(op==='×'){ const a=ri(2,9), b=ri(2,9); text=`${a} × __ = ${a*b}`; ans=b; }
   else { const a=ri(2,9), b=ri(2,9); text=`${a*b} ÷ ${a} = __`; ans=b; }
   return {label:"השלימו את המספר", text:`<span class="mono">${text}</span>`, type:'input', answer:ans};
@@ -3982,6 +4005,11 @@ function gThreeSymbols(){
   const [s1,s2,s3] = pickSyms(3);
   const x=ri(2,8), y=ri(2,8), z=ri(2,10);
   const sum1=x+y, sum2=2*x+2*y+z;
+  if(Math.random()<0.4){   // the sample test's form: the long line is the short line plus several copies of the third symbol
+    const k = ri(2,5), zz = ri(2,8), tot = x+y+k*zz, reps = Array(k).fill(s3).join(' + ');
+    return {label:"חידת סמלים משולשת", text:`<span class="eq">${s1} + ${s2} = <span class="hl">${sum1}</span></span><br><span class="eq">${reps} + ${s1} + ${s2} = <span class="hl">${tot}</span></span><br>איזה מספר מתאים ל-${s3}?`,
+      type:'mcq', answer:zz, choices: mcqFrom(zz,5)};
+  }
   return {label:"חידת סמלים משולשת", text:`<span class="eq">${s1} + ${s2} = <span class="hl">${sum1}</span></span><br><span class="eq">${s1} + ${s2} + ${s3} + ${s1} + ${s2} = <span class="hl">${sum2}</span></span><br>איזה מספר מתאים ל-${s3}?`,
     type:'mcq', answer:z, choices: mcqFrom(z,5)};
 }
@@ -3991,13 +4019,53 @@ function gCirclePattern(){
     type:'mcq', answer:b, choices: mcqFrom(b,4)};
 }
 function gInequality(){
+  const form = ri(0,2);   // 0: same factor, 1: same number added (blank on the right), 2: same number subtracted (blank on the left), as in the sample test
+  if(form>0){
+    const a=ri(40,90), b=ri(6,30), op = Math.random()<0.5 ? '<' : '>';
+    const valid = x => form===1 ? (op==='<' ? x>b : x<b) : (op==='>' ? x<b : x>b);   // subtracting more leaves less, so the direction flips
+    const hi=Math.min(a, b+16), vs=[], ws=[];
+    for(let x=1;x<=hi;x++){ if(x===b || !valid(x)) ws.push(x); else vs.push(x); }
+    const near = vs.filter(x=>Math.abs(x-b)<=12), answer = pick(near.length?near:vs);
+    const wrongs = shuffle(ws.filter(x=>x!==b && Math.abs(x-b)<=12)).slice(0,2);
+    const choices = shuffle([answer, b, ...wrongs]);
+    const text = form===1 ? `<span class="mono">${a} + ${b} ${op} ${a} + __</span>` : `<span class="mono">${a} − __ ${op} ${a} − ${b}</span>`;
+    return {label:"אי-שוויון קסום", text:`השלימו מספר כך שאי-השוויון יתקיים:<br>${text}`, type:'mcq', answer, choices};
+  }
   const a=ri(3,9), missingLess=Math.random()<0.5, mult=ri(2,9);
   const pool=[]; for(let n=1;n<=12;n++){ if(missingLess? n<a : n>a) pool.push(n); }
   const answer = pool[ri(0,pool.length-1)];
-  const wrongPool=[]; for(let n=1;n<=12;n++){ if(n!==a && !(missingLess? n<a : n>a)) wrongPool.push(n); }
+  const wrongPool=[]; for(let n=1;n<=12;n++){ if(!(missingLess? n<a : n>a)) wrongPool.push(n); }   // includes n = a (equal, so the sign is false): with a small a there were only 3 choices
   const choices = shuffle([answer, ...shuffle(wrongPool).slice(0,3)]);
   return {label:"אי-שוויון קסום", text:`השלימו מספר כך שאי-השוויון יתקיים:<br><span class="mono">${mult} × ${a} ${missingLess?'>':'<'} ${mult} × __</span>`,
     type:'mcq', answer, choices};
+}
+function gMulFact(){
+  const a=ri(2,9), b=ri(2,9), ans=a*b;
+  return {label:'לוח הכפל', text:`פתרו:<br><span class="eq">${a} × ${b} = __</span>`, type:'mcq', answer:ans,
+    choices:digChoices(ans,[a+b, ans+a, ans-a, ans+b, ans-b, ans+1, ans-1],0,90,6)};
+}
+function gCompareTotals(){
+  const P = pick([['תרנגולת','תרנגולות','כבש','כבשים','בחצר'], ['ברווז','ברווזים','עז','עזים','בחווה'], ['ציפור','ציפורים','חתול','חתולים','בגינה'], ['יונה','יונים','סוס','סוסים','בחווה']]);
+  let nA, nB; do{ nA = ri(3,9); nB = ri(3,8); } while(4*nB-2*nA < 2 || nB===nA);
+  const tA = 2*nA, tB = 4*nB, ans = tB-tA;
+  return {label:'השוואת סכומים', text:`ל${P[0]} יש ${hl(2)} רגליים ול${P[2]} יש ${hl(4)} רגליים. ${P[4]} יש ${hl(nA)} ${P[1]} ו-${hl(nB)} ${P[3]}. בכמה גדול מספר הרגליים של ה${P[3]} ממספר הרגליים של ה${P[1]}?`,
+    type:'mcq', answer:ans, choices:digChoices(ans,[tA+tB, nB-nA, 2*nB-2*nA, tB-nA, ans+2, ans-2, ans+4],1,80,6)};
+}
+function gRoundsTransfer(){
+  const [p1,p2] = pickPeople(2), item = pick(['קלפים','גולות','מדבקות']);
+  const t = ri(2,5), R = ri(3,6), mixed = Math.random()<0.5, start = ri(Math.max(18,t*R+4), 45);   // the loser never runs out
+  let lost; do{ lost = mixed ? ri(1,R-1) : R; } while(mixed && lost*2===R);
+  const net = t*(lost-(R-lost)), a = start-net, b = start+net;
+  const both = (p1.g==='f' && p2.g==='f') ? 'לכל אחת מהן' : 'לכל אחד מהם';
+  const who = v(p1,'הפסיד','הפסידה');
+  const story = mixed ? `${p1.n} ${who} ב-${hl(lost)} סבבים וניצח${v(p1,'','ה')} ב-${hl(R-lost)} סבבים.` : `${p1.n} ${who} בכל הסבבים.`;
+  const fmt = (x,y) => `${x} ${item} ל${p1.n}, ${y} ${item} ל${p2.n}`;
+  const wrong = [[b,a],[start-t,start+t],[start-net-t,start+net+t],[start-net+t,start+net-t],[start-t*R,start+t*R],[a,b+t]]
+    .filter(([x,y])=>x>0 && y>0 && !(x===a&&y===b));
+  const uniq = []; wrong.forEach(w=>{ if(!uniq.some(u=>u[0]===w[0]&&u[1]===w[1])) uniq.push(w); });
+  const ch = shuffle([fmt(a,b), ...shuffle(uniq).slice(0,3).map(w=>fmt(w[0],w[1]))]);
+  return {label:'משחק בסבבים', text:`${p1.n} ו${p2.n} שיחקו במשחק ${item}. בהתחלה היו ${both} ${hl(start)} ${item}. במשחק היו ${hl(R)} סבבים, ובכל סבב מי שהפסיד נתן למנצח ${hl(t)} ${item}. ${story} כמה ${item} יש ל${p1.n} ול${p2.n} אחרי ${R} הסבבים?`,
+    type:'mcq', answer:fmt(a,b), choices:ch};
 }
 function gSingleSymbolMul(){
   const [s] = pickSyms(1);
@@ -5093,9 +5161,9 @@ function bShapes_JoinedRects(){
 
 // ---- SECTION POOLS (one topic per section; see CATEGORIES.md). A question type is in exactly one section, and the mix level (5) has them all. ----
 const NUMBERS_POOL = [gDigitOf, gBuildNumber, gWordsToNum, gNumToWords, gDigitCompare, gFindByDigit, gBiggestOfFour, gOrderNumbers, gMissingDigit, gBetween, gNumberRiddle, gPredSucc, gFillNumber,
-  gAddTwoDigit, gAddCarry, gSubTwoDigit, gSubBorrow, gBiggerExpr, gDigitsMinMaxDiff, gHowManyBuild];
+  gAddTwoDigit, gAddCarry, gSubTwoDigit, gSubBorrow, gBiggerExpr, gDigitsMinMaxDiff, gHowManyBuild, gMulFact];
 const STORIES_POOL = [gSharing, gMultiplyChain, gLeftover, gDifferenceMore, gGroups, gRemainder, gCompareChain, gWorkBackwards, gPartWhole, gTookAway, gGotMore, gTwoGroups, gMadeAndLeft,
-  gMoneyCoins, gCheaperBundle, gCheaperPerItem, gChange, gSplitCost, gBudget];
+  gMoneyCoins, gCheaperBundle, gCheaperPerItem, gChange, gSplitCost, gBudget, gCompareTotals, gRoundsTransfer];
 const SYMBOLS_POOL = [gTwoSymbols, gThreeSymbols, gCirclePattern, gInequality, gSingleSymbolMul, gSumDiff, gCompareSymbols, gFourLinkChain, gSymbolsMul];
 const CLOCK_POOL = [gClockHour, gClockQuarter, gClockFive, gClockWords, gClockPick, gClockLater, gSchedule];
 const PATTERNS_POOL = [gMachine, gSequence, gMissingMiddleSeq, gInterleavedSeq, gSkipPair, gSkipFill, gSkipMember, gCountInSeries, gGrowingSteps, gShapeSequence, gCountingPattern, gShapeAnalogy, gComboRule, gTwoRules, gMovingSquare];
