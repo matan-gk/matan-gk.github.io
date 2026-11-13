@@ -59,7 +59,7 @@ await B.evaluate(()=>cloudPush()); await B.waitForTimeout(300);
 await A.evaluate(()=>cloudPush()); await A.waitForTimeout(800);
 const final=JSON.parse(Object.values(U('u1'))[0].p).score;
 ok(await A.evaluate(()=>cloud.status)==='ok','conflict resolved without error');
-ok(await A.evaluate(()=>!!localStorage.getItem(SAVE_KEY+'_before_sync')),'safety copy made before conflict resolution');
+ok(await A.evaluate(()=>!!localStorage.getItem(SAVE_KEY+'_snaps')),'safety copy made before conflict resolution');
 ok(final===(await A.evaluate(()=>score)),'A and the cloud agree after conflict ('+final+')');
 // --- deletion propagates
 await A.evaluate(()=>{ store.profiles.push(makeProfile('דני','m',{})); persist(); cloudChanged(); }); await A.evaluate(()=>cloudPush()); await A.waitForTimeout(400);

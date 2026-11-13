@@ -1736,7 +1736,7 @@ function loadState(){
     try{
       const d = JSON.parse(raw2);
       if(d && Array.isArray(d.profiles) && d.profiles.length){
-        store = {version:3, activeId:d.activeId, profiles:d.profiles.filter(p=>p&&typeof p.id==='string').map(p=>({id:p.id, name:typeof p.name==='string'?p.name:'', gender:GENDER_INFO[p.gender]?p.gender:'f', progress:p.progress||{}, stats:statsSanitize(p.stats), u:(Number.isFinite(p.u)&&p.u>0)?p.u:Date.now(), sy:Number.isFinite(p.sy)?p.sy:0})), gone:(Array.isArray(d.gone)?d.gone.filter(g=>g&&typeof g.id==='string'&&Number.isFinite(g.u)).map(g=>({id:g.id,u:g.u})):[])};
+        store = {version:3, activeId:d.activeId, profiles:d.profiles.filter(p=>p&&typeof p.id==='string').map(p=>({id:p.id, name:typeof p.name==='string'?p.name:'', gender:GENDER_INFO[p.gender]?p.gender:'f', progress:p.progress||{}, stats:statsSanitize(p.stats), u:(Number.isFinite(p.u)&&p.u>0)?p.u:0, sy:Number.isFinite(p.sy)?p.sy:0}))   /* no recorded change time = the oldest, never "now": it must not beat a cloud copy */, gone:(Array.isArray(d.gone)?d.gone.filter(g=>g&&typeof g.id==='string'&&Number.isFinite(g.u)).map(g=>({id:g.id,u:g.u})):[])};
         if(!store.profiles.length) throw new Error('no profiles');
         if(!activeProfile()) store.activeId = store.profiles[0].id;
         enterProfile(); return;
@@ -2328,6 +2328,37 @@ document.getElementById('helpOverlay').addEventListener('click', e=>{
 });
 
 // ===== CLOUD CORE (pure, testable) =====
+// Would `inc` (a progress that is about to replace `cur`) lose something `cur` has? '' when not. `inc` is the raw progress of a cloud document
+// (not yet cleaned: cleaning always adds a room), so a missing room is visible. Reasons: 'room' (no room at all), 'tokens' (fewer earned), 'golden' (fewer rewards).
+function roomHasData(sp){ return !!(sp && (sp.unlocked || (sp.earned||0)>0 || (sp.spent||0)>0 || (sp.things&&sp.things.length))); }
+function cloudLoss(cur, inc){
+  cur = cur||{}; inc = inc||{};
+  const a = cur.space, b = inc.space && typeof inc.space==='object' ? inc.space : null;
+  if(roomHasData(a) && !b) return 'room';
+  if(a && b && typeof b.earned==='number' && b.earned < (a.earned||0)) return 'tokens';
+  const g = x=>Array.isArray(x.golden) ? x.golden.length : 0;
+  if(g(inc) < g(cur)) return 'golden';
+  return '';
+}
+const CLOUD_SKEW_MS = 10*60*1000;     // a change time further ahead than this is a wrong clock, and is pulled back to now
+const SNAP_MAX = 8;                   // dated safety copies kept per device
+// Safety copies: the profiles that are about to be replaced, newest last. Several, not one, so that a second sync cannot erase the first.
+function snapAdd(list, ids, reason, profiles, now){
+  const items = profiles.filter(p=>ids.includes(p.id)).map(p=>({id:p.id, name:p.name, gender:p.gender, u:p.u, progress:p.progress, stats:p.stats}));
+  if(!items.length) return list;
+  const sig = JSON.stringify(items.map(i=>[i.id,i.u,JSON.stringify(i.progress).length]));
+  if(list.length && list[list.length-1].sig===sig) return list;
+  const slim = items.map(i=>JSON.stringify(i.stats||'').length>300000 ? Object.assign({}, i, {stats:null}) : i);   // a very large log is not worth a second copy
+  return list.concat([{t:now, why:reason, sig, items:slim}]).slice(-SNAP_MAX);
+}
+function cloudSnapSave(reason, ids){
+  try{
+    const key = SAVE_KEY+'_snaps'; let list = []; try{ list = JSON.parse(localStorage.getItem(key)||'[]'); }catch(e){}
+    list = snapAdd(Array.isArray(list)?list:[], ids, reason, store.profiles, Date.now());
+    for(;;){ try{ localStorage.setItem(key, JSON.stringify(list)); break; }catch(e){ if(list.length<=1) break; list = list.slice(1); } }   // storage full: drop the oldest
+  }catch(e){}
+}
+
 // Sync planner. Local profile: {id,u,sy}  u = last change time, sy = the cloud version (cloud u) it was last in step with.
 // Cloud doc: {id,u,d}  d = true for a deleted profile (kept as a marker so other devices delete it too).
 // gone = [{id,u}] local deletions not yet marked in the cloud. Returns a list of actions; nothing is changed here.
@@ -2382,7 +2413,7 @@ function cloudProfileFromDoc(C, helpers){
 // ===== CLOUD (Google sign-in, cloud progress, problem reports) =====
 // Local-first: the game always works from this device's storage. The cloud is a mirror, so no internet / no account / no quota never blocks play.
 // Everything here is off while CLOUD_CONFIG is null. See firebase/SETUP.md for how to create the (free) Firebase project and paste its settings below.
-const APP_VERSION = '2026.11.13a';       // keep equal to VERSION in sw.js (a test checks it)
+const APP_VERSION = '2026.11.13b';       // keep equal to VERSION in sw.js (a test checks it)
 const BUILD_COMMIT = '';                 // the full id of the commit this page was built from: the deploy workflow (.github/workflows/tests.yml) fills it in; empty in a plain checkout
 const REPO_URL = 'https://github.com/matan-gk/matan-gk.github.io';
 const CLOUD_CONFIG = {apiKey:"AIzaSyAlq_TJNGvWPJpUrpbdq_hkAoURydqMzm0", authDomain:"learning-quest-1.firebaseapp.com", projectId:"learning-quest-1", appId:"1:98931179722:web:78fb00084ccba3efb53433"};   // e.g. {apiKey:'...', authDomain:'xxx.firebaseapp.com', projectId:'xxx', appId:'...'}
@@ -2396,6 +2427,7 @@ const CLOUD_LIMITS = {
 };
 const FB_VER = '10.14.1', FB_BASE = 'https://www.gstatic.com/firebasejs/'+FB_VER+'/';
 const cloud = {
+  allow:{}, held:[], newer:false,   // allow: profile id -> cloud version the parent approved replacing; held: copies the guard stopped (memory only, recomputed by every sync)
   ad: null, ready: null, user: null, status: CLOUD_CONFIG ? 'signedout' : 'off', msg: '', lastSync: 0, lastPull: 0,
   busy: false, again: null, timer: null, confirmWipe: false,
   mode: 'off', fid: '', joining: false, copied: false        // mode: 'off' (this device only) | 'google' (account) | 'code' (anonymous backup); fid: the family the device syncs with
@@ -2620,13 +2652,26 @@ async function cloudSync(reason){
   let refresh = false, stopBudget = false, retryNeeded = false;
   try{
     saveState(); store.gone = store.gone||[];
-    const docs = await cloud.ad.list(cloud.fid);
-    const plan = cloudPlan(store.profiles, store.gone||[], docs, MAX_PROFILES);
+    const nowT = Date.now(); store.profiles.forEach(p=>{ if((p.u||0) > nowT+CLOUD_SKEW_MS) p.u = nowT; });   // a wrong clock must not win every conflict
+    const allDocs = await cloud.ad.list(cloud.fid);
+    // profiles stored in a newer format than this build knows are left alone (read-only): this build could only damage them
+    const newer = new Set(allDocs.filter(d=>(d.v||1) > CLOUD_DOC_V).map(d=>d.id));
+    const docs = allDocs.filter(d=>!newer.has(d.id));
+    cloud.newer = newer.size > 0;
+    const plan = cloudPlan(store.profiles.filter(p=>!newer.has(p.id)), (store.gone||[]).filter(g=>!newer.has(g.id)), docs, MAX_PROFILES);
     const byDoc = {}; docs.forEach(d=>byDoc[d.id]=d);
-    if(plan.some(a=>a.op==='pull'||a.op==='removeLocal'||a.conflict)){ try{ localStorage.setItem(SAVE_KEY+'_before_sync', JSON.stringify(store)); }catch(e){} }
+    const held = [];
+    const snapIds = plan.filter(a=>a.op==='pull'||a.op==='removeLocal'||a.conflict).map(a=>a.id);
+    if(snapIds.length) cloudSnapSave('sync', snapIds);
     const helpers = {genders:GENDER_INFO, cleanProgress, statsSanitize};
     for(const a of plan){
       const p = store.profiles.find(x=>x.id===a.id);
+      // the guard: a copy that would replace another and lose room data, tokens or rewards is held back until the parent chooses
+      if((a.op==='pull' || (a.op==='push' && a.conflict)) && p && byDoc[a.id] && !byDoc[a.id].d && cloud.allow[a.id]!==byDoc[a.id].u){
+        let raw = {}; try{ raw = JSON.parse(byDoc[a.id].p||'{}'); }catch(e){}
+        const why = a.op==='pull' ? cloudLoss(p.progress, raw) : cloudLoss(raw, p.progress);
+        if(why){ held.push({id:a.id, name:p.name||'', why, dir:a.op, cu:byDoc[a.id].u, doc:byDoc[a.id]}); continue; }
+      }
       if(a.op==='pull'){
         const np = cloudProfileFromDoc(byDoc[a.id], helpers);
         Object.assign(p, {name:np.name, gender:np.gender, progress:np.progress, stats:np.stats, u:np.u, sy:np.sy});
@@ -2647,6 +2692,8 @@ async function cloudSync(reason){
       } else if(a.op==='forgetGone'){ store.gone = (store.gone||[]).filter(g=>g.id!==a.id); }
     }
     if(!store.profiles.some(x=>x.id===store.activeId)){ store.activeId = store.profiles[0] && store.profiles[0].id; if(store.activeId) refresh = true; }
+    cloud.held = held;
+    if(cloud.newer && !cloud.msg){ cloud.msg = 'בענן יש נתונים בפורמט חדש יותר מהגרסה הזאת, ולכן הם לא נוגעים בהם. כדי להמשיך לסנכרן צריך לעדכן את האפליקציה (לפתוח אותה עם חיבור לאינטרנט).'; cloud.msgOk = false; }
     persist();
     if(profMode.first && store.profiles.length && !document.getElementById('profOverlay').hidden){ profMode = {view:'list', editId:null, first:false, confirmDel:null, error:''}; document.getElementById('profOverlay').hidden = true; }
     if(refresh){ enterProfile(); refreshAll(); }
@@ -2720,7 +2767,30 @@ function cloudStatusLine(){
   const t = cloud.lastSync ? new Date(cloud.lastSync).toLocaleTimeString('he-IL',{hour:'2-digit',minute:'2-digit'}) : '';
   return esc(CLOUD_STATUS_TEXT[cloud.status]||'') + (cloud.status==='ok'&&t ? ' · '+esc(t) : '');
 }
-function cloudMsgHTML(){ return cloud.msg ? `<div class="bkmsg ${cloud.msgOk?'good':'bad'}">${esc(cloud.msg)}</div>` : ''; }
+const HELD_TEXT = {
+  room:'בענן אין נתוני חדר (פריטים ומטבעות), ובמכשיר הזה יש. כנראה שגרסה ישנה של המשחק כתבה על הנתונים.',
+  tokens:'בענן יש פחות מטבעות מאשר במכשיר הזה.',
+  golden:'בענן יש פחות פרסים מאשר במכשיר הזה.'
+};
+function cloudHeldHTML(){
+  return (cloud.held||[]).map(h=>`<div class="bkmsg bad"><b>${esc(h.name||'ללא שם')}</b>: ${esc(h.dir==='pull' ? HELD_TEXT[h.why] : 'במכשיר הזה יש פחות מאשר בענן ('+({room:'חדר',tokens:'מטבעות',golden:'פרסים'}[h.why])+').')}<br>לא שינינו כלום. מה עדיף?</div>
+    <div class="pa-actions" style="margin-top:0"><button type="button" class="pa-btn sm" data-pact="heldkeep" data-id="${esc(h.id)}">${h.dir==='pull'?'להשאיר את מה שבמכשיר':'להשאיר את מה שבענן'}</button><button type="button" class="pa-btn sm sec" data-pact="heldtake" data-id="${esc(h.id)}">${h.dir==='pull'?'לקחת את מה שבענן':'להשאיר את מה שבמכשיר'}</button><button type="button" class="pa-btn sm sec" data-pact="heldboth" data-id="${esc(h.id)}">לשמור את שניהם</button></div>`).join('');
+}
+function cloudHeldAct(act, id){
+  const h = (cloud.held||[]).find(x=>x.id===id), p = store.profiles.find(x=>x.id===id); if(!h || !p) return;
+  const pullHeld = h.dir==='pull';
+  // keep = the side that was NOT about to be replaced; take = the side that was
+  const useLocal = act==='heldboth' || (pullHeld ? act==='heldkeep' : act==='heldtake');
+  cloud.allow[id] = h.cu;
+  if(act==='heldboth' && store.profiles.length < MAX_PROFILES){
+    const np = cloudProfileFromDoc(h.doc, {genders:GENDER_INFO, cleanProgress, statsSanitize});
+    np.id = newProfileId(); np.name = ((np.name||'')+' (מהענן)').slice(0,20); np.u = Date.now(); np.sy = 0; store.profiles.push(np); profSigs.set(np.id, profSig(np));
+  }
+  if(useLocal && (p.u||0) <= h.cu) p.u = Math.max(Date.now(), h.cu+1);   // newer than the cloud copy, so the plan uploads it
+  if(!useLocal && !pullHeld) p.u = Math.min(p.u||0, h.cu-1);               // older than the cloud copy, so the plan takes it
+  cloud.held = cloud.held.filter(x=>x.id!==id); persist(); cloudSync('held');
+}
+function cloudMsgHTML(){ return (cloud.msg ? `<div class="bkmsg ${cloud.msgOk?'good':'bad'}">${esc(cloud.msg)}</div>` : '') + cloudHeldHTML(); }
 const CLOUD_STORED_TXT = 'נשמרים: שם הפרופיל (אם הוזן), בן/בת/ניטרלי, ההתקדמות והסטטיסטיקות. לא נשמרים: תמונות, מיקום או פרטים נוספים. אפשר למחוק את הכול מהענן בכל רגע.';
 function famCodeCard(){      // the family code, shown on any device that syncs
   return `<div class="pa-field"><label for="famShown">קוד המשפחה</label><input type="text" id="famShown" class="famcode" dir="ltr" readonly value="${esc(famShow(cloud.fid))}" onfocus="this.select()" aria-label="קוד המשפחה"></div>
@@ -6957,6 +7027,7 @@ function profileAction(act, id){
   if(act==='famcopy') return famCopy();
   if(act==='joinfirst'){ cloud.msg = ''; profMode = {view:'joinfirst', editId:null, first:true, confirmDel:null, error:''}; return renderProfiles(); }
   if(act==='cloudsync') return cloudSync('manual');
+  if(act==='heldkeep' || act==='heldtake' || act==='heldboth') return cloudHeldAct(act, id);
   if(act==='cloudwipe'){ cloud.confirmWipe = true; return renderProfiles(); }
   if(act==='cloudwipeno'){ cloud.confirmWipe = false; return renderProfiles(); }
   if(act==='cloudwipeyes') return cloudWipe();
