@@ -524,3 +524,12 @@ Plan and rollout order: `docs/SYNC_SAFETY_PLAN.md`. Cloud documents are written 
 - **Safety copies:** `_before_sync` (one copy, overwritten by the next sync) is replaced by `_snaps`, a ring of the last 8 copies of the affected profiles (`snapAdd`, `cloudSnapSave`), dropping the oldest when storage is full.
 - Test: `tests/cloud/guardtest.js` (new). `cloudtest.js` now checks `_snaps`.
 - Reminder: adding a persistent progress field means bumping `CLOUD_DOC_V` and `minDocVersion()` together.
+
+## Step 30: sync safety, phase 3: daily backups (branch `sync-backup-3`, off `sync-guard-2`; version 2026.11.13c)
+
+- **Cloud copies:** after a good sync, once a day, each profile is copied to `families/{fid}/snaps/{day}_{profile}` (progress and stats; stats dropped if over 700 KB). The security rules make a copy create-only, with a stamp near the server clock, and deletable only when older than 8 days. The game prunes to the newest 7 days (`snapPrune`). No copy is made while a profile is held by the guard.
+- **Device copies:** `_daily` in localStorage keeps the last 7 days (progress only), next to the `_snaps` ring of Step 29.
+- **Extra copy:** before the parent chooses on a held profile, the cloud copy about to be replaced is saved as `{day}_{profile}_x{time}`.
+- **Limits:** a profile that is damaged and then synced every day will push good copies out after 7 days; the guard of Step 29 is what stops the damage from being synced in the first place. Restoring from a copy is not built yet (the copies can be read in the Firebase console, and the admin page can be extended).
+- Tests: `tests/cloud/backuptest.js` (new), `locktest.js` (rules and game agree on the 8 days), `firebase/rules-test/rules.test.js` (emulator, CI only).
+- **Rollout:** paste the new `firestore.rules` into the Firebase console (together with phase 1's), after every device runs version 2026.11.13c or newer; without the rules the copies are refused and silently skipped.

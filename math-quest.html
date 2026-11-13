@@ -2413,7 +2413,7 @@ function cloudProfileFromDoc(C, helpers){
 // ===== CLOUD (Google sign-in, cloud progress, problem reports) =====
 // Local-first: the game always works from this device's storage. The cloud is a mirror, so no internet / no account / no quota never blocks play.
 // Everything here is off while CLOUD_CONFIG is null. See firebase/SETUP.md for how to create the (free) Firebase project and paste its settings below.
-const APP_VERSION = '2026.11.13b';       // keep equal to VERSION in sw.js (a test checks it)
+const APP_VERSION = '2026.11.13c';       // keep equal to VERSION in sw.js (a test checks it)
 const BUILD_COMMIT = '';                 // the full id of the commit this page was built from: the deploy workflow (.github/workflows/tests.yml) fills it in; empty in a plain checkout
 const REPO_URL = 'https://github.com/matan-gk/matan-gk.github.io';
 const CLOUD_CONFIG = {apiKey:"AIzaSyAlq_TJNGvWPJpUrpbdq_hkAoURydqMzm0", authDomain:"learning-quest-1.firebaseapp.com", projectId:"learning-quest-1", appId:"1:98931179722:web:78fb00084ccba3efb53433"};   // e.g. {apiKey:'...', authDomain:'xxx.firebaseapp.com', projectId:'xxx', appId:'...'}
@@ -2499,6 +2499,13 @@ function firebaseAdapter(cfg){
       await b1.commit();
       const b2 = M.writeBatch(db); sn.docs.forEach(d=>b2.delete(d.ref)); await b2.commit();
     },
+    // daily safety copies: families/{fid}/snaps/{day}_{profile}, create-only; deletable by the security rules only once older than 8 days
+    async snapList(fid){ const sn = await M.getDocs(M.collection(db,'families',fid,'snaps')); return sn.docs.map(d=>({id:d.id, day:d.data().day, t:d.data().t, pid:d.data().pid})); },
+    async snapPut(fid, id, doc){
+      try{ await M.setDoc(M.doc(db,'families',fid,'snaps',id), doc); return {ok:true}; }
+      catch(e){ if(e && e.code==='permission-denied') return {exists:true}; throw e; }   // an existing copy cannot be replaced: that is the point
+    },
+    async snapDelete(fid, id){ try{ await M.deleteDoc(M.doc(db,'families',fid,'snaps',id)); }catch(e){} },
     // earlier versions kept profiles directly under the account: read once, move, delete
     async legacyList(uid){ const sn = await M.getDocs(oldCol(uid)); return sn.docs.map(d=>Object.assign({id:d.id}, d.data())); },
     async legacyDelete(uid){ await wipeCol(oldCol(uid)); },
@@ -2644,6 +2651,41 @@ async function cloudPush(){            // periodic / on leaving: upload what cha
   cloud.busy = false; cloudRefreshUI();
   if(conflict) cloudSync('conflict');
 }
+// ---- daily backups ----
+const SNAP_DAYS = 7;                                      // days of copies kept, in the cloud and on the device
+const SNAP_KEEP_MS = 8*86400000;                          // the security rules refuse deleting a copy younger than this
+const SNAP_MAX_S = 700000;
+function dayKey(t){ const d = new Date(t); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function snapDoc(p, day, now){
+  let s = p.stats ? JSON.stringify(p.stats) : ''; if(s.length > SNAP_MAX_S) s = '';   // a huge log is not worth the copy; the progress is
+  return {day, pid:String(p.id).slice(0,40), n:String(p.name||'').slice(0,20), g:p.gender, p:JSON.stringify(p.progress||{}), s, u:p.u||0, t:now, v:CLOUD_DOC_V};
+}
+// Which copies to delete: every day beyond the newest SNAP_DAYS, but only copies the rules allow deleting (older than SNAP_KEEP_MS).
+function snapPrune(list, now){
+  const days = [...new Set(list.map(x=>x.day))].sort().reverse();
+  const keep = new Set(days.slice(0, SNAP_DAYS));
+  return list.filter(x=>!keep.has(x.day) && now - (x.t||0) > SNAP_KEEP_MS).map(x=>x.id);
+}
+function dailyLocal(now){
+  const key = SAVE_KEY+'_daily'; let o = {}; try{ o = JSON.parse(localStorage.getItem(key)||'{}')||{}; }catch(e){}
+  const day = dayKey(now);
+  o[day] = store.profiles.map(p=>({id:p.id, name:p.name, gender:p.gender, u:p.u, progress:p.progress}));   // no stats: they are large, the progress is what matters
+  Object.keys(o).sort().reverse().slice(SNAP_DAYS).forEach(k=>delete o[k]);
+  for(;;){ try{ localStorage.setItem(key, JSON.stringify(o)); break; }catch(e){ const ks = Object.keys(o).sort(); if(ks.length<=1) break; delete o[ks[0]]; } }
+}
+// Once a day after a good sync: a copy on the device and one in the cloud per profile. Never throws, never blocks the sync.
+async function cloudDaily(){
+  try{
+    const now = Date.now(), day = dayKey(now), key = SAVE_KEY+'_snapday';
+    let last = ''; try{ last = localStorage.getItem(key)||''; }catch(e){}
+    if(last === day || !cloudActive() || !cloud.ad.snapPut) return;
+    dailyLocal(now);
+    for(const p of store.profiles){ if(p.name || p.u) await cloud.ad.snapPut(cloud.fid, day+'_'+p.id, snapDoc(p, day, now)); }
+    try{ localStorage.setItem(key, day); }catch(e){}
+    const ids = snapPrune(await cloud.ad.snapList(cloud.fid), now);
+    for(const id of ids) await cloud.ad.snapDelete(cloud.fid, id);
+  }catch(e){}
+}
 // ---- full two-way sync ----
 async function cloudSync(reason){
   if(!cloudActive()) return;
@@ -2700,6 +2742,7 @@ async function cloudSync(reason){
     cloud.lastSync = Date.now(); cloud.lastPull = Date.now();
     if(retryNeeded){ if(reason==='retry') cloud.status = 'denied'; else cloud.again = 'retry'; }
     if(cloud.status==='syncing') cloud.status = 'ok';
+    if(cloud.status==='ok' && !(cloud.held||[]).length) cloudDaily();
   }catch(e){ cloud.status = cloudErr(e); }
   cloud.busy = false; cloudRefreshUI();
   if(cloud.again){ const r = cloud.again; cloud.again = null; if(cloud.status==='ok') cloudSync(r); }
@@ -2782,6 +2825,7 @@ function cloudHeldAct(act, id){
   // keep = the side that was NOT about to be replaced; take = the side that was
   const useLocal = act==='heldboth' || (pullHeld ? act==='heldkeep' : act==='heldtake');
   cloud.allow[id] = h.cu;
+  try{ const now = Date.now(); const q = cloudProfileFromDoc(h.doc, {genders:GENDER_INFO, cleanProgress, statsSanitize}); q.id = id; if(cloud.ad.snapPut) cloud.ad.snapPut(cloud.fid, dayKey(now)+'_'+id+'_x'+now, snapDoc(q, dayKey(now), now)).catch(()=>{}); }catch(e){}   // the cloud copy that is about to be replaced is kept first
   if(act==='heldboth' && store.profiles.length < MAX_PROFILES){
     const np = cloudProfileFromDoc(h.doc, {genders:GENDER_INFO, cleanProgress, statsSanitize});
     np.id = newProfileId(); np.name = ((np.name||'')+' (מהענן)').slice(0,20); np.u = Date.now(); np.sy = 0; store.profiles.push(np); profSigs.set(np.id, profSig(np));

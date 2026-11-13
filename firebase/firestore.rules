@@ -51,6 +51,30 @@ service cloud.firestore {
       allow create, update: if request.auth != null && validFam(fid) && validProfile(pid);
     }
 
+    // ---- Daily safety copies: families/{familyId}/snaps/{day}_{profileId}. Created once and never changed; deletable only after 8 days (the game keeps 7 days). ----
+    function validSnap(sid) {
+      return sid.size() <= 80
+        && request.resource.data.keys().hasOnly(['day','pid','n','g','p','s','u','t','v'])
+        && request.resource.data.keys().hasAll(['day','pid','n','g','p','s','u','t','v'])
+        && request.resource.data.day is string && request.resource.data.day.size() == 10
+        && request.resource.data.pid is string && request.resource.data.pid.size() <= 40
+        && request.resource.data.n is string && request.resource.data.n.size() <= 20
+        && request.resource.data.g in ['f','m','n']
+        && request.resource.data.p is string && request.resource.data.p.size() <= 100000
+        && request.resource.data.s is string && request.resource.data.s.size() <= 700000
+        && request.resource.data.u is number && request.resource.data.v is number
+        // the stamp must be close to the server clock, so a copy cannot be made undeletable by stamping it in the future
+        && request.resource.data.t is number
+        && request.resource.data.t >= request.time.toMillis() - 600000
+        && request.resource.data.t <= request.time.toMillis() + 600000;
+    }
+    match /families/{fid}/snaps/{sid} {
+      allow read: if request.auth != null && validFam(fid);
+      allow create: if request.auth != null && validFam(fid) && validSnap(sid);
+      allow update: if false;
+      allow delete: if request.auth != null && validFam(fid) && resource.data.t < request.time.toMillis() - 691200000;
+    }
+
     // ---- A Google account remembers which family it owns: users/{uid} = { fid, t }. ----
     match /users/{uid} {
       allow read: if isGoogle(uid) || isAdmin();      // the admin page lists all accounts (read only)

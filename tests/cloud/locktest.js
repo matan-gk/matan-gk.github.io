@@ -28,4 +28,8 @@ const wipe=/async wipe\(fid\)\{[\s\S]*?\n    \},/.exec(html);
 ok(wipe&&/d:true, v:CLOUD_DOC_V/.test(wipe[0])&&/b2\.delete/.test(wipe[0])&&wipe[0].indexOf('b1.commit')<wipe[0].indexOf('b2.delete'),'"delete my cloud data" blanks profiles as deleted, then deletes them');
 
 ok(/ver:Number\(d\.v\)\|\|1/.test(admin)&&/גרסת מסמך/.test(admin),'the admin page shows each profile\'s document format');
+// daily copies: create-only, deletable after 8 days; the client's prune window must match the rules
+ok(/match \/families\/\{fid\}\/snaps\/\{sid\}/.test(rules)&&/allow update: if false;/.test(rules.slice(rules.indexOf('match /families/{fid}/snaps/'))),'rules: safety copies cannot be updated');
+ok(/691200000/.test(rules)&&/SNAP_KEEP_MS = 8\*86400000/.test(html),'rules and game agree: a copy is deletable after 8 days (691200000 ms)');
+ok(/t >= request\.time\.toMillis\(\) - 600000/.test(rules)&&/t <= request\.time\.toMillis\(\) \+ 600000/.test(rules),'rules: a copy\'s stamp must be near the server clock');
 console.log(f?'FAILURES '+f:'ALL PASS');process.exit(f?1:0);
