@@ -7,7 +7,7 @@ await p.goto(T.URL);await p.evaluate(()=>localStorage.clear());await p.reload();
 await p.fill('#pfName','X');await p.click('.gopt:has(input[value=f])');await p.click('[data-pact=save]');await p.waitForTimeout(300);
 const r=await p.evaluate(()=>{
   const o={}; const sec=[1,2,3,4,6,7,8];
-  const reg=new Set(Object.keys(SKILL_META).filter(k=>!SKILL_META[k].bonus));
+  const reg=new Set(Object.keys(SKILL_META).filter(k=>!SKILL_META[k].bonus&&SKILL_META[k].area!=='reading'));   // reading (section 9) has its own rules and is not in the mix
   const where={}; sec.forEach(l=>pools[l].forEach(g=>{(where[g.name]=where[g.name]||[]).push(l);}));
   o.twice=Object.entries(where).filter(([k,v])=>v.length>1).map(x=>x[0]);
   o.notInAny=[...reg].filter(k=>!where[k]);
@@ -34,8 +34,8 @@ ok(r.twice.length===0,'no type in two sections: '+r.twice);ok(r.notInAny.length=
 ok(r.mixOk,'mix = all regular types');ok(r.areaMismatch.length===0,'section = area for every type: '+r.areaMismatch);
 ok(r.bonusMissing.length===0&&r.bonusTwice.length===0,'every bonus in exactly one section '+r.bonusMissing+r.bonusTwice);ok(r.bonusAreaMismatch.length===0,'bonus area matches section: '+r.bonusAreaMismatch);
 ok(r.mixBonus,'mix has every bonus');ok(r.shapesBonus,'shapes section still gets a bonus (from the mix)');
-ok(r.areas==='numbers,stories,symbols,clock,patterns,logic,shapes,other','7 areas + other: '+r.areas);
-ok(r.badDraw===0,'each level draws only from its own pool');ok(r.levelsSaved==='8,1','saved level 8 is valid, 9 resets');
+ok(r.areas==='numbers,stories,symbols,clock,patterns,logic,shapes,reading,other','7 areas + reading + other: '+r.areas);
+ok(r.badDraw===0,'each level draws only from its own pool');ok(r.levelsSaved==='8,9','saved levels 8 and 9 (reading) are valid');
 ok(['1','2','3','4','6','7'].every(l=>r.counts[l].every(n=>n>=2)),'sections 1-7 have >=2 types at every difficulty');
 console.log('shapes (known gap until step 3):',r.counts[8]);
 ok(errs.length===0,'no page errors '+errs);

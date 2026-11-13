@@ -556,7 +556,9 @@ body[data-view="home"] .wrap > .sub{margin-bottom:12px}
 @keyframes bounce{ 0%{transform:scale(1)} 30%{transform:scale(1.18) rotate(-4deg)} 60%{transform:scale(.96) rotate(3deg)} 100%{transform:scale(1)} }
 .milestone .box img{width:150px; margin-bottom:6px}
 [data-skin="space"] .milestone .box img{width:auto; height:190px; max-width:210px; object-fit:contain}
-@media (min-width:720px){ .wrap{max-width:720px} .levels{grid-template-columns:repeat(4,minmax(0,1fr))} .levels .levelbtn, .levels .roombtn, .levels[data-rem] .roombtn, .levels[data-rem] .levelbtn:last-child, .levels[data-rem] .levelbtn:nth-last-child(-n+2){grid-column:auto} }
+@media (min-width:720px){ .wrap{max-width:720px} .levels{grid-template-columns:repeat(12,minmax(0,1fr))} .levels .levelbtn, .levels .roombtn, .levels[data-rem] .roombtn, .levels[data-rem] .levelbtn:last-child, .levels[data-rem] .levelbtn:nth-last-child(-n+2){grid-column:span 3}
+  /* four to a row; a short last row is stretched so it is always full (the menu has 9 or 10 buttons) */
+  .levels[data-rem4="1"] > :last-child{grid-column:1/-1} .levels[data-rem4="2"] > :nth-last-child(-n+2){grid-column:span 6} .levels[data-rem4="3"] > :nth-last-child(-n+3){grid-column:span 4} }
 @media (min-width:1100px){ .wrap{max-width:880px} .levels{grid-template-columns:repeat(8,minmax(0,1fr))} .levelbtn{font-size:.95rem; padding:12px 8px} .card{padding:28px 28px} }
 /* selection screen: the game grid is the main control, so it grows with the room available */
 @media (min-width:480px){ body[data-view="home"] .levelbtn .lvimg, body[data-view="home"] .roombtn .lvimg{width:84px; height:84px} body[data-view="home"] .levelbtn .lvimg.cut, body[data-view="home"] .roombtn .lvimg.cut{width:72px; height:72px} body[data-view="home"] .levelbtn, body[data-view="home"] .roombtn{font-size:.95rem; padding:12px 8px} body[data-view="home"] .levelbtn .emoji, body[data-view="home"] .roombtn .emoji{font-size:3.6rem} }
@@ -1056,8 +1058,8 @@ const LEVELS = [
   {id:3, name:"מכונת הקינוחים", emoji:"🍰"},       // rules, patterns and sequences (was "מגדל הקינוחים")
   {id:4, get name(){return G("בלשית ההיגיון","בלש ההיגיון","בלש ההיגיון");}, emoji:"🔍"},   // pure reasoning (was "בלש הצורות")
   {id:8, name:"גן הצורות", emoji:"⛲"},            // geometry
-  {id:9, name:"ספריית הסיפורים", emoji:"📖"},       // reading passages with questions: its own rules (not in the mix, no bonus, passages are never repeated)
   {id:5, name:"אתגר הקשת בענן", emoji:"🌈"},       // the mix
+  {id:9, name:"ספריית הסיפורים", emoji:"📖"},       // reading passages with questions: its own rules (not in the mix, no bonus, passages are never repeated)
 ];
 // ---- UPGRADED REWARDS + PREMIUM LOOKS (merge system) ----
 const UPGRADE_IMG = {
@@ -1879,7 +1881,6 @@ rdSynonyms:{
   what:'מילים נרדפות הן מילים עם אותה משמעות. כאן צריך למצוא את הזוג שהמילים בו לא נרדפות.',
   think:['בודקים כל זוג: האם אפשר להחליף מילה אחת בשנייה בלי לשנות את המשמעות?','מילים הפוכות (גדול וקטן) אינן נרדפות.','הזוג הנכון הוא זה שלא מתאים.'],
   ex:[{q:'איזה זוג אינו נרדף?  קטן – זעיר, רעב – שבע',steps:['קטן וזעיר: אותה משמעות.','רעב ושבע: הפוכות.'],a:'רעב – שבע'}]},
-gReading:{what:'קטע קריאה עם שאלות.',think:['קוראים את הקטע.'],ex:[{q:'-',steps:['-'],a:'-'}]},
 gMulFact:{
   what:'תרגיל כפל פשוט מלוח הכפל. מוצאים את התוצאה.',
   think:['כפל הוא חיבור חוזר: 8 × 3 זה שלוש פעמים 8.','אפשר לספור בקפיצות: 8, 16, 24.','כפל אפשר להפוך: 8 × 3 הוא גם 3 × 8, ובוחרים את הדרך הנוחה.'],
@@ -3289,7 +3290,7 @@ const DIFFICULTY = {
 };
 const SKILL_DIFFICULTY = {
   // word problems
-  rdCause:2, rdWordRole:3, rdPhrase:2, rdPurpose:3, rdNotInText:3, rdWordMeaning:2, rdMotive:2, rdSynonyms:2, gReading:2,
+  rdCause:2, rdWordRole:3, rdPhrase:2, rdPurpose:3, rdNotInText:3, rdWordMeaning:2, rdMotive:2, rdSynonyms:2,
   gCompareTotals:3, gRoundsTransfer:3, gMulFact:1,
   gLeftover:1, gDifferenceMore:1, gGroups:1, gSharing:2, gMultiplyChain:2, gRemainder:2,
   // symbol puzzles
@@ -5407,7 +5408,7 @@ function openGame(id){
 function renderLevels(){
   const shown = mxVisibleLevels(diffOn, mxState).filter(id=>id!==9 || rdAvailable());
   if(shown.length && !shown.includes(level)) level = shown.includes(5) ? 5 : shown[0];   // the parent hid the section she was in
-  const el = document.getElementById('levels'); el.innerHTML=''; el.dataset.rem = String((shown.length + ((space.unlocked||gateOn)?1:0))%3);
+  const el = document.getElementById('levels'); el.innerHTML=''; const nBtn = shown.length + ((space.unlocked||gateOn)?1:0); el.dataset.rem = String(nBtn%3); el.dataset.rem4 = String(nBtn%4);
   LEVELS.filter(l=>shown.includes(l.id)).forEach(l=>{
     const b=document.createElement('div');
     b.className='levelbtn'+(l.id===level?' active':'');
