@@ -56,6 +56,7 @@ const TESTS = [
   ['pairtest','pairtest.js','"two numbers" questions never offer the same pair in a different order'],
   ['plantest','cloud/plantest.js','cloud sync planner: push, pull, conflicts, deletions'],
   ['cloudtest','cloud/cloudtest.js','Google account sync with a fake Firebase: two devices, conflicts, offline, budget, reports'],
+  ['locktest','cloud/locktest.js','version lock: document format number, security rules and admin page agree; no deletes of live data'],
   ['famtest','cloud/famtest.js','family model: Google account, anonymous backup and codes, joining, migration, modes'],
   ['leveltest','leveltest.js','space sections: 8 pictures and names, gendered first name, hidden sections, parent area keeps default names, coverage'],
   ['rewardtest','rewardtest.js','space collectibles: 14+14 pictures, Hebrew names, workshop and upgrade wording, bonus trophy, extra mascot poses, sweets unchanged'],

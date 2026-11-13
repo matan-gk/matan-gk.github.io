@@ -10,7 +10,7 @@ async function handle(op,a){
   if(op==='setFamily'){ srv.users[a.uid]={fid:a.fid}; return; }
   if(op==='clearFamily'){ delete srv.users[a.uid]; return; }
   if(op==='list'){ const d=Object.entries(F(a.fid)).map(([id,v])=>Object.assign({id},v)); srv.reads+=Math.max(1,d.length); return clone(d); }
-  if(op==='put'){ const cur=F(a.fid)[a.id]; if(cur&&cur.u!==a.doc.b) return {conflict:true}; F(a.fid)[a.id]=clone(a.doc); srv.writes++; return {ok:true}; }
+  if(op==='put'){ const cur=F(a.fid)[a.id]; if(cur&&cur.u!==a.doc.b) return {conflict:true}; if(!(a.doc.v>=2)||(cur&&a.doc.v<cur.v)){ srv.refusedV=(srv.refusedV||0)+1; return {conflict:true}; }   /* the security rules: format 2 or newer, never lower */ F(a.fid)[a.id]=clone(a.doc); srv.writes++; return {ok:true}; }
   if(op==='wipe'){ srv.fams[a.fid]={}; return; }
   if(op==='legacyList'){ return clone(Object.entries(srv.legacy[a.uid]||{}).map(([id,v])=>Object.assign({id},v))); }
   if(op==='legacyDelete'){ srv.legacy[a.uid]={}; return; }
@@ -110,5 +110,6 @@ await A.screenshot({path:'c_account_out.png'});
 await A.evaluate(()=>{window.__failNext=true;}); await A.click('[data-pact=cloudin]'); await A.waitForTimeout(300);
 ok((await A.textContent('#profBody')).includes('ההתחברות לא הצליחה'),'failed sign-in shows a message');
 for(const p of [A,B,C]) ok(p.errs.length===0,'no page errors '+p.errs.join('|'));
+ok(!srv.refusedV,'every upload is in document format 2 (the security rules would refuse anything else)');
 console.log('server totals: reads',srv.reads,'writes',srv.writes);
 console.log(f?'FAILURES '+f:'ALL PASS');await b.close();})();

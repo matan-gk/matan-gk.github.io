@@ -85,6 +85,7 @@ function decodeProfile(p){
   const parts = p.path.split('/');
   return {path:p.path, scope:parts[0], owner:parts[1], pid:parts[3], name:d.n||'', gender:d.g, deleted:!!d.d, updated:d.u||0, size:String(d.p||'').length+String(d.s||'').length+String(d.n||'').length,
     score:prog.score||0, streak:prog.streak||0, level:prog.level||1, gifts:(prog.collection||[]).length, looks:(prog.looks||[]).length,
+    ver:Number(d.v)||1, oldFormat:!!(prog.lookSrc||prog.looks||prog.activeLook)||!(prog.space||d.d), rooms:(prog.space&&prog.space.things||[]).length, earned:prog.space?prog.space.earned:null, spent:prog.space?prog.space.spent:null,
     answers:log.length, acc:log.length?Math.round(100*correct/log.length):null, days, last, raw:d};
 }
 function families(){
@@ -140,8 +141,8 @@ function overview(){
 }
 function profileCard(p){
   const g = {f:'בת',m:'בן',n:'ניטרלי'}[p.gender]||p.gender;
-  return `<div class="pcard"><b>${esc(p.name||'ללא שם')}</b> <span class="tag">${esc(g)}</span>${p.deleted?'<span class="tag warn">נמחק</span>':''}
-    <div class="kv"><span>ניקוד <b>${p.score}</b></span><span>רמה <b>${p.level}</b></span><span>רצף <b>${p.streak}</b></span><span>מתנות <b>${p.gifts}</b></span><span>מראות <b>${p.looks}</b></span><span>תשובות <b>${p.answers}</b></span><span>דיוק <b>${p.acc==null?'–':p.acc+'%'}</b></span><span>ימי משחק <b>${p.days}</b></span><span>שיחק לאחרונה <b>${esc(when(p.last))}</b></span><span>עודכן <b>${esc(when(p.updated))}</b></span><span>נפח <b>${kb(p.size)}</b></span></div>
+  return `<div class="pcard"><b>${esc(p.name||'ללא שם')}</b> <span class="tag">${esc(g)}</span>${p.deleted?'<span class="tag warn">נמחק</span>':''}${(!p.deleted&&p.ver<2)?'<span class="tag warn">פורמט מסמך ישן v'+p.ver+'</span>':''}${(!p.deleted&&p.oldFormat)?'<span class="tag warn">נתוני חדר חסרים</span>':''}
+    <div class="kv"><span>ניקוד <b>${p.score}</b></span><span>רמה <b>${p.level}</b></span><span>רצף <b>${p.streak}</b></span><span>מתנות <b>${p.gifts}</b></span><span>חדר <b>${p.earned==null?'–':p.rooms+' פריטים · '+p.spent+'/'+p.earned}</b></span><span>גרסת מסמך <b>v${p.ver}</b></span><span>תשובות <b>${p.answers}</b></span><span>דיוק <b>${p.acc==null?'–':p.acc+'%'}</b></span><span>ימי משחק <b>${p.days}</b></span><span>שיחק לאחרונה <b>${esc(when(p.last))}</b></span><span>עודכן <b>${esc(when(p.updated))}</b></span><span>נפח <b>${kb(p.size)}</b></span></div>
     <details><summary>נתונים גולמיים</summary><div class="muted mono">${esc(p.path)}</div><pre>${esc(JSON.stringify(p.raw,(k,v)=>typeof v==='string'&&v.length>4000?v.slice(0,4000)+'… ('+v.length+' תווים)':v,1))}</pre></details></div>`;
 }
 function familiesView(){

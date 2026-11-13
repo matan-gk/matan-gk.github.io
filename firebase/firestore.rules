@@ -18,6 +18,11 @@ service cloud.firestore {
     function validFam(fid) {
       return fid.size() == 26 && fid.matches('[A-Z2-9]+');
     }
+    // The oldest document format that may still write. Raise it (together with CLOUD_DOC_V in math-quest.html) when the format changes:
+    // older builds then become read-only and can no longer overwrite what a newer build stored.
+    function minDocVersion() {
+      return 2;
+    }
     function validProfile(pid) {
       return pid.size() <= 40
         && request.resource.data.keys().hasOnly(['n','g','p','s','u','b','d','v'])
@@ -31,13 +36,18 @@ service cloud.firestore {
         // optimistic concurrency: an update must build on the version that is stored (a stale device is refused and re-syncs)
         && (resource == null || resource.data.u == request.resource.data.b)
         && request.resource.data.d is bool
-        && request.resource.data.v == 1;
+        // the version can only go up: a build that knows an older format must not overwrite a newer one
+        && request.resource.data.v is number
+        && request.resource.data.v >= minDocVersion()
+        && (resource == null || request.resource.data.v >= resource.data.v);
     }
 
     // ---- Progress: families/{familyId}/profiles/{profileId}. Any signed-in user (Google or anonymous) who knows the family id can reach it.
     // The families collection itself cannot be listed, so ids cannot be discovered. ----
     match /families/{fid}/profiles/{pid} {
-      allow read, delete: if request.auth != null && validFam(fid);
+      allow read: if request.auth != null && validFam(fid);
+      // No real deletes of live data: a profile is removed in two steps, first marked deleted (d = true, an ordinary update), then deleted.
+      allow delete: if request.auth != null && validFam(fid) && resource.data.d == true;
       allow create, update: if request.auth != null && validFam(fid) && validProfile(pid);
     }
 
