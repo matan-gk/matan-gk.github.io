@@ -9,7 +9,7 @@ async function handle(op,a){
   if(op==='setFamily'){ srv.users[a.uid]={fid:a.fid}; return; }
   if(op==='clearFamily'){ delete srv.users[a.uid]; return; }
   if(op==='list'){ const d=Object.entries(F(a.fid)).map(([id,v])=>Object.assign({id},v)); srv.reads+=Math.max(1,d.length); return clone(d); }
-  if(op==='put'){ const cur=F(a.fid)[a.id]; if(cur&&cur.u!==a.doc.b) return {conflict:true}; if(!(a.doc.v>=2)||(cur&&a.doc.v<cur.v)){ srv.refusedV=(srv.refusedV||0)+1; return {conflict:true}; }   /* the security rules: format 2 or newer, never lower */ F(a.fid)[a.id]=clone(a.doc); srv.writes++; return {ok:true}; }
+  if(op==='put'){ const cur=F(a.fid)[a.id]; if(cur&&cur.u!==a.doc.b) return {conflict:true}; if(!(a.doc.v>=3)||(cur&&a.doc.v<cur.v)){ srv.refusedV=(srv.refusedV||0)+1; return {conflict:true}; }   /* the security rules: format 2 or newer, never lower */ F(a.fid)[a.id]=clone(a.doc); srv.writes++; return {ok:true}; }
   if(op==='wipe'){ srv.fams[a.fid]={}; return; }
   if(op==='legacyList'){ return clone(Object.entries(srv.legacy[a.uid]||{}).map(([id,v])=>Object.assign({id},v))); }
   if(op==='legacyDelete'){ srv.legacy[a.uid]={}; return; }

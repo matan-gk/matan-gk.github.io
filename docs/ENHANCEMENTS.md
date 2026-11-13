@@ -555,3 +555,16 @@ Decisions from the owner (2026-11-13):
 - The reading passages are not part of the rainbow mix (5 to 7 questions per passage breaks its format). They live in a section of their own, with their own rules.
 - Passages cannot be generated, so the profile records which passages it has finished (every question answered), and a finished passage is never offered again; the section announces when the bank is used up.
 - Eight question types (cause, role of a word, meaning of a phrase, purpose of a sentence, what the text does not answer, word in context, motive, not-a-synonym pair), each its own skill id so the progress tab can show them.
+
+## Step 32: reading section, first slice (branch `reading-1`, off `test-math-types`; version 2026.11.13e)
+
+Section 9, "ספריית הסיפורים" (📖), with one passage ("הקפוד", 15 numbered lines) and its eight questions, one per type. Rules of the section, as decided:
+
+- **Numbered lines.** The passage opens in a full-screen panel. Each authored line is a row with its number in the right-hand gutter; when a line wraps onto 2 or 3 screen lines the number appears once, beside the first. Questions say "בשורה 7" and the "📖 הקטע" button reopens the passage with those lines highlighted. The first question of a passage in a session opens it automatically.
+- **One passage at a time, never repeated.** The profile keeps `progress.rd = {done:[ids], cur:{id, i}}`. A passage is done when all its questions are answered (right or wrong); it resumes at question `i` after a reload; a done passage is never offered again. When every passage is done the section leaves the menu and the game returns home.
+- **Its own rules.** Not in the rainbow mix (`pools[5]` excludes it), no bonus question or bonus party in this section, answers in one column, difficulty switches still apply (rated 2), and the cell matrix and hidden-types controls do not list it yet.
+- **Skills.** Each question's type is its own skill (`rdCause`, `rdWordRole`, `rdPhrase`, `rdPurpose`, `rdNotInText`, `rdWordMeaning`, `rdMotive`, `rdSynonyms`) in a new area "קריאה והבנה"; each has a help page.
+- **Sync format 3.** `progress.rd` is a new saved field, so `CLOUD_DOC_V` and `minDocVersion()` in the rules are now 3 (see `docs/SYNC_SAFETY_PLAN.md`: raising them makes older builds read-only). New in `locktest`: a list of the progress keys, so adding a field without raising the format fails a test. **Rollout:** paste the rules only after every device runs 2026.11.13e or newer; until then keep the version-2 rules.
+- **Level 9 loads.** `cleanProgress` accepted levels 1 to 8 only; now 1 to 9.
+- **To do next (phase 2 continued):** more passages (about 12 in all, you review the vowels), a parent-area switch for the section, the section's own picture, a message when the last passage is finished, read-aloud (optional), and the same loss guard for `rd` (a pull that would lower the done list is held).
+- Tests: `tests/readingtest.js` (new), and the sync tests now expect format 3.

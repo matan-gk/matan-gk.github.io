@@ -488,6 +488,18 @@ body[data-view="home"] .wrap > .sub{margin-bottom:12px}
 .gl{line-height:1; font-family:'Baloo 2',sans-serif}
 .choice.grid-choice{display:flex; justify-content:center; align-items:center; padding:10px 6px; min-height:70px}
 .choices{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px}
+.choices.wide{grid-template-columns:1fr}
+.rdbtn{display:block; width:100%; margin:0 0 10px; padding:10px 14px; font:inherit; font-weight:700; border:2px solid var(--muted); border-radius:14px; background:var(--card2); color:var(--text); cursor:pointer}
+.rdov{position:fixed; inset:0; z-index:9000; background:rgba(30,20,45,.55); display:flex; align-items:center; justify-content:center; padding:12px}
+.rdbox{background:var(--card); color:var(--text); border-radius:20px; max-width:640px; width:100%; max-height:92vh; display:flex; flex-direction:column; padding:14px 14px 12px; box-shadow:0 10px 40px var(--shadow)}
+.rdbox h2{margin:0 0 8px; text-align:center}
+.rdbody{overflow-y:auto; flex:1; padding:0 2px}
+.rdp{margin:0 0 .8em}
+.rdl{display:grid; grid-template-columns:2em 1fr; column-gap:.5em; align-items:start; font-size:1.2rem; line-height:1.9; padding:0 .25em; border-radius:8px}
+.rdn{color:var(--muted); font-size:.85rem; text-align:center; line-height:2.5; font-variant-numeric:tabular-nums}
+.rdt{min-width:0}
+.rdhl{background:rgba(255,200,60,.28)}
+.rdclose{margin-top:10px; width:100%}
 .choice{
   background:var(--card2); border:2px solid transparent; border-radius:14px; padding:14px 8px;
   font-size:1.1rem; font-weight:800; font-family:'Baloo 2',sans-serif; cursor:pointer; color:var(--text);
@@ -1044,6 +1056,7 @@ const LEVELS = [
   {id:3, name:"מכונת הקינוחים", emoji:"🍰"},       // rules, patterns and sequences (was "מגדל הקינוחים")
   {id:4, get name(){return G("בלשית ההיגיון","בלש ההיגיון","בלש ההיגיון");}, emoji:"🔍"},   // pure reasoning (was "בלש הצורות")
   {id:8, name:"גן הצורות", emoji:"⛲"},            // geometry
+  {id:9, name:"ספריית הסיפורים", emoji:"📖"},       // reading passages with questions: its own rules (not in the mix, no bonus, passages are never repeated)
   {id:5, name:"אתגר הקשת בענן", emoji:"🌈"},       // the mix
 ];
 // ---- UPGRADED REWARDS + PREMIUM LOOKS (merge system) ----
@@ -1546,6 +1559,7 @@ function spaceClean(sp, gold, legacy){
   return {earned, spent:Math.min(spent,earned), trued:true, unlocked:sp.unlocked===true, ...(dw?{dw:1}:{}), surf, own, po, bc, lv, top, things, fix:{bed:fbed, window:fwin}, sub:GU};
 }
 function spaceSnap(){ return JSON.parse(JSON.stringify(space)); }
+let rd = {done:[], cur:null};   // reading section: passages finished (every question answered) and the one in progress {id, i = next question}
 let space = spaceClean({},[],0);   // personal-space tokens: earned once per upgrade (stored, never derived), spent in the shop later; trued = the one-time true-up for old players was done
 let golden = [], legacyLooks = 0;   // upgraded rewards (each remembers the 10 rewards it was made from); how many looks the player had opened before the looks were retired (used by the token true-up)
 const COTTON_CANDY_IMG = "assets/32c4bd427e57.webp";
@@ -1679,7 +1693,7 @@ function applyTheme(){
 }
 let warmOn = false, sessionDraws = 0;   // warm-up first (parent switch) and how many questions this session has drawn (resets when the game opens or the profile changes)
 let diffOn = [1,2,3];     // enabled difficulty levels for the active profile (see the Settings tab)
-function captureProgress(){ return {score,streak,collection,lollipops,level,golden,legacyLooks,space:spaceSnap(),rv:LAYER_V,diff:diffIdsClean(diffOn),mx:mxClean(mxState),focus:focusOn,warm:warmOn,theme:themeId}; }
+function captureProgress(){ return {score,streak,collection,lollipops,level,golden,legacyLooks,space:spaceSnap(),rd:rdSnap(),rv:LAYER_V,diff:diffIdsClean(diffOn),mx:mxClean(mxState),focus:focusOn,warm:warmOn,theme:themeId}; }
 function cleanProgress(d){
   d = (d && typeof d==='object') ? d : {};
   let col = Array.isArray(d.collection) ? d.collection.filter(x=>typeof x==='string') : [];
@@ -1704,10 +1718,11 @@ function cleanProgress(d){
     streak: (typeof d.streak==='number' && isFinite(d.streak)) ? d.streak : 0,
     collection: col,
     lollipops: [],
-    level: (typeof d.level==='number' && d.level>=1 && d.level<=8) ? d.level : 1,
+    level: (typeof d.level==='number' && d.level>=1 && d.level<=9) ? d.level : 1,
     golden: gold,
     legacyLooks: legacy,
     space: sp2,
+    rd: rdClean(d.rd),
     rv: LAYER_V,
     diff: diffIdsClean(d.diff),
     mx: mxClean(d.mx),
@@ -1718,7 +1733,7 @@ function cleanProgress(d){
 }
 function applyProgress(d){
   const c = cleanProgress(d);
-  score=c.score; streak=c.streak; collection=c.collection; lollipops=c.lollipops; golden=c.golden; legacyLooks=c.legacyLooks; space=c.space; level=c.level; diffOn=c.diff; mxState=c.mx; focusOn=c.focus; warmOn=c.warm; themeId=c.theme; applyTheme();
+  score=c.score; streak=c.streak; collection=c.collection; lollipops=c.lollipops; golden=c.golden; legacyLooks=c.legacyLooks; space=c.space; rd=c.rd; level=c.level; diffOn=c.diff; mxState=c.mx; focusOn=c.focus; warmOn=c.warm; themeId=c.theme; applyTheme();
 }
 function persist(){ try{ localStorage.setItem(SAVE_KEY, JSON.stringify(store)); }catch(e){} }
 function saveState(){
@@ -1832,6 +1847,39 @@ gInequality:{
     steps:['בשני הצדדים מוסיפים ל-47, לכן מספיק להשוות: [[15 &lt; __]]','המספר החסר צריך להיות גדול מ-15, למשל 20.','בודקים: [[62 &lt; 67]] ✓'],a:'מספר גדול מ-15, למשל 20'},
       {q:'<span class="mono">87 − __ &gt; 87 − 15</span>',
     steps:['בשני הצדדים מחסירים מ-87. כשמחסירים פחות, נשאר יותר.','כדי שהצד השמאלי יהיה גדול יותר, צריך להחסיר פחות מ-15, למשל 10.','בודקים: [[87 − 10 = 77]] ו-[[87 − 15 = 72]], וגם [[77 &gt; 72]] ✓'],a:'מספר קטן מ-15, למשל 10'}]},
+rdCause:{
+  what:'שאלת "מדוע" על הקטע. התשובה היא הסיבה, והיא כתובה בקטע או נובעת ממנו.',
+  think:['מוצאים בקטע את המקום שמדבר על העניין, אפשר לפתוח את הקטע בכפתור.','הסיבה עונה על השאלה "בגלל מה?". מחפשים מילים כמו "כי", "לכן", "כדי".','בודקים שהתשובה שבחרתם באמת מופיעה בקטע, ולא רק נשמעת הגיונית.'],
+  ex:[{q:'בקטע כתוב: "הגשם ירד, ולכן הרצפה רטובה". מדוע הרצפה רטובה?',steps:['המילה "לכן" מראה שמה שלפניה הוא הסיבה.','הסיבה: [[הגשם ירד]]'],a:'כי הגשם ירד'}]},
+rdWordRole:{
+  what:'שואלים למה כתובה מילה קטנה בקטע, כמו "גם", "אבל", "רק" או "כי". צריך להבין מה היא מוסיפה למשפט.',
+  think:['קוראים את המשפט עם המילה ובלי המילה, ורואים מה משתנה.','"גם" אומר שיש עוד משהו מאותו סוג. "אבל" אומר שיש ניגוד.','מחפשים בקטע את מה ש"עוד" או את מה ש"מנוגד".'],
+  ex:[{q:'"דנה אוכלת תפוחים, וגם אגסים". מדוע כתוב "גם"?',steps:['דנה אוכלת תפוחים, ו"גם" אגסים: עוד סוג פרי.'],a:'כי היא אוכלת עוד סוג פרי, לא רק תפוחים'}]},
+rdPhrase:{
+  what:'שואלים מה פירוש משפט או קריאה מהקטע, למשל "איזו הפתעה!". צריך להסביר במילים אחרות מה קרה.',
+  think:['קוראים את המשפט ואת מה שקרה סביבו.','שואלים: מה היה לא צפוי? מה השתנה פתאום?','בוחרים את התשובה שמתארת מה שקרה בקטע, לא מה שאפשר לדמיין.'],
+  ex:[{q:'בקטע כתוב: "איזו הפתעה! הארנב יצא מהכובע". מהי ההפתעה?',steps:['ההפתעה היא מה שלא ציפו לו: [[ארנב מתוך כובע]].'],a:'שארנב יצא מתוך הכובע'}]},
+rdPurpose:{
+  what:'שואלים למה הכותב כתב כמה שורות. מה הוא רוצה שנבין, נרגיש או נעשה.',
+  think:['קוראים את השורות ושואלים: מה המסר?','הכותב יכול להסביר, לספר, להזהיר או לשכנע.','התשובה היא המסר של השורות כולן, לא פרט אחד מהן.'],
+  ex:[{q:'"לתרנגולות יש כנפיים, אבל הן לא עפות רחוק". מה מטרת המשפט?',steps:['המשפט נותן מידע על תרנגולות: [[מסביר]].'],a:'להסביר משהו על תרנגולות'}]},
+rdNotInText:{
+  what:'כמה שאלות, ועל אחת מהן הקטע לא עונה. צריך למצוא את השאלה ההיא.',
+  think:['לכל שאלה מחפשים בקטע את התשובה.','אם מצאתם את התשובה בקטע, השאלה לא הנכונה.','התשובה הנכונה היא השאלה שאי אפשר לענות עליה מתוך הקטע.'],
+  ex:[{q:'בקטע כתוב רק שהדג גר בים ואוכל אצות. על איזו שאלה אין תשובה בקטע?',steps:['איפה גר הדג? [[בים]], יש תשובה.','מה אוכל הדג? [[אצות]], יש תשובה.','כמה שנים הוא חי? בקטע אין.'],a:'כמה שנים חי הדג?'}]},
+rdWordMeaning:{
+  what:'שואלים מה פירוש מילה שמופיעה בקטע.',
+  think:['קוראים את המשפט שבו המילה מופיעה ואת מה שסביבו.','מנסים להחליף את המילה בכל תשובה, ובודקים אם המשפט עדיין מתאים.','מחפשים מילה שיש בה חלק מוכר.'],
+  ex:[{q:'"הילד מתכרבל בשמיכה". מה פירוש "מתכרבל"?',steps:['מנסים: "הילד מתקפל ונצמד בשמיכה". מתאים.','"בורח" או "קופץ" לא מתאימים למשפט.'],a:'מתקפל ונצמד'}]},
+rdMotive:{
+  what:'שואלים למה דמות או חיה עושה משהו. הסיבה כתובה בקטע או אפשר להבין אותה ממנו.',
+  think:['מחפשים בקטע מה קרה לפני כן ומה אפשר להרוויח מזה.','קוראים שוב את המשפטים לפני ואחרי.','בוחרים את הסיבה שהקטע תומך בה.'],
+  ex:[{q:'"השנאבה אוספת אגוזים כל הסתיו, כי בחורף אין אגוזים". מדוע היא אוספת?',steps:['"כי" מראה את הסיבה: [[בחורף אין אגוזים]].'],a:'כי בחורף אין אגוזים'}]},
+rdSynonyms:{
+  what:'מילים נרדפות הן מילים עם אותה משמעות. כאן צריך למצוא את הזוג שהמילים בו לא נרדפות.',
+  think:['בודקים כל זוג: האם אפשר להחליף מילה אחת בשנייה בלי לשנות את המשמעות?','מילים הפוכות (גדול וקטן) אינן נרדפות.','הזוג הנכון הוא זה שלא מתאים.'],
+  ex:[{q:'איזה זוג אינו נרדף?  קטן – זעיר, רעב – שבע',steps:['קטן וזעיר: אותה משמעות.','רעב ושבע: הפוכות.'],a:'רעב – שבע'}]},
+gReading:{what:'קטע קריאה עם שאלות.',think:['קוראים את הקטע.'],ex:[{q:'-',steps:['-'],a:'-'}]},
 gMulFact:{
   what:'תרגיל כפל פשוט מלוח הכפל. מוצאים את התוצאה.',
   think:['כפל הוא חיבור חוזר: 8 × 3 זה שלוש פעמים 8.','אפשר לספור בקפיצות: 8, 16, 24.','כפל אפשר להפוך: 8 × 3 הוא גם 3 × 8, ובוחרים את הדרך הנוחה.'],
@@ -2417,7 +2465,7 @@ function cloudPlan(local, gone, docs, maxProfiles){
   return out;
 }
 // Version of the cloud document format. The security rules refuse any write below this number (and any write that would lower the stored one), so an older build can never overwrite a profile written by a newer one. Raise it only together with firebase/firestore.rules.
-const CLOUD_DOC_V = 2;
+const CLOUD_DOC_V = 3;   // 3: progress.rd (reading passages done) was added; builds that do not know it must not write
 // Profile <-> cloud document. Progress and stats are stored as JSON text: one field each, no per-field indexing, no nesting limits.
 function cloudDocFromProfile(p, maxStatsChars, base){
   let stats = p.stats ? JSON.parse(JSON.stringify(p.stats)) : null, s = stats ? JSON.stringify(stats) : '';
@@ -2434,7 +2482,7 @@ function cloudProfileFromDoc(C, helpers){
 // ===== CLOUD (Google sign-in, cloud progress, problem reports) =====
 // Local-first: the game always works from this device's storage. The cloud is a mirror, so no internet / no account / no quota never blocks play.
 // Everything here is off while CLOUD_CONFIG is null. See firebase/SETUP.md for how to create the (free) Firebase project and paste its settings below.
-const APP_VERSION = '2026.11.13d';       // keep equal to VERSION in sw.js (a test checks it)
+const APP_VERSION = '2026.11.13e';       // keep equal to VERSION in sw.js (a test checks it)
 const BUILD_COMMIT = '';                 // the full id of the commit this page was built from: the deploy workflow (.github/workflows/tests.yml) fills it in; empty in a plain checkout
 const REPO_URL = 'https://github.com/matan-gk/matan-gk.github.io';
 const CLOUD_CONFIG = {apiKey:"AIzaSyAlq_TJNGvWPJpUrpbdq_hkAoURydqMzm0", authDomain:"learning-quest-1.firebaseapp.com", projectId:"learning-quest-1", appId:"1:98931179722:web:78fb00084ccba3efb53433"};   // e.g. {apiKey:'...', authDomain:'xxx.firebaseapp.com', projectId:'xxx', appId:'...'}
@@ -3181,11 +3229,13 @@ const STATS_CONFIG = {
     labels: {up:{emoji:'📈', label:'משתפר'}, flat:{emoji:'➡️', label:'יציב'}, down:{emoji:'📉', label:'יורד'}},
     insufficient: {emoji:'', label:''}
   },
-  areas: {numbers:'מספרים וחישוב', stories:'סיפורים וכסף', symbols:'חידות סמלים', clock:'שעון וזמן', patterns:'דפוסים וסדרות', logic:'היגיון', shapes:'צורות והיקף', other:'אחר'}
+  areas: {numbers:'מספרים וחישוב', stories:'סיפורים וכסף', symbols:'חידות סמלים', clock:'שעון וזמן', patterns:'דפוסים וסדרות', logic:'היגיון', shapes:'צורות והיקף', reading:'קריאה והבנה', other:'אחר'}
 };
 // One entry per question generator. Optional per skill: bands:[...] (replaces the global bands) or bandShift:-0.05 (moves every threshold above 0).
 const SKILL_META = {
   gSharing:{area:'stories', he:'בעיית חלוקה'}, gMultiplyChain:{area:'stories', he:'בעיית כפל'}, gLeftover:{area:'stories', he:'בעיית שאריות'},
+  rdCause:{area:'reading', he:'קריאה: סיבה'}, rdWordRole:{area:'reading', he:'קריאה: תפקיד מילה'}, rdPhrase:{area:'reading', he:'קריאה: משמעות ביטוי'}, rdPurpose:{area:'reading', he:'קריאה: מטרת משפט'},
+  rdNotInText:{area:'reading', he:'קריאה: מה אין בקטע'}, rdWordMeaning:{area:'reading', he:'קריאה: פירוש מילה'}, rdMotive:{area:'reading', he:'קריאה: למה עשה'}, rdSynonyms:{area:'reading', he:'מילים נרדפות'},
   gMulFact:{area:'numbers', he:'לוח הכפל'}, gCompareTotals:{area:'stories', he:'השוואת סכומים'}, gRoundsTransfer:{area:'stories', he:'משחק בסבבים'},
   gFillNumber:{area:'numbers', he:'השלימו את המספר'}, gDifferenceMore:{area:'stories', he:'בעיית הפרש'}, gGroups:{area:'stories', he:'בעיית קבוצות'}, gRemainder:{area:'stories', he:'בעיית שארית'},
   gTwoSymbols:{area:'symbols', he:'חידת סמלים'}, gThreeSymbols:{area:'symbols', he:'חידת סמלים משולשת'}, gCirclePattern:{area:'symbols', he:'מספרים בקשת'}, gInequality:{area:'symbols', he:'אי-שוויון'},
@@ -3239,6 +3289,7 @@ const DIFFICULTY = {
 };
 const SKILL_DIFFICULTY = {
   // word problems
+  rdCause:2, rdWordRole:3, rdPhrase:2, rdPurpose:3, rdNotInText:3, rdWordMeaning:2, rdMotive:2, rdSynonyms:2, gReading:2,
   gCompareTotals:3, gRoundsTransfer:3, gMulFact:1,
   gLeftover:1, gDifferenceMore:1, gGroups:1, gSharing:2, gMultiplyChain:2, gRemainder:2,
   // symbol puzzles
@@ -5159,6 +5210,73 @@ function bShapes_JoinedRects(){
     choices:digChoices(per,[2*(a+b)+2*(c+d), a+b+c+d, 2*(a+c)+b+d, per+2, per-2, 2*(a+c+b+d)],6,150,4)};
 }
 
+// ---- READING SECTION (id 9): passages with questions. Authored data, not generated, so each passage is offered once. ----
+// A passage is a list of paragraphs, a paragraph a list of numbered lines (the numbers follow the lines, not the screen: a line that wraps shows its number once).
+// A question: skill (an rd... id), lines (highlighted when the passage is opened from it), q, a (the right answer), w (three wrong ones).
+const READING_BANK = [
+  {id:'hedgehog', title:'הַקִּפּוֹד',
+   paras:[
+    ['הַקִּפּוֹד הוּא בַּעַל חַיִּים קָטָן וְקוֹצָנִי.','עַל גַּבּוֹ יֵשׁ אֲלָפִים שֶׁל קוֹצִים חַדִּים, וְהֵם שׁוֹמְרִים עָלָיו.','בַּיּוֹם הוּא יָשֵׁן בֵּין הָעָלִים, וּבַלַּיְלָה הוּא יוֹצֵא לְחַפֵּשׂ אֹכֶל.'],
+    ['הַקִּפּוֹד אוֹכֵל חֲרָקִים, וְגַם חֲלָזוֹנוֹת וְתוֹלָעִים.','הוּא אוֹכֵל הַרְבֵּה לִפְנֵי הַחֹרֶף, כִּי בַּחֹרֶף קָשֶׁה לִמְצֹא אֹכֶל.'],
+    ['כְּשֶׁהַקִּפּוֹד מִתְפַּחֵד, הוּא מִתְכַּרְבֵּל בִּמְהִירוּת.','פִּתְאֹם הוּא כְּבָר לֹא חַיָּה קְטַנָּה, אֶלָּא כַּדּוּר שֶׁל קוֹצִים! אֵיזוֹ הַפְתָּעָה לַשּׁוּעָל הָרָעֵב!','הַשּׁוּעָל מְנַסֶּה לִפְתֹּחַ אֶת הַכַּדּוּר, אֲבָל הַקּוֹצִים דּוֹקְרִים אֶת אַפּוֹ.','אַחֲרֵי כַּמָּה דַּקּוֹת הַשּׁוּעָל מִתְיָאֵשׁ וְהוֹלֵךְ.'],
+    ['בַּסְּתָיו מְחַפֵּשׂ הַקִּפּוֹד מָקוֹם חָם וְשָׁקֵט, כְּמוֹ עֲרֵמַת עָלִים.','שָׁם הוּא יָשֵׁן כָּל הַחֹרֶף, וְהַלֵּב שֶׁלּוֹ פּוֹעֵם לְאַט לְאַט.','כְּשֶׁהָאֲדָמָה מִתְחַמֶּמֶת בָּאָבִיב, הוּא מִתְעוֹרֵר וְיוֹצֵא לְחַפֵּשׂ אֹכֶל.'],
+    ['אֲנָשִׁים רַבִּים שְׂמֵחִים כְּשֶׁקִּפּוֹד בָּא לַגִּנָּה שֶׁלָּהֶם.','הוּא אוֹכֵל חֲלָזוֹנוֹת שֶׁמַּזִּיקִים לַפְּרָחִים.','כָּךְ הַקִּפּוֹד עוֹזֵר לַגַּנָּן, בְּלִי שֶׁמִּישֶׁהוּ בִּקֵּשׁ מִמֶּנּוּ.']
+   ],
+   qs:[
+    {skill:'rdCause', lines:[6,7,8], q:'מַדּוּעַ הַקִּפּוֹד מִתְכַּרְבֵּל כְּשֶׁהוּא מִתְפַּחֵד? (שׁוּרוֹת 6 עַד 8)', a:'כִּי כְּשֶׁהוּא כַּדּוּר, הַקּוֹצִים דּוֹקְרִים מִי שֶׁמְּנַסֶּה לִפְגֹּעַ בּוֹ', w:['כִּי הוּא רוֹצֶה לִישֹׁן','כִּי הוּא רוֹצֶה לְהִתְחַמֵּם','כִּי הַשּׁוּעָל אוֹהֵב לְשַׂחֵק בְּכַדּוּרִים']},
+    {skill:'rdWordRole', lines:[4], q:'בְּשׁוּרָה 4 כָּתוּב שֶׁהַקִּפּוֹד אוֹכֵל חֲרָקִים, וְגַם חֲלָזוֹנוֹת וְתוֹלָעִים. מַדּוּעַ כָּתוּב "גַּם"?', a:'כִּי הוּא אוֹכֵל עוֹד סוּגִים שֶׁל מָזוֹן, לֹא רַק חֲרָקִים', w:['כִּי כָּל בַּעֲלֵי הַחַיִּים אוֹכְלִים חֲלָזוֹנוֹת','כִּי הַחֲרָקִים וְהַחֲלָזוֹנוֹת דּוֹמִים זֶה לָזֶה','כִּי גַּם הַשּׁוּעָל אוֹכֵל חֲלָזוֹנוֹת']},
+    {skill:'rdPhrase', lines:[7], q:'בְּשׁוּרָה 7 כָּתוּב: "אֵיזוֹ הַפְתָּעָה לַשּׁוּעָל הָרָעֵב!" מַהִי הַהַפְתָּעָה?', a:'שֶׁחַיָּה קְטַנָּה הָפְכָה פִּתְאֹם לְכַדּוּר שֶׁל קוֹצִים', w:['שֶׁהַשּׁוּעָל מָצָא הַרְבֵּה אֹכֶל','שֶׁהַקִּפּוֹד בָּרַח מַהֵר מְאֹד','שֶׁהַקּוֹצִים נָפְלוּ מֵהַגַּב']},
+    {skill:'rdPurpose', lines:[13,14,15], q:'הַמַּטָּרָה שֶׁל שׁוּרוֹת 13 עַד 15 הִיא –', a:'לְהַסְבִּיר שֶׁהַקִּפּוֹד מוֹעִיל לַגִּנָּה', w:['לְהַזְהִיר שֶׁהַקִּפּוֹד מְסֻכָּן לָאֲנָשִׁים','לְסַפֵּר שֶׁהַקִּפּוֹד יָשֵׁן בַּחֹרֶף','לְלַמֵּד אֵיךְ מְגַדְּלִים פְּרָחִים']},
+    {skill:'rdNotInText', lines:[], q:'עַל אֵיזוֹ שְׁאֵלָה מֵהַשְּׁאֵלוֹת שֶׁלִּפְנֵיכֶם אֵין תְּשׁוּבָה בַּקֶּטַע?', a:'כַּמָּה שָׁנִים חַי הַקִּפּוֹד?', w:['מָה הַקִּפּוֹד אוֹכֵל?','מָתַי הַקִּפּוֹד הוֹלֵךְ לִישֹׁן לַחֹרֶף?','אֵיךְ הַקִּפּוֹד מֵגֵן עַל עַצְמוֹ?']},
+    {skill:'rdWordMeaning', lines:[6], q:'בְּשׁוּרָה 6 כָּתוּב: "הוּא מִתְכַּרְבֵּל בִּמְהִירוּת". מַה פֵּרוּשׁ הַמִּלָּה "מִתְכַּרְבֵּל"?', a:'מִתְקַפֵּל וְנַעֲשֶׂה כַּדּוּר', w:['בּוֹרֵחַ','מְקַפֵּץ גָּבוֹהַּ','נִרְדָּם']},
+    {skill:'rdMotive', lines:[5], q:'מַדּוּעַ הַקִּפּוֹד אוֹכֵל הַרְבֵּה לִפְנֵי הַחֹרֶף? (שׁוּרָה 5)', a:'כִּי בַּחֹרֶף קָשֶׁה לִמְצֹא אֹכֶל', w:['כִּי הוּא אוֹהֵב אֹכֶל חָם','כִּי הוּא רוֹצֶה לִהְיוֹת גָּדוֹל מֵהַשּׁוּעָל','כִּי הַגַּנָּן מַאֲכִיל אוֹתוֹ']},
+    {skill:'rdSynonyms', lines:[], q:'מִילִּים נִרְדָּפוֹת הֵן מִילִּים שֶׁיֵּשׁ לָהֶן אוֹתָהּ מַשְׁמָעוּת אוֹ מַשְׁמָעוּת דּוֹמָה מְאֹד. בְּאֵיזֶה זוּג הַמִּילִּים אֵינָן נִרְדָּפוֹת?', a:'רָעֵב – שָׂבֵעַ', w:['קָטָן – זָעִיר','יָפֶה – נָאֶה','מָהִיר – זָרִיז']}
+   ]}
+];
+function rdClean(x){
+  x = (x && typeof x==='object') ? x : {};
+  const done = [...new Set((Array.isArray(x.done)?x.done:[]).filter(i=>typeof i==='string' && i.length>0 && i.length<=40))].slice(0,400);
+  const c = x.cur && typeof x.cur==='object' && typeof x.cur.id==='string' && Number.isInteger(x.cur.i) && x.cur.i>=0 && x.cur.i<100 && !done.includes(x.cur.id) ? {id:x.cur.id.slice(0,40), i:x.cur.i} : null;
+  return {done, cur:c};
+}
+function rdSnap(){ return rdClean(rd); }
+const rdPassage = id => READING_BANK.find(p=>p.id===id) || null;
+const rdAvailable = () => READING_BANK.some(p=>!rd.done.includes(p.id));
+const rdSeen = new Set();   // passages already shown in this session
+function rdNext(){
+  let cur = rd.cur && rdPassage(rd.cur.id) && !rd.done.includes(rd.cur.id) ? rd.cur : null;
+  if(!cur){ const left = READING_BANK.filter(p=>!rd.done.includes(p.id)); if(!left.length) return null; cur = rd.cur = {id:pick(left).id, i:0}; }
+  const p = rdPassage(cur.id); if(cur.i>=p.qs.length){ rdFinish(p); return rdNext(); }
+  return {p, i:cur.i};
+}
+function rdFinish(p){ if(!rd.done.includes(p.id)) rd.done.push(p.id); rd.cur = null; }
+function rdAnswered(info){
+  const p = rdPassage(info.id); if(!p || !rd.cur || rd.cur.id!==info.id || rd.cur.i!==info.i) return;
+  rd.cur.i++; if(rd.cur.i>=p.qs.length) rdFinish(p);
+}
+function gReading(){
+  const n = rdNext(); const q = n.p.qs[n.i];
+  return {label:`📖 ${n.p.title} · שְׁאֵלָה ${n.i+1} מִתּוֹךְ ${n.p.qs.length}`, text:q.q, type:'mcq', wide:true, answer:q.a, choices:shuffle([q.a, ...q.w]),
+    rd:{id:n.p.id, i:n.i, lines:q.lines||[]}, rdSkill:q.skill};
+}
+function rdOpen(id, hi, intro){
+  const p = rdPassage(id); if(!p) return; rdClose();
+  let n = 0;
+  const body = p.paras.map(par=>'<div class="rdp">'+par.map(t=>{ n++; return `<div class="rdl${hi&&hi.includes(n)?' rdhl':''}" data-n="${n}"><span class="rdn" aria-hidden="true">${n}</span><span class="rdt">${esc(t)}</span></div>`; }).join('')+'</div>').join('');
+  const o = document.createElement('div'); o.id='rdOverlay'; o.className='rdov'; o.setAttribute('role','dialog'); o.setAttribute('aria-modal','true'); o.setAttribute('aria-label',p.title);
+  o.innerHTML = `<div class="rdbox"><h2>${esc(p.title)}</h2><div class="rdbody">${body}</div><button type="button" class="btn rdclose">${intro?'מתחילים בשאלות':'חזרה לשאלה'}</button></div>`;
+  document.body.appendChild(o);
+  o.querySelector('.rdclose').onclick = rdClose;
+  const h = o.querySelector('.rdhl'); if(h) h.scrollIntoView({block:'center'});
+}
+function rdClose(){ const o = document.getElementById('rdOverlay'); if(o) o.remove(); }
+function rdQuestionUI(area){
+  const b = document.createElement('button'); b.type='button'; b.className='rdbtn'; b.textContent='📖 הַקֶּטַע';
+  b.onclick = ()=>rdOpen(current.rd.id, current.rd.lines, false);
+  area.insertBefore(b, area.firstChild);
+  if(!rdSeen.has(current.rd.id)){ rdSeen.add(current.rd.id); rdOpen(current.rd.id, [], true); }   // the first question of a passage in this session opens the passage
+}
+
 // ---- SECTION POOLS (one topic per section; see CATEGORIES.md). A question type is in exactly one section, and the mix level (5) has them all. ----
 const NUMBERS_POOL = [gDigitOf, gBuildNumber, gWordsToNum, gNumToWords, gDigitCompare, gFindByDigit, gBiggestOfFour, gOrderNumbers, gMissingDigit, gBetween, gNumberRiddle, gPredSucc, gFillNumber,
   gAddTwoDigit, gAddCarry, gSubTwoDigit, gSubBorrow, gBiggerExpr, gDigitsMinMaxDiff, gHowManyBuild, gMulFact];
@@ -5171,7 +5289,8 @@ const LOGIC_POOL = [gAnalogyWord, gPairAnalogy, gOddOneOutCategory, gOddOneOutSh
 const SHAPES_POOL = [gShapeSides, gWhichShape, gCountSquares, gCompleteShape, gPolygonName, gPerimeter, gSymmetryLine, gRectPerimeter, gLPerimeter, gMissingSide];
 const pools = {
   7: NUMBERS_POOL, 1: STORIES_POOL, 2: SYMBOLS_POOL, 6: CLOCK_POOL, 3: PATTERNS_POOL, 4: LOGIC_POOL, 8: SHAPES_POOL,
-  5: [...NUMBERS_POOL, ...STORIES_POOL, ...SYMBOLS_POOL, ...CLOCK_POOL, ...PATTERNS_POOL, ...LOGIC_POOL, ...SHAPES_POOL]
+  9: [gReading],
+  5: [...NUMBERS_POOL, ...STORIES_POOL, ...SYMBOLS_POOL, ...CLOCK_POOL, ...PATTERNS_POOL, ...LOGIC_POOL, ...SHAPES_POOL]   // the mix never contains reading (section 9)
 };
 
 // ---- BONUS QUESTIONS (slightly harder, one lollipop-worthy question per streak milestone) ----
@@ -5286,7 +5405,7 @@ function openGame(id){
   applyView(); nextQuestion(); saveState(); window.scrollTo(0,0);
 }
 function renderLevels(){
-  const shown = mxVisibleLevels(diffOn, mxState);
+  const shown = mxVisibleLevels(diffOn, mxState).filter(id=>id!==9 || rdAvailable());
   if(shown.length && !shown.includes(level)) level = shown.includes(5) ? 5 : shown[0];   // the parent hid the section she was in
   const el = document.getElementById('levels'); el.innerHTML=''; el.dataset.rem = String((shown.length + ((space.unlocked||gateOn)?1:0))%3);
   LEVELS.filter(l=>shown.includes(l.id)).forEach(l=>{
@@ -6134,7 +6253,7 @@ function showMilestone(){
     f = (f+1) % theme.seq.length;
     partyImg.src = theme.frames[theme.seq[f]];
   }, 260);
-  const cleanup = ()=>{ clearInterval(timer); overlay.remove(); renderBonus(); };
+  const cleanup = ()=>{ clearInterval(timer); overlay.remove(); if(level!==9) renderBonus(); };   // the reading section has no bonus question
   overlay.onclick = cleanup;
   setTimeout(cleanup, 5000);
 }
@@ -6146,7 +6265,7 @@ function renderAnswerArea(q, onAnswer){
   const area = document.getElementById('answerArea');
   area.innerHTML = '';
   if(q.type==='mcq'){
-    const grid = document.createElement('div'); grid.className='choices';
+    const grid = document.createElement('div'); grid.className='choices'+(q.wide?' wide':'');
     q.choices.forEach(c=>{
       const btn=document.createElement('div'); btn.className='choice';
       if(c && typeof c==='object'){
@@ -6226,16 +6345,18 @@ function nextQuestion(){
   document.getElementById('nextBtn').style.display='none';
   document.getElementById('feedback').textContent='';
   document.getElementById('feedback').className='feedback';
+  if(level===9 && !rdAvailable()){ showHome(); return; }   // every passage has been read: the section is gone from the menu
   let pool = poolFor(level);
   if(!pool.length){ renderLevels(); pool = poolFor(level); }          // safety: the section was emptied while it was open
   if(!pool.length) pool = filterByDifficultySet(pools[level], activeDifficultyIds());
   const pr = activeProfile();
   const warming = warmOn && sessionDraws < WARMUP.count; sessionDraws++;
   const gen = pickGenerator(pool, pr && pr.stats, focusOn, current && current.skill, undefined, warming);
-  current = themeStory(gen()); current.skill = gen.name; current.d = questionDifficulty({d:current.d, skill:gen.name}); current.isBonus = false; startQTimer();
+  current = themeStory(gen()); current.skill = current.rdSkill || gen.name; current.d = questionDifficulty({d:current.d, skill:current.skill}); current.isBonus = false; startQTimer();
   document.getElementById('qlabel').textContent = current.label;
   document.getElementById('qtext').innerHTML = grpShapes(current.text);
-  renderAnswerArea(current, checkAnswer);
+  const area0 = renderAnswerArea(current, checkAnswer);
+  if(current.rd) rdQuestionUI(area0);
   if(wasBonus) setTimeout(flushCelebs, 350);
 }
 
@@ -6264,6 +6385,7 @@ function renderBonus(){
 function checkAnswer(val, btnEl, grid){
   const ok = val === current.answer;
   logAnswer(ok, val);
+  if(current.rd && !current._rdDone){ current._rdDone = true; rdAnswered(current.rd); }
   const fb = document.getElementById('feedback');
   if(grid){
     [...grid.children].forEach(c=>{

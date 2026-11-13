@@ -9,7 +9,7 @@ async function handle(op,a){
   if(op==='setFamily'){ srv.users[a.uid]={fid:a.fid}; return; }
   if(op==='clearFamily'){ delete srv.users[a.uid]; return; }
   if(op==='list'){ return clone(Object.entries(F(a.fid)).map(([id,v])=>Object.assign({id},v))); }
-  if(op==='put'){ const cur=F(a.fid)[a.id]; if(cur&&cur.u!==a.doc.b) return {conflict:true}; if(!(a.doc.v>=2)||(cur&&a.doc.v<cur.v)) return {conflict:true}; F(a.fid)[a.id]=clone(a.doc); srv.writes++; return {ok:true}; }
+  if(op==='put'){ const cur=F(a.fid)[a.id]; if(cur&&cur.u!==a.doc.b) return {conflict:true}; if(!(a.doc.v>=3)||(cur&&a.doc.v<cur.v)) return {conflict:true}; F(a.fid)[a.id]=clone(a.doc); srv.writes++; return {ok:true}; }
   if(op==='snapList'){ return clone(Object.entries(srv.snaps[a.fid]||{}).map(([id,d])=>({id,day:d.day,t:d.t,pid:d.pid}))); }
   if(op==='snapPut'){ const S=srv.snaps[a.fid]||(srv.snaps[a.fid]={}); if(S[a.id]) return {exists:true}; S[a.id]=clone(a.doc); return {ok:true}; }
   if(op==='snapDelete'){ delete (srv.snaps[a.fid]||{})[a.id]; return; }
