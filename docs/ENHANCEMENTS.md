@@ -585,3 +585,11 @@ Section 9, "ספריית הסיפורים" (📖), with one passage ("הקפוד
 - **Story list in the card:** each story with its state (not read, in progress at question N of M, read on D, returns on D / will not return) and a "להחזיר עכשיו" button.
 - **Saved fields.** All inside `progress.rd` ({done, t, cur, days, off}), so the list of progress keys, and the sync format (3, not yet released), are unchanged. If `reading-1` has already been released with the shorter `rd`, the format number must be raised again before this ships.
 - Tests: `tests/readingset.js` (new), `readingtest.js` updated.
+
+## Step 34: main menu layout fix (branch `menu-layout-fix`; version 2026.11.14d)
+
+After the reading section made the menu 9 buttons (10 with the room), the layout broke on tablets and large screens: a vertical list of wide buttons on large screens, and on tablets a button count that did not add up to even rows.
+
+- **Cause.** The phone-only "short last row" rules (`data-rem`, thirds) were not scoped to phones, so they also applied on larger screens. They out-ranked the four-per-row rules (`data-rem4`) there, and on large screens the grid had 4 columns while the buttons still spanned 3 of 12, so each button took a whole row.
+- **Fix.** The `data-rem` rules apply only below 720px. From 720px up the menu is one 12-column grid, 4 buttons per row, with a short last row stretched to full width (`data-rem4`). The large-screen column overrides were removed.
+- Tests: `tests/menulayout.js` (new) measures real button positions at 390, 600, 820, 1024, 1280 and 1920px, with and without the room button: even rows, last row fills the width, no narrow buttons. It fails on the old CSS (18 failures) and passes now.

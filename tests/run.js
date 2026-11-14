@@ -65,6 +65,7 @@ const TESTS = [
   ['guardtest','cloud/guardtest.js','sync guard: loss of room/tokens held for the parent, keep/take, newer format, clock clamp, snapshot ring'],
   ['famtest','cloud/famtest.js','family model: Google account, anonymous backup and codes, joining, migration, modes'],
   ['leveltest','leveltest.js','space sections: 8 pictures and names, gendered first name, hidden sections, parent area keeps default names, coverage'],
+  ['menulayout','menulayout.js','main menu: even rows at phone, tablet and large-screen widths, with and without the room button'],
   ['rewardtest','rewardtest.js','space collectibles: 14+14 pictures, Hebrew names, workshop and upgrade wording, bonus trophy, extra mascot poses, sweets unchanged'],
   ['storytest','storytest.js','space stories: every question type in both themes, item pools, phrase map, help examples, praise, wrong-answer, bonus and party wording, sweets unchanged'],
   ['mascottest','mascottest.js','space mascot: 8 moods, equal height, wrong-answer reaction (theme only), looks, no broken picture on switching'],
