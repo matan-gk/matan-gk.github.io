@@ -2448,6 +2448,7 @@ function cloudPlan(local, gone, docs, maxProfiles){
     if(lc && cc){ const cloudWins = (C.u||0) > (L.u||0); acts.push({op: cloudWins?'pull':'push', id:L.id, base:C.u||0, conflict:true}); }
     else if(lc) acts.push({op:'push', id:L.id, base:C.u||0});
     else if(cc) acts.push({op:'pull', id:L.id});
+    else if((C.v||1) < CLOUD_DOC_V) acts.push({op:'upgrade', id:L.id, base:C.u||0});   // in sync, but stored in an older format: rewrite the same content in the current one, so the lock covers it
   });
   (gone||[]).forEach(g=>{
     const C = byId[g.id];
@@ -2483,7 +2484,7 @@ function cloudProfileFromDoc(C, helpers){
 // ===== CLOUD (Google sign-in, cloud progress, problem reports) =====
 // Local-first: the game always works from this device's storage. The cloud is a mirror, so no internet / no account / no quota never blocks play.
 // Everything here is off while CLOUD_CONFIG is null. See firebase/SETUP.md for how to create the (free) Firebase project and paste its settings below.
-const APP_VERSION = '2026.11.13e';       // keep equal to VERSION in sw.js (a test checks it)
+const APP_VERSION = '2026.11.14b';       // keep equal to VERSION in sw.js (a test checks it)
 const BUILD_COMMIT = '';                 // the full id of the commit this page was built from: the deploy workflow (.github/workflows/tests.yml) fills it in; empty in a plain checkout
 const REPO_URL = 'https://github.com/matan-gk/matan-gk.github.io';
 const CLOUD_CONFIG = {apiKey:"AIzaSyAlq_TJNGvWPJpUrpbdq_hkAoURydqMzm0", authDomain:"learning-quest-1.firebaseapp.com", projectId:"learning-quest-1", appId:"1:98931179722:web:78fb00084ccba3efb53433"};   // e.g. {apiKey:'...', authDomain:'xxx.firebaseapp.com', projectId:'xxx', appId:'...'}
@@ -2798,6 +2799,10 @@ async function cloudSync(reason){
         }
       } else if(a.op==='push' && !stopBudget){
         const r = await cloudPutProfile(p, a.base||0); if(r.budget) stopBudget = true; else if(r.conflict) retryNeeded = true;
+      } else if(a.op==='upgrade' && !stopBudget && p){
+        // same content, same change time, new format number. The security rules still check that nobody changed it meanwhile.
+        if(!cloudBudget('w')){ stopBudget = true; cloud.status = 'budget'; }
+        else { const doc = cloudDocFromProfile(p, CLOUD_LIMITS.maxStatsChars, a.base||0); doc.u = a.base||0; const r = await cloud.ad.put(cloud.fid, a.id, doc); if(r && r.conflict) retryNeeded = true; }
       } else if(a.op==='tombstone' && !stopBudget){
         if(!cloudBudget('w')){ stopBudget = true; cloud.status = 'budget'; }
         else { const r = await cloud.ad.put(cloud.fid, a.id, {n:'', g:'n', p:'{}', s:'', u:a.u||Date.now(), b:a.base||0, d:true, v:CLOUD_DOC_V}); if(r && r.ok) store.gone = store.gone.filter(g=>g.id!==a.id); }
