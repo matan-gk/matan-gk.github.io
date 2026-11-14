@@ -533,3 +533,12 @@ Plan and rollout order: `docs/SYNC_SAFETY_PLAN.md`. Cloud documents are written 
 - **Limits:** a profile that is damaged and then synced every day will push good copies out after 7 days; the guard of Step 29 is what stops the damage from being synced in the first place. Restoring from a copy is not built yet (the copies can be read in the Firebase console, and the admin page can be extended).
 - Tests: `tests/cloud/backuptest.js` (new), `locktest.js` (rules and game agree on the 8 days), `firebase/rules-test/rules.test.js` (emulator, CI only).
 - **Rollout:** paste the new `firestore.rules` into the Firebase console (together with phase 1's), after every device runs version 2026.11.13c or newer; without the rules the copies are refused and silently skipped.
+
+## Step 30a: format upgrade in place (branch `sync-upgrade-4`, off `main`; version 2026.11.14a)
+
+Found after rollout: with every device on 2026.11.13c the admin page still showed documents in format v1. Reason: a profile is uploaded only when it changes, so a profile that was in sync before the update was never rewritten, and kept the format number it was first stored with. The lock (Step 28) only protects a document that carries the current number.
+
+- New plan step `upgrade` in `cloudPlan`: a profile that is in sync (nobody changed it) but stored in an older format is rewritten once, with the same content and the same change time, and the current format number. The security rules still check that nobody changed it in between.
+- It costs one write per old profile, once, on the first sync of an updated device. A fresh install or a changed profile already writes the current format.
+- Deleted-profile markers (tombstones) that were written by older builds keep their old number; they carry no data, so the admin page may still show a v1 on a deleted profile. They are cleaned when the family's cloud data is deleted.
+- Test: `tests/cloud/upgradetest.js` (new).

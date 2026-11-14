@@ -58,6 +58,7 @@ const TESTS = [
   ['cloudtest','cloud/cloudtest.js','Google account sync with a fake Firebase: two devices, conflicts, offline, budget, reports'],
   ['locktest','cloud/locktest.js','version lock: document format number, security rules and admin page agree; no deletes of live data'],
   ['backuptest','cloud/backuptest.js','daily backups: one copy per profile per day in the cloud and on the device, 7 days kept, extra copy before a held decision'],
+  ['upgradetest','cloud/upgradetest.js','format upgrade in place: an in-sync profile stored in an older format is rewritten once, same content'],
   ['guardtest','cloud/guardtest.js','sync guard: loss of room/tokens held for the parent, keep/take, newer format, clock clamp, snapshot ring'],
   ['famtest','cloud/famtest.js','family model: Google account, anonymous backup and codes, joining, migration, modes'],
   ['leveltest','leveltest.js','space sections: 8 pictures and names, gendered first name, hidden sections, parent area keeps default names, coverage'],
