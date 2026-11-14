@@ -4,7 +4,8 @@ let f=0;const eq=(a,b,m)=>{const ok=JSON.stringify(a)===JSON.stringify(b);consol
 const ops=(l,g,d,max=8)=>cloudPlan(l,g,d,max).map(a=>a.op+':'+a.id+(a.conflict?'!':''));
 eq(ops([{id:'a',u:5,sy:0}],[],[]),['push:a'],'new local profile uploads');
 eq(ops([],[],[{id:'a',u:5}]),['adopt:a'],'cloud-only profile is adopted');
-eq(ops([{id:'a',u:5,sy:5}],[],[{id:'a',u:5}]),[],'in step: nothing');
+eq(ops([{id:'a',u:5,sy:5}],[],[{id:'a',u:5,v:CLOUD_DOC_V}]),[],'in step: nothing');
+eq(ops([{id:'a',u:5,sy:5}],[],[{id:'a',u:5}]),['upgrade:a'],'in step but stored in an older format: upgraded in place');
 eq(ops([{id:'a',u:9,sy:5}],[],[{id:'a',u:5}]),['push:a'],'only local changed: push');
 eq(ops([{id:'a',u:5,sy:5}],[],[{id:'a',u:9}]),['pull:a'],'only cloud changed: pull');
 eq(ops([{id:'a',u:9,sy:5}],[],[{id:'a',u:7}]),['push:a!'],'both changed, local newer: local wins');
@@ -16,7 +17,7 @@ eq(ops([],[{id:'a',u:5}],[{id:'a',u:9}]),['adopt:a'],'edited elsewhere after our
 eq(ops([],[{id:'a',u:5}],[]),['forgetGone:a'],'deleted here, never uploaded: just forget');
 eq(ops([],[{id:'a',u:5}],[{id:'a',u:6,d:true}]),['forgetGone:a'],'both deleted: forget');
 eq(ops([{id:'x'+1,u:1,sy:1},{id:'x2',u:1,sy:1}],[],[{id:'c1',u:1},{id:'c2',u:1},{id:'c3',u:1}],3),['push:x1','push:x2','adopt:c1','skipAdopt:c2','skipAdopt:c3'],'profile limit: extra cloud profiles skipped');
-eq(ops([{id:'a',u:5,sy:5}],[],[{id:'a',u:5},{id:'z',u:1,d:true}]),[],'unknown deletion markers ignored');
+eq(ops([{id:'a',u:5,sy:5}],[],[{id:'a',u:5,v:CLOUD_DOC_V},{id:'z',u:1,d:true}]),[],'unknown deletion markers ignored');
 // doc round trip + size guard
 const big={v:1,log:Array.from({length:2000},(_,i)=>({t:1e12+i,s:'gSharing',l:1,c:1,d:3.2,x:'12',a:'13'})),daily:{}};
 const doc=cloudDocFromProfile({id:'a',name:'נועה',gender:'f',progress:{score:5},stats:big,u:9},600000,4);
