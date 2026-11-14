@@ -6,7 +6,7 @@ Last updated: 2026-11-01. This file is kept current with every change: what is b
 
 | Area | Status |
 |---|---|
-| Game: 8 levels (sections), 105 question types (14 bonus), help page for every type | Built |
+| Game: 8 levels (sections), 108 question types (14 bonus), help page for every type | Built |
 | Profiles (name optional, girl / boy / neutral wording), switching from the top menu (the menu holds only the switcher and "parent area") | Built |
 | Difficulty (easy / medium / hard) per type; parent switch per profile | Built |
 | Progress tab: per-skill strength labels, trend, activity, common wrong answers | Built |
@@ -542,3 +542,46 @@ Found after rollout: with every device on 2026.11.13c the admin page still showe
 - It costs one write per old profile, once, on the first sync of an updated device. A fresh install or a changed profile already writes the current format.
 - Deleted-profile markers (tombstones) that were written by older builds keep their old number; they carry no data, so the admin page may still show a v1 on a deleted profile. They are cleaned when the family's cloud data is deleted.
 - Test: `tests/cloud/upgradetest.js` (new).
+## Step 31: math types from the gifted-students sample test (branch `test-math-types`, off `sync-backup-3`; version 2026.11.13d)
+
+Source: the Ministry of Education "מבחן סינון, כיתה ב'" sample (Part 2, the math tasks). Part 1 (reading passages) is a separate phase, see the plan below.
+
+Already covered, nothing built: two-digit add and subtract (`gAddCarry`, `gSubBorrow`), the "eggs in trays" remainder (`gRemainder`), the picture equations with two symbols (`gTwoSymbols`, `gSumDiff`).
+
+- **New `gMulFact`** (numbers, easy): a plain 2 to 9 times-table exercise, `8 × 3 = __`.
+- **Extended `gFillNumber`:** two new forms, `82 − __ = 11` (missing subtrahend) and `__ + 15 = 62` (missing first addend). Help page has the subtraction example.
+- **Extended `gInequality`:** besides the same-factor form, `47 + 15 < 47 + __` and `87 − __ > 87 − 15` (the direction flips when the subtracted number grows). Multiple-choice with exactly one valid choice, the equal value is always one of the wrong ones. Also fixed an old flaw: with a small first number the same-factor form offered only 3 choices.
+- **New `gCompareTotals`** (stories, hard): two kinds of animals with 2 and 4 legs, how much bigger one total is than the other.
+- **New `gRoundsTransfer`** (stories, hard): two players start equal, the loser of each round gives the winner a fixed amount; either one player lost every round or lost some and won some. Wrong choices are the usual slips (swapped, one round only, one side forgotten). The sum of the two is checked by the test.
+- **Extended `gThreeSymbols`:** a second form where the long line is the short line plus several copies of the third symbol (house + car = 19, four suns + house + car = 27).
+- Test: `tests/testmath.js` (800 draws per type: four distinct choices, the answer present, answers recomputed from the text, forms present, help and registration).
+
+### Plan: the reading section (phase 2, not built)
+
+Decisions from the owner (2026-11-13):
+- Line numbers, not quoted sentences, tie a question to the text. The numbers belong to the text's own lines, and the next number must sit next to the correct line even when a line wraps into 2 or 3 screen lines (a numbered-line layout, each text line a row with its own number gutter).
+- The reading passages are not part of the rainbow mix (5 to 7 questions per passage breaks its format). They live in a section of their own, with their own rules.
+- Passages cannot be generated, so the profile records which passages it has finished (every question answered), and a finished passage is never offered again; the section announces when the bank is used up.
+- Eight question types (cause, role of a word, meaning of a phrase, purpose of a sentence, what the text does not answer, word in context, motive, not-a-synonym pair), each its own skill id so the progress tab can show them.
+
+## Step 32: reading section, first slice (branch `reading-1`, off `test-math-types`; version 2026.11.13e)
+
+Section 9, "ספריית הסיפורים" (📖), with one passage ("הקפוד", 15 numbered lines) and its eight questions, one per type. Rules of the section, as decided:
+
+- **Numbered lines.** The passage opens in a full-screen panel. Each authored line is a row with its number in the right-hand gutter; when a line wraps onto 2 or 3 screen lines the number appears once, beside the first. Questions say "בשורה 7" and the "📖 הקטע" button reopens the passage with those lines highlighted. The first question of a passage in a session opens it automatically.
+- **One passage at a time, never repeated.** The profile keeps `progress.rd = {done:[ids], cur:{id, i}}`. A passage is done when all its questions are answered (right or wrong); it resumes at question `i` after a reload; a done passage is never offered again. When every passage is done the section leaves the menu and the game returns home.
+- **Its own rules.** Not in the rainbow mix (`pools[5]` excludes it), no bonus question or bonus party in this section, answers in one column, difficulty switches still apply (rated 2), and the cell matrix and hidden-types controls do not list it yet.
+- **Skills.** Each question's type is its own skill (`rdCause`, `rdWordRole`, `rdPhrase`, `rdPurpose`, `rdNotInText`, `rdWordMeaning`, `rdMotive`, `rdSynonyms`) in a new area "קריאה והבנה"; each has a help page.
+- **Sync format 3.** `progress.rd` is a new saved field, so `CLOUD_DOC_V` and `minDocVersion()` in the rules are now 3 (see `docs/SYNC_SAFETY_PLAN.md`: raising them makes older builds read-only). New in `locktest`: a list of the progress keys, so adding a field without raising the format fails a test. **Rollout:** paste the rules only after every device runs 2026.11.13e or newer; until then keep the version-2 rules.
+- **Level 9 loads.** `cleanProgress` accepted levels 1 to 8 only; now 1 to 9.
+- **To do next (phase 2 continued):** more passages (about 12 in all, you review the vowels), a parent-area switch for the section, the section's own picture, a message when the last passage is finished, read-aloud (optional), and the same loss guard for `rd` (a pull that would lower the done list is held).
+- Tests: `tests/readingtest.js` (new), and the sync tests now expect format 3.
+
+## Step 33: reading section, parent switch and returning stories (branch `reading-2`, off `reading-1`; version 2026.11.14c)
+
+- **Parent switch.** Settings tab, new card "📖 ספריית הסיפורים", per profile (also for a profile that is not the active one): show or hide the section in the child's menu.
+- **Empty section stays.** When every story is finished the section is still in the menu; tapping it shows a message ("סיימת לקרוא את כל הסיפורים! סיפור חדש יחזור בעוד N ימים") instead of opening a question. After the last answer of the last story the game goes home and shows the same message. (Step 32 hid the section instead.)
+- **Stories come back.** A finished story returns after `days` days (default 30). The age is kept per story: `progress.rd.t[id]` is the time that story was finished. Choices in the card: 7, 14, 30, 60, 90 days or never; the setting is `progress.rd.days`. A returning story starts again from question 1. A finished story with no time recorded gets today's, once.
+- **Story list in the card:** each story with its state (not read, in progress at question N of M, read on D, returns on D / will not return) and a "להחזיר עכשיו" button.
+- **Saved fields.** All inside `progress.rd` ({done, t, cur, days, off}), so the list of progress keys, and the sync format (3, not yet released), are unchanged. If `reading-1` has already been released with the shorter `rd`, the format number must be raised again before this ships.
+- Tests: `tests/readingset.js` (new), `readingtest.js` updated.

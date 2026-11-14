@@ -12,7 +12,7 @@ const r=await p.evaluate(()=>{
   o.orphans=Object.keys(SKILL_DIFFICULTY).filter(i=>!(i in SKILL_META));
   o.invalid=Object.keys(SKILL_DIFFICULTY).filter(i=>!difficultyValid(SKILL_DIFFICULTY[i]));
   const gens=[...Object.values(pools).flat(),...Object.values(BONUS_POOLS).flat()];
-  o.poolsUnrated=[...new Set(gens.map(g=>g.name))].filter(n=>!(n in SKILL_DIFFICULTY));
+  o.poolsUnrated=[...new Set(gens.map(g=>g.name))].filter(n=>!(n in SKILL_DIFFICULTY)&&n!=='gReading');   // gReading: pseudo-generator, each reading question carries its own rated skill
   o.counts=Object.fromEntries(DIFFICULTY.levels.map(l=>[l.id,ids.filter(i=>skillDifficulty(i)===l.id).length]));
   o.perLevel=Object.fromEntries(Object.entries(pools).map(([k,v])=>[k,[1,2,3].map(d=>v.filter(g=>skillDifficulty(g.name)===d).length)]));
   o.nulls=pools[1]===filterByDifficulty(pools[1],null);

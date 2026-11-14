@@ -488,6 +488,24 @@ body[data-view="home"] .wrap > .sub{margin-bottom:12px}
 .gl{line-height:1; font-family:'Baloo 2',sans-serif}
 .choice.grid-choice{display:flex; justify-content:center; align-items:center; padding:10px 6px; min-height:70px}
 .choices{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px}
+.choices.wide{grid-template-columns:1fr}
+.rdbtn{display:block; width:100%; margin:0 0 10px; padding:10px 14px; font:inherit; font-weight:700; border:2px solid var(--muted); border-radius:14px; background:var(--card2); color:var(--text); cursor:pointer}
+.rdov{position:fixed; inset:0; z-index:9000; background:rgba(30,20,45,.55); display:flex; align-items:center; justify-content:center; padding:12px}
+.rdbox{background:var(--card); color:var(--text); border-radius:20px; max-width:640px; width:100%; max-height:92vh; display:flex; flex-direction:column; padding:14px 14px 12px; box-shadow:0 10px 40px var(--shadow)}
+.rdbox h2{margin:0 0 8px; text-align:center}
+.rdbody{overflow-y:auto; flex:1; padding:0 2px}
+.rdp{margin:0 0 .8em}
+.rdl{display:grid; grid-template-columns:2em 1fr; column-gap:.5em; align-items:start; font-size:1.2rem; line-height:1.9; padding:0 .25em; border-radius:8px}
+.rdn{color:var(--muted); font-size:.85rem; text-align:center; line-height:2.5; font-variant-numeric:tabular-nums}
+.rdt{min-width:0}
+.rdhl{background:rgba(255,200,60,.28)}
+.rdclose{margin-top:10px; width:100%}
+.rdnote{text-align:center; max-width:420px}
+.rdnote p{font-size:1.15rem; line-height:1.7; margin:.5em 0 1em}
+.rdset .pa-btn[aria-pressed="true"]{outline:3px solid var(--accent,#7b5cff)}
+.rdlist{margin:.4em 0 0; padding:0; list-style:none}
+.rdlist li{display:flex; align-items:center; justify-content:space-between; gap:.6em; padding:.45em 0; border-top:1px solid rgba(0,0,0,.08)}
+.rdlist small{display:block; opacity:.75}
 .choice{
   background:var(--card2); border:2px solid transparent; border-radius:14px; padding:14px 8px;
   font-size:1.1rem; font-weight:800; font-family:'Baloo 2',sans-serif; cursor:pointer; color:var(--text);
@@ -544,7 +562,9 @@ body[data-view="home"] .wrap > .sub{margin-bottom:12px}
 @keyframes bounce{ 0%{transform:scale(1)} 30%{transform:scale(1.18) rotate(-4deg)} 60%{transform:scale(.96) rotate(3deg)} 100%{transform:scale(1)} }
 .milestone .box img{width:150px; margin-bottom:6px}
 [data-skin="space"] .milestone .box img{width:auto; height:190px; max-width:210px; object-fit:contain}
-@media (min-width:720px){ .wrap{max-width:720px} .levels{grid-template-columns:repeat(4,minmax(0,1fr))} .levels .levelbtn, .levels .roombtn, .levels[data-rem] .roombtn, .levels[data-rem] .levelbtn:last-child, .levels[data-rem] .levelbtn:nth-last-child(-n+2){grid-column:auto} }
+@media (min-width:720px){ .wrap{max-width:720px} .levels{grid-template-columns:repeat(12,minmax(0,1fr))} .levels .levelbtn, .levels .roombtn, .levels[data-rem] .roombtn, .levels[data-rem] .levelbtn:last-child, .levels[data-rem] .levelbtn:nth-last-child(-n+2){grid-column:span 3}
+  /* four to a row; a short last row is stretched so it is always full (the menu has 9 or 10 buttons) */
+  .levels[data-rem4="1"] > :last-child{grid-column:1/-1} .levels[data-rem4="2"] > :nth-last-child(-n+2){grid-column:span 6} .levels[data-rem4="3"] > :nth-last-child(-n+3){grid-column:span 4} }
 @media (min-width:1100px){ .wrap{max-width:880px} .levels{grid-template-columns:repeat(8,minmax(0,1fr))} .levelbtn{font-size:.95rem; padding:12px 8px} .card{padding:28px 28px} }
 /* selection screen: the game grid is the main control, so it grows with the room available */
 @media (min-width:480px){ body[data-view="home"] .levelbtn .lvimg, body[data-view="home"] .roombtn .lvimg{width:84px; height:84px} body[data-view="home"] .levelbtn .lvimg.cut, body[data-view="home"] .roombtn .lvimg.cut{width:72px; height:72px} body[data-view="home"] .levelbtn, body[data-view="home"] .roombtn{font-size:.95rem; padding:12px 8px} body[data-view="home"] .levelbtn .emoji, body[data-view="home"] .roombtn .emoji{font-size:3.6rem} }
@@ -1045,6 +1065,7 @@ const LEVELS = [
   {id:4, get name(){return G("בלשית ההיגיון","בלש ההיגיון","בלש ההיגיון");}, emoji:"🔍"},   // pure reasoning (was "בלש הצורות")
   {id:8, name:"גן הצורות", emoji:"⛲"},            // geometry
   {id:5, name:"אתגר הקשת בענן", emoji:"🌈"},       // the mix
+  {id:9, name:"ספריית הסיפורים", emoji:"📖"},       // reading passages with questions: its own rules (not in the mix, no bonus, passages are never repeated)
 ];
 // ---- UPGRADED REWARDS + PREMIUM LOOKS (merge system) ----
 const UPGRADE_IMG = {
@@ -1546,6 +1567,7 @@ function spaceClean(sp, gold, legacy){
   return {earned, spent:Math.min(spent,earned), trued:true, unlocked:sp.unlocked===true, ...(dw?{dw:1}:{}), surf, own, po, bc, lv, top, things, fix:{bed:fbed, window:fwin}, sub:GU};
 }
 function spaceSnap(){ return JSON.parse(JSON.stringify(space)); }
+let rd = {done:[], t:{}, cur:null, days:30, off:false};   // reading section: passages finished (every question answered) with the time each was finished, the one in progress {id, i = next question}, days until a finished passage returns (0 = never), and the parent's switch
 let space = spaceClean({},[],0);   // personal-space tokens: earned once per upgrade (stored, never derived), spent in the shop later; trued = the one-time true-up for old players was done
 let golden = [], legacyLooks = 0;   // upgraded rewards (each remembers the 10 rewards it was made from); how many looks the player had opened before the looks were retired (used by the token true-up)
 const COTTON_CANDY_IMG = "assets/32c4bd427e57.webp";
@@ -1679,7 +1701,7 @@ function applyTheme(){
 }
 let warmOn = false, sessionDraws = 0;   // warm-up first (parent switch) and how many questions this session has drawn (resets when the game opens or the profile changes)
 let diffOn = [1,2,3];     // enabled difficulty levels for the active profile (see the Settings tab)
-function captureProgress(){ return {score,streak,collection,lollipops,level,golden,legacyLooks,space:spaceSnap(),rv:LAYER_V,diff:diffIdsClean(diffOn),mx:mxClean(mxState),focus:focusOn,warm:warmOn,theme:themeId}; }
+function captureProgress(){ return {score,streak,collection,lollipops,level,golden,legacyLooks,space:spaceSnap(),rd:rdSnap(),rv:LAYER_V,diff:diffIdsClean(diffOn),mx:mxClean(mxState),focus:focusOn,warm:warmOn,theme:themeId}; }
 function cleanProgress(d){
   d = (d && typeof d==='object') ? d : {};
   let col = Array.isArray(d.collection) ? d.collection.filter(x=>typeof x==='string') : [];
@@ -1704,10 +1726,11 @@ function cleanProgress(d){
     streak: (typeof d.streak==='number' && isFinite(d.streak)) ? d.streak : 0,
     collection: col,
     lollipops: [],
-    level: (typeof d.level==='number' && d.level>=1 && d.level<=8) ? d.level : 1,
+    level: (typeof d.level==='number' && d.level>=1 && d.level<=9) ? d.level : 1,
     golden: gold,
     legacyLooks: legacy,
     space: sp2,
+    rd: rdClean(d.rd),
     rv: LAYER_V,
     diff: diffIdsClean(d.diff),
     mx: mxClean(d.mx),
@@ -1718,7 +1741,7 @@ function cleanProgress(d){
 }
 function applyProgress(d){
   const c = cleanProgress(d);
-  score=c.score; streak=c.streak; collection=c.collection; lollipops=c.lollipops; golden=c.golden; legacyLooks=c.legacyLooks; space=c.space; level=c.level; diffOn=c.diff; mxState=c.mx; focusOn=c.focus; warmOn=c.warm; themeId=c.theme; applyTheme();
+  score=c.score; streak=c.streak; collection=c.collection; lollipops=c.lollipops; golden=c.golden; legacyLooks=c.legacyLooks; space=c.space; rd=c.rd; rdExpire(); level=c.level; diffOn=c.diff; mxState=c.mx; focusOn=c.focus; warmOn=c.warm; themeId=c.theme; applyTheme();
 }
 function persist(){ try{ localStorage.setItem(SAVE_KEY, JSON.stringify(store)); }catch(e){} }
 function saveState(){
@@ -1786,7 +1809,8 @@ gFillNumber:{
   think:['הפעולה ההפוכה מוצאת את המספר החסר: חיבור ← חיסור, חיסור ← חיבור, כפל ← חילוק, חילוק ← כפל.','כשהחסר הוא התוצאה (אחרי סימן =), פשוט מחשבים.','תמיד בודקים: מציבים את התשובה במקום הקו, והתרגיל צריך להסתדר.'],
   ex:[{q:'<span class="mono">8 + __ = 21</span>',steps:['מה צריך להוסיף ל-8 כדי להגיע ל-21? מחסירים: [[21 − 8 = 13]]','בודקים: [[8 + 13 = 21]] ✓'],a:'13'},
       {q:'<span class="mono">__ − 9 = 15</span>',steps:['לפני שהחסירו 9 היה מספר גדול יותר. מחזירים את ה-9: [[15 + 9 = 24]]','בודקים: [[24 − 9 = 15]] ✓'],a:'24'},
-      {q:'<span class="mono">4 × __ = 28</span>',steps:['כמה פעמים 4 נכנס ב-28? מחלקים: [[28 ÷ 4 = 7]]','בודקים: [[4 × 7 = 28]] ✓'],a:'7'}]},
+      {q:'<span class="mono">4 × __ = 28</span>',steps:['כמה פעמים 4 נכנס ב-28? מחלקים: [[28 ÷ 4 = 7]]','בודקים: [[4 × 7 = 28]] ✓'],a:'7'},
+      {q:'<span class="mono">82 − __ = 11</span>',steps:['82 פחות משהו נותן 11. כמה הורידו? מחסירים: [[82 − 11 = 71]]','בודקים: [[82 − 71 = 11]] ✓'],a:'71'}]},
 gDifferenceMore:{
   what:'בחנות יש כמות אחת. בכמות אחרת (יום אחר, מדף אחר או לקוח אחר) יש "יותר" ממנה. שואלים כמה יש בכמות השנייה.',
   think:['"יותר מ..." פירושו להוסיף. "פחות מ..." פירושו להחסיר.','המספר שאחרי המילה "יותר" הוא ההפרש, ולא הכמות עצמה. את הכמות מחשבים.','כדאי לשרטט: שורה של הכמות הראשונה ומעליה עוד כמה נוספים.'],
@@ -1812,19 +1836,71 @@ gThreeSymbols:{
   what:'שורה אחת עם שני סמלים, ושורה שנייה ארוכה שבה אותם שני סמלים חוזרים פעמיים ויש בה גם סמל שלישי.',
   think:['מחפשים בשורה הארוכה חלק שכבר ידוע מהשורה הקצרה.','מחליפים אותו במספר שלו, וכך השורה הארוכה מתקצרת.','מה שנשאר הוא הסמל החסר.'],
   ex:[{q:'<span class="eq">🦄 + 🍭 = 9</span><br><span class="eq">🦄 + 🍭 + 🧁 + 🦄 + 🍭 = 25</span><br>מה המספר של 🧁?',
-    steps:['בשורה הארוכה "🦄 + 🍭" מופיע פעמיים, וכל פעם הוא שווה 9.','לכן השורה היא: [[9 + 9 + 🧁 = 25]]','[[9 + 9 = 18]], ואז [[18 + 🧁 = 25]]','[[🧁 = 25 − 18 = 7]]'],a:'7'}]},
+    steps:['בשורה הארוכה "🦄 + 🍭" מופיע פעמיים, וכל פעם הוא שווה 9.','לכן השורה היא: [[9 + 9 + 🧁 = 25]]','[[9 + 9 = 18]], ואז [[18 + 🧁 = 25]]','[[🧁 = 25 − 18 = 7]]'],a:'7'},
+      {q:'<span class="eq">🏠 + 🚗 = 19</span><br><span class="eq">☀️ + ☀️ + ☀️ + ☀️ + 🏠 + 🚗 = 27</span><br>מה המספר של ☀️?',
+    steps:['בשורה השנייה מופיע "🏠 + 🚗", וידוע שהוא שווה 19.','לכן: [[☀️ + ☀️ + ☀️ + ☀️ + 19 = 27]]','ארבע שמשות הן [[27 − 19 = 8]]','[[8 ÷ 4 = 2]], אז ☀️ = 2'],a:'2'}]},
 gCirclePattern:{
   what:'בקשת אחת מוצגים שני מספרים והתוצאה שלהם. בקשת השנייה חסר אחד המספרים ויש אותו כלל.',
   think:['קודם מגלים את הכלל מהקשת הראשונה: מנסים לחבר, להחסיר או להכפיל עד שיוצא המספר שבפנים.','אחר כך מפעילים את הכלל על הקשת השנייה, אבל "הפוך": מחפשים את החסר.','בודקים שהמספר שמצאו עובד עם הכלל.'],
   ex:[{q:'<span class="mono">3 , 4 → 12</span><br><span class="mono">? , 4 → 20</span>',
     steps:['בודקים את הקשת הראשונה: [[3 × 4 = 12]], אז הכלל הוא כפל.','בקשת השנייה: [[? × 4 = 20]]','[[20 ÷ 4 = 5]]','בודקים: [[5 × 4 = 20]] ✓'],a:'5'}]},
 gInequality:{
-  what:'אי-שוויון (גדול או קטן) כשבשני הצדדים אותו מספר מוכפל. צריך להשלים מספר שמתאים.',
-  think:['בשני הצדדים מכפילים באותו מספר. לכן אין צורך להכפיל: משווים רק את המספרים שמוכפלים.','הסימן "&gt;" פירושו שהצד שלפניו גדול יותר, ו-"&lt;" פירושו שהוא קטן יותר.','בוחרים מספר שמתאים, ואז בודקים בעזרת כפל.'],
+  what:'אי-שוויון (גדול או קטן) כשבשני הצדדים אותו מספר מוכפל, מחובר או מחוסר. צריך להשלים מספר שמתאים.',
+  think:['בשני הצדדים עושים אותו דבר לאותו מספר (מכפילים, מוסיפים או מחסירים). לכן אין צורך לחשב: משווים רק את המספרים שמשתנים.','כשמחסירים מספר גדול יותר, נשאר פחות: הכיוון מתהפך. ‏47 − 15 קטן מ-47 − 5.','הסימן "&gt;" פירושו שהצד שלפניו גדול יותר, ו-"&lt;" פירושו שהוא קטן יותר.','בוחרים מספר שמתאים, ואז בודקים בעזרת כפל.'],
   ex:[{q:'<span class="mono">3 × 7 &gt; 3 × __</span>',
     steps:['משני הצדדים כופלים ב-3, לכן מספיק להשוות: [[7 &gt; __]]','המספר החסר צריך להיות קטן מ-7, למשל 5.','בודקים: [[3 × 7 = 21]] ו-[[3 × 5 = 15]], וגם [[21 &gt; 15]] ✓'],a:'מספר קטן מ-7, למשל 5'},
       {q:'<span class="mono">4 × 5 &lt; 4 × __</span>',
-    steps:['מספיק להשוות: [[5 &lt; __]]','המספר החסר צריך להיות גדול מ-5, למשל 8.','בודקים: [[20 &lt; 32]] ✓'],a:'מספר גדול מ-5, למשל 8'}]},
+    steps:['מספיק להשוות: [[5 &lt; __]]','המספר החסר צריך להיות גדול מ-5, למשל 8.','בודקים: [[20 &lt; 32]] ✓'],a:'מספר גדול מ-5, למשל 8'},
+      {q:'<span class="mono">47 + 15 &lt; 47 + __</span>',
+    steps:['בשני הצדדים מוסיפים ל-47, לכן מספיק להשוות: [[15 &lt; __]]','המספר החסר צריך להיות גדול מ-15, למשל 20.','בודקים: [[62 &lt; 67]] ✓'],a:'מספר גדול מ-15, למשל 20'},
+      {q:'<span class="mono">87 − __ &gt; 87 − 15</span>',
+    steps:['בשני הצדדים מחסירים מ-87. כשמחסירים פחות, נשאר יותר.','כדי שהצד השמאלי יהיה גדול יותר, צריך להחסיר פחות מ-15, למשל 10.','בודקים: [[87 − 10 = 77]] ו-[[87 − 15 = 72]], וגם [[77 &gt; 72]] ✓'],a:'מספר קטן מ-15, למשל 10'}]},
+rdCause:{
+  what:'שאלת "מדוע" על הקטע. התשובה היא הסיבה, והיא כתובה בקטע או נובעת ממנו.',
+  think:['מוצאים בקטע את המקום שמדבר על העניין, אפשר לפתוח את הקטע בכפתור.','הסיבה עונה על השאלה "בגלל מה?". מחפשים מילים כמו "כי", "לכן", "כדי".','בודקים שהתשובה שבחרתם באמת מופיעה בקטע, ולא רק נשמעת הגיונית.'],
+  ex:[{q:'בקטע כתוב: "הגשם ירד, ולכן הרצפה רטובה". מדוע הרצפה רטובה?',steps:['המילה "לכן" מראה שמה שלפניה הוא הסיבה.','הסיבה: [[הגשם ירד]]'],a:'כי הגשם ירד'}]},
+rdWordRole:{
+  what:'שואלים למה כתובה מילה קטנה בקטע, כמו "גם", "אבל", "רק" או "כי". צריך להבין מה היא מוסיפה למשפט.',
+  think:['קוראים את המשפט עם המילה ובלי המילה, ורואים מה משתנה.','"גם" אומר שיש עוד משהו מאותו סוג. "אבל" אומר שיש ניגוד.','מחפשים בקטע את מה ש"עוד" או את מה ש"מנוגד".'],
+  ex:[{q:'"דנה אוכלת תפוחים, וגם אגסים". מדוע כתוב "גם"?',steps:['דנה אוכלת תפוחים, ו"גם" אגסים: עוד סוג פרי.'],a:'כי היא אוכלת עוד סוג פרי, לא רק תפוחים'}]},
+rdPhrase:{
+  what:'שואלים מה פירוש משפט או קריאה מהקטע, למשל "איזו הפתעה!". צריך להסביר במילים אחרות מה קרה.',
+  think:['קוראים את המשפט ואת מה שקרה סביבו.','שואלים: מה היה לא צפוי? מה השתנה פתאום?','בוחרים את התשובה שמתארת מה שקרה בקטע, לא מה שאפשר לדמיין.'],
+  ex:[{q:'בקטע כתוב: "איזו הפתעה! הארנב יצא מהכובע". מהי ההפתעה?',steps:['ההפתעה היא מה שלא ציפו לו: [[ארנב מתוך כובע]].'],a:'שארנב יצא מתוך הכובע'}]},
+rdPurpose:{
+  what:'שואלים למה הכותב כתב כמה שורות. מה הוא רוצה שנבין, נרגיש או נעשה.',
+  think:['קוראים את השורות ושואלים: מה המסר?','הכותב יכול להסביר, לספר, להזהיר או לשכנע.','התשובה היא המסר של השורות כולן, לא פרט אחד מהן.'],
+  ex:[{q:'"לתרנגולות יש כנפיים, אבל הן לא עפות רחוק". מה מטרת המשפט?',steps:['המשפט נותן מידע על תרנגולות: [[מסביר]].'],a:'להסביר משהו על תרנגולות'}]},
+rdNotInText:{
+  what:'כמה שאלות, ועל אחת מהן הקטע לא עונה. צריך למצוא את השאלה ההיא.',
+  think:['לכל שאלה מחפשים בקטע את התשובה.','אם מצאתם את התשובה בקטע, השאלה לא הנכונה.','התשובה הנכונה היא השאלה שאי אפשר לענות עליה מתוך הקטע.'],
+  ex:[{q:'בקטע כתוב רק שהדג גר בים ואוכל אצות. על איזו שאלה אין תשובה בקטע?',steps:['איפה גר הדג? [[בים]], יש תשובה.','מה אוכל הדג? [[אצות]], יש תשובה.','כמה שנים הוא חי? בקטע אין.'],a:'כמה שנים חי הדג?'}]},
+rdWordMeaning:{
+  what:'שואלים מה פירוש מילה שמופיעה בקטע.',
+  think:['קוראים את המשפט שבו המילה מופיעה ואת מה שסביבו.','מנסים להחליף את המילה בכל תשובה, ובודקים אם המשפט עדיין מתאים.','מחפשים מילה שיש בה חלק מוכר.'],
+  ex:[{q:'"הילד מתכרבל בשמיכה". מה פירוש "מתכרבל"?',steps:['מנסים: "הילד מתקפל ונצמד בשמיכה". מתאים.','"בורח" או "קופץ" לא מתאימים למשפט.'],a:'מתקפל ונצמד'}]},
+rdMotive:{
+  what:'שואלים למה דמות או חיה עושה משהו. הסיבה כתובה בקטע או אפשר להבין אותה ממנו.',
+  think:['מחפשים בקטע מה קרה לפני כן ומה אפשר להרוויח מזה.','קוראים שוב את המשפטים לפני ואחרי.','בוחרים את הסיבה שהקטע תומך בה.'],
+  ex:[{q:'"השנאבה אוספת אגוזים כל הסתיו, כי בחורף אין אגוזים". מדוע היא אוספת?',steps:['"כי" מראה את הסיבה: [[בחורף אין אגוזים]].'],a:'כי בחורף אין אגוזים'}]},
+rdSynonyms:{
+  what:'מילים נרדפות הן מילים עם אותה משמעות. כאן צריך למצוא את הזוג שהמילים בו לא נרדפות.',
+  think:['בודקים כל זוג: האם אפשר להחליף מילה אחת בשנייה בלי לשנות את המשמעות?','מילים הפוכות (גדול וקטן) אינן נרדפות.','הזוג הנכון הוא זה שלא מתאים.'],
+  ex:[{q:'איזה זוג אינו נרדף?  קטן – זעיר, רעב – שבע',steps:['קטן וזעיר: אותה משמעות.','רעב ושבע: הפוכות.'],a:'רעב – שבע'}]},
+gMulFact:{
+  what:'תרגיל כפל פשוט מלוח הכפל. מוצאים את התוצאה.',
+  think:['כפל הוא חיבור חוזר: 8 × 3 זה שלוש פעמים 8.','אפשר לספור בקפיצות: 8, 16, 24.','כפל אפשר להפוך: 8 × 3 הוא גם 3 × 8, ובוחרים את הדרך הנוחה.'],
+  ex:[{q:'<span class="eq">8 × 3 = __</span>',steps:['שלוש פעמים 8: [[8 + 8 + 8]]','[[8 + 8 = 16]], ואז [[16 + 8 = 24]]','בודקים בהפוך: [[3 × 8 = 24]] ✓'],a:'24'}]},
+gCompareTotals:{
+  what:'שני סוגים של חיות או חפצים, ולכל סוג יש מספר קבוע של רגליים (או גלגלים וכדומה). שואלים בכמה אחד הסכומים גדול מהשני.',
+  think:['לכל סוג מחשבים בנפרד: כמה יש × כמה רגליים לכל אחד.','אחר כך משווים את שני הסכומים. כדי לדעת בכמה אחד גדול מהשני, מחסירים.','לא מחסירים את מספר החיות. מחסירים את מספר הרגליים.'],
+  ex:[{q:'לתרנגולת יש 2 רגליים ולכבש יש 4 רגליים. בחצר יש 4 תרנגולות ו-5 כבשים. בכמה גדול מספר הרגליים של הכבשים ממספר הרגליים של התרנגולות?',
+    steps:['רגליים של תרנגולות: [[4 × 2 = 8]]','רגליים של כבשים: [[5 × 4 = 20]]','ההפרש: [[20 − 8 = 12]]'],a:'ב-12'}]},
+gRoundsTransfer:{
+  what:'שני שחקנים מתחילים עם אותה כמות, ובכל סבב המפסיד נותן למנצח כמות קבועה. שואלים כמה יש לכל אחד בסוף.',
+  think:['בכל סבב מה שאחד מקבל, השני מאבד. הסכום של שניהם לא משתנה.','סופרים כמה סבבים כל אחד הפסיד וכמה ניצח. סבב ניצחון מוסיף, סבב הפסד מחסיר.','בודקים בסוף: סכום שני השחקנים חייב להישאר כמו בהתחלה.'],
+  ex:[{q:'לאפרת ולנעמה היו 26 קלפים כל אחת. במשחק היו 3 סבבים, ובכל סבב המפסידה נתנה למנצחת 2 קלפים. אפרת הפסידה בכל הסבבים. כמה קלפים יש לכל אחת?',
+    steps:['אפרת הפסידה 3 פעמים, ובכל פעם נתנה 2: [[3 × 2 = 6]]','לאפרת: [[26 − 6 = 20]]. לנעמה: [[26 + 6 = 32]]','בודקים: [[20 + 32 = 52]], כמו [[26 + 26 = 52]] ✓'],a:'20 לאפרת, 32 לנעמה'}]},
 gSingleSymbolMul:{
   what:'אותו סמל חוזר כמה פעמים בחיבור, והסכום ידוע. שואלים מה המספר של הסמל.',
   think:['סופרים כמה פעמים מופיע הסמל.','חיבור של אותו מספר כמה פעמים הוא כפל, ולכן מחלקים את הסכום בכמות הסמלים.','בודקים: מחברים את המספר שמצאו כמה פעמים שצריך.'],
@@ -2397,7 +2473,7 @@ function cloudPlan(local, gone, docs, maxProfiles){
   return out;
 }
 // Version of the cloud document format. The security rules refuse any write below this number (and any write that would lower the stored one), so an older build can never overwrite a profile written by a newer one. Raise it only together with firebase/firestore.rules.
-const CLOUD_DOC_V = 2;
+const CLOUD_DOC_V = 3;   // 3: progress.rd (reading passages done) was added; builds that do not know it must not write
 // Profile <-> cloud document. Progress and stats are stored as JSON text: one field each, no per-field indexing, no nesting limits.
 function cloudDocFromProfile(p, maxStatsChars, base){
   let stats = p.stats ? JSON.parse(JSON.stringify(p.stats)) : null, s = stats ? JSON.stringify(stats) : '';
@@ -2414,7 +2490,7 @@ function cloudProfileFromDoc(C, helpers){
 // ===== CLOUD (Google sign-in, cloud progress, problem reports) =====
 // Local-first: the game always works from this device's storage. The cloud is a mirror, so no internet / no account / no quota never blocks play.
 // Everything here is off while CLOUD_CONFIG is null. See firebase/SETUP.md for how to create the (free) Firebase project and paste its settings below.
-const APP_VERSION = '2026.11.14a';       // keep equal to VERSION in sw.js (a test checks it)
+const APP_VERSION = '2026.11.14c';       // keep equal to VERSION in sw.js (a test checks it)
 const BUILD_COMMIT = '';                 // the full id of the commit this page was built from: the deploy workflow (.github/workflows/tests.yml) fills it in; empty in a plain checkout
 const REPO_URL = 'https://github.com/matan-gk/matan-gk.github.io';
 const CLOUD_CONFIG = {apiKey:"AIzaSyAlq_TJNGvWPJpUrpbdq_hkAoURydqMzm0", authDomain:"learning-quest-1.firebaseapp.com", projectId:"learning-quest-1", appId:"1:98931179722:web:78fb00084ccba3efb53433"};   // e.g. {apiKey:'...', authDomain:'xxx.firebaseapp.com', projectId:'xxx', appId:'...'}
@@ -3165,11 +3241,14 @@ const STATS_CONFIG = {
     labels: {up:{emoji:'📈', label:'משתפר'}, flat:{emoji:'➡️', label:'יציב'}, down:{emoji:'📉', label:'יורד'}},
     insufficient: {emoji:'', label:''}
   },
-  areas: {numbers:'מספרים וחישוב', stories:'סיפורים וכסף', symbols:'חידות סמלים', clock:'שעון וזמן', patterns:'דפוסים וסדרות', logic:'היגיון', shapes:'צורות והיקף', other:'אחר'}
+  areas: {numbers:'מספרים וחישוב', stories:'סיפורים וכסף', symbols:'חידות סמלים', clock:'שעון וזמן', patterns:'דפוסים וסדרות', logic:'היגיון', shapes:'צורות והיקף', reading:'קריאה והבנה', other:'אחר'}
 };
 // One entry per question generator. Optional per skill: bands:[...] (replaces the global bands) or bandShift:-0.05 (moves every threshold above 0).
 const SKILL_META = {
   gSharing:{area:'stories', he:'בעיית חלוקה'}, gMultiplyChain:{area:'stories', he:'בעיית כפל'}, gLeftover:{area:'stories', he:'בעיית שאריות'},
+  rdCause:{area:'reading', he:'קריאה: סיבה'}, rdWordRole:{area:'reading', he:'קריאה: תפקיד מילה'}, rdPhrase:{area:'reading', he:'קריאה: משמעות ביטוי'}, rdPurpose:{area:'reading', he:'קריאה: מטרת משפט'},
+  rdNotInText:{area:'reading', he:'קריאה: מה אין בקטע'}, rdWordMeaning:{area:'reading', he:'קריאה: פירוש מילה'}, rdMotive:{area:'reading', he:'קריאה: למה עשה'}, rdSynonyms:{area:'reading', he:'מילים נרדפות'},
+  gMulFact:{area:'numbers', he:'לוח הכפל'}, gCompareTotals:{area:'stories', he:'השוואת סכומים'}, gRoundsTransfer:{area:'stories', he:'משחק בסבבים'},
   gFillNumber:{area:'numbers', he:'השלימו את המספר'}, gDifferenceMore:{area:'stories', he:'בעיית הפרש'}, gGroups:{area:'stories', he:'בעיית קבוצות'}, gRemainder:{area:'stories', he:'בעיית שארית'},
   gTwoSymbols:{area:'symbols', he:'חידת סמלים'}, gThreeSymbols:{area:'symbols', he:'חידת סמלים משולשת'}, gCirclePattern:{area:'symbols', he:'מספרים בקשת'}, gInequality:{area:'symbols', he:'אי-שוויון'},
   gSingleSymbolMul:{area:'symbols', he:'חידת סמל בודד'}, gSumDiff:{area:'symbols', he:'סכום והפרש'}, gCompareSymbols:{area:'symbols', he:'השוואת סמלים'},
@@ -3222,6 +3301,8 @@ const DIFFICULTY = {
 };
 const SKILL_DIFFICULTY = {
   // word problems
+  rdCause:2, rdWordRole:3, rdPhrase:2, rdPurpose:3, rdNotInText:3, rdWordMeaning:2, rdMotive:2, rdSynonyms:2,
+  gCompareTotals:3, gRoundsTransfer:3, gMulFact:1,
   gLeftover:1, gDifferenceMore:1, gGroups:1, gSharing:2, gMultiplyChain:2, gRemainder:2,
   // symbol puzzles
   gSingleSymbolMul:1, gCompareSymbols:1, gTwoSymbols:2, gCirclePattern:2, gInequality:2, gSumDiff:2, gThreeSymbols:3,
@@ -3970,8 +4051,8 @@ function bL3_ComboMoneyChange(){
 function gFillNumber(){
   const ops=['+','-','×','÷']; const op=ops[ri(0,3)];
   let text, ans;
-  if(op==='+'){ const a=ri(2,30), b=ri(2,40); text=`${a} + __ = ${a+b}`; ans=b; }
-  else if(op==='-'){ const b=ri(2,30), r=ri(2,30); text=`__ − ${b} = ${r}`; ans=b+r; }
+  if(op==='+'){ const a=ri(2,30), b=ri(2,40); if(Math.random()<0.3){ text=`__ + ${b} = ${a+b}`; ans=a; } else { text=`${a} + __ = ${a+b}`; ans=b; } }
+  else if(op==='-'){ const b=ri(2,30), r=ri(2,30); if(Math.random()<0.45){ const a=b+r; text=`${a} − __ = ${r}`; ans=b; } else { text=`__ − ${b} = ${r}`; ans=b+r; } }
   else if(op==='×'){ const a=ri(2,9), b=ri(2,9); text=`${a} × __ = ${a*b}`; ans=b; }
   else { const a=ri(2,9), b=ri(2,9); text=`${a*b} ÷ ${a} = __`; ans=b; }
   return {label:"השלימו את המספר", text:`<span class="mono">${text}</span>`, type:'input', answer:ans};
@@ -3987,6 +4068,11 @@ function gThreeSymbols(){
   const [s1,s2,s3] = pickSyms(3);
   const x=ri(2,8), y=ri(2,8), z=ri(2,10);
   const sum1=x+y, sum2=2*x+2*y+z;
+  if(Math.random()<0.4){   // the sample test's form: the long line is the short line plus several copies of the third symbol
+    const k = ri(2,5), zz = ri(2,8), tot = x+y+k*zz, reps = Array(k).fill(s3).join(' + ');
+    return {label:"חידת סמלים משולשת", text:`<span class="eq">${s1} + ${s2} = <span class="hl">${sum1}</span></span><br><span class="eq">${reps} + ${s1} + ${s2} = <span class="hl">${tot}</span></span><br>איזה מספר מתאים ל-${s3}?`,
+      type:'mcq', answer:zz, choices: mcqFrom(zz,5)};
+  }
   return {label:"חידת סמלים משולשת", text:`<span class="eq">${s1} + ${s2} = <span class="hl">${sum1}</span></span><br><span class="eq">${s1} + ${s2} + ${s3} + ${s1} + ${s2} = <span class="hl">${sum2}</span></span><br>איזה מספר מתאים ל-${s3}?`,
     type:'mcq', answer:z, choices: mcqFrom(z,5)};
 }
@@ -3996,13 +4082,53 @@ function gCirclePattern(){
     type:'mcq', answer:b, choices: mcqFrom(b,4)};
 }
 function gInequality(){
+  const form = ri(0,2);   // 0: same factor, 1: same number added (blank on the right), 2: same number subtracted (blank on the left), as in the sample test
+  if(form>0){
+    const a=ri(40,90), b=ri(6,30), op = Math.random()<0.5 ? '<' : '>';
+    const valid = x => form===1 ? (op==='<' ? x>b : x<b) : (op==='>' ? x<b : x>b);   // subtracting more leaves less, so the direction flips
+    const hi=Math.min(a, b+16), vs=[], ws=[];
+    for(let x=1;x<=hi;x++){ if(x===b || !valid(x)) ws.push(x); else vs.push(x); }
+    const near = vs.filter(x=>Math.abs(x-b)<=12), answer = pick(near.length?near:vs);
+    const wrongs = shuffle(ws.filter(x=>x!==b && Math.abs(x-b)<=12)).slice(0,2);
+    const choices = shuffle([answer, b, ...wrongs]);
+    const text = form===1 ? `<span class="mono">${a} + ${b} ${op} ${a} + __</span>` : `<span class="mono">${a} − __ ${op} ${a} − ${b}</span>`;
+    return {label:"אי-שוויון קסום", text:`השלימו מספר כך שאי-השוויון יתקיים:<br>${text}`, type:'mcq', answer, choices};
+  }
   const a=ri(3,9), missingLess=Math.random()<0.5, mult=ri(2,9);
   const pool=[]; for(let n=1;n<=12;n++){ if(missingLess? n<a : n>a) pool.push(n); }
   const answer = pool[ri(0,pool.length-1)];
-  const wrongPool=[]; for(let n=1;n<=12;n++){ if(n!==a && !(missingLess? n<a : n>a)) wrongPool.push(n); }
+  const wrongPool=[]; for(let n=1;n<=12;n++){ if(!(missingLess? n<a : n>a)) wrongPool.push(n); }   // includes n = a (equal, so the sign is false): with a small a there were only 3 choices
   const choices = shuffle([answer, ...shuffle(wrongPool).slice(0,3)]);
   return {label:"אי-שוויון קסום", text:`השלימו מספר כך שאי-השוויון יתקיים:<br><span class="mono">${mult} × ${a} ${missingLess?'>':'<'} ${mult} × __</span>`,
     type:'mcq', answer, choices};
+}
+function gMulFact(){
+  const a=ri(2,9), b=ri(2,9), ans=a*b;
+  return {label:'לוח הכפל', text:`פתרו:<br><span class="eq">${a} × ${b} = __</span>`, type:'mcq', answer:ans,
+    choices:digChoices(ans,[a+b, ans+a, ans-a, ans+b, ans-b, ans+1, ans-1],0,90,6)};
+}
+function gCompareTotals(){
+  const P = pick([['תרנגולת','תרנגולות','כבש','כבשים','בחצר'], ['ברווז','ברווזים','עז','עזים','בחווה'], ['ציפור','ציפורים','חתול','חתולים','בגינה'], ['יונה','יונים','סוס','סוסים','בחווה']]);
+  let nA, nB; do{ nA = ri(3,9); nB = ri(3,8); } while(4*nB-2*nA < 2 || nB===nA);
+  const tA = 2*nA, tB = 4*nB, ans = tB-tA;
+  return {label:'השוואת סכומים', text:`ל${P[0]} יש ${hl(2)} רגליים ול${P[2]} יש ${hl(4)} רגליים. ${P[4]} יש ${hl(nA)} ${P[1]} ו-${hl(nB)} ${P[3]}. בכמה גדול מספר הרגליים של ה${P[3]} ממספר הרגליים של ה${P[1]}?`,
+    type:'mcq', answer:ans, choices:digChoices(ans,[tA+tB, nB-nA, 2*nB-2*nA, tB-nA, ans+2, ans-2, ans+4],1,80,6)};
+}
+function gRoundsTransfer(){
+  const [p1,p2] = pickPeople(2), item = pick(['קלפים','גולות','מדבקות']);
+  const t = ri(2,5), R = ri(3,6), mixed = Math.random()<0.5, start = ri(Math.max(18,t*R+4), 45);   // the loser never runs out
+  let lost; do{ lost = mixed ? ri(1,R-1) : R; } while(mixed && lost*2===R);
+  const net = t*(lost-(R-lost)), a = start-net, b = start+net;
+  const both = (p1.g==='f' && p2.g==='f') ? 'לכל אחת מהן' : 'לכל אחד מהם';
+  const who = v(p1,'הפסיד','הפסידה');
+  const story = mixed ? `${p1.n} ${who} ב-${hl(lost)} סבבים וניצח${v(p1,'','ה')} ב-${hl(R-lost)} סבבים.` : `${p1.n} ${who} בכל הסבבים.`;
+  const fmt = (x,y) => `${x} ${item} ל${p1.n}, ${y} ${item} ל${p2.n}`;
+  const wrong = [[b,a],[start-t,start+t],[start-net-t,start+net+t],[start-net+t,start+net-t],[start-t*R,start+t*R],[a,b+t]]
+    .filter(([x,y])=>x>0 && y>0 && !(x===a&&y===b));
+  const uniq = []; wrong.forEach(w=>{ if(!uniq.some(u=>u[0]===w[0]&&u[1]===w[1])) uniq.push(w); });
+  const ch = shuffle([fmt(a,b), ...shuffle(uniq).slice(0,3).map(w=>fmt(w[0],w[1]))]);
+  return {label:'משחק בסבבים', text:`${p1.n} ו${p2.n} שיחקו במשחק ${item}. בהתחלה היו ${both} ${hl(start)} ${item}. במשחק היו ${hl(R)} סבבים, ובכל סבב מי שהפסיד נתן למנצח ${hl(t)} ${item}. ${story} כמה ${item} יש ל${p1.n} ול${p2.n} אחרי ${R} הסבבים?`,
+    type:'mcq', answer:fmt(a,b), choices:ch};
 }
 function gSingleSymbolMul(){
   const [s] = pickSyms(1);
@@ -5096,11 +5222,102 @@ function bShapes_JoinedRects(){
     choices:digChoices(per,[2*(a+b)+2*(c+d), a+b+c+d, 2*(a+c)+b+d, per+2, per-2, 2*(a+c+b+d)],6,150,4)};
 }
 
+// ---- READING SECTION (id 9): passages with questions. Authored data, not generated, so each passage is offered once. ----
+// A passage is a list of paragraphs, a paragraph a list of numbered lines (the numbers follow the lines, not the screen: a line that wraps shows its number once).
+// A question: skill (an rd... id), lines (highlighted when the passage is opened from it), q, a (the right answer), w (three wrong ones).
+const READING_BANK = [
+  {id:'hedgehog', title:'הַקִּפּוֹד',
+   paras:[
+    ['הַקִּפּוֹד הוּא בַּעַל חַיִּים קָטָן וְקוֹצָנִי.','עַל גַּבּוֹ יֵשׁ אֲלָפִים שֶׁל קוֹצִים חַדִּים, וְהֵם שׁוֹמְרִים עָלָיו.','בַּיּוֹם הוּא יָשֵׁן בֵּין הָעָלִים, וּבַלַּיְלָה הוּא יוֹצֵא לְחַפֵּשׂ אֹכֶל.'],
+    ['הַקִּפּוֹד אוֹכֵל חֲרָקִים, וְגַם חֲלָזוֹנוֹת וְתוֹלָעִים.','הוּא אוֹכֵל הַרְבֵּה לִפְנֵי הַחֹרֶף, כִּי בַּחֹרֶף קָשֶׁה לִמְצֹא אֹכֶל.'],
+    ['כְּשֶׁהַקִּפּוֹד מִתְפַּחֵד, הוּא מִתְכַּרְבֵּל בִּמְהִירוּת.','פִּתְאֹם הוּא כְּבָר לֹא חַיָּה קְטַנָּה, אֶלָּא כַּדּוּר שֶׁל קוֹצִים! אֵיזוֹ הַפְתָּעָה לַשּׁוּעָל הָרָעֵב!','הַשּׁוּעָל מְנַסֶּה לִפְתֹּחַ אֶת הַכַּדּוּר, אֲבָל הַקּוֹצִים דּוֹקְרִים אֶת אַפּוֹ.','אַחֲרֵי כַּמָּה דַּקּוֹת הַשּׁוּעָל מִתְיָאֵשׁ וְהוֹלֵךְ.'],
+    ['בַּסְּתָיו מְחַפֵּשׂ הַקִּפּוֹד מָקוֹם חָם וְשָׁקֵט, כְּמוֹ עֲרֵמַת עָלִים.','שָׁם הוּא יָשֵׁן כָּל הַחֹרֶף, וְהַלֵּב שֶׁלּוֹ פּוֹעֵם לְאַט לְאַט.','כְּשֶׁהָאֲדָמָה מִתְחַמֶּמֶת בָּאָבִיב, הוּא מִתְעוֹרֵר וְיוֹצֵא לְחַפֵּשׂ אֹכֶל.'],
+    ['אֲנָשִׁים רַבִּים שְׂמֵחִים כְּשֶׁקִּפּוֹד בָּא לַגִּנָּה שֶׁלָּהֶם.','הוּא אוֹכֵל חֲלָזוֹנוֹת שֶׁמַּזִּיקִים לַפְּרָחִים.','כָּךְ הַקִּפּוֹד עוֹזֵר לַגַּנָּן, בְּלִי שֶׁמִּישֶׁהוּ בִּקֵּשׁ מִמֶּנּוּ.']
+   ],
+   qs:[
+    {skill:'rdCause', lines:[6,7,8], q:'מַדּוּעַ הַקִּפּוֹד מִתְכַּרְבֵּל כְּשֶׁהוּא מִתְפַּחֵד? (שׁוּרוֹת 6 עַד 8)', a:'כִּי כְּשֶׁהוּא כַּדּוּר, הַקּוֹצִים דּוֹקְרִים מִי שֶׁמְּנַסֶּה לִפְגֹּעַ בּוֹ', w:['כִּי הוּא רוֹצֶה לִישֹׁן','כִּי הוּא רוֹצֶה לְהִתְחַמֵּם','כִּי הַשּׁוּעָל אוֹהֵב לְשַׂחֵק בְּכַדּוּרִים']},
+    {skill:'rdWordRole', lines:[4], q:'בְּשׁוּרָה 4 כָּתוּב שֶׁהַקִּפּוֹד אוֹכֵל חֲרָקִים, וְגַם חֲלָזוֹנוֹת וְתוֹלָעִים. מַדּוּעַ כָּתוּב "גַּם"?', a:'כִּי הוּא אוֹכֵל עוֹד סוּגִים שֶׁל מָזוֹן, לֹא רַק חֲרָקִים', w:['כִּי כָּל בַּעֲלֵי הַחַיִּים אוֹכְלִים חֲלָזוֹנוֹת','כִּי הַחֲרָקִים וְהַחֲלָזוֹנוֹת דּוֹמִים זֶה לָזֶה','כִּי גַּם הַשּׁוּעָל אוֹכֵל חֲלָזוֹנוֹת']},
+    {skill:'rdPhrase', lines:[7], q:'בְּשׁוּרָה 7 כָּתוּב: "אֵיזוֹ הַפְתָּעָה לַשּׁוּעָל הָרָעֵב!" מַהִי הַהַפְתָּעָה?', a:'שֶׁחַיָּה קְטַנָּה הָפְכָה פִּתְאֹם לְכַדּוּר שֶׁל קוֹצִים', w:['שֶׁהַשּׁוּעָל מָצָא הַרְבֵּה אֹכֶל','שֶׁהַקִּפּוֹד בָּרַח מַהֵר מְאֹד','שֶׁהַקּוֹצִים נָפְלוּ מֵהַגַּב']},
+    {skill:'rdPurpose', lines:[13,14,15], q:'הַמַּטָּרָה שֶׁל שׁוּרוֹת 13 עַד 15 הִיא –', a:'לְהַסְבִּיר שֶׁהַקִּפּוֹד מוֹעִיל לַגִּנָּה', w:['לְהַזְהִיר שֶׁהַקִּפּוֹד מְסֻכָּן לָאֲנָשִׁים','לְסַפֵּר שֶׁהַקִּפּוֹד יָשֵׁן בַּחֹרֶף','לְלַמֵּד אֵיךְ מְגַדְּלִים פְּרָחִים']},
+    {skill:'rdNotInText', lines:[], q:'עַל אֵיזוֹ שְׁאֵלָה מֵהַשְּׁאֵלוֹת שֶׁלִּפְנֵיכֶם אֵין תְּשׁוּבָה בַּקֶּטַע?', a:'כַּמָּה שָׁנִים חַי הַקִּפּוֹד?', w:['מָה הַקִּפּוֹד אוֹכֵל?','מָתַי הַקִּפּוֹד הוֹלֵךְ לִישֹׁן לַחֹרֶף?','אֵיךְ הַקִּפּוֹד מֵגֵן עַל עַצְמוֹ?']},
+    {skill:'rdWordMeaning', lines:[6], q:'בְּשׁוּרָה 6 כָּתוּב: "הוּא מִתְכַּרְבֵּל בִּמְהִירוּת". מַה פֵּרוּשׁ הַמִּלָּה "מִתְכַּרְבֵּל"?', a:'מִתְקַפֵּל וְנַעֲשֶׂה כַּדּוּר', w:['בּוֹרֵחַ','מְקַפֵּץ גָּבוֹהַּ','נִרְדָּם']},
+    {skill:'rdMotive', lines:[5], q:'מַדּוּעַ הַקִּפּוֹד אוֹכֵל הַרְבֵּה לִפְנֵי הַחֹרֶף? (שׁוּרָה 5)', a:'כִּי בַּחֹרֶף קָשֶׁה לִמְצֹא אֹכֶל', w:['כִּי הוּא אוֹהֵב אֹכֶל חָם','כִּי הוּא רוֹצֶה לִהְיוֹת גָּדוֹל מֵהַשּׁוּעָל','כִּי הַגַּנָּן מַאֲכִיל אוֹתוֹ']},
+    {skill:'rdSynonyms', lines:[], q:'מִילִּים נִרְדָּפוֹת הֵן מִילִּים שֶׁיֵּשׁ לָהֶן אוֹתָהּ מַשְׁמָעוּת אוֹ מַשְׁמָעוּת דּוֹמָה מְאֹד. בְּאֵיזֶה זוּג הַמִּילִּים אֵינָן נִרְדָּפוֹת?', a:'רָעֵב – שָׂבֵעַ', w:['קָטָן – זָעִיר','יָפֶה – נָאֶה','מָהִיר – זָרִיז']}
+   ]}
+];
+const RD_DAYS_DEFAULT = 30, RD_DAYS_CHOICES = [7,14,30,60,90,0];   // 0 = a finished passage never returns
+function rdClean(x){
+  x = (x && typeof x==='object') ? x : {};
+  const done = [...new Set((Array.isArray(x.done)?x.done:[]).filter(i=>typeof i==='string' && i.length>0 && i.length<=40))].slice(0,400);
+  const t = {}; done.forEach(id=>{ const v = x.t && x.t[id]; if(Number.isFinite(v) && v>0) t[id] = Math.round(v); });   // when each was finished: its age is kept per passage
+  const c = x.cur && typeof x.cur==='object' && typeof x.cur.id==='string' && Number.isInteger(x.cur.i) && x.cur.i>=0 && x.cur.i<100 && !done.includes(x.cur.id) ? {id:x.cur.id.slice(0,40), i:x.cur.i} : null;
+  const days = Number.isInteger(x.days) && x.days>=0 && x.days<=365 ? x.days : RD_DAYS_DEFAULT;
+  return {done, t, cur:c, days, off:x.off===true};
+}
+// Passages finished more than `days` days ago come back (the age is per passage). A finished passage with no time gets today's.
+function rdExpire(now){
+  now = now || Date.now();
+  rd.done.forEach(id=>{ if(!rd.t[id]) rd.t[id] = now; });
+  if(!rd.days) return;
+  const back = rd.done.filter(id=>now - rd.t[id] >= rd.days*86400000);
+  if(back.length){ rd.done = rd.done.filter(id=>!back.includes(id)); back.forEach(id=>{ delete rd.t[id]; }); }
+}
+// when the first finished passage returns (ms), or 0 when none will
+function rdReturnAt(){ if(!rd.days || !rd.done.length) return 0; return Math.min(...rd.done.map(id=>(rd.t[id]||Date.now()) + rd.days*86400000)); }
+function rdDoneText(){
+  const at = rdReturnAt(), left = at ? Math.max(1, Math.ceil((at-Date.now())/86400000)) : 0;
+  return 'סיימת לקרוא את כל הסיפורים! 🎉' + (left ? ` סיפור חדש יחזור בעוד ${left===1?'יום אחד':left+' ימים'}.` : ' כשיהיו סיפורים חדשים, הם יחכו לך כאן.');
+}
+function rdNote(text){
+  rdClose();
+  const o = document.createElement('div'); o.id='rdOverlay'; o.className='rdov'; o.setAttribute('role','dialog'); o.setAttribute('aria-modal','true');
+  o.innerHTML = `<div class="rdbox rdnote"><h2>📖 ספריית הסיפורים</h2><p>${esc(text)}</p><button type="button" class="btn rdclose">הבנתי</button></div>`;
+  document.body.appendChild(o); o.querySelector('.rdclose').onclick = rdClose;
+}
+function rdSnap(){ return rdClean(rd); }
+const rdPassage = id => READING_BANK.find(p=>p.id===id) || null;
+function rdAvailable(){ rdExpire(); return READING_BANK.some(p=>!rd.done.includes(p.id)); }
+const rdSeen = new Set();   // passages already shown in this session
+function rdNext(){
+  rdExpire();
+  let cur = rd.cur && rdPassage(rd.cur.id) && !rd.done.includes(rd.cur.id) ? rd.cur : null;
+  if(!cur){ const left = READING_BANK.filter(p=>!rd.done.includes(p.id)); if(!left.length) return null; cur = rd.cur = {id:pick(left).id, i:0}; }
+  const p = rdPassage(cur.id); if(cur.i>=p.qs.length){ rdFinish(p); return rdNext(); }
+  return {p, i:cur.i};
+}
+function rdFinish(p){ if(!rd.done.includes(p.id)) rd.done.push(p.id); rd.t[p.id] = Date.now(); rd.cur = null; }
+function rdAnswered(info){
+  const p = rdPassage(info.id); if(!p || !rd.cur || rd.cur.id!==info.id || rd.cur.i!==info.i) return;
+  rd.cur.i++; if(rd.cur.i>=p.qs.length) rdFinish(p);
+}
+function gReading(){
+  const n = rdNext(); const q = n.p.qs[n.i];
+  return {label:`📖 ${n.p.title} · שְׁאֵלָה ${n.i+1} מִתּוֹךְ ${n.p.qs.length}`, text:q.q, type:'mcq', wide:true, answer:q.a, choices:shuffle([q.a, ...q.w]),
+    rd:{id:n.p.id, i:n.i, lines:q.lines||[]}, rdSkill:q.skill};
+}
+function rdOpen(id, hi, intro){
+  const p = rdPassage(id); if(!p) return; rdClose();
+  let n = 0;
+  const body = p.paras.map(par=>'<div class="rdp">'+par.map(t=>{ n++; return `<div class="rdl${hi&&hi.includes(n)?' rdhl':''}" data-n="${n}"><span class="rdn" aria-hidden="true">${n}</span><span class="rdt">${esc(t)}</span></div>`; }).join('')+'</div>').join('');
+  const o = document.createElement('div'); o.id='rdOverlay'; o.className='rdov'; o.setAttribute('role','dialog'); o.setAttribute('aria-modal','true'); o.setAttribute('aria-label',p.title);
+  o.innerHTML = `<div class="rdbox"><h2>${esc(p.title)}</h2><div class="rdbody">${body}</div><button type="button" class="btn rdclose">${intro?'מתחילים בשאלות':'חזרה לשאלה'}</button></div>`;
+  document.body.appendChild(o);
+  o.querySelector('.rdclose').onclick = rdClose;
+  const h = o.querySelector('.rdhl'); if(h) h.scrollIntoView({block:'center'});
+}
+function rdClose(){ const o = document.getElementById('rdOverlay'); if(o) o.remove(); }
+function rdQuestionUI(area){
+  const b = document.createElement('button'); b.type='button'; b.className='rdbtn'; b.textContent='📖 הַקֶּטַע';
+  b.onclick = ()=>rdOpen(current.rd.id, current.rd.lines, false);
+  area.insertBefore(b, area.firstChild);
+  if(!rdSeen.has(current.rd.id)){ rdSeen.add(current.rd.id); rdOpen(current.rd.id, [], true); }   // the first question of a passage in this session opens the passage
+}
+
 // ---- SECTION POOLS (one topic per section; see CATEGORIES.md). A question type is in exactly one section, and the mix level (5) has them all. ----
 const NUMBERS_POOL = [gDigitOf, gBuildNumber, gWordsToNum, gNumToWords, gDigitCompare, gFindByDigit, gBiggestOfFour, gOrderNumbers, gMissingDigit, gBetween, gNumberRiddle, gPredSucc, gFillNumber,
-  gAddTwoDigit, gAddCarry, gSubTwoDigit, gSubBorrow, gBiggerExpr, gDigitsMinMaxDiff, gHowManyBuild];
+  gAddTwoDigit, gAddCarry, gSubTwoDigit, gSubBorrow, gBiggerExpr, gDigitsMinMaxDiff, gHowManyBuild, gMulFact];
 const STORIES_POOL = [gSharing, gMultiplyChain, gLeftover, gDifferenceMore, gGroups, gRemainder, gCompareChain, gWorkBackwards, gPartWhole, gTookAway, gGotMore, gTwoGroups, gMadeAndLeft,
-  gMoneyCoins, gCheaperBundle, gCheaperPerItem, gChange, gSplitCost, gBudget];
+  gMoneyCoins, gCheaperBundle, gCheaperPerItem, gChange, gSplitCost, gBudget, gCompareTotals, gRoundsTransfer];
 const SYMBOLS_POOL = [gTwoSymbols, gThreeSymbols, gCirclePattern, gInequality, gSingleSymbolMul, gSumDiff, gCompareSymbols, gFourLinkChain, gSymbolsMul];
 const CLOCK_POOL = [gClockHour, gClockQuarter, gClockFive, gClockWords, gClockPick, gClockLater, gSchedule];
 const PATTERNS_POOL = [gMachine, gSequence, gMissingMiddleSeq, gInterleavedSeq, gSkipPair, gSkipFill, gSkipMember, gCountInSeries, gGrowingSteps, gShapeSequence, gCountingPattern, gShapeAnalogy, gComboRule, gTwoRules, gMovingSquare];
@@ -5108,7 +5325,8 @@ const LOGIC_POOL = [gAnalogyWord, gPairAnalogy, gOddOneOutCategory, gOddOneOutSh
 const SHAPES_POOL = [gShapeSides, gWhichShape, gCountSquares, gCompleteShape, gPolygonName, gPerimeter, gSymmetryLine, gRectPerimeter, gLPerimeter, gMissingSide];
 const pools = {
   7: NUMBERS_POOL, 1: STORIES_POOL, 2: SYMBOLS_POOL, 6: CLOCK_POOL, 3: PATTERNS_POOL, 4: LOGIC_POOL, 8: SHAPES_POOL,
-  5: [...NUMBERS_POOL, ...STORIES_POOL, ...SYMBOLS_POOL, ...CLOCK_POOL, ...PATTERNS_POOL, ...LOGIC_POOL, ...SHAPES_POOL]
+  9: [gReading],
+  5: [...NUMBERS_POOL, ...STORIES_POOL, ...SYMBOLS_POOL, ...CLOCK_POOL, ...PATTERNS_POOL, ...LOGIC_POOL, ...SHAPES_POOL]   // the mix never contains reading (section 9)
 };
 
 // ---- BONUS QUESTIONS (slightly harder, one lollipop-worthy question per streak milestone) ----
@@ -5223,16 +5441,16 @@ function openGame(id){
   applyView(); nextQuestion(); saveState(); window.scrollTo(0,0);
 }
 function renderLevels(){
-  const shown = mxVisibleLevels(diffOn, mxState);
+  const shown = mxVisibleLevels(diffOn, mxState).filter(id=>id!==9 || !rd.off);   // the parent can switch the reading section off; when all passages are read it stays, with a message
   if(shown.length && !shown.includes(level)) level = shown.includes(5) ? 5 : shown[0];   // the parent hid the section she was in
-  const el = document.getElementById('levels'); el.innerHTML=''; el.dataset.rem = String((shown.length + ((space.unlocked||gateOn)?1:0))%3);
+  const el = document.getElementById('levels'); el.innerHTML=''; const nBtn = shown.length + ((space.unlocked||gateOn)?1:0); el.dataset.rem = String(nBtn%3); el.dataset.rem4 = String(nBtn%4);
   LEVELS.filter(l=>shown.includes(l.id)).forEach(l=>{
     const b=document.createElement('div');
     b.className='levelbtn'+(l.id===level?' active':'');
     const cut = themeId===THEME_DEFAULT ? LEVEL_ICON_IMG[l.id] : null;
     const pic = skinImg('level', l.id, cut || null);
     b.innerHTML = (pic ? `<span class="emoji"><img class="lvimg${cut&&pic===cut?' cut':''}" src="${pic}" alt=""></span>` : `<span class="emoji">${l.emoji}</span>`) + esc(levelName(l));
-    b.onclick=()=>openGame(l.id);
+    b.onclick = l.id===9 ? ()=>{ if(rdAvailable()) openGame(9); else rdNote(rdDoneText()); } : ()=>openGame(l.id);
     el.appendChild(b);
   });
   addRoomBtn(el);
@@ -6071,7 +6289,7 @@ function showMilestone(){
     f = (f+1) % theme.seq.length;
     partyImg.src = theme.frames[theme.seq[f]];
   }, 260);
-  const cleanup = ()=>{ clearInterval(timer); overlay.remove(); renderBonus(); };
+  const cleanup = ()=>{ clearInterval(timer); overlay.remove(); if(level!==9) renderBonus(); };   // the reading section has no bonus question
   overlay.onclick = cleanup;
   setTimeout(cleanup, 5000);
 }
@@ -6083,7 +6301,7 @@ function renderAnswerArea(q, onAnswer){
   const area = document.getElementById('answerArea');
   area.innerHTML = '';
   if(q.type==='mcq'){
-    const grid = document.createElement('div'); grid.className='choices';
+    const grid = document.createElement('div'); grid.className='choices'+(q.wide?' wide':'');
     q.choices.forEach(c=>{
       const btn=document.createElement('div'); btn.className='choice';
       if(c && typeof c==='object'){
@@ -6163,16 +6381,18 @@ function nextQuestion(){
   document.getElementById('nextBtn').style.display='none';
   document.getElementById('feedback').textContent='';
   document.getElementById('feedback').className='feedback';
+  if(level===9 && !rdAvailable()){ showHome(); rdNote(rdDoneText()); return; }   // every passage has been read: back to the menu with a message
   let pool = poolFor(level);
   if(!pool.length){ renderLevels(); pool = poolFor(level); }          // safety: the section was emptied while it was open
   if(!pool.length) pool = filterByDifficultySet(pools[level], activeDifficultyIds());
   const pr = activeProfile();
   const warming = warmOn && sessionDraws < WARMUP.count; sessionDraws++;
   const gen = pickGenerator(pool, pr && pr.stats, focusOn, current && current.skill, undefined, warming);
-  current = themeStory(gen()); current.skill = gen.name; current.d = questionDifficulty({d:current.d, skill:gen.name}); current.isBonus = false; startQTimer();
+  current = themeStory(gen()); current.skill = current.rdSkill || gen.name; current.d = questionDifficulty({d:current.d, skill:current.skill}); current.isBonus = false; startQTimer();
   document.getElementById('qlabel').textContent = current.label;
   document.getElementById('qtext').innerHTML = grpShapes(current.text);
-  renderAnswerArea(current, checkAnswer);
+  const area0 = renderAnswerArea(current, checkAnswer);
+  if(current.rd) rdQuestionUI(area0);
   if(wasBonus) setTimeout(flushCelebs, 350);
 }
 
@@ -6201,6 +6421,7 @@ function renderBonus(){
 function checkAnswer(val, btnEl, grid){
   const ok = val === current.answer;
   logAnswer(ok, val);
+  if(current.rd && !current._rdDone){ current._rdDone = true; rdAnswered(current.rd); }
   const fb = document.getElementById('feedback');
   if(grid){
     [...grid.children].forEach(c=>{
@@ -6466,6 +6687,29 @@ function renderThemeHTML(prof){
     <p class="pa-sub">בוחרים איך המשחק של ${nm} נראה. זה נפרד מהפנייה (בן/בת/ניטרלי), לא משנה שאלות, התקדמות או אוסף (האוסף נשמר כשמחליפים), וחל מיד: אפשר לסגור את ההגדרות ולראות. אזור ההורים נשאר בעיצוב הרגיל. ערכת החלל עדיין בבנייה: הצבעים והכותרת מוכנים, והתמונות מתווספות בשלבים.</p>
     <div class="thchips" role="group" aria-label="ערכת נושא">${chips}</div>${cov}</section>`;
 }
+function profileRd(p){ return rdClean(p && p.id===store.activeId ? rd : cleanProgress(p && p.progress).rd); }
+function setProfileRd(p, patch){
+  if(p.id===store.activeId){ rd = rdClean(Object.assign({}, rd, patch)); rdExpire(); saveState(); renderLevels(); }
+  else { const c = cleanProgress(p.progress); p.progress = Object.assign({}, c, {rd:rdClean(Object.assign({}, c.rd, patch))}); p.u = Date.now(); persist(); cloudChanged(); }
+}
+const rdFmtDay = ms => { const d = new Date(ms); return d.getDate()+'.'+(d.getMonth()+1)+'.'+d.getFullYear(); };
+function renderReadingHTML(prof){
+  const r = profileRd(prof), nm = esc(prof.name||'');
+  const days = RD_DAYS_CHOICES.map(d=>`<button type="button" class="pa-btn sm sec" data-pact="rddays" data-id="${d}" aria-pressed="${r.days===d}">${d?d+' ימים':'לא לחזור'}</button>`).join(' ');
+  const list = READING_BANK.map(p=>{
+    const t = r.t[p.id], isDone = r.done.includes(p.id), cur = r.cur && r.cur.id===p.id ? r.cur : null;
+    let st = 'עוד לא נקרא';
+    if(isDone) st = 'נקרא ב-'+rdFmtDay(t||Date.now()) + (r.days && t ? ', יחזור ב-'+rdFmtDay(t+r.days*86400000) : ', לא יחזור');
+    else if(cur) st = `בקריאה: שאלה ${cur.i+1} מתוך ${p.qs.length}`;
+    return `<li><span><b>${esc(p.title)}</b><small>${esc(st)}</small></span>${isDone?`<button type="button" class="pa-btn sm sec" data-pact="rdreturn" data-id="${esc(p.id)}">להחזיר עכשיו</button>`:''}</li>`;
+  }).join('');
+  return `<section class="pa-card rdset"><h2 class="pa-h">📖 ספריית הסיפורים</h2>
+    <p class="pa-sub">קטעי קריאה עם שאלות, לכל פרופיל בנפרד. סיפור שהסתיים (ענו על כל השאלות שלו) לא יופיע שוב, עד שיעברו מספיק ימים.</p>
+    <div class="pa-row"><div class="pa-main-txt"><b>הצגת הנושא ל${nm}</b><small>${r.off?'הנושא מוסתר מהתפריט':'הנושא מוצג בתפריט'}</small></div><div class="pa-ctl"><button type="button" class="pa-btn sm ${r.off?'':'sec'}" data-pact="rdoff" aria-pressed="${!r.off}">${r.off?'להציג':'להסתיר'}</button></div></div>
+    <div class="pa-row"><div class="pa-main-txt"><b>סיפור שנקרא חוזר אחרי</b><small>הגיל נשמר לכל סיפור בנפרד, מרגע שהסתיים</small></div></div>
+    <div class="pa-actions" style="margin-top:0" role="group" aria-label="חזרת סיפורים">${days}</div>
+    <ul class="rdlist">${list}</ul></section>`;
+}
 function profileMx(p){ return mxClean(p && p.id===store.activeId ? mxState : cleanProgress(p && p.progress).mx); }
 // one entry point for every change in the question controls: refuses an empty game, saves, and updates the game behind the panel at once
 function mxCommit(prof, diff, mx){
@@ -6516,7 +6760,7 @@ function renderSettingsHTML(){
     <p class="pa-sub">בוחרים אילו רמות יופיעו ב${esc(profileName(prof, store.profiles.indexOf(prof)))}. אפשר להפעיל רמה אחת, שתיים או שלוש. ברירת המחדל: כל הרמות.</p>
     <div class="pa-rows">${rows}</div>
     <div class="perr" id="dswErr">${setMsg?esc(setMsg):''}</div>
-    <p class="pa-sub" style="margin-top:10px">שאלות בונוס הן תמיד ברמה קשה, ולכן ההגדרה הזאת לא משפיעה עליהן.</p></section>` + renderFocusHTML(prof, on, profileMx(prof)) + renderWarmHTML(prof, on, profileMx(prof)) + renderMatrixHTML(prof, on, profileMx(prof)) + renderThemeHTML(prof);
+    <p class="pa-sub" style="margin-top:10px">שאלות בונוס הן תמיד ברמה קשה, ולכן ההגדרה הזאת לא משפיעה עליהן.</p></section>` + renderFocusHTML(prof, on, profileMx(prof)) + renderWarmHTML(prof, on, profileMx(prof)) + renderMatrixHTML(prof, on, profileMx(prof)) + renderReadingHTML(prof) + renderThemeHTML(prof);
 }
 let setMsg = '';
 // ---- sample questions for a difficulty level (modal) ----
@@ -7062,6 +7306,13 @@ function profileAction(act, id){
   if(act==='mxcell'){ const prof = store.profiles.find(x=>x.id===setViewId) || activeProfile(); if(!prof) return; const [sec,d] = id.split(':').map(Number);
     const r = mxToggleCell(profileDiff(prof), profileMx(prof), sec, d); return mxCommit(prof, r.diff, r.mx); }
   if(act==='theme'){ const prof = store.profiles.find(x=>x.id===setViewId) || activeProfile(); if(!prof) return; setProfileTheme(prof, id); return renderProfiles(); }
+  if(act==='rdoff' || act==='rddays' || act==='rdreturn'){
+    const prof = store.profiles.find(x=>x.id===setViewId) || activeProfile(); if(!prof) return; const r = profileRd(prof);
+    if(act==='rdoff') setProfileRd(prof, {off:!r.off});
+    else if(act==='rddays') setProfileRd(prof, {days:+id});
+    else { const t = Object.assign({}, r.t); delete t[id]; setProfileRd(prof, {done:r.done.filter(x=>x!==id), t}); }
+    return renderProfiles();
+  }
   if(act==='mxreset'){ const prof = store.profiles.find(x=>x.id===setViewId) || activeProfile(); if(!prof) return; return mxCommit(prof, profileDiff(prof), {off:[],hide:[]}); }
   if(act==='setprof'){ setViewId = id; setMsg = ''; return renderProfiles(); }
   if(act==='new'){ profMode={view:'form',editId:null,first:false,confirmDel:null,error:''}; return renderProfiles(); }

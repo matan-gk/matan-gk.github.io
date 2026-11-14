@@ -61,7 +61,7 @@ ok(L.src.startsWith('data:image/png;base64,AAAA')&&/^data:image|\/assets\//.test
 await E(()=>{ setViewId=store.activeId; openPanel('settings'); });
 const card=await p.textContent('#profBody');
 ok(card.includes('ערכת נושא (בניסוי)')&&card.includes('ברק בחלל')&&card.includes('ממתקים וקסם'),'settings card with both themes');
-ok(card.includes('0 מתוך 8')&&card.includes('✓ מוכן'),'coverage report shows what is ready and what is still missing');
+ok(card.includes('0 מתוך 9')&&card.includes('✓ מוכן'),'coverage report shows what is ready and what is still missing');
 await p.locator('.thchips [data-id=sweets]').click(); await p.waitForTimeout(100);
 ok(await E(()=>themeId==='sweets')&&!(await p.textContent('#profBody')).includes('מתוך 16'),'chip switches at once; no coverage table for the default theme');
 await p.locator('.thchips [data-id=space]').click(); await p.waitForTimeout(100);

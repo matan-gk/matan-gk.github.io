@@ -9,7 +9,7 @@ async function handle(op,a){
   if(op==='setFamily'){ srv.users[a.uid]={fid:a.fid}; return; }
   if(op==='clearFamily'){ delete srv.users[a.uid]; return; }
   if(op==='list'){ return clone(Object.entries(F(a.fid)).map(([id,v])=>Object.assign({id},v))); }
-  if(op==='put'){ const cur=F(a.fid)[a.id]; if(cur&&cur.u!==a.doc.b) return {conflict:true}; if(!(a.doc.v>=2)||(cur&&a.doc.v<cur.v)) return {conflict:true}; F(a.fid)[a.id]=clone(a.doc); srv.writes++; return {ok:true}; }
+  if(op==='put'){ const cur=F(a.fid)[a.id]; if(cur&&cur.u!==a.doc.b) return {conflict:true}; if(!(a.doc.v>=3)||(cur&&a.doc.v<cur.v)) return {conflict:true}; F(a.fid)[a.id]=clone(a.doc); srv.writes++; return {ok:true}; }
   if(op==='wipe'){ srv.fams[a.fid]={}; return; }
   if(op==='legacyList'){ return []; }
   if(op==='legacyDelete'){ return; }
@@ -57,7 +57,7 @@ ok(await A.evaluate(()=>cloud.held.length)===1,'held again');
 await A.evaluate(()=>cloudHeldAct('heldtake',cloud.held[0].id)); await A.waitForTimeout(700);
 ok(await A.evaluate(()=>activeProfile().progress.space.earned)===0,'"take cloud" applied the cloud copy on purpose');
 // newer format is left alone
-srv.fams[fid][id]=Object.assign({},srv.fams[fid][id],{v:3,u:srv.fams[fid][id].u+10});
+srv.fams[fid][id]=Object.assign({},srv.fams[fid][id],{v:4,u:srv.fams[fid][id].u+10});
 const before=JSON.stringify(srv.fams[fid][id]); const nm=await A.evaluate(()=>activeProfile().name);
 await A.evaluate(()=>{ score+=5; persist(); cloudSync('manual'); }); await A.waitForTimeout(600);
 ok(JSON.stringify(srv.fams[fid][id])===before,'newer-format doc is never written');

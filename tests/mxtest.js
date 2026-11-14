@@ -8,7 +8,7 @@ const E=(fn,...a)=>p.evaluate(fn,...a);
 // ---- default = exactly today's behaviour ----
 ok(await E(()=>[1,2,3,4,5,6,7,8].every(l=>poolFor(l).length===filterByDifficultySet(pools[l],diffOn).length&&poolFor(l)===filterByDifficultySet(pools[l],diffOn)||poolFor(l).every((g,i)=>g===filterByDifficultySet(pools[l],diffOn)[i]))),'default: every pool is what the difficulty switches gave before');
 ok(await E(()=>{diffOn=[1];const r=[1,2,3,4,5,6,7,8].every(l=>{const a=poolFor(l),b=filterByDifficultySet(pools[l],[1]);return a.length===b.length&&a.every((g,i)=>g===b[i]);});diffOn=[1,2,3];return r;}),'simple "easy only" unchanged, including sections with no easy type');
-ok(await E(()=>mxVisibleLevels([1,2,3],{off:[],hide:[]}).length===8),'all 8 menu entries visible by default');
+ok(await E(()=>mxVisibleLevels([1,2,3],{off:[],hide:[]}).length===9),'all 9 menu entries visible by default (8 sections + reading)');
 // ---- pure rules ----
 const R=await E(()=>{
   const out={};
@@ -39,7 +39,7 @@ ok(draw.n>0&&draw.bad.length===0,'numbers section: only hard types appear, hidde
 ok(draw.mixNum.length===0&&draw.mixOther>10,'mix level honours the same cells and still draws from other sections');
 // ---- hiding a whole section removes it from the child menu and moves her out of it ----
 const hid=await E(()=>{ level=6; const m={off:[],hide:pools[6].map(g=>g.name)}; diffOn=[1,2,3]; mxState=m; renderLevels(); const names=[...document.querySelectorAll('#levels .levelbtn')].map(x=>x.textContent); const lv=level; mxState={off:[],hide:[]}; renderLevels(); return {names:names.length,lv,clock:names.some(n=>n.includes('שעון'))}; });
-ok(hid.names===7&&!hid.clock&&hid.lv===5,'all clock types hidden: section leaves the menu and she moves to the mix');
+ok(hid.names===8&&!hid.clock&&hid.lv===5,'all clock types hidden: section leaves the menu and she moves to the mix');
 // ---- UI: settings tab ----
 await E(()=>openPanel('settings')); await p.waitForTimeout(200);
 ok(await p.locator('table.qmx').count()===1&&await p.locator('table.qmx tbody tr').count()===7,'matrix has a row per section');
