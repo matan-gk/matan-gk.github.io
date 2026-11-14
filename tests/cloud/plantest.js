@@ -1,5 +1,5 @@
 const T=require('../lib.js');
-const fs=require('fs');eval(T.section('// ===== CLOUD CORE (pure, testable) =====','// ===== CLOUD (Google')+';global.cloudPlan=cloudPlan;global.cloudDocFromProfile=cloudDocFromProfile;global.cloudProfileFromDoc=cloudProfileFromDoc;');
+const fs=require('fs');eval(T.section('// ===== CLOUD CORE (pure, testable) =====','// ===== CLOUD (Google')+';global.cloudPlan=cloudPlan;global.CLOUD_DOC_V=CLOUD_DOC_V;global.cloudDocFromProfile=cloudDocFromProfile;global.cloudProfileFromDoc=cloudProfileFromDoc;');
 let f=0;const eq=(a,b,m)=>{const ok=JSON.stringify(a)===JSON.stringify(b);console.log((ok?'ok   ':'FAIL ')+m+(ok?'':' got '+JSON.stringify(a)));if(!ok)f++;};
 const ops=(l,g,d,max=8)=>cloudPlan(l,g,d,max).map(a=>a.op+':'+a.id+(a.conflict?'!':''));
 eq(ops([{id:'a',u:5,sy:0}],[],[]),['push:a'],'new local profile uploads');
