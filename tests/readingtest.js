@@ -5,6 +5,8 @@ let f=0;const ok=(c,m)=>{console.log((c?'ok   ':'FAIL ')+m);if(!c)f++;};
 const ctx=await b.newContext({viewport:{width:320,height:700}}); const p=await ctx.newPage();const errs=[];p.on('pageerror',e=>errs.push(e.message));
 await p.goto(T.URL);await p.evaluate(()=>localStorage.clear());await p.reload();
 await p.fill('#pfName','גאיה'); await p.click('.gopt:has(input[value=f])'); await p.click('[data-pact=save]'); await p.waitForTimeout(300);
+// this test is about the engine, so it plays with the first passage only (the whole bank is checked in readingbank.js)
+await p.evaluate(()=>{ READING_BANK.splice(1); });
 // the section exists, is not in the mix, has its own rules
 const s=await p.evaluate(()=>({lv:LEVELS.some(l=>l.id===9), mix:pools[5].some(g=>g.name==='gReading'), vis:mxVisibleLevels(diffOn,mxState).includes(9), bank:READING_BANK.length,
   skills:READING_BANK.flatMap(x=>x.qs.map(q=>q.skill)), reg:['rdCause','rdWordRole','rdPhrase','rdPurpose','rdNotInText','rdWordMeaning','rdMotive','rdSynonyms'].filter(n=>!SKILL_META[n]||!HELP[n]||!SKILL_DIFFICULTY[n]),
@@ -29,7 +31,7 @@ await p.click('.rdbtn'); const hl=await p.evaluate(()=>[...document.querySelecto
 async function answer(right){ await p.evaluate(r=>{ const a=current.answer; const btns=[...document.querySelectorAll('#answerArea .choice')]; (r? btns.find(b=>b.textContent==a) : btns.find(b=>b.textContent!=a)).click(); },right); await p.waitForTimeout(150); }
 for(let i=0;i<3;i++){ await answer(i!==1); await p.evaluate(()=>nextQuestion()); await p.waitForTimeout(120); await p.evaluate(()=>rdClose()); }
 ok(await p.evaluate(()=>rd.cur.i)===3&&await p.evaluate(()=>rd.done.length)===0,'three answered (one wrongly): the passage is in progress at question 4');
-await p.reload(); await p.waitForTimeout(300); await p.evaluate(()=>openGame(9)); await p.waitForTimeout(200);
+await p.reload(); await p.waitForTimeout(300); await p.evaluate(()=>{ READING_BANK.splice(1); openGame(9); }); await p.waitForTimeout(200);
 ok(await p.evaluate(()=>current.rd.i)===3,'after reloading, the passage resumes at question 4 (progress saved)');
 await p.evaluate(()=>rdClose());
 // stats are recorded under the question's own skill
@@ -48,7 +50,7 @@ await p.evaluate(()=>rdClose()); await p.evaluate(()=>{ renderLevels(); [...docu
 ok(await p.evaluate(()=>!!document.getElementById('rdOverlay')&&gameView==='home'),'tapping the section when it is empty shows the message and does not open a question');
 await p.evaluate(()=>rdClose());
 // a reload, or a profile switch, with every story read must not pop the message up on the menu
-await p.evaluate(()=>{ level=9; saveState(); }); await p.reload(); await p.waitForTimeout(500);
+await p.evaluate(()=>{ rd.done=['hedgehog','camel','bee','owl']; level=9; saveState(); }); await p.reload(); await p.waitForTimeout(500);
 ok(await p.evaluate(()=>!document.getElementById('rdOverlay')&&gameView==='home'&&level!==9),'page load with every story read: no message on the menu, and she is no longer parked in the empty section');
 await p.evaluate(()=>{ level=9; nextQuestion(); });
 ok(await p.evaluate(()=>!document.getElementById('rdOverlay')),'the empty section reached without a tap (profile switch) stays silent');

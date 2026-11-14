@@ -599,3 +599,11 @@ After the reading section made the menu 9 buttons (10 with the room), the layout
 - **Cause.** With every story read, the section stays in the menu and shows a message when tapped. But a child who finished the last story was left with `level = 9` saved, and every page load (and profile switch) called `nextQuestion()` for that empty section, which showed the message.
 - **Fix.** `nextQuestion()` now moves her out of the empty section (to the mix) and shows the message only when she was playing, i.e. after a tap on the section or her last answer. Page loads and profile switches stay silent.
 - Test: `readingtest.js` reloads with all stories read and checks there is no message and she is not parked in the section (fails on the old code).
+
+## Step 36: three more stories, and the passage no longer opens on the menu (branch `more-stories`; version 2026.11.14f)
+
+- **Passage popup on the menu (bug).** If she had left a story half done, a page load or profile switch with that section as the current one prepared the next question, and the first question of a passage opens the passage, so the story covered the menu. Now the passage opens only while she is inside the section (`gameView==='play'`), it is not marked as seen otherwise (so it opens when she taps the section), and going home closes it.
+- **Stories.** The bank now has 4 passages: הַקִּפּוֹד, הַגָּמָל (14 lines), הַדְּבוֹרָה (15) and הַיַּנְשׁוּף (15), each with the same eight question types in the same order. **The vowel marks are mine and need your review**, especially the new three.
+- Order of play is random among the passages not yet finished; finished ones return after the number of days set in the parent area.
+- Tests: `tests/readingbank.js` (new) checks every passage (8 questions in order, 3 distinct wrong answers, line numbers in range and matching the question text, no broken characters), plays all passages to the end one after another, and checks the popup bug (fails on the old code). `readingtest.js` plays with the first passage only.
+- To do: more passages (about 12 in all), the section's own picture, a loss guard for `progress.rd`.
