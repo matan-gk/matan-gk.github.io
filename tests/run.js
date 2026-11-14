@@ -22,6 +22,7 @@ const TESTS = [
   ['newtypes','newtypes.js','question types added after the first sample tests'],
   ['nt2test','nt2test.js','numbers-castle question types: semantics, labels, help, order of levels'],
   ['testmath','testmath.js','math types from the gifted-test sample: multiplication facts, totals comparison, rounds, inequality and fill-in forms, symbol variant'],
+  ['readingset','readingset.js','reading section: parent switch, days until a story returns (per story age), list, empty-section message'],
   ['readingtest','readingtest.js','reading section: passage with numbered lines, eight question types, resume, never repeated, not in the mix'],
   ['sections','sections.js','each type in exactly one section; areas match sections; bonus pools'],
   ['shoptest','shoptest.js','shop stories: wording, answers, variety, price questions'],

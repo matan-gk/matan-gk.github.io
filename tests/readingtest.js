@@ -38,11 +38,17 @@ ok(/rdCause/.test(sk)&&/rdWordRole/.test(sk)&&!/gReading/.test(sk),'answers are 
 // no bonus in this section
 ok(await p.evaluate(()=>{ streak=4; return true; }),'(streak set)'); 
 // finish: the passage is done, never offered again, the section leaves the menu
-for(let i=0;i<5;i++){ await answer(true); await p.evaluate(()=>nextQuestion()); await p.waitForTimeout(120); await p.evaluate(()=>rdClose()); }
-const fin=await p.evaluate(()=>({done:rd.done.slice(), cur:rd.cur, vis:mxVisibleLevels(diffOn,mxState).filter(id=>id!==9||rdAvailable()).includes(9), view:gameView, saved:JSON.parse(JSON.stringify(activeProfile().progress.rd))}));
-ok(fin.done.join()==='hedgehog'&&fin.cur===null,'all 8 answered: the passage is done'); ok(!fin.vis&&fin.view==='home','the section leaves the menu and the game returns home'); ok(fin.saved.done[0]==='hedgehog','saved in the profile');
+for(let i=0;i<5;i++){ await answer(true); await p.evaluate(()=>{ rdClose(); nextQuestion(); }); await p.waitForTimeout(120); }
+const fin=await p.evaluate(()=>({done:rd.done.slice(), cur:rd.cur, hasT:!!rd.t.hedgehog&&Math.abs(rd.t.hedgehog-Date.now())<60000, shown:mxVisibleLevels(diffOn,mxState).filter(id=>id!==9||!rd.off).includes(9), view:gameView, note:!!document.getElementById('rdOverlay'), noteText:(document.querySelector('#rdOverlay p')||{}).textContent||'', saved:JSON.parse(JSON.stringify(activeProfile().progress.rd))}));
+ok(fin.done.join()==='hedgehog'&&fin.cur===null&&fin.hasT,'all 8 answered: the passage is done and its finishing time is kept');
+ok(fin.shown&&fin.view==='home','the section stays in the menu and the game returns home');
+ok(fin.note&&/סיימת לקרוא את כל הסיפורים/.test(fin.noteText)&&/30 ימים/.test(fin.noteText),'a message says everything is read and when a story returns: '+fin.noteText);
+ok(fin.saved.done[0]==='hedgehog'&&fin.saved.t.hedgehog>0,'saved in the profile');
+await p.evaluate(()=>rdClose()); await p.evaluate(()=>{ renderLevels(); [...document.querySelectorAll('#levels .levelbtn')].find(b=>b.textContent.includes('ספריית')).click(); });
+ok(await p.evaluate(()=>!!document.getElementById('rdOverlay')&&gameView==='home'),'tapping the section when it is empty shows the message and does not open a question');
+await p.evaluate(()=>rdClose());
 ok(await p.evaluate(()=>{ const d=cloudDocFromProfile(activeProfile(),700000,0); return d.v===CLOUD_DOC_V&&JSON.parse(d.p).rd.done[0]==='hedgehog'; }),'the cloud document carries it, in format '+await p.evaluate(()=>CLOUD_DOC_V));
 // a profile from before the section: no rd, level 1
-ok(await p.evaluate(()=>{ const c=cleanProgress({score:5,level:9}); return c.level===9&&c.rd.done.length===0&&c.rd.cur===null; }),'old progress without rd loads clean; level 9 survives loading');
+ok(await p.evaluate(()=>{ const c=cleanProgress({score:5,level:9}); return c.level===9&&c.rd.done.length===0&&c.rd.cur===null&&c.rd.days===30&&c.rd.off===false; }),'old progress without rd loads clean; level 9 survives loading');
 ok(errs.length===0,'no page errors '+errs.join('|'));
 await b.close();process.exit(f?1:0);})();

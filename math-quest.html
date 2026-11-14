@@ -500,6 +500,12 @@ body[data-view="home"] .wrap > .sub{margin-bottom:12px}
 .rdt{min-width:0}
 .rdhl{background:rgba(255,200,60,.28)}
 .rdclose{margin-top:10px; width:100%}
+.rdnote{text-align:center; max-width:420px}
+.rdnote p{font-size:1.15rem; line-height:1.7; margin:.5em 0 1em}
+.rdset .pa-btn[aria-pressed="true"]{outline:3px solid var(--accent,#7b5cff)}
+.rdlist{margin:.4em 0 0; padding:0; list-style:none}
+.rdlist li{display:flex; align-items:center; justify-content:space-between; gap:.6em; padding:.45em 0; border-top:1px solid rgba(0,0,0,.08)}
+.rdlist small{display:block; opacity:.75}
 .choice{
   background:var(--card2); border:2px solid transparent; border-radius:14px; padding:14px 8px;
   font-size:1.1rem; font-weight:800; font-family:'Baloo 2',sans-serif; cursor:pointer; color:var(--text);
@@ -1561,7 +1567,7 @@ function spaceClean(sp, gold, legacy){
   return {earned, spent:Math.min(spent,earned), trued:true, unlocked:sp.unlocked===true, ...(dw?{dw:1}:{}), surf, own, po, bc, lv, top, things, fix:{bed:fbed, window:fwin}, sub:GU};
 }
 function spaceSnap(){ return JSON.parse(JSON.stringify(space)); }
-let rd = {done:[], cur:null};   // reading section: passages finished (every question answered) and the one in progress {id, i = next question}
+let rd = {done:[], t:{}, cur:null, days:30, off:false};   // reading section: passages finished (every question answered) with the time each was finished, the one in progress {id, i = next question}, days until a finished passage returns (0 = never), and the parent's switch
 let space = spaceClean({},[],0);   // personal-space tokens: earned once per upgrade (stored, never derived), spent in the shop later; trued = the one-time true-up for old players was done
 let golden = [], legacyLooks = 0;   // upgraded rewards (each remembers the 10 rewards it was made from); how many looks the player had opened before the looks were retired (used by the token true-up)
 const COTTON_CANDY_IMG = "assets/32c4bd427e57.webp";
@@ -1735,7 +1741,7 @@ function cleanProgress(d){
 }
 function applyProgress(d){
   const c = cleanProgress(d);
-  score=c.score; streak=c.streak; collection=c.collection; lollipops=c.lollipops; golden=c.golden; legacyLooks=c.legacyLooks; space=c.space; rd=c.rd; level=c.level; diffOn=c.diff; mxState=c.mx; focusOn=c.focus; warmOn=c.warm; themeId=c.theme; applyTheme();
+  score=c.score; streak=c.streak; collection=c.collection; lollipops=c.lollipops; golden=c.golden; legacyLooks=c.legacyLooks; space=c.space; rd=c.rd; rdExpire(); level=c.level; diffOn=c.diff; mxState=c.mx; focusOn=c.focus; warmOn=c.warm; themeId=c.theme; applyTheme();
 }
 function persist(){ try{ localStorage.setItem(SAVE_KEY, JSON.stringify(store)); }catch(e){} }
 function saveState(){
@@ -2484,7 +2490,7 @@ function cloudProfileFromDoc(C, helpers){
 // ===== CLOUD (Google sign-in, cloud progress, problem reports) =====
 // Local-first: the game always works from this device's storage. The cloud is a mirror, so no internet / no account / no quota never blocks play.
 // Everything here is off while CLOUD_CONFIG is null. See firebase/SETUP.md for how to create the (free) Firebase project and paste its settings below.
-const APP_VERSION = '2026.11.14b';       // keep equal to VERSION in sw.js (a test checks it)
+const APP_VERSION = '2026.11.14c';       // keep equal to VERSION in sw.js (a test checks it)
 const BUILD_COMMIT = '';                 // the full id of the commit this page was built from: the deploy workflow (.github/workflows/tests.yml) fills it in; empty in a plain checkout
 const REPO_URL = 'https://github.com/matan-gk/matan-gk.github.io';
 const CLOUD_CONFIG = {apiKey:"AIzaSyAlq_TJNGvWPJpUrpbdq_hkAoURydqMzm0", authDomain:"learning-quest-1.firebaseapp.com", projectId:"learning-quest-1", appId:"1:98931179722:web:78fb00084ccba3efb53433"};   // e.g. {apiKey:'...', authDomain:'xxx.firebaseapp.com', projectId:'xxx', appId:'...'}
@@ -5239,23 +5245,47 @@ const READING_BANK = [
     {skill:'rdSynonyms', lines:[], q:'מִילִּים נִרְדָּפוֹת הֵן מִילִּים שֶׁיֵּשׁ לָהֶן אוֹתָהּ מַשְׁמָעוּת אוֹ מַשְׁמָעוּת דּוֹמָה מְאֹד. בְּאֵיזֶה זוּג הַמִּילִּים אֵינָן נִרְדָּפוֹת?', a:'רָעֵב – שָׂבֵעַ', w:['קָטָן – זָעִיר','יָפֶה – נָאֶה','מָהִיר – זָרִיז']}
    ]}
 ];
+const RD_DAYS_DEFAULT = 30, RD_DAYS_CHOICES = [7,14,30,60,90,0];   // 0 = a finished passage never returns
 function rdClean(x){
   x = (x && typeof x==='object') ? x : {};
   const done = [...new Set((Array.isArray(x.done)?x.done:[]).filter(i=>typeof i==='string' && i.length>0 && i.length<=40))].slice(0,400);
+  const t = {}; done.forEach(id=>{ const v = x.t && x.t[id]; if(Number.isFinite(v) && v>0) t[id] = Math.round(v); });   // when each was finished: its age is kept per passage
   const c = x.cur && typeof x.cur==='object' && typeof x.cur.id==='string' && Number.isInteger(x.cur.i) && x.cur.i>=0 && x.cur.i<100 && !done.includes(x.cur.id) ? {id:x.cur.id.slice(0,40), i:x.cur.i} : null;
-  return {done, cur:c};
+  const days = Number.isInteger(x.days) && x.days>=0 && x.days<=365 ? x.days : RD_DAYS_DEFAULT;
+  return {done, t, cur:c, days, off:x.off===true};
+}
+// Passages finished more than `days` days ago come back (the age is per passage). A finished passage with no time gets today's.
+function rdExpire(now){
+  now = now || Date.now();
+  rd.done.forEach(id=>{ if(!rd.t[id]) rd.t[id] = now; });
+  if(!rd.days) return;
+  const back = rd.done.filter(id=>now - rd.t[id] >= rd.days*86400000);
+  if(back.length){ rd.done = rd.done.filter(id=>!back.includes(id)); back.forEach(id=>{ delete rd.t[id]; }); }
+}
+// when the first finished passage returns (ms), or 0 when none will
+function rdReturnAt(){ if(!rd.days || !rd.done.length) return 0; return Math.min(...rd.done.map(id=>(rd.t[id]||Date.now()) + rd.days*86400000)); }
+function rdDoneText(){
+  const at = rdReturnAt(), left = at ? Math.max(1, Math.ceil((at-Date.now())/86400000)) : 0;
+  return 'סיימת לקרוא את כל הסיפורים! 🎉' + (left ? ` סיפור חדש יחזור בעוד ${left===1?'יום אחד':left+' ימים'}.` : ' כשיהיו סיפורים חדשים, הם יחכו לך כאן.');
+}
+function rdNote(text){
+  rdClose();
+  const o = document.createElement('div'); o.id='rdOverlay'; o.className='rdov'; o.setAttribute('role','dialog'); o.setAttribute('aria-modal','true');
+  o.innerHTML = `<div class="rdbox rdnote"><h2>📖 ספריית הסיפורים</h2><p>${esc(text)}</p><button type="button" class="btn rdclose">הבנתי</button></div>`;
+  document.body.appendChild(o); o.querySelector('.rdclose').onclick = rdClose;
 }
 function rdSnap(){ return rdClean(rd); }
 const rdPassage = id => READING_BANK.find(p=>p.id===id) || null;
-const rdAvailable = () => READING_BANK.some(p=>!rd.done.includes(p.id));
+function rdAvailable(){ rdExpire(); return READING_BANK.some(p=>!rd.done.includes(p.id)); }
 const rdSeen = new Set();   // passages already shown in this session
 function rdNext(){
+  rdExpire();
   let cur = rd.cur && rdPassage(rd.cur.id) && !rd.done.includes(rd.cur.id) ? rd.cur : null;
   if(!cur){ const left = READING_BANK.filter(p=>!rd.done.includes(p.id)); if(!left.length) return null; cur = rd.cur = {id:pick(left).id, i:0}; }
   const p = rdPassage(cur.id); if(cur.i>=p.qs.length){ rdFinish(p); return rdNext(); }
   return {p, i:cur.i};
 }
-function rdFinish(p){ if(!rd.done.includes(p.id)) rd.done.push(p.id); rd.cur = null; }
+function rdFinish(p){ if(!rd.done.includes(p.id)) rd.done.push(p.id); rd.t[p.id] = Date.now(); rd.cur = null; }
 function rdAnswered(info){
   const p = rdPassage(info.id); if(!p || !rd.cur || rd.cur.id!==info.id || rd.cur.i!==info.i) return;
   rd.cur.i++; if(rd.cur.i>=p.qs.length) rdFinish(p);
@@ -5411,7 +5441,7 @@ function openGame(id){
   applyView(); nextQuestion(); saveState(); window.scrollTo(0,0);
 }
 function renderLevels(){
-  const shown = mxVisibleLevels(diffOn, mxState).filter(id=>id!==9 || rdAvailable());
+  const shown = mxVisibleLevels(diffOn, mxState).filter(id=>id!==9 || !rd.off);   // the parent can switch the reading section off; when all passages are read it stays, with a message
   if(shown.length && !shown.includes(level)) level = shown.includes(5) ? 5 : shown[0];   // the parent hid the section she was in
   const el = document.getElementById('levels'); el.innerHTML=''; const nBtn = shown.length + ((space.unlocked||gateOn)?1:0); el.dataset.rem = String(nBtn%3); el.dataset.rem4 = String(nBtn%4);
   LEVELS.filter(l=>shown.includes(l.id)).forEach(l=>{
@@ -5420,7 +5450,7 @@ function renderLevels(){
     const cut = themeId===THEME_DEFAULT ? LEVEL_ICON_IMG[l.id] : null;
     const pic = skinImg('level', l.id, cut || null);
     b.innerHTML = (pic ? `<span class="emoji"><img class="lvimg${cut&&pic===cut?' cut':''}" src="${pic}" alt=""></span>` : `<span class="emoji">${l.emoji}</span>`) + esc(levelName(l));
-    b.onclick=()=>openGame(l.id);
+    b.onclick = l.id===9 ? ()=>{ if(rdAvailable()) openGame(9); else rdNote(rdDoneText()); } : ()=>openGame(l.id);
     el.appendChild(b);
   });
   addRoomBtn(el);
@@ -6351,7 +6381,7 @@ function nextQuestion(){
   document.getElementById('nextBtn').style.display='none';
   document.getElementById('feedback').textContent='';
   document.getElementById('feedback').className='feedback';
-  if(level===9 && !rdAvailable()){ showHome(); return; }   // every passage has been read: the section is gone from the menu
+  if(level===9 && !rdAvailable()){ showHome(); rdNote(rdDoneText()); return; }   // every passage has been read: back to the menu with a message
   let pool = poolFor(level);
   if(!pool.length){ renderLevels(); pool = poolFor(level); }          // safety: the section was emptied while it was open
   if(!pool.length) pool = filterByDifficultySet(pools[level], activeDifficultyIds());
@@ -6657,6 +6687,29 @@ function renderThemeHTML(prof){
     <p class="pa-sub">בוחרים איך המשחק של ${nm} נראה. זה נפרד מהפנייה (בן/בת/ניטרלי), לא משנה שאלות, התקדמות או אוסף (האוסף נשמר כשמחליפים), וחל מיד: אפשר לסגור את ההגדרות ולראות. אזור ההורים נשאר בעיצוב הרגיל. ערכת החלל עדיין בבנייה: הצבעים והכותרת מוכנים, והתמונות מתווספות בשלבים.</p>
     <div class="thchips" role="group" aria-label="ערכת נושא">${chips}</div>${cov}</section>`;
 }
+function profileRd(p){ return rdClean(p && p.id===store.activeId ? rd : cleanProgress(p && p.progress).rd); }
+function setProfileRd(p, patch){
+  if(p.id===store.activeId){ rd = rdClean(Object.assign({}, rd, patch)); rdExpire(); saveState(); renderLevels(); }
+  else { const c = cleanProgress(p.progress); p.progress = Object.assign({}, c, {rd:rdClean(Object.assign({}, c.rd, patch))}); p.u = Date.now(); persist(); cloudChanged(); }
+}
+const rdFmtDay = ms => { const d = new Date(ms); return d.getDate()+'.'+(d.getMonth()+1)+'.'+d.getFullYear(); };
+function renderReadingHTML(prof){
+  const r = profileRd(prof), nm = esc(prof.name||'');
+  const days = RD_DAYS_CHOICES.map(d=>`<button type="button" class="pa-btn sm sec" data-pact="rddays" data-id="${d}" aria-pressed="${r.days===d}">${d?d+' ימים':'לא לחזור'}</button>`).join(' ');
+  const list = READING_BANK.map(p=>{
+    const t = r.t[p.id], isDone = r.done.includes(p.id), cur = r.cur && r.cur.id===p.id ? r.cur : null;
+    let st = 'עוד לא נקרא';
+    if(isDone) st = 'נקרא ב-'+rdFmtDay(t||Date.now()) + (r.days && t ? ', יחזור ב-'+rdFmtDay(t+r.days*86400000) : ', לא יחזור');
+    else if(cur) st = `בקריאה: שאלה ${cur.i+1} מתוך ${p.qs.length}`;
+    return `<li><span><b>${esc(p.title)}</b><small>${esc(st)}</small></span>${isDone?`<button type="button" class="pa-btn sm sec" data-pact="rdreturn" data-id="${esc(p.id)}">להחזיר עכשיו</button>`:''}</li>`;
+  }).join('');
+  return `<section class="pa-card rdset"><h2 class="pa-h">📖 ספריית הסיפורים</h2>
+    <p class="pa-sub">קטעי קריאה עם שאלות, לכל פרופיל בנפרד. סיפור שהסתיים (ענו על כל השאלות שלו) לא יופיע שוב, עד שיעברו מספיק ימים.</p>
+    <div class="pa-row"><div class="pa-main-txt"><b>הצגת הנושא ל${nm}</b><small>${r.off?'הנושא מוסתר מהתפריט':'הנושא מוצג בתפריט'}</small></div><div class="pa-ctl"><button type="button" class="pa-btn sm ${r.off?'':'sec'}" data-pact="rdoff" aria-pressed="${!r.off}">${r.off?'להציג':'להסתיר'}</button></div></div>
+    <div class="pa-row"><div class="pa-main-txt"><b>סיפור שנקרא חוזר אחרי</b><small>הגיל נשמר לכל סיפור בנפרד, מרגע שהסתיים</small></div></div>
+    <div class="pa-actions" style="margin-top:0" role="group" aria-label="חזרת סיפורים">${days}</div>
+    <ul class="rdlist">${list}</ul></section>`;
+}
 function profileMx(p){ return mxClean(p && p.id===store.activeId ? mxState : cleanProgress(p && p.progress).mx); }
 // one entry point for every change in the question controls: refuses an empty game, saves, and updates the game behind the panel at once
 function mxCommit(prof, diff, mx){
@@ -6707,7 +6760,7 @@ function renderSettingsHTML(){
     <p class="pa-sub">בוחרים אילו רמות יופיעו ב${esc(profileName(prof, store.profiles.indexOf(prof)))}. אפשר להפעיל רמה אחת, שתיים או שלוש. ברירת המחדל: כל הרמות.</p>
     <div class="pa-rows">${rows}</div>
     <div class="perr" id="dswErr">${setMsg?esc(setMsg):''}</div>
-    <p class="pa-sub" style="margin-top:10px">שאלות בונוס הן תמיד ברמה קשה, ולכן ההגדרה הזאת לא משפיעה עליהן.</p></section>` + renderFocusHTML(prof, on, profileMx(prof)) + renderWarmHTML(prof, on, profileMx(prof)) + renderMatrixHTML(prof, on, profileMx(prof)) + renderThemeHTML(prof);
+    <p class="pa-sub" style="margin-top:10px">שאלות בונוס הן תמיד ברמה קשה, ולכן ההגדרה הזאת לא משפיעה עליהן.</p></section>` + renderFocusHTML(prof, on, profileMx(prof)) + renderWarmHTML(prof, on, profileMx(prof)) + renderMatrixHTML(prof, on, profileMx(prof)) + renderReadingHTML(prof) + renderThemeHTML(prof);
 }
 let setMsg = '';
 // ---- sample questions for a difficulty level (modal) ----
@@ -7253,6 +7306,13 @@ function profileAction(act, id){
   if(act==='mxcell'){ const prof = store.profiles.find(x=>x.id===setViewId) || activeProfile(); if(!prof) return; const [sec,d] = id.split(':').map(Number);
     const r = mxToggleCell(profileDiff(prof), profileMx(prof), sec, d); return mxCommit(prof, r.diff, r.mx); }
   if(act==='theme'){ const prof = store.profiles.find(x=>x.id===setViewId) || activeProfile(); if(!prof) return; setProfileTheme(prof, id); return renderProfiles(); }
+  if(act==='rdoff' || act==='rddays' || act==='rdreturn'){
+    const prof = store.profiles.find(x=>x.id===setViewId) || activeProfile(); if(!prof) return; const r = profileRd(prof);
+    if(act==='rdoff') setProfileRd(prof, {off:!r.off});
+    else if(act==='rddays') setProfileRd(prof, {days:+id});
+    else { const t = Object.assign({}, r.t); delete t[id]; setProfileRd(prof, {done:r.done.filter(x=>x!==id), t}); }
+    return renderProfiles();
+  }
   if(act==='mxreset'){ const prof = store.profiles.find(x=>x.id===setViewId) || activeProfile(); if(!prof) return; return mxCommit(prof, profileDiff(prof), {off:[],hide:[]}); }
   if(act==='setprof'){ setViewId = id; setMsg = ''; return renderProfiles(); }
   if(act==='new'){ profMode={view:'form',editId:null,first:false,confirmDel:null,error:''}; return renderProfiles(); }

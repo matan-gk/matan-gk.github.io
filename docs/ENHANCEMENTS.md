@@ -576,3 +576,12 @@ Section 9, "ספריית הסיפורים" (📖), with one passage ("הקפוד
 - **Level 9 loads.** `cleanProgress` accepted levels 1 to 8 only; now 1 to 9.
 - **To do next (phase 2 continued):** more passages (about 12 in all, you review the vowels), a parent-area switch for the section, the section's own picture, a message when the last passage is finished, read-aloud (optional), and the same loss guard for `rd` (a pull that would lower the done list is held).
 - Tests: `tests/readingtest.js` (new), and the sync tests now expect format 3.
+
+## Step 33: reading section, parent switch and returning stories (branch `reading-2`, off `reading-1`; version 2026.11.14c)
+
+- **Parent switch.** Settings tab, new card "📖 ספריית הסיפורים", per profile (also for a profile that is not the active one): show or hide the section in the child's menu.
+- **Empty section stays.** When every story is finished the section is still in the menu; tapping it shows a message ("סיימת לקרוא את כל הסיפורים! סיפור חדש יחזור בעוד N ימים") instead of opening a question. After the last answer of the last story the game goes home and shows the same message. (Step 32 hid the section instead.)
+- **Stories come back.** A finished story returns after `days` days (default 30). The age is kept per story: `progress.rd.t[id]` is the time that story was finished. Choices in the card: 7, 14, 30, 60, 90 days or never; the setting is `progress.rd.days`. A returning story starts again from question 1. A finished story with no time recorded gets today's, once.
+- **Story list in the card:** each story with its state (not read, in progress at question N of M, read on D, returns on D / will not return) and a "להחזיר עכשיו" button.
+- **Saved fields.** All inside `progress.rd` ({done, t, cur, days, off}), so the list of progress keys, and the sync format (3, not yet released), are unchanged. If `reading-1` has already been released with the shorter `rd`, the format number must be raised again before this ships.
+- Tests: `tests/readingset.js` (new), `readingtest.js` updated.
