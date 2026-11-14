@@ -593,3 +593,9 @@ After the reading section made the menu 9 buttons (10 with the room), the layout
 - **Cause.** The phone-only "short last row" rules (`data-rem`, thirds) were not scoped to phones, so they also applied on larger screens. They out-ranked the four-per-row rules (`data-rem4`) there, and on large screens the grid had 4 columns while the buttons still spanned 3 of 12, so each button took a whole row.
 - **Fix.** The `data-rem` rules apply only below 720px. From 720px up the menu is one 12-column grid, 4 buttons per row, with a short last row stretched to full width (`data-rem4`). The large-screen column overrides were removed.
 - Tests: `tests/menulayout.js` (new) measures real button positions at 390, 600, 820, 1024, 1280 and 1920px, with and without the room button: even rows, last row fills the width, no narrow buttons. It fails on the old CSS (18 failures) and passes now.
+
+## Step 35: story message no longer pops up on the menu (branch `story-popup-fix`; version 2026.11.14e)
+
+- **Cause.** With every story read, the section stays in the menu and shows a message when tapped. But a child who finished the last story was left with `level = 9` saved, and every page load (and profile switch) called `nextQuestion()` for that empty section, which showed the message.
+- **Fix.** `nextQuestion()` now moves her out of the empty section (to the mix) and shows the message only when she was playing, i.e. after a tap on the section or her last answer. Page loads and profile switches stay silent.
+- Test: `readingtest.js` reloads with all stories read and checks there is no message and she is not parked in the section (fails on the old code).

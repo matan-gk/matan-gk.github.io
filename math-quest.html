@@ -2488,7 +2488,7 @@ function cloudProfileFromDoc(C, helpers){
 // ===== CLOUD (Google sign-in, cloud progress, problem reports) =====
 // Local-first: the game always works from this device's storage. The cloud is a mirror, so no internet / no account / no quota never blocks play.
 // Everything here is off while CLOUD_CONFIG is null. See firebase/SETUP.md for how to create the (free) Firebase project and paste its settings below.
-const APP_VERSION = '2026.11.14d';       // keep equal to VERSION in sw.js (a test checks it)
+const APP_VERSION = '2026.11.14e';       // keep equal to VERSION in sw.js (a test checks it)
 const BUILD_COMMIT = '';                 // the full id of the commit this page was built from: the deploy workflow (.github/workflows/tests.yml) fills it in; empty in a plain checkout
 const REPO_URL = 'https://github.com/matan-gk/matan-gk.github.io';
 const CLOUD_CONFIG = {apiKey:"AIzaSyAlq_TJNGvWPJpUrpbdq_hkAoURydqMzm0", authDomain:"learning-quest-1.firebaseapp.com", projectId:"learning-quest-1", appId:"1:98931179722:web:78fb00084ccba3efb53433"};   // e.g. {apiKey:'...', authDomain:'xxx.firebaseapp.com', projectId:'xxx', appId:'...'}
@@ -6379,7 +6379,13 @@ function nextQuestion(){
   document.getElementById('nextBtn').style.display='none';
   document.getElementById('feedback').textContent='';
   document.getElementById('feedback').className='feedback';
-  if(level===9 && !rdAvailable()){ showHome(); rdNote(rdDoneText()); return; }   // every passage has been read: back to the menu with a message
+  if(level===9 && !rdAvailable()){   // every passage has been read
+    const playing = gameView==='play';
+    level = 5;                       // leave the empty section, so that a reload or a profile switch does not land in it again
+    showHome();
+    if(playing) rdNote(rdDoneText());   // the message only follows a tap or the last answer, never a page load or a profile switch
+    saveState(); return;
+  }
   let pool = poolFor(level);
   if(!pool.length){ renderLevels(); pool = poolFor(level); }          // safety: the section was emptied while it was open
   if(!pool.length) pool = filterByDifficultySet(pools[level], activeDifficultyIds());

@@ -47,6 +47,12 @@ ok(fin.saved.done[0]==='hedgehog'&&fin.saved.t.hedgehog>0,'saved in the profile'
 await p.evaluate(()=>rdClose()); await p.evaluate(()=>{ renderLevels(); [...document.querySelectorAll('#levels .levelbtn')].find(b=>b.textContent.includes('ספריית')).click(); });
 ok(await p.evaluate(()=>!!document.getElementById('rdOverlay')&&gameView==='home'),'tapping the section when it is empty shows the message and does not open a question');
 await p.evaluate(()=>rdClose());
+// a reload, or a profile switch, with every story read must not pop the message up on the menu
+await p.evaluate(()=>{ level=9; saveState(); }); await p.reload(); await p.waitForTimeout(500);
+ok(await p.evaluate(()=>!document.getElementById('rdOverlay')&&gameView==='home'&&level!==9),'page load with every story read: no message on the menu, and she is no longer parked in the empty section');
+await p.evaluate(()=>{ level=9; nextQuestion(); });
+ok(await p.evaluate(()=>!document.getElementById('rdOverlay')),'the empty section reached without a tap (profile switch) stays silent');
+await p.evaluate(()=>rdClose());
 ok(await p.evaluate(()=>{ const d=cloudDocFromProfile(activeProfile(),700000,0); return d.v===CLOUD_DOC_V&&JSON.parse(d.p).rd.done[0]==='hedgehog'; }),'the cloud document carries it, in format '+await p.evaluate(()=>CLOUD_DOC_V));
 // a profile from before the section: no rd, level 1
 ok(await p.evaluate(()=>{ const c=cleanProgress({score:5,level:9}); return c.level===9&&c.rd.done.length===0&&c.rd.cur===null&&c.rd.days===30&&c.rd.off===false; }),'old progress without rd loads clean; level 9 survives loading');
