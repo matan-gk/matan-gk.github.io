@@ -4,19 +4,27 @@ Goal: close the gap between the original vision of Cupcake's room (a painted, li
 
 Evidence: `room-polish/mock-stages.png` (today, then each step on the rainbow room) and `room-polish/mock-colours.png` (the same treatment on white, pink, blue, green, navy and rainbow). The mock-up is a throwaway layer drawn over the live room (`room-polish/mockup-*.js`, run with Playwright); it changed nothing in the game.
 
-## What is required and what is optional
+## Decisions (2026-11-15)
 
-**Required (this is the plan):**
-- **A. Atmosphere layer** (code only, no new art).
-- **B. Wall decor** (wall items, using the wall mounting that already exists).
-- **C. Themed furniture sets** (new art, four sheets).
-- **0. One safety fix first:** an older build must not delete items it does not know (see Step 0).
+- The atmosphere layer is **on by default, with a toggle**.
+- The **unicorn and cloud set comes first**, then numbers, crystal and candy.
+- Shelves start as **pre-arranged pictures** (wall items). Real shelves come later, built on the existing table and bed surface system (see "Later: real shelves").
+- **All the D items are in the plan** (D1 to D4). Changing the default look of the wooden furniture is possible later, and D1 is built so that it can be (see D1).
+- No lavender; the room must work in every colour, rainbow included.
 
-**Optional (decide later, none blocks the rest):**
-- **D1.** A "finish" colour for the wooden frames of the existing furniture, so old pieces match the new sets.
-- **D2.** Ceiling lights (a chandelier hanging from the ceiling).
-- **D3.** A balcony railing and clouds at the room's front edge.
-- **D4.** One-tap room themes (a bundle of wall, floor and decor choices).
+## What is in the plan, and the order
+
+All of it is planned. Items marked **required** block what comes after them; the rest can be reordered:
+
+- **0. Safety fix (required, first):** an older build must not delete items it does not know (see Step 0).
+- **A. Atmosphere layer** (required; code only, no new art).
+- **B. Wall decor** with pre-arranged shelves (required; wall items, the wall mounting already exists).
+- **C. Themed furniture sets** (required; new art, four sheets): **unicorn first**, then numbers, crystal, candy.
+- **D1. Finish colour for wooden frames** (so old furniture matches the new sets; may later change the default look of wooden furniture).
+- **D2. Ceiling lights.**
+- **D3. Balcony railing and clouds** at the room's front edge.
+- **D4. One-tap room themes.**
+- **E. Real shelves** on the walls, using the surface grid (after B and D1 are proven).
 
 ---
 
@@ -44,7 +52,7 @@ Plus one **grade on the things**: a single filter on the group holding all floor
 
 **Rainbow and very saturated colours:** a milky layer (white, 30 to 40%) over walls and floor when the colour is rainbow or highly saturated (saturation measured from the colour), a lighter one (about 10%) otherwise. Result: rainbow reads as pastel rainbow.
 
-**Setting:** on by default, with an "atmosphere" toggle in the room's settings (stored in the profile, the one new saved value; a tiny format addition, see "Format and rollout"). Reason: SVG filters on a weak tablet.
+**Setting (decided):** on by default, with an "atmosphere" toggle in the room's settings, stored in the profile (the one new saved value; see "Format and rollout"). Reason for the toggle: SVG filters on a weak tablet.
 
 **Performance budget (acceptance):** room redraw under 40 ms on a mid phone profile (Playwright CPU throttle 4x), no per-item filters, one filter on one group; if the room is panned or zoomed the layers are not re-created.
 
@@ -87,7 +95,7 @@ Why it matters: after A and B the room is lit and has walls, but the pieces are 
 
 **Style bible (add to every prompt, and attach two accepted sprites from the game as style references):** same camera, outline weight and lighting as `GEMINI_PROMPTS.md`; light from the upper left; soft pastel pigments, a thin pearly highlight on top edges; gold or white trim instead of plain brown wood; one recolourable magenta part per item (as today); no floor shadow, no floor diamond. Rejection test: place the cut item in the room beside the bed and the cloud sofa; if it looks like it came from another game, redo.
 
-### C1. Numbers set (the game's own theme; most important)
+### C-numbers. Numbers set (second)
 | Item | Price | Notes |
 |---|---|---|
 | Hopscotch number rug 0 to 9 | 4 | flat rug, as in the vision |
@@ -100,13 +108,13 @@ Why it matters: after A and B the room is lit and has walls, but the pieces are 
 | Giant number clock stand | 4 | |
 | Number mobile stand | 3 | |
 
-### C2. Crystal set
+### C-crystal. Crystal set (third)
 Crystal cluster on a pedestal (4), crystal lamp (4), crystal bed-side table (4, with a top), crystal ottoman (4), amethyst vase with flowers (3), crystal tree (5), geode bowl (3), prism on a stand (3), crystal planter (3). Colour part: the pedestal or base.
 
-### C3. Candy and sweets set
+### C-candy. Candy and sweets set (fourth)
 Cupcake stand (4), ice-cream cart (6, back picture), bubble-tea bar with two stools (6, back picture), candy jar tower (3), sprinkle rug (4), donut cushion (3), macaron side table (4, with a top), candy-floss lamp (4), cookie jar (3).
 
-### C4. Cloud and unicorn set (the vision's bedroom)
+### C-unicorn. Cloud and unicorn set (FIRST: the vision's bedroom)
 Cloud armchair (5, back picture), cloud ottoman (4), unicorn standing mirror (5), rainbow curtain stand (4), unicorn rocking horse (6, back picture), heart bed-bench (5, back picture), plush unicorn throne (6, back picture), star pouf (3), cloud lamp (4).
 
 Plus four topiary plants (cube, cone, ball, spiral; 2 to 3 tokens each) and the vision's cube planters, as a small extra sheet shared with plants.
@@ -117,35 +125,48 @@ Plus four topiary plants (cube, cone, ball, spiral; 2 to 3 tokens each) and the 
 
 ---
 
-## Optional extras
+## The D items (all planned)
 
-- **D1. Finish colour for wood frames.** Add one more recolour channel (key `wood`) for the brown frames of bed, desk, chair, table, bookshelf and wardrobes, so an old desk can be white, gold or lilac like the new sets. The brown can be found by hue, so masks come from the existing pictures with no new art. Prototype on three pieces first; adopt only if it looks clean at the edges. Cost per extra key: 19 tokens in the max-out total, and a rise in saved format (item option). Closes most of "old pieces look like another set" without redrawing them.
-- **D2. Ceiling lights.** A new placement kind that hangs from the top (the vision's number chandelier). New code (placement UI, its own draw layer), a sprite sheet of 6 lamps. About two days.
+- **D1. Finish colour for wood frames.** Add one more recolour channel (key `wood`) for the brown frames of bed, desk, chair, table, bookshelf and wardrobes, so an old desk can be white, gold or lilac like the new sets. The brown can be found by hue, so masks come from the existing pictures with no new art. Prototype on three pieces first (the bed, desk and bookshelf); adopt only if it looks clean at the edges. Cost per extra key: 19 tokens in the max-out total, and a small saved-format addition (an item option). Closes most of "old pieces look like another set" without redrawing them. **Changing the default wood** (for example new rooms start with white-washed or gold-trimmed frames) is then only a default value, not new art; it will be decided after you have seen the prototype next to the unicorn set. Existing rooms keep their wood unless the finish is changed by hand.
+- **D2. Ceiling lights.** A new placement kind that hangs from the top (the vision's number chandelier). New code (placement UI, its own draw layer, a ceiling position saved like `wl`), a sprite sheet of 6 lamps. About two days.
 - **D3. Balcony railing and clouds.** A room-frame upgrade drawn along the two front edges, like the window levels. A small art sheet and a render group. About one day.
-- **D4. One-tap room themes.** Bundles (for example "Crystal": the set's pieces and a wall colour pair) for people who do not want to arrange. Only after C.
+- **D4. One-tap room themes.** Bundles (for example "Unicorn": the set's pieces and a wall colour pair) for people who do not want to arrange. Built after at least two sets exist.
 
 ---
 
 ## Order of work
 
-1. **Step 0** (safety fix), `unknown-items-safe`.
-2. **A** atmosphere, `room-atmosphere` (can run in parallel with art being generated).
-3. **B** wall decor sheet, `wall-decor`.
-4. **C1 numbers**, then **C4 cloud and unicorn**, then **C2 crystal**, then **C3 candy** (the order puts the game's own theme and the vision's bedroom first), each its own branch.
-5. Optional **D1** prototype after C1 so the old furniture can be judged next to a new set.
+1. **Step 0** (safety fix), branch `unknown-items-safe`.
+2. **A** atmosphere with the toggle, `room-atmosphere` (can run while art is being generated).
+3. **B** wall decor sheet with pre-arranged shelves, `wall-decor`.
+4. **C-unicorn** (first set), `room-items-5`.
+5. **D1** prototype, judged next to the unicorn set; then **C-numbers**, **C-crystal**, **C-candy** (`room-items-6` to `8`, plus topiary).
+6. **D2** ceiling lights, **D3** balcony, **D4** themes, in whatever order art is ready.
+7. **E** real shelves (below).
 
 Every branch follows the usual routine: off the latest branch, version bump, `docs/ENHANCEMENTS.md` step, tests added or updated and run, commit with a short subject and the longer detail in the body, push, you merge.
 
+## Later: real shelves (E)
+
+Goal: a shelf on a wall where she places her own things, using the same machinery as the bed and the tables (a host with a measured top and `on:{h,dx,dy}` positions in grid units).
+
+- A shelf is a wall item (so it already has a place `wl`) that is also a **host**: its top is a thin strip (for example 6 x 1 units) measured on the picture like `tools/surfaces.py` does for tables, in the wall plane.
+- Things on a shelf are small items (the catalog items flagged as small: markers, puzzle, lego, tictac, chess, figures; a new "shelf size" flag keeps big things off). They stand upright on the strip (not sheared), drawn with the shelf.
+- The grid system already handles hosts, overlap checks, and moving a host with its sitters; the new parts are the strip in wall space, the "small only" rule, and the UI to tap a shelf and place on it. When the shelf moves or goes to the inventory, its things come with it (as on tables).
+- Pre-arranged shelves from B stay as decor; real shelves are new items (empty glass shelf, wooden shelf, cloud shelf), so nothing bought earlier changes.
+- Saved format: sitters already use `on`, so a shelf host adds no new field; the wall host needs one more flag. Treat as one format bump if the flag is stored.
+
+About two to three days of code, plus one small art sheet (3 to 4 shelf types, with their tops measured).
+
 ## Format and rollout
 
-- A saves one new value (the atmosphere toggle) in the profile; if it is kept out of the room data (profile settings, not `space`) there is no format change, otherwise it is one small bump. Decide when A starts.
+- A saves one new value (the atmosphere toggle) in the profile settings, outside `space`, so it does not change the room's format. It is a new profile field, so it follows the usual rule: a newer build writes it, an older one ignores it.
+- D1 (an item option), D2 (a ceiling position) and E (a wall-host flag) each change the room data; each is its own format bump, announced in its step, and none needs a console rules change.
 - Items add catalog ids only. After Step 0 an older build keeps what it cannot show instead of deleting it.
 - The wall decor adds no new saved fields (it uses `wl`, format 4).
 - No change to the Firebase console rules at any step.
 
-## Decisions I need from you
+## Still open
 
-1. Atmosphere on by default with a toggle (my recommendation), or always on?
-2. The numbers set first (my recommendation), or the unicorn bedroom?
-3. Should the shelves be pre-arranged pictures (recommended), or a real shelf where she places her own things (a much larger feature, new surfaces on walls)?
-4. Optional D1 (wood finish): worth a prototype after the numbers set?
+- Whether the atmosphere toggle lives in the profile (my choice: in profile settings, outside the room data, so no room-format change) or in the room data.
+- D1: whether the default wood changes at all (decide after the prototype).
