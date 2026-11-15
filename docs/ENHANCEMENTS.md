@@ -625,3 +625,12 @@ After the reading section made the menu 9 buttons (10 with the room), the layout
 - **Hosts.** The kids table (top = the middle column, 1x2 cells), the nightstand (1x1) and the toy shelf (2x1) can carry things (`top` measured by `tools/surfaces.py`: new entries in `HOSTS` / `HOSTS_BACK`; the nightstand's and shelf's back tops too). The shelf's back picture is drawn lower than its front (top z 71 against 84), so a thing on it moves slightly when the shelf is turned. The counter is not a host (the display case and awning cover its top).
 - **Numbers.** Catalog 88 items (price sum 330), 34 colourable part keys; max-out cost 1143 (was 860 by the old comment; the test computes it).
 - Tests: `tests/items3test.js` (new): the 9 items, their keys, the back pictures, the hosts and a thing staying on a host through all four looks, repainting, no white in the gaps. Updated for the new counts: `catalogtest`, `colortest`, `surfacetest`, `backtest`.
+
+## Step 39: 25 more room items, sheets c2 to c4 (branch `room-items-2`, on top of `room-items-1`; version 2026.11.15b)
+
+- **Art.** `art/sheet-c2-lights-music.jpg` + `sheet-c2-music-back.jpg`, `sheet-c3-learning-pets.jpg` + `sheet-c3-back.jpg`, `sheet-c4-plush-plants-wall.jpg` + `sheet-c4-back.jpg`. `tools/items4.py` cuts and fits them (blobs or the 3x2 grid of the c4 back; the yellow floor diamond under the plush backs is removed).
+- **Items.** Lights and music: cup lamp, star lamp, lava lamp, disco ball, light pole, crystal ball, music box, xylophone, drum. Learning and pets: abacus, register, microscope, magnetic board, marble run, robot, fish bowl, fish tank, hamster. Plushies and plants: elephant, sleeping cat, penguin, sloth, sunflower (pl21), strawberry (pl22), star rug.
+- **Back pictures (11):** music box, register, microscope, magnetic board, marble run, robot, fish tank, elephant, cat, penguin, sloth.
+- **Not added.** The wall clock and treasure map (sheet c4) wait for wall mounting. New colour parts have Hebrew names in `PART_NAMES`.
+- **Numbers.** Catalog 113 items (price sum 419), 42 colourable part keys, 23 plants.
+- Tests: `tests/items4test.js` (new); counts updated in catalog, colour, space and back tests; the register's back cord is allowed to trail sideways in the ground test.
