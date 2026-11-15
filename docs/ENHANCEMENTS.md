@@ -660,3 +660,15 @@ Marked on a screenshot of the bed (b = blanket, s = sheet, p = pillow), two part
 ## Step 43: coins next to the gift square (branch `prize-corner`, off `bed-colors`; version 2026.11.15f)
 
 Once the room is unlocked, the top-left of the screen shows the coin balance (the coin picture for the amount, as in the gift room, and the number) in a small card beside the gift square, so the balance is visible without opening anything. It follows the balance (every save), is hidden while the room is locked, and is left out on phone widths (under 600 px). Not tappable. Interpretation of the request: "also the number of tokens" next to the prizes. `renderTokBadge()`; `tests/tokbadgetest.js`.
+
+## Step 44: unknown items are kept; sync format 5 (branch `unknown-items-safe`, off `prize-corner` with `main` merged; version 2026.11.15g)
+
+**The gap.** The server rules stop a build from writing a *lower* format number than the stored one, but adding catalog items does not change the number. An older build loaded the profile, dropped the things whose item id it did not know (`spaceClean` filtered them out) and uploaded the result the next time anything changed, so new items could be deleted from the saved room.
+
+**The fix.** `spaceClean` now keeps those things in `space.unk` (not drawn, not counted, positions converted to the saved unit like everything else, at most 100, each under 400 characters and with a short id; anything oversized or malformed is not kept). A thing standing on an unknown item is kept with it. `spent` is not touched. When a build that knows the item loads the profile, the entries come back as normal things at their places.
+
+**The bump.** `space.unk` is new saved data, and builds without this fix would keep dropping new items, so `CLOUD_DOC_V` is 5 and `minDocVersion()` in the repo's rules is 5 (the emulator tests use 5 as current, 4 as old, 6 as newer). Every build older than this one becomes read-only against a profile written by it. Console: no change is required (the protection is the stored-format rule that is already deployed, plus the clients). From here on, new art batches need no format bump.
+
+**Known remaining gap (not new).** Unknown colour indices or other unknown option values inside the room are still normalised by older builds; only items are kept.
+
+Tests: `tests/unkitemstest.js` (new); `walltest.js` accepts format 4 or later; rules tests moved to format 5.

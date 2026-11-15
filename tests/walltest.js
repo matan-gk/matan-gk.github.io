@@ -8,7 +8,7 @@ const ev=(fn,a)=>p.evaluate(fn,a);
 await p.goto(T.URL);await ev(()=>localStorage.clear());await p.reload();
 await p.fill('#pfName','X');await p.click('.gopt:has(input[value=f])');await p.click('[data-pact=save]');await p.waitForTimeout(500);
 await ev(()=>{space.earned=1000;space.spent=0;space.unlocked=true;golden=['🍪'];renderLevels();openSpace();});
-ok(await ev(()=>CLOUD_DOC_V===4),'sync format 4 (things carry wl)');
+ok(await ev(()=>CLOUD_DOC_V>=4),'sync format 4 or later (things carry wl)');
 ok(await ev(()=>['wallclock','treasuremap'].every(id=>{const c=catOf(id);return c.wall&&c.g==='wall'&&c.r[2]>0&&ROOM_GROUPS.wall;})),'both are wall items in their own group');
 const clean=async(things,fix)=>ev(([th,fx])=>{const sp=spaceSnap();sp.things=th;if(fx)sp.fix=fx;return spaceClean(sp).things;},[things,fix]);
 let r=await clean([{k:'wallclock',x:-1,y:-1,u:'wc01',wl:{s:'l',a:250,h:300}},{k:'treasuremap',x:-1,y:-1,u:'tm01',wl:{s:'l',a:250,h:300}},{k:'chair',x:-1,y:-1,u:'ch01',wl:{s:'l',a:200,h:300}},{k:'treasuremap',x:3,y:3,u:'tm02',wl:{s:'l',a:9999,h:-5}}]);
