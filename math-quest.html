@@ -588,6 +588,12 @@ body[data-view="play"] .card{background:color-mix(in srgb, var(--card) 76%, tran
 .topbar .chip{padding:3px 12px; font-size:.8rem; justify-content:space-between; background:var(--card); gap:8px}
 .topbar .rewardstrip{width:72px; height:72px; flex:none; margin:0; padding:4px 3px; gap:0; align-items:center; justify-content:center; position:relative; background:var(--card); border-radius:16px}
 .topbar .rs-title, .topbar .rs-cotton, .topbar .rs-gold{display:none !important}
+/* once the room is unlocked, the coins are shown next to the gift square (wide screens only: a phone has no room for it) */
+.topgifts{display:flex; align-items:flex-start; gap:6px; flex:none}
+.tokbadge{width:58px; height:72px; box-sizing:border-box; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; background:var(--card); border-radius:16px; box-shadow:0 4px 10px var(--shadow); font-family:'Baloo 2',sans-serif; font-weight:800; font-size:.85rem; color:var(--text)}
+.tokbadge[hidden]{display:none}
+.tokbadge .tokimg{height:32px; width:auto; display:block}
+@media (max-width:599px){ .tokbadge{display:none !important} }
 .topbar .rs-top{order:2; justify-content:center; gap:0}
 .topbar .rs-count{margin:0; font-size:.62rem; line-height:1}
 .topbar .rs-ready{position:absolute; top:-7px; inset-inline-start:-5px; font-size:.58rem; padding:1px 7px; white-space:nowrap}
@@ -912,6 +918,7 @@ body[data-view="space"] #spaceView{box-sizing:border-box; display:flex; flex-dir
     <div class="chip">⭐ ניקוד: <span id="score">0</span></div>
     <div class="chip">🔥 רצף: <span id="streak">0</span></div>
   </div>
+  <div class="topgifts"><div class="tokbadge" id="tokBadge" role="img" hidden></div>
   <button type="button" class="rewardstrip" id="rewardsStrip" aria-label="פתחי את חדר המתנות">
     <span class="rs-top">
       <span class="rs-title">🎁 חדר המתנות</span>
@@ -920,7 +927,7 @@ body[data-view="space"] #spaceView{box-sizing:border-box; display:flex; flex-dir
       <span class="rs-count">סה"כ <b id="rsTotal">0</b> ›</span>
     </span>
     <span class="rs-recent" id="rsRecent"><span class="rs-empty">עוד אין מתנות 🎀</span></span>
-  </button>
+  </button></div>
   </div>
   <div class="locbar" id="locBar"><button type="button" class="backbtn" id="backBtn">→ חזרה לבחירת משחק</button></div>
   <h1>🦄 המסע הקסום של קאפקייק</h1>
@@ -1812,6 +1819,7 @@ function persist(){ try{ localStorage.setItem(SAVE_KEY, JSON.stringify(store)); 
 function saveState(){
   const p = activeProfile();
   if(p){ p.progress = captureProgress(); const ch = touchIfChanged(p); persist(); if(ch) cloudChanged(); }
+  if(typeof renderTokBadge==='function') renderTokBadge();
 }
 function newProfileId(){ return 'p'+Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
 function makeProfile(name, gender, progress){
@@ -2555,7 +2563,7 @@ function cloudProfileFromDoc(C, helpers){
 // ===== CLOUD (Google sign-in, cloud progress, problem reports) =====
 // Local-first: the game always works from this device's storage. The cloud is a mirror, so no internet / no account / no quota never blocks play.
 // Everything here is off while CLOUD_CONFIG is null. See firebase/SETUP.md for how to create the (free) Firebase project and paste its settings below.
-const APP_VERSION = '2026.11.15e';       // keep equal to VERSION in sw.js (a test checks it)
+const APP_VERSION = '2026.11.15f';       // keep equal to VERSION in sw.js (a test checks it)
 const BUILD_COMMIT = '';                 // the full id of the commit this page was built from: the deploy workflow (.github/workflows/tests.yml) fills it in; empty in a plain checkout
 const REPO_URL = 'https://github.com/matan-gk/matan-gk.github.io';
 const CLOUD_CONFIG = {apiKey:"AIzaSyAlq_TJNGvWPJpUrpbdq_hkAoURydqMzm0", authDomain:"learning-quest-1.firebaseapp.com", projectId:"learning-quest-1", appId:"1:98931179722:web:78fb00084ccba3efb53433"};   // e.g. {apiKey:'...', authDomain:'xxx.firebaseapp.com', projectId:'xxx', appId:'...'}
@@ -5605,7 +5613,14 @@ function itemHTML(item, isGold, px){
   }
   return `<span style="font-size:${Math.round(px*0.85)}px;line-height:1">${kind}</span>`;
 }
+function renderTokBadge(){   // the coins next to the gift square, once the room is unlocked
+  const el = document.getElementById('tokBadge'); if(!el) return;
+  if(!space.unlocked){ el.hidden = true; return; }
+  const n = tokenBalance(); el.hidden = false; el.setAttribute('aria-label', coinsTxt(n)); el.title = coinsTxt(n);
+  el.innerHTML = `${tokenHTML(n,32)||'<span class="tokzero">🪙</span>'}<b>${n}</b>`;
+}
 function renderRewards(){
+  renderTokBadge();
   const total = collection.length + golden.length;
   document.getElementById('rsTotal').textContent = total;
   const recent = document.getElementById('rsRecent');

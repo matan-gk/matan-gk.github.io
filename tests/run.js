@@ -68,6 +68,7 @@ const TESTS = [
   ['readingbank','readingbank.js','reading bank: every passage valid and playable, passages never pop up on the menu'],
   ['prizetest','prizetest.js','prize pop-up: appears mid-screen, flies to the gift box, never overlaps a party, reduced motion'],
   ['items3','items3test.js','batch 3 items (kids furniture and play): catalog, back pictures, hosts, recolouring, transparent gaps'],
+  ['tokbadge','tokbadgetest.js','coin balance next to the gift square once the room is unlocked'],
   ['bedmask','bedmasktest.js','bed part masks: fold band is blanket, bit left of the pillow is sheet'],
   ['wall','walltest.js','pictures on the walls: place, move, put away, overlaps, sync'],
   ['items4','items4test.js','batch 4 items (lights, music, learning, pets, plushies): catalog, backs, part names'],
