@@ -656,3 +656,7 @@ Marked on a screenshot of the bed (b = blanket, s = sheet, p = pillow), two part
 - The narrow band along the blanket's top edge (the fold, between the blanket and the pillow) was sheet. It is now blanket.
 - The small piece left of the pillow (a bit of sheet showing) was pillow. It is now sheet.
 `tools/bedmask.py` fixes the masks of levels 1 to 4 (level 5, the canopy bed, has neither; the same band is on levels 2 to 4, so it is changed there too). New masks are lossless files. `tests/bedmasktest.js` checks the marked points.
+
+## Step 43: coins next to the gift square (branch `prize-corner`, off `bed-colors`; version 2026.11.15f)
+
+Once the room is unlocked, the top-left of the screen shows the coin balance (the coin picture for the amount, as in the gift room, and the number) in a small card beside the gift square, so the balance is visible without opening anything. It follows the balance (every save), is hidden while the room is locked, and is left out on phone widths (under 600 px). Not tappable. Interpretation of the request: "also the number of tokens" next to the prizes. `renderTokBadge()`; `tests/tokbadgetest.js`.
