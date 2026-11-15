@@ -649,3 +649,10 @@ After the reading section made the menu 9 buttons (10 with the room), the layout
 - **Kids' table.** Replaced by a four-chair picture (`art/ktable-4chairs.png`), the same from every side, so it has no turn button (`NO_TURN`) and no back picture. It now covers 3x3 cells (was 3x2); seats stay recolourable (`kidchair`); its top (2x2 cells, measured by `tools/surfaces.py`) still holds small things.
 - **Rocking horse.** Gets its back picture (`art/rhorse-back.png`), so it turns through four looks.
 - `tools/items5.py` makes both (run from the repo root; idempotent). Tests: `items3test`, `backtest` updated.
+
+## Step 42: bed colours (branch `bed-colors`, off `table4-horse-back`; version 2026.11.15e)
+
+Marked on a screenshot of the bed (b = blanket, s = sheet, p = pillow), two parts of the part mask were wrong:
+- The narrow band along the blanket's top edge (the fold, between the blanket and the pillow) was sheet. It is now blanket.
+- The small piece left of the pillow (a bit of sheet showing) was pillow. It is now sheet.
+`tools/bedmask.py` fixes the masks of levels 1 to 4 (level 5, the canopy bed, has neither; the same band is on levels 2 to 4, so it is changed there too). New masks are lossless files. `tests/bedmasktest.js` checks the marked points.
