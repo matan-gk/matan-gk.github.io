@@ -1257,7 +1257,7 @@ const ROOM_COLORS = [
   {n:'חום',h:'#c9966b',p:1},{n:'זהב',h:'#f2d36b',p:2},{n:'כסף',h:'#d9dde3',p:2},{n:'קשת',h:'rainbow',p:2}];
 // ===== colorable parts (step 4): the bed's blanket, sheet, pillow and curtains; the pot of every plant; the colored surface of a furniture item =====
 // an option is 'd' (the original picture), a colour index into ROOM_COLORS, or 'p:<id>' for a pattern. A part is bought per option, like the walls; owned options switch for free.
-const PART_NAMES = {blanket:'שמיכה', sheet:'סדין', pillow:'כרית', curtain:'וילונות', pot:'עציץ', dollhouse:'גג', wardrobe:'ארון', chair:'כיסא', slide:'מגלשה', track:'רכבת', guitar:'גיטרה', rug:'שטיח', dressbox:'ארגז', car:'מכונית', laptop:'מחשב', monkey:'קוף', ladybug:'חיפושית', bunny:'ארנב', beanbag:'פוף', tent:'אוהל', hammock:'כרית', kidchair:'כיסאות', nstand:'מגירה', bins:'סלים', horse:'שמיכה', swing:'נדנדות', awning:'סוכך'};
+const PART_NAMES = {cuplamp:'אהיל', xylo:'קלידים', drum:'תוף', register:'קופה', magboard:'מסגרת', marblerun:'בסיס', robot:'גוף', fishtank:'ארון', blanket:'שמיכה', sheet:'סדין', pillow:'כרית', curtain:'וילונות', pot:'עציץ', dollhouse:'גג', wardrobe:'ארון', chair:'כיסא', slide:'מגלשה', track:'רכבת', guitar:'גיטרה', rug:'שטיח', dressbox:'ארגז', car:'מכונית', laptop:'מחשב', monkey:'קוף', ladybug:'חיפושית', bunny:'ארנב', beanbag:'פוף', tent:'אוהל', hammock:'כרית', kidchair:'כיסאות', nstand:'מגירה', bins:'סלים', horse:'שמיכה', swing:'נדנדות', awning:'סוכך'};
 // patterns: every pattern can go on the walls, the floor and the bed's blanket, sheet and curtain, and is bought once for all of them. sc = sprite pixels per tile pixel (bed parts); parts = where the pattern is offered (wl/wr/fl = the walls and the floor, bed.* = the bed's parts).
 // The tiles after the unicorn are mirrored 2x2 so that they repeat without a seam; on the walls and floor they are laid in perspective (SVG pattern transform)
 const PAT_PARTS = ['wl','wr','fl','bed.blanket','bed.sheet','bed.curtain'];
@@ -1422,7 +1422,32 @@ const ROOM_CATALOG = [
   {"id":"toyshelf","n":"מדף צעצועים","p":5,"g":"furniture","fw":4,"fd":2,"src":"assets/ef6c7ab09d07.webp","base":"assets/25986e11f19f.webp","r":[-44.0,-83.4,138.0,157.0],"dc":"#9ad0f5","ref":0.9059,"pk":"bins","back":{"src":"assets/0c9b553f0043.webp","r":[-44.0,-71.7,138.0,145.3],"top":{"c":[0,0,2,1],"z":71}},"top":{"c":[0,0,2,1],"z":84}},
   {"id":"rhorse","n":"סוס נדנדה","p":5,"g":"play","fw":4,"fd":2,"src":"assets/64ca06025432.webp","base":"assets/eee60f54604c.webp","r":[-44.0,-37.9,138.0,111.4],"dc":"#ef8a93","ref":0.9745,"pk":"horse"},
   {"id":"swingset","n":"נדנדות","p":8,"g":"play","fw":6,"fd":4,"src":"assets/4fed44d60c3f.webp","base":"assets/e3aeec4958ab.webp","r":[-90.0,-92.5,230.0,216.0],"dc":"#ffcc5c","ref":0.9255,"pk":"swing","back":{"src":"assets/97d2f579d6a9.webp","base":"assets/bdd8837fef05.webp","ref":0.7804,"r":[-90.0,-92.5,230.0,216.0]}},
-  {"id":"shopcounter","n":"דוכן קאפקייקס","p":7,"g":"furniture","fw":6,"fd":2,"src":"assets/22ab0c4ce4be.webp","base":"assets/06bbdcc01cf5.webp","r":[-42.0,-147.4,184.0,246.1],"dc":"#ef8a93","ref":0.9667,"pk":"awning","back":{"src":"assets/614d991b9e56.webp","base":"assets/cea201d1fd2b.webp","ref":0.9706,"r":[-42.0,-146.3,184.0,244.9]}}
+  {"id":"shopcounter","n":"דוכן קאפקייקס","p":7,"g":"furniture","fw":6,"fd":2,"src":"assets/22ab0c4ce4be.webp","base":"assets/06bbdcc01cf5.webp","r":[-42.0,-147.4,184.0,246.1],"dc":"#ef8a93","ref":0.9667,"pk":"awning","back":{"src":"assets/614d991b9e56.webp","base":"assets/cea201d1fd2b.webp","ref":0.9706,"r":[-42.0,-146.3,184.0,244.9]}},
+  {"id":"cuplamp","n":"מנורת קאפקייק","p":3,"g":"play","fw":2,"fd":2,"src":"assets/241e9d3ad5bd.webp","base":"assets/32f5feca5a87.webp","r":[-32.0,-59.9,64.0,96.9],"ref":0.9588,"dc":"#f48fd0","pk":"cuplamp"},
+  {"id":"starlamp","n":"מנורת כוכב","p":3,"g":"play","fw":2,"fd":2,"src":"assets/9227a512c75f.webp","r":[-35.0,-134.1,70.0,171.1]},
+  {"id":"lavalamp","n":"מנורת לבה","p":3,"g":"play","fw":2,"fd":2,"src":"assets/3cc33b9a7ed5.webp","r":[-22.0,-77.3,44.0,114.3]},
+  {"id":"disco","n":"כדור דיסקו","p":4,"g":"play","fw":2,"fd":2,"src":"assets/13a40103f08b.webp","r":[-36.0,-81.6,72.0,118.6]},
+  {"id":"lightpole","n":"עמוד אורות","p":3,"g":"play","fw":2,"fd":2,"src":"assets/271adb1befe1.webp","r":[-60.0,-90.6,120.0,127.6]},
+  {"id":"crystal","n":"כדור קסמים","p":4,"g":"play","fw":2,"fd":2,"src":"assets/d6a5a0e6b5c1.webp","r":[-32.0,-52.2,64.0,89.2]},
+  {"id":"musicbox","n":"קופסת נגינה","p":3,"g":"play","fw":2,"fd":2,"src":"assets/61b8f7d199dc.webp","r":[-35.0,-38.9,70.0,75.9],"back":{"src":"assets/47c731df3d97.webp","r":[-35.0,-29.5,70.0,66.5]}},
+  {"id":"xylo","n":"קסילופון","p":3,"g":"play","fw":2,"fd":2,"src":"assets/43940a38c84c.webp","base":"assets/688c6180552a.webp","r":[-46.0,-36.2,92.0,73.2],"ref":0.8588,"dc":"#f48fd0","pk":"xylo"},
+  {"id":"drum","n":"תוף","p":3,"g":"play","fw":2,"fd":2,"src":"assets/e7a7eba61288.webp","base":"assets/ef466ce496ac.webp","r":[-35.0,-42.4,70.0,79.4],"ref":0.9216,"dc":"#f48fd0","pk":"drum"},
+  {"id":"abacus","n":"חשבונייה","p":3,"g":"play","fw":2,"fd":2,"src":"assets/efc4169c81a6.webp","r":[-33.0,-51.3,66.0,88.3]},
+  {"id":"register","n":"קופה רושמת","p":3,"g":"play","fw":2,"fd":2,"src":"assets/5598c62eb390.webp","base":"assets/0b752086aa36.webp","r":[-37.0,-41.2,74.0,78.2],"ref":0.8373,"dc":"#f48fd0","pk":"register","back":{"src":"assets/660f16c219be.webp","base":"assets/de5d30098dcc.webp","ref":0.8196,"r":[-37.0,-41.7,74.0,78.7]}},
+  {"id":"microscope","n":"מיקרוסקופ","p":4,"g":"play","fw":2,"fd":2,"src":"assets/59361ead433d.webp","r":[-31.0,-73.5,62.0,110.5],"back":{"src":"assets/3e799084d1d4.webp","r":[-31.0,-66.5,62.0,103.5]}},
+  {"id":"magboard","n":"לוח מגנטים","p":4,"g":"play","fw":4,"fd":2,"src":"assets/b3b92e8c6f64.webp","base":"assets/1c76934429fe.webp","r":[-44.0,-152.2,138.0,226.0],"ref":0.8,"dc":"#f48fd0","pk":"magboard","back":{"src":"assets/dc0bb45d3b45.webp","base":"assets/bff9ffcd559f.webp","ref":0.851,"r":[-44.0,-155.3,138.0,229.1]}},
+  {"id":"marblerun","n":"מסלול גולות","p":6,"g":"play","fw":4,"fd":4,"src":"assets/b6f63a39751e.webp","base":"assets/dde927c4e282.webp","r":[-92.0,-101.1,184.0,199.6],"ref":0.8804,"dc":"#f48fd0","pk":"marblerun","back":{"src":"assets/53efc233d206.webp","base":"assets/23d7742cd923.webp","ref":0.849,"r":[-92.0,-101.2,184.0,199.8]}},
+  {"id":"robot","n":"רובוט","p":4,"g":"play","fw":2,"fd":2,"src":"assets/fa4452906564.webp","base":"assets/99743a298ad5.webp","r":[-35.0,-67.0,70.0,104.0],"ref":0.8725,"dc":"#f48fd0","pk":"robot","back":{"src":"assets/89e2e7463a2d.webp","base":"assets/ded45b342395.webp","ref":0.8569,"r":[-35.0,-66.5,70.0,103.5]}},
+  {"id":"fishbowl","n":"קערת דגים","p":3,"g":"play","fw":2,"fd":2,"src":"assets/38d5bac3536d.webp","r":[-33.0,-37.4,66.0,74.4]},
+  {"id":"fishtank","n":"אקווריום","p":8,"g":"play","fw":4,"fd":2,"src":"assets/8fdfe9229e82.webp","base":"assets/f5e44f4d4d89.webp","r":[-44.0,-73.9,138.0,147.5],"ref":0.8882,"dc":"#f48fd0","pk":"fishtank","back":{"src":"assets/de254af99281.webp","base":"assets/f0b0160d9a13.webp","ref":0.851,"r":[-44.0,-73.3,138.0,146.9]}},
+  {"id":"hamster","n":"אוגר בכדור","p":4,"g":"play","fw":2,"fd":2,"src":"assets/e2355f583d8d.webp","r":[-37.0,-45.9,74.0,82.9]},
+  {"id":"elephant","n":"פיל קטיפה","p":3,"g":"play","fw":2,"fd":2,"src":"assets/6fc4a66a2820.webp","r":[-33.0,-34.1,66.0,71.1],"back":{"src":"assets/bbf78f633b3f.webp","r":[-33.0,-33.2,66.0,70.2]}},
+  {"id":"sleepcat","n":"חתולה ישנה","p":3,"g":"play","fw":2,"fd":2,"src":"assets/8f383b042f5e.webp","r":[-34.0,-10.4,68.0,47.4],"back":{"src":"assets/14792d59c8de.webp","r":[-34.0,-33.9,68.0,70.9]}},
+  {"id":"penguin","n":"פינגווין קטיפה","p":3,"g":"play","fw":2,"fd":2,"src":"assets/2416e4ac6683.webp","r":[-29.0,-38.6,58.0,75.6],"back":{"src":"assets/c96e2fc680bc.webp","r":[-29.0,-24.7,58.0,61.7]}},
+  {"id":"sloth","n":"עצלן על מוט","p":4,"g":"play","fw":2,"fd":2,"src":"assets/7feabc0916a4.webp","r":[-38.0,-62.0,76.0,99.0],"back":{"src":"assets/add2432fec69.webp","r":[-38.0,-48.1,76.0,85.1]}},
+  {"id":"pl21","n":"חמנייה","p":2,"g":"plants","fw":2,"fd":2,"src":"assets/bc9d98a1f10e.webp","base":"assets/c50ecd60e467.webp","r":[-39.0,-123.9,78.0,160.9],"ref":0.8725},
+  {"id":"pl22","n":"שיח תותים","p":2,"g":"plants","fw":2,"fd":2,"src":"assets/9bf4ff13be03.webp","base":"assets/9b57effba049.webp","r":[-50.0,-77.8,100.0,114.8],"ref":0.9529},
+  {"id":"rug_star","n":"שטיח כוכב","p":4,"g":"rugs","fw":4,"fd":4,"src":"assets/b4fd69b1c5bf.webp","base":"assets/6314eb06b74d.webp","r":[-91.3,11.3,184.0,88.9],"flat":1,"ref":0.9804,"dc":"#f9a8d4","pk":"rug"}
 ];
 // every entry: g = group, fw x fd = floor cells it covers (x by y, default 1x1), dc = the color painted over its magenta parts by default (only items with magenta parts have `base` and `ref`)
 const ROOM_GROUPS = {plants:'צמחים', furniture:'רהיטים', rugs:'שטיחים', play:'צעצועים וקישוטים'};
@@ -2508,7 +2533,7 @@ function cloudProfileFromDoc(C, helpers){
 // ===== CLOUD (Google sign-in, cloud progress, problem reports) =====
 // Local-first: the game always works from this device's storage. The cloud is a mirror, so no internet / no account / no quota never blocks play.
 // Everything here is off while CLOUD_CONFIG is null. See firebase/SETUP.md for how to create the (free) Firebase project and paste its settings below.
-const APP_VERSION = '2026.11.15a';       // keep equal to VERSION in sw.js (a test checks it)
+const APP_VERSION = '2026.11.15b';       // keep equal to VERSION in sw.js (a test checks it)
 const BUILD_COMMIT = '';                 // the full id of the commit this page was built from: the deploy workflow (.github/workflows/tests.yml) fills it in; empty in a plain checkout
 const REPO_URL = 'https://github.com/matan-gk/matan-gk.github.io';
 const CLOUD_CONFIG = {apiKey:"AIzaSyAlq_TJNGvWPJpUrpbdq_hkAoURydqMzm0", authDomain:"learning-quest-1.firebaseapp.com", projectId:"learning-quest-1", appId:"1:98931179722:web:78fb00084ccba3efb53433"};   // e.g. {apiKey:'...', authDomain:'xxx.firebaseapp.com', projectId:'xxx', appId:'...'}
