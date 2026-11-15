@@ -1257,7 +1257,7 @@ const ROOM_COLORS = [
   {n:'חום',h:'#c9966b',p:1},{n:'זהב',h:'#f2d36b',p:2},{n:'כסף',h:'#d9dde3',p:2},{n:'קשת',h:'rainbow',p:2}];
 // ===== colorable parts (step 4): the bed's blanket, sheet, pillow and curtains; the pot of every plant; the colored surface of a furniture item =====
 // an option is 'd' (the original picture), a colour index into ROOM_COLORS, or 'p:<id>' for a pattern. A part is bought per option, like the walls; owned options switch for free.
-const PART_NAMES = {blanket:'שמיכה', sheet:'סדין', pillow:'כרית', curtain:'וילונות', pot:'עציץ', dollhouse:'גג', wardrobe:'ארון', chair:'כיסא', slide:'מגלשה', track:'רכבת', guitar:'גיטרה', rug:'שטיח', dressbox:'ארגז', car:'מכונית', laptop:'מחשב', monkey:'קוף', ladybug:'חיפושית', bunny:'ארנב'};
+const PART_NAMES = {blanket:'שמיכה', sheet:'סדין', pillow:'כרית', curtain:'וילונות', pot:'עציץ', dollhouse:'גג', wardrobe:'ארון', chair:'כיסא', slide:'מגלשה', track:'רכבת', guitar:'גיטרה', rug:'שטיח', dressbox:'ארגז', car:'מכונית', laptop:'מחשב', monkey:'קוף', ladybug:'חיפושית', bunny:'ארנב', beanbag:'פוף', tent:'אוהל', hammock:'כרית', kidchair:'כיסאות', nstand:'מגירה', bins:'סלים', horse:'שמיכה', swing:'נדנדות', awning:'סוכך'};
 // patterns: every pattern can go on the walls, the floor and the bed's blanket, sheet and curtain, and is bought once for all of them. sc = sprite pixels per tile pixel (bed parts); parts = where the pattern is offered (wl/wr/fl = the walls and the floor, bed.* = the bed's parts).
 // The tiles after the unicorn are mirrored 2x2 so that they repeat without a seam; on the walls and floor they are laid in perspective (SVG pattern transform)
 const PAT_PARTS = ['wl','wr','fl','bed.blanket','bed.sheet','bed.curtain'];
@@ -1413,7 +1413,16 @@ const ROOM_CATALOG = [
   {"id":"ladybug","n":"פרת משה רבנו","p":3,"g":"play","fw":2,"fd":2,"src":"assets/3c2e5267a3db.webp","base":"assets/500e70ea03c9.webp","r":[-38.0,-13.7,76,50.7],"dc":"#e8473f","ref":0.9353,"pk":"ladybug"},
   {"id":"bunny","n":"ארנב","p":3,"g":"play","fw":2,"fd":2,"src":"assets/6c3dbde189f3.webp","base":"assets/6d336e7c9eed.webp","r":[-33.0,-55.0,66,92.0],"dc":"#bcd7f5","ref":0.8843,"pk":"bunny"},
   {"id":"bunny2","n":"ארנב פרווה","p":3,"g":"play","fw":2,"fd":2,"src":"assets/74b30305a74a.webp","base":"assets/674bffdec120.webp","r":[-31.0,-51.0,62,88.0],"dc":"#ffd0e0","ref":0.8941,"pk":"bunny"},
-  {"id":"telescope","n":"טלסקופ","p":4,"g":"play","fw":4,"fd":4,"src":"assets/8333a6ccf0b8.webp","base":null,"r":[-93.3,-91.6,186.6,191.2]}
+  {"id":"telescope","n":"טלסקופ","p":4,"g":"play","fw":4,"fd":4,"src":"assets/8333a6ccf0b8.webp","base":null,"r":[-93.3,-91.6,186.6,191.2]},
+  {"id":"beanbag","n":"פוף","p":4,"g":"furniture","fw":4,"fd":4,"src":"assets/2e91bf9a126e.webp","base":"assets/9b58410b931e.webp","r":[-92.0,-118.2,184.0,216.9],"dc":"#ff9ec7","ref":0.9804,"pk":"beanbag","back":{"src":"assets/7f66001c8495.webp","base":"assets/4dfc79a9a079.webp","ref":0.9843,"r":[-92.0,-112.9,184.0,211.6]}},
+  {"id":"tent","n":"אוהל קריאה","p":8,"g":"furniture","fw":6,"fd":6,"src":"assets/9e361f0e7068.webp","base":"assets/d4c984a0bf59.webp","r":[-138.0,-146.2,276.0,294.8],"dc":"#f48fd0","ref":0.9784,"pk":"tent","back":{"src":"assets/084f9e8d08f2.webp","base":"assets/0c617cfa047c.webp","ref":0.9824,"r":[-138.0,-147.6,276.0,296.2]}},
+  {"id":"hammock","n":"כיסא ערסל","p":6,"g":"furniture","fw":4,"fd":4,"src":"assets/2ced3662f1ab.webp","base":"assets/61834914867a.webp","r":[-92.0,-85.9,184.0,184.4],"dc":"#b9a1e8","ref":0.9725,"pk":"hammock","back":{"src":"assets/96afed95c1d3.webp","base":"assets/e96dd09db063.webp","ref":0.9667,"r":[-92.0,-85.9,184.0,184.4]}},
+  {"id":"ktable","n":"שולחן ילדים עם כיסאות","p":6,"g":"furniture","fw":6,"fd":4,"src":"assets/fc857bca024f.webp","base":"assets/ca30f0f8dec5.webp","r":[-90.0,-55.1,230.0,178.7],"dc":"#6db3f2","ref":0.9569,"pk":"kidchair","top":{"c":[1,0,1,2],"z":45}},
+  {"id":"nstand","n":"שידת לילה","p":3,"g":"furniture","fw":2,"fd":2,"src":"assets/c2c5274b7bbc.webp","base":"assets/4b15ef558ab8.webp","r":[-42.0,-60.6,84.0,97.6],"dc":"#ffcc5c","ref":0.9804,"pk":"nstand","back":{"src":"assets/d955eed9b872.webp","r":[-42.0,-60.6,84.0,97.6],"top":{"c":[0,0,1,1],"z":62}},"top":{"c":[0,0,1,1],"z":62}},
+  {"id":"toyshelf","n":"מדף צעצועים","p":5,"g":"furniture","fw":4,"fd":2,"src":"assets/ef6c7ab09d07.webp","base":"assets/25986e11f19f.webp","r":[-44.0,-83.4,138.0,157.0],"dc":"#9ad0f5","ref":0.9059,"pk":"bins","back":{"src":"assets/0c9b553f0043.webp","r":[-44.0,-71.7,138.0,145.3],"top":{"c":[0,0,2,1],"z":71}},"top":{"c":[0,0,2,1],"z":84}},
+  {"id":"rhorse","n":"סוס נדנדה","p":5,"g":"play","fw":4,"fd":2,"src":"assets/64ca06025432.webp","base":"assets/eee60f54604c.webp","r":[-44.0,-37.9,138.0,111.4],"dc":"#ef8a93","ref":0.9745,"pk":"horse"},
+  {"id":"swingset","n":"נדנדות","p":8,"g":"play","fw":6,"fd":4,"src":"assets/4fed44d60c3f.webp","base":"assets/e3aeec4958ab.webp","r":[-90.0,-92.5,230.0,216.0],"dc":"#ffcc5c","ref":0.9255,"pk":"swing","back":{"src":"assets/97d2f579d6a9.webp","base":"assets/bdd8837fef05.webp","ref":0.7804,"r":[-90.0,-92.5,230.0,216.0]}},
+  {"id":"shopcounter","n":"דוכן קאפקייקס","p":7,"g":"furniture","fw":6,"fd":2,"src":"assets/22ab0c4ce4be.webp","base":"assets/06bbdcc01cf5.webp","r":[-42.0,-147.4,184.0,246.1],"dc":"#ef8a93","ref":0.9667,"pk":"awning","back":{"src":"assets/614d991b9e56.webp","base":"assets/cea201d1fd2b.webp","ref":0.9706,"r":[-42.0,-146.3,184.0,244.9]}}
 ];
 // every entry: g = group, fw x fd = floor cells it covers (x by y, default 1x1), dc = the color painted over its magenta parts by default (only items with magenta parts have `base` and `ref`)
 const ROOM_GROUPS = {plants:'צמחים', furniture:'רהיטים', rugs:'שטיחים', play:'צעצועים וקישוטים'};
@@ -2499,7 +2508,7 @@ function cloudProfileFromDoc(C, helpers){
 // ===== CLOUD (Google sign-in, cloud progress, problem reports) =====
 // Local-first: the game always works from this device's storage. The cloud is a mirror, so no internet / no account / no quota never blocks play.
 // Everything here is off while CLOUD_CONFIG is null. See firebase/SETUP.md for how to create the (free) Firebase project and paste its settings below.
-const APP_VERSION = '2026.11.14h';       // keep equal to VERSION in sw.js (a test checks it)
+const APP_VERSION = '2026.11.15a';       // keep equal to VERSION in sw.js (a test checks it)
 const BUILD_COMMIT = '';                 // the full id of the commit this page was built from: the deploy workflow (.github/workflows/tests.yml) fills it in; empty in a plain checkout
 const REPO_URL = 'https://github.com/matan-gk/matan-gk.github.io';
 const CLOUD_CONFIG = {apiKey:"AIzaSyAlq_TJNGvWPJpUrpbdq_hkAoURydqMzm0", authDomain:"learning-quest-1.firebaseapp.com", projectId:"learning-quest-1", appId:"1:98931179722:web:78fb00084ccba3efb53433"};   // e.g. {apiKey:'...', authDomain:'xxx.firebaseapp.com', projectId:'xxx', appId:'...'}

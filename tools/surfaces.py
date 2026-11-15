@@ -20,9 +20,11 @@ HTML = ROOT + 'math-quest.html'
 GU = int(re.search(r'const GU = (\d+);', open(HTML, encoding='utf-8').read()).group(1))   # grid units per old cell: catalog fw x fd are in units, the measuring is in cells
 # seed (fraction of the picture width, height) inside each top face; tol = colour tolerance, grad = outline barrier (None: dark pixels only)
 HOSTS = {'table': dict(seed=None, tol=28), 'desk': dict(seed=None, tol=28),
-         'toybox1': dict(seed=(.49, .29), tol=22, grad=10), 'toybox2': dict(seed=(.49, .27), tol=22, grad=10), 'toybox3': dict(seed='purple', tol=30)}
+         'toybox1': dict(seed=(.49, .29), tol=22, grad=10), 'toybox2': dict(seed=(.49, .27), tol=22, grad=10), 'toybox3': dict(seed='purple', tol=30),
+         'ktable': dict(seed=(.5, .45), tol=22, grad=10), 'nstand': dict(seed=(.5, .22), tol=22, grad=10), 'toyshelf': dict(seed=(.5, .2), tol=22, grad=10)}
 # the same for the back pictures (`back` of the catalog entry): seed inside the lid of each
-HOSTS_BACK = {'toybox1': dict(seed=(.5, .25), tol=22, grad=10), 'toybox2': dict(seed=(.6, .2), tol=22, grad=10), 'toybox3': dict(seed='purple', tol=30, back=1)}
+HOSTS_BACK = {'toybox1': dict(seed=(.5, .25), tol=22, grad=10), 'toybox2': dict(seed=(.6, .2), tol=22, grad=10), 'toybox3': dict(seed='purple', tol=30, back=1),
+               'nstand': dict(seed=(.5, .22), tol=22, grad=10), 'toyshelf': dict(seed=(.5, .2), tol=22, grad=10)}
 TOL_Z = {'toybox3': 10}      # the strapped chest's lid is cut in pieces; its two estimates differ a little
 # the bed's top plane per level (z, ox), found by matching the diamond to the mattress (see bed_fit) and checked by eye
 BED_PARAMS = {1: (66, 32), 2: (64, 30), 3: (84, 18), 4: (52, 39), 5: (82, 40)}
