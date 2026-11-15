@@ -1609,8 +1609,13 @@ function spaceClean(sp, gold, legacy){
     if(fx.window===null) fwin = null; else if(fx.window && (fx.window.w==='l' || fx.window.w==='r') && Number.isFinite(fx.window.u)) fwin = winAtFor(lv.window||1, {w:fx.window.w, u:Math.round(fx.window.u/WIN_STEP)*WIN_STEP});
   }
   const things = [], occ = new Set(), occF = new Set();   // bought copies: x,y = their cell, or -1,-1 while put away in the stock
-  const raw = (Array.isArray(sp.things) ? sp.things : []).slice(0,300).filter(t=>t && typeof t==='object').map(t=>ROOM_TURNED[t.k] ? {...t, k:ROOM_TURNED[t.k], o:(t.o||0)+1} : t).filter(t=>catOf(t.k)), uids = new Set();   // the old turned items are the item itself, turned
+  const mapped = (Array.isArray(sp.things) ? sp.things : []).concat(Array.isArray(sp.unk) ? sp.unk : []).slice(0,300).filter(t=>t && typeof t==='object').map(t=>ROOM_TURNED[t.k] ? {...t, k:ROOM_TURNED[t.k], o:(t.o||0)+1} : t);   // the old turned items are the item itself, turned
+  // things of an item this build does not know (a newer build bought them) are kept as they are, not drawn, not counted: dropping them here would delete them from the saved room the next time this build saves. Things standing on one of them stay with it.
+  const unk = mapped.filter(t=>!catOf(t.k)), unkU = new Set(unk.map(t=>t.u).filter(u=>typeof u==='string'));
+  for(let moved=true; moved;){ moved = false; for(const t of mapped){ if(unk.includes(t) || !t.on || typeof t.on!=='object' || !unkU.has(t.on.h)) continue; unk.push(t); if(typeof t.u==='string') unkU.add(t.u); moved = true; } }
+  const raw = mapped.filter(t=>!unk.includes(t)), uids = new Set();
   const sub = (Number.isInteger(sp.sub) && sp.sub>=1 && GU%sp.sub===0) ? sp.sub : 1, kx = GU/sub;   // the unit the saved positions are counted in; they are multiplied up to GU
+  const unkKeep = unk.filter(t=>typeof t.k==='string' && t.k.length<=40 && JSON.stringify(t).length<=400).slice(0,100).map(t=>JSON.parse(JSON.stringify(t))).map(t=>{ if(Number.isInteger(t.x) && t.x>=0) t.x *= kx; if(Number.isInteger(t.y) && t.y>=0) t.y *= kx; if(t.on && Number.isInteger(t.on.dx) && Number.isInteger(t.on.dy)){ t.on.dx *= kx; t.on.dy *= kx; } return t; });   // kept in the saved unit (sub = GU) like everything else in the result
   for(const t of raw){   // pass 1: every thing gets a unique id u and a place on the floor (or the stock); things standing on furniture wait for pass 2
     const c = catOf(t.k), [fw, fd] = fpOf(c, t.o); let x = -1, y = -1; const tx = Number.isInteger(t.x) ? t.x*kx : -1, ty = Number.isInteger(t.y) ? t.y*kx : -1;
     const sits = !!t.on && typeof t.on==='object' && typeof t.on.h==='string' && Number.isInteger(t.on.dx) && Number.isInteger(t.on.dy);   // a well-formed link is checked in pass 2 and never falls back to the floor
@@ -1636,7 +1641,7 @@ function spaceClean(sp, gold, legacy){
   { const kept = []; things.forEach(t=>{ if(!t.wl) return; const c = catOf(t.k); if(wallFits(c, t.wl, kept, fwin, lv.window||1)) kept.push({c, wl:t.wl}); else delete t.wl; }); }   // pictures on the walls: the first stays when two overlap, or one overlaps the window
   const top = {};   // the highest level bought of each item: every level up to it stays owned and can be switched to for free
   for(const id in ROOM_ITEMS){ const v = sp.top && sp.top[id]; top[id] = Math.max(lv[id], (Number.isInteger(v) && v>=1 && v<=roomMax(id)) ? v : 1); }
-  return {earned, spent:Math.min(spent,earned), trued:true, unlocked:sp.unlocked===true, ...(dw?{dw:1}:{}), surf, own, po, bc, lv, top, things, fix:{bed:fbed, window:fwin}, sub:GU};
+  return {earned, spent:Math.min(spent,earned), trued:true, unlocked:sp.unlocked===true, ...(dw?{dw:1}:{}), surf, own, po, bc, lv, top, things, ...(unkKeep.length?{unk:unkKeep}:{}), fix:{bed:fbed, window:fwin}, sub:GU};
 }
 function spaceSnap(){ return JSON.parse(JSON.stringify(space)); }
 let rd = {done:[], t:{}, cur:null, days:30, off:false};   // reading section: passages finished (every question answered) with the time each was finished, the one in progress {id, i = next question}, days until a finished passage returns (0 = never), and the parent's switch
@@ -2546,7 +2551,7 @@ function cloudPlan(local, gone, docs, maxProfiles){
   return out;
 }
 // Version of the cloud document format. The security rules refuse any write below this number (and any write that would lower the stored one), so an older build can never overwrite a profile written by a newer one. Raise it only together with firebase/firestore.rules.
-const CLOUD_DOC_V = 4;   // 4: pictures on the walls (things have wl); 3: progress.rd (reading passages done) was added; builds that do not know it must not write
+const CLOUD_DOC_V = 5;   // 5: space.unk (things of items this build does not know are kept untouched); 4: pictures on the walls (things have wl); 3: progress.rd (reading passages done) was added; builds that do not know it must not write
 // Profile <-> cloud document. Progress and stats are stored as JSON text: one field each, no per-field indexing, no nesting limits.
 function cloudDocFromProfile(p, maxStatsChars, base){
   let stats = p.stats ? JSON.parse(JSON.stringify(p.stats)) : null, s = stats ? JSON.stringify(stats) : '';
@@ -2563,7 +2568,7 @@ function cloudProfileFromDoc(C, helpers){
 // ===== CLOUD (Google sign-in, cloud progress, problem reports) =====
 // Local-first: the game always works from this device's storage. The cloud is a mirror, so no internet / no account / no quota never blocks play.
 // Everything here is off while CLOUD_CONFIG is null. See firebase/SETUP.md for how to create the (free) Firebase project and paste its settings below.
-const APP_VERSION = '2026.11.15f';       // keep equal to VERSION in sw.js (a test checks it)
+const APP_VERSION = '2026.11.15g';       // keep equal to VERSION in sw.js (a test checks it)
 const BUILD_COMMIT = '';                 // the full id of the commit this page was built from: the deploy workflow (.github/workflows/tests.yml) fills it in; empty in a plain checkout
 const REPO_URL = 'https://github.com/matan-gk/matan-gk.github.io';
 const CLOUD_CONFIG = {apiKey:"AIzaSyAlq_TJNGvWPJpUrpbdq_hkAoURydqMzm0", authDomain:"learning-quest-1.firebaseapp.com", projectId:"learning-quest-1", appId:"1:98931179722:web:78fb00084ccba3efb53433"};   // e.g. {apiKey:'...', authDomain:'xxx.firebaseapp.com', projectId:'xxx', appId:'...'}

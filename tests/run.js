@@ -70,6 +70,7 @@ const TESTS = [
   ['items3','items3test.js','batch 3 items (kids furniture and play): catalog, back pictures, hosts, recolouring, transparent gaps'],
   ['tokbadge','tokbadgetest.js','coin balance next to the gift square once the room is unlocked'],
   ['bedmask','bedmasktest.js','bed part masks: fold band is blanket, bit left of the pillow is sheet'],
+  ['unkitems','unkitemstest.js','unknown items are kept, not deleted (format 5)'],
   ['wall','walltest.js','pictures on the walls: place, move, put away, overlaps, sync'],
   ['items4','items4test.js','batch 4 items (lights, music, learning, pets, plushies): catalog, backs, part names'],
   ['menulayout','menulayout.js','main menu: even rows at phone, tablet and large-screen widths, with and without the room button'],
