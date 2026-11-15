@@ -1447,10 +1447,12 @@ const ROOM_CATALOG = [
   {"id":"sloth","n":"עצלן על מוט","p":4,"g":"play","fw":2,"fd":2,"src":"assets/7feabc0916a4.webp","r":[-38.0,-62.0,76.0,99.0],"back":{"src":"assets/add2432fec69.webp","r":[-38.0,-48.1,76.0,85.1]}},
   {"id":"pl21","n":"חמנייה","p":2,"g":"plants","fw":2,"fd":2,"src":"assets/bc9d98a1f10e.webp","base":"assets/c50ecd60e467.webp","r":[-39.0,-123.9,78.0,160.9],"ref":0.8725},
   {"id":"pl22","n":"שיח תותים","p":2,"g":"plants","fw":2,"fd":2,"src":"assets/9bf4ff13be03.webp","base":"assets/9b57effba049.webp","r":[-50.0,-77.8,100.0,114.8],"ref":0.9529},
-  {"id":"rug_star","n":"שטיח כוכב","p":4,"g":"rugs","fw":4,"fd":4,"src":"assets/b4fd69b1c5bf.webp","base":"assets/6314eb06b74d.webp","r":[-91.3,11.3,184.0,88.9],"flat":1,"ref":0.9804,"dc":"#f9a8d4","pk":"rug"}
+  {"id":"rug_star","n":"שטיח כוכב","p":4,"g":"rugs","fw":4,"fd":4,"src":"assets/b4fd69b1c5bf.webp","base":"assets/6314eb06b74d.webp","r":[-91.3,11.3,184.0,88.9],"flat":1,"ref":0.9804,"dc":"#f9a8d4","pk":"rug"},
+  {"id":"wallclock","n":"שעון קיר","p":3,"g":"wall","wall":1,"src":"assets/2afe9b3247a1.webp","r":[-60.0,-64.5,120.0,129.0]},
+  {"id":"treasuremap","n":"מפת אוצר","p":3,"g":"wall","wall":1,"src":"assets/83282eb581d8.webp","r":[-75.0,-63.5,150.0,127.0]}
 ];
 // every entry: g = group, fw x fd = floor cells it covers (x by y, default 1x1), dc = the color painted over its magenta parts by default (only items with magenta parts have `base` and `ref`)
-const ROOM_GROUPS = {plants:'צמחים', furniture:'רהיטים', rugs:'שטיחים', play:'צעצועים וקישוטים'};
+const ROOM_GROUPS = {plants:'צמחים', furniture:'רהיטים', rugs:'שטיחים', play:'צעצועים וקישוטים', wall:'קיר'};
 const isFlat = c => !!c.flat;   // rugs, floor games and tracks lie on the floor: other items can stand on them, they only exclude other flat things
 const catGroup = c => c.g || 'plants';
 const fwOf = c => c.fw || 1, fdOf = c => c.fd || 1;   // the catalog's fw x fd are in grid units (see GU)
@@ -1462,7 +1464,7 @@ const fpOf = (c, o) => oddO(o) ? [fdOf(c), fwOf(c)] : [fwOf(c), fdOf(c)];   // t
 const footOf = t => fpOf(catOf(t.k), t.o);
 const ROOM_TURNED = {desk_turn:'desk', chair2:'chair', slide2:'slide', soccer2:'soccer'};   // catalog entries that became "the same item, turned": old saves are migrated
 const NO_TURN = /^(pl\d+|rug_\w+|globe|table|blocks|soccer|basketball|books2?|puzzle2?|lego|tictac|chess|markers|heart|star|track2?|trainset|mat)$/;   // the same from every side: no turn button
-const canTurn = c => !!c && !NO_TURN.test(c.id);
+const canTurn = c => !!c && !c.wall && !NO_TURN.test(c.id);
 const oStates = c => c.back ? 4 : 2;   // how many looks it has: 0 as drawn, 1 mirrored, and (with back art) 2 the back, 3 the back mirrored; an item without back art has just the first two (turned half way round it looks the same, or we have no picture yet)
 const lookOf = (c, o) => ((o||0) & 2) && c.back ? c.back : c;   // the picture record ({src, base, ref, r}) for that look
 const nextO = (c, o) => ((o||0)+1) % oStates(c);
@@ -1479,6 +1481,25 @@ const WIN_U = 300, WIN_SILL = 235, WIN_STEP = 50/GU;   // window: default centre
 const bedAtFor = (l, p) => { if(!p) return null; const f = bedFp(l, p.o), q = {x:Math.max(0,Math.min(ROOM_CELLS-f[0],p.x)), y:Math.max(0,Math.min(ROOM_CELLS-f[1],p.y))}; if(oddO(p.o)) q.o = 1; return q; };   // o only when turned   // a bigger level is pushed back into the room
 const bedPos = (l, ctx) => { const s = ctx || space; return s && s.fix ? bedAtFor(l || s.lv.bed || 1, s.fix.bed) : null; };
 const winAtFor = (l, w) => { if(!w) return null; const a = ROOM_ART.window[l-1], u = Math.max(a.ax, Math.min(500-(a.w-a.ax), w.u)); return {w:w.w, u}; };
+// ---- wall things (a clock, a picture): drawn flat on a wall, sheared with it. t.wl = {s:'l'|'r', a, h}: the wall, the distance of the picture's centre from the corner along the wall, and its height above the floor (wall pixels; the room's walls are 500 wide and 600 high). x,y stay -1 (they are not on the floor)
+const isWall = c => !!c && !!c.wall, WALL_STEP = 25, WALL_W = 500, WALL_HT = 600;
+const wallClamp = (c, w) => { const W = c.r[2], H = c.r[3], lo = Math.ceil(W/2), hi = Math.floor(WALL_W-W/2), vl = Math.ceil(H/2+40), vh = Math.floor(WALL_HT-H/2-30);
+  const a = Math.max(lo, Math.min(hi, Math.round(w.a/WALL_STEP)*WALL_STEP)), h = Math.max(vl, Math.min(vh, Math.round(w.h/WALL_STEP)*WALL_STEP)); return {s:w.s, a, h}; };
+const wallRect = (c, w) => [w.a-c.r[2]/2, w.h-c.r[3]/2, w.a+c.r[2]/2, w.h+c.r[3]/2];   // along the wall, height: from, from, to, to
+const wallHits = (A, B) => A[0]<B[2] && B[0]<A[2] && A[1]<B[3] && B[1]<A[3];
+function wallFits(c, w, others, fwin, wlv){   // others: [{c, wl}] already on a wall; the window on the same wall takes its space too
+  if(!w || (w.s!=='l' && w.s!=='r') || !Number.isFinite(w.a) || !Number.isFinite(w.h)) return false;
+  const R = wallRect(c, w); if(R[0]<0 || R[2]>WALL_W || R[1]<30 || R[3]>WALL_HT) return false;
+  if(others.some(o=>o.wl.s===w.s && wallHits(R, wallRect(o.c, o.wl)))) return false;
+  if(fwin && fwin.w===w.s){ const a = ROOM_ART.window[wlv-1]; if(wallHits(R, [fwin.u-a.ax, WIN_SILL+a.ay-a.h, fwin.u-a.ax+a.w, WIN_SILL+a.ay])) return false; }
+  return true; }
+const wallOthers = except => space.things.filter((t,i)=>t.wl && i!==except).map(t=>({c:catOf(t.k), wl:t.wl}));
+const wallFree = (c, w, except) => wallFits(c, w, wallOthers(except), space.fix && space.fix.window, space.lv.window);
+function wallSettle(){   // after the window moved or grew: a picture that now overlaps it (or another) goes back to the inventory
+  const kept = []; space.things.forEach(t=>{ if(!t.wl) return; const c = catOf(t.k); if(wallFits(c, t.wl, kept, space.fix && space.fix.window, space.lv.window)) kept.push({c, wl:t.wl}); else delete t.wl; }); }
+function wallDefault(c, except){   // the first free spot, right wall first
+  for(const s of ['r','l']) for(let h=300; h<=450; h+=WALL_STEP) for(let a=125; a<=400; a+=WALL_STEP){ const w = wallClamp(c, {s, a, h}); if(wallFree(c, w, except)) return w; }
+  return wallClamp(c, {s:'r', a:250, h:300}); }
 const roomBlocked = (x,y,l,p) => { const lv = l || (space && space.lv && space.lv.bed), q = p===undefined ? bedPos(lv) : p; if(!q) return false; const f = bedFp(lv, q.o); return x>=q.x && x<q.x+f[0] && y>=q.y && y<q.y+f[1]; };
 // can the bed (level l) stand with its back corner at p? inside the room and not on a floor thing (things lying on the bed itself come along)
 function bedFits(p, l){
@@ -1488,7 +1509,7 @@ function bedFits(p, l){
 function stowBlocked(){
   if(space.fix){ if(space.fix.bed) space.fix.bed = bedAtFor(space.lv.bed, space.fix.bed); if(space.fix.window) space.fix.window = winAtFor(space.lv.window, space.fix.window); }   // a bigger level may not fit where it was
   for(const t of space.things){ if(t.x<0 || t.on) continue;   // things standing on furniture are checked by settleSurfaces
-    const q = footOf(t); let hit = false; for(let a=0;a<q[0];a++) for(let b=0;b<q[1];b++) if(roomBlocked(t.x+a,t.y+b)) hit = true; if(hit){ t.x = -1; t.y = -1; } } settleSurfaces(); }
+    const q = footOf(t); let hit = false; for(let a=0;a<q[0];a++) for(let b=0;b<q[1];b++) if(roomBlocked(t.x+a,t.y+b)) hit = true; if(hit){ t.x = -1; t.y = -1; } } settleSurfaces(); wallSettle(); }
 function roomMaxCost(){   // everything buyable in the room today (the catalog grows in later steps)
   let t = 0; for(const id in ROOM_ITEMS) t += ROOM_ITEMS[id].up.reduce((a,b)=>a+b,0);
   t += ROOM_CATALOG.reduce((a,c)=>a+c.p,0);   // one copy of each floor item
@@ -1594,7 +1615,7 @@ function spaceClean(sp, gold, legacy){
     let u = (typeof t.u==='string' && /^[a-z0-9]{4,12}$/.test(t.u) && !uids.has(t.u)) ? t.u : null;
     if(!u) do { u = Math.random().toString(36).slice(2,8); } while(u.length<4 || uids.has(u));
     uids.add(u);
-    const th = {k:t.k, x, y, u}; const to = Number.isInteger(t.o) ? t.o % oStates(c) : 0; if(to) th.o = to; if(t.c!=='d' && optOk(t.c) && (po[partKeyOf(c)]||[]).includes(t.c)) th.c = t.c; things.push(th);
+    const th = {k:t.k, x, y, u}; const to = Number.isInteger(t.o) ? t.o % oStates(c) : 0; if(to) th.o = to; if(t.c!=='d' && optOk(t.c) && (po[partKeyOf(c)]||[]).includes(t.c)) th.c = t.c; if(isWall(c) && t.wl && typeof t.wl==='object' && (t.wl.s==='l' || t.wl.s==='r') && Number.isFinite(t.wl.a) && Number.isFinite(t.wl.h)) th.wl = wallClamp(c, t.wl); things.push(th);
   }
   const ctx = {things, lv, fix:{bed:fbed, window:fwin}};   // pass 2 uses the same rules as play (surfFree, topOf), against the cleaned list
   raw.forEach((t,i)=>{
@@ -1605,6 +1626,7 @@ function spaceClean(sp, gold, legacy){
     if(!surfFree(catOf(t.k), h, dx, dy, i, ctx)) return;
     const cell = sitCell(h, dx, dy, ctx); things[i].on = {h, dx, dy}; things[i].x = cell[0]; things[i].y = cell[1];
   });
+  { const kept = []; things.forEach(t=>{ if(!t.wl) return; const c = catOf(t.k); if(wallFits(c, t.wl, kept, fwin, lv.window||1)) kept.push({c, wl:t.wl}); else delete t.wl; }); }   // pictures on the walls: the first stays when two overlap, or one overlaps the window
   const top = {};   // the highest level bought of each item: every level up to it stays owned and can be switched to for free
   for(const id in ROOM_ITEMS){ const v = sp.top && sp.top[id]; top[id] = Math.max(lv[id], (Number.isInteger(v) && v>=1 && v<=roomMax(id)) ? v : 1); }
   return {earned, spent:Math.min(spent,earned), trued:true, unlocked:sp.unlocked===true, ...(dw?{dw:1}:{}), surf, own, po, bc, lv, top, things, fix:{bed:fbed, window:fwin}, sub:GU};
@@ -2516,7 +2538,7 @@ function cloudPlan(local, gone, docs, maxProfiles){
   return out;
 }
 // Version of the cloud document format. The security rules refuse any write below this number (and any write that would lower the stored one), so an older build can never overwrite a profile written by a newer one. Raise it only together with firebase/firestore.rules.
-const CLOUD_DOC_V = 3;   // 3: progress.rd (reading passages done) was added; builds that do not know it must not write
+const CLOUD_DOC_V = 4;   // 4: pictures on the walls (things have wl); 3: progress.rd (reading passages done) was added; builds that do not know it must not write
 // Profile <-> cloud document. Progress and stats are stored as JSON text: one field each, no per-field indexing, no nesting limits.
 function cloudDocFromProfile(p, maxStatsChars, base){
   let stats = p.stats ? JSON.parse(JSON.stringify(p.stats)) : null, s = stats ? JSON.stringify(stats) : '';
@@ -2533,7 +2555,7 @@ function cloudProfileFromDoc(C, helpers){
 // ===== CLOUD (Google sign-in, cloud progress, problem reports) =====
 // Local-first: the game always works from this device's storage. The cloud is a mirror, so no internet / no account / no quota never blocks play.
 // Everything here is off while CLOUD_CONFIG is null. See firebase/SETUP.md for how to create the (free) Firebase project and paste its settings below.
-const APP_VERSION = '2026.11.15b';       // keep equal to VERSION in sw.js (a test checks it)
+const APP_VERSION = '2026.11.15c';       // keep equal to VERSION in sw.js (a test checks it)
 const BUILD_COMMIT = '';                 // the full id of the commit this page was built from: the deploy workflow (.github/workflows/tests.yml) fills it in; empty in a plain checkout
 const REPO_URL = 'https://github.com/matan-gk/matan-gk.github.io';
 const CLOUD_CONFIG = {apiKey:"AIzaSyAlq_TJNGvWPJpUrpbdq_hkAoURydqMzm0", authDomain:"learning-quest-1.firebaseapp.com", projectId:"learning-quest-1", appId:"1:98931179722:web:78fb00084ccba3efb53433"};   // e.g. {apiKey:'...', authDomain:'xxx.firebaseapp.com', projectId:'xxx', appId:'...'}
@@ -5755,7 +5777,7 @@ function wouldStow(to){
     const q = footOf(t); for(let a=0;a<q[0];a++) for(let b=0;b<q[1];b++) if(roomBlocked(t.x+a,t.y+b,to)) return n+1;
     return n; }, 0);
 }
-const stowedCount = () => space.things.filter(t=>t.x<0).length;
+const stowedCount = () => space.things.filter(t=>t.x<0 && !t.wl).length;
 const stowNote = n => n ? (n===1 ? 'פריט אחד עבר למלאי' : n+' פריטים עברו למלאי') + ' כי הוא כבר לא נכנס במקום שלו' : '';
 // every surface that is available right now: the bed and each thing with a top that stands on the floor; {h, tp (see topOf), depth}
 function surfaces(skipIdx){
@@ -5913,6 +5935,8 @@ function fxPreviewSVG(pl){
   const l = space.lv.window, a = ROOM_ART.window[l-1], q = winAtFor(l, pl);
   return `<g class="rmghost" opacity=".62" transform="matrix(${q.w==='l'?-1:1} .5 0 1 500 400)">${windowSVG(l, q.u)}<rect class="rmtile pend" x="${(q.u-a.ax).toFixed(1)}" y="${(-WIN_SILL-a.ay).toFixed(1)}" width="${a.w}" height="${a.h}" fill="#7ee08a" fill-opacity=".25" stroke="#2e9d45" stroke-width="3"/></g>`;
 }
+const wallXf = w => `translate(${500+(w.s==='r'?1:-1)*w.a} ${400+w.a/2-w.h}) matrix(1 ${w.s==='r'?.5:-.5} 0 1 0 0)`;   // the wall's own plane: a picture drawn flat is sheared with the wall (no mirroring, so a clock keeps its numbers)
+const wallImgSVG = c => `<image href="${c.src}" x="${c.r[0]}" y="${c.r[1]}" width="${c.r[2]}" height="${c.r[3]}"/>`;
 function roomSVG(){
   const cl = effCol('wl'), cr = effCol('wr'), cf = effCol('fl');
   const sel = (t,id) => RM.sel && RM.sel.t===t && (RM.sel.id||RM.sel.k)===id ? ' sel' : '';
@@ -5924,6 +5948,10 @@ function roomSVG(){
   s += `<g data-hit="surf:fl" class="rmh${sel('surf','fl')}"><polygon points="500,400 1000,650 500,900 0,650" fill="${surfFill(cf,'fl')}" stroke="#5b3a2a" stroke-width="4" stroke-linejoin="round"/><path d="${grid}" stroke="#5b3a2a" stroke-opacity=".16" stroke-width="2" fill="none"/>${pvk==='fl' ? pendEdge('500,400 1000,650 500,900 0,650') + pendTag(500,650) : ''}</g>`;
   const pl = RM.pl, shown = effLv('bed'), wl = effLv('window'), wp = winAtFor(wl, space.fix.window), bp = bedPos(shown);
   if(wp && !(pl && pl.fx==='window')) s += `<g data-hit="item:window" class="rmh${sel('item','window')}" transform="matrix(${wp.w==='l'?-1:1} .5 0 1 500 400)">${windowSVG(wl, wp.u)}</g>`;
+  space.things.forEach((t,i)=>{ if(!t.wl || (pl && pl.i===i)) return; const c = catOf(t.k);
+    s += `<g data-hit="thing:${i}" class="rmh${RM.sel && RM.sel.t==='thing' && RM.sel.i===i ? ' sel' : ''}" transform="${wallXf(t.wl)}">${wallImgSVG(c)}</g>`; });
+  if(pl && pl.wl){ const c = catOf(pl.k), ok = wallFree(c, pl.wl, pl.i);
+    s += `<g class="rmghost" opacity=".72" transform="${wallXf(pl.wl)}">${wallImgSVG(c)}<rect class="rmtile pend" x="${c.r[0]}" y="${c.r[1]}" width="${c.r[2]}" height="${c.r[3]}" fill="${ok?'#7ee08a':'#ff7b7b'}" fill-opacity=".25" stroke="${ok?'#2e9d45':'#c93a3a'}" stroke-width="3"/></g>`; }
   const pvp = pvPart(), bedPend = !!(RM.pv && ((RM.pv.t==='lv' && RM.pv.id==='bed') || (pvp && RM.sel && RM.sel.t==='item' && RM.sel.id==='bed')));   // an upgrade or colour of the bed that is only previewed
   const bctx = {things: space.things, lv: {...space.lv, bed: shown}, fix: space.fix}, bt = topOf('bed', bctx), ents = [];   // everything standing on the floor, sorted back to front (the bed too, with what lies on it)
   if(bp && !(pl && pl.fx==='bed')){ const f = bedFp(shown, bp.o);
@@ -5933,7 +5961,7 @@ function roomSVG(){
   ents.sort((a,b)=>a.f-b.f || a.d-b.d);   // rugs and other flat things first, then further back first
   s += ents.map(q=>q.svg).join('');
   if(pl && pl.fx) s += fxPreviewSVG(pl);
-  else if(pl){ const c = catOf(pl.k), [fw, fd] = fpOf(c, pl.o);
+  else if(pl && !pl.wl){ const c = catOf(pl.k), [fw, fd] = fpOf(c, pl.o);
     if(canSit(c)) for(const sf of surfaces(pl.i)){   // a small thing can also go on furniture: the units where it could stand are lit
       const lit = new Set();
       for(let dx=sf.tp.c[0]; dx<sf.tp.c[0]+sf.tp.c[2]; dx++) for(let dy=sf.tp.c[1]; dy<sf.tp.c[1]+sf.tp.c[3]; dy++)
@@ -6045,12 +6073,21 @@ function renderDrawerBody(){
   const d = document.getElementById('rmDrawer'); if(!d) return;
   const bal = tokenBalance(), sel = RM.sel;
   const head = (title) => `<div class="rmsh-h"><div class="rmsh-t">${title}</div><div class="rmcoins" id="rmCoins">${tokenHTML(bal,26)||'<span class="tokzero">🪙</span>'}<b>${bal}</b></div></div>`;
-  const stock = space.things.map((t,i)=>[t,i]).filter(([t])=>t.x<0);
+  const stock = space.things.map((t,i)=>[t,i]).filter(([t])=>t.x<0 && !t.wl);
   if(RM.pl && RM.pl.fx){   // moving the bed or the window
     const pl = RM.pl, bed = pl.fx==='bed', ok = !bed || bedFits({x:pl.x, y:pl.y, o:pl.o}, space.lv.bed);
     d.classList.remove('idle'); d.hidden = false;
     d.innerHTML = head(ROOM_ITEMS[pl.fx].n) + `<div class="rmsh-s">${bed ? 'הקישו על הרצפה כדי לבחור מקום' : 'הקישו על הקיר כדי לבחור מקום'}</div>` + (bed ? nudgeHTML() : `<div class="rmnudge" role="group" aria-label="הזזה קטנה"><button type="button" class="btn ghost" data-wnudge="-1" aria-label="הזיזו צעד שמאלה">←</button><button type="button" class="btn ghost" data-wnudge="1" aria-label="הזיזו צעד ימינה">→</button></div>`)
       + `<div class="rmsh-btns"><button type="button" class="btn" data-place="1"${ok?'':' disabled'}>הציבו כאן</button><button type="button" class="btn ghost" data-cancel="1">ביטול</button></div>`;
+    return;
+  }
+  if(RM.pl && RM.pl.wl){   // placing a picture on a wall: tap the wall, or nudge
+    const pl = RM.pl, c = catOf(pl.k), cost = pvCost(), poor = bal<cost, ok = wallFree(c, pl.wl, pl.i), sg = pl.wl.s==='r' ? 1 : -1;
+    const mv = (g,da,dh,l) => `<button type="button" class="btn ghost" data-wmv="${da},${dh}" aria-label="${l}">${g}</button>`;
+    d.classList.remove('idle'); d.hidden = false;
+    d.innerHTML = head(c.n) + `<div class="rmsh-s">הקישו על הקיר כדי לבחור מקום</div><div class="rmnudge" role="group" aria-label="הזזה קטנה">${mv('◀',-sg,0,'שמאלה')}${mv('▲',0,1,'למעלה')}${mv('▼',0,-1,'למטה')}${mv('▶',sg,0,'ימינה')}</div>${ok?'':'<div class="rmsh-s small lost">אין כאן מקום פנוי</div>'}`
+      + (pl.i<0 ? `<div class="rmsh-need${poor?' poor':''}">${needTxt(cost,bal)}</div><div class="rmsh-btns"><button type="button" class="btn" data-place="1"${poor||!ok?' disabled':''}>קנו · ${cost} 🪙</button><button type="button" class="btn ghost" data-cancel="1">ביטול</button></div><div class="rmsh-s small">אי אפשר להחזיר או למכור אחר כך</div>`
+        : `<div class="rmsh-btns"><button type="button" class="btn" data-place="1"${ok?'':' disabled'}>הציבו כאן</button><button type="button" class="btn ghost" data-cancel="1">ביטול</button></div>`);
     return;
   }
   if(RM.pl){   // placing a floor item: tap a cell of the floor to choose where it stands
@@ -6125,6 +6162,11 @@ function onRoomTap(hit, e){
     if(e && (hit==='surf:wl' || hit==='surf:wr' || hit==='item:window')){ const rx = (rmVB(e)[0]-RM.tx)/RM.k, q = winAtFor(space.lv.window, {w:rx<500?'l':'r', u:Math.round(Math.abs(rx-500)/WIN_STEP)*WIN_STEP}); pl.w = q.w; pl.u = q.u; rmRedraw(); return renderDrawer(); }
     return;
   }
+  if(RM.pl && RM.pl.wl){   // choosing a place on a wall for a picture
+    const c = catOf(RM.pl.k); if(!e) return; const v = rmVB(e), rx = (v[0]-RM.tx)/RM.k, ry = (v[1]-RM.ty)/RM.k-RM_DY, a = Math.abs(rx-500), h = 400+a/2-ry;
+    if(h<=0 || h>=WALL_HT) return;   // the floor and the space above the room are not wall
+    RM.pl.wl = wallClamp(c, {s:rx<500?'l':'r', a, h}); rmRedraw(); return renderDrawer();
+  }
   if(RM.pl){   // choosing a cell for a floor item
     const c = e && cellAt(e), it = catOf(RM.pl.k), [ifw, ifd] = fpOf(it, RM.pl.o), on = e && canSit(it) && topCellAt(e, it, RM.pl.i);   // a free cell on a top wins over the floor behind it
     if(on){ const cell = sitCell(on.h, on.dx, on.dy); RM.pl.on = on; RM.pl.x = cell[0]; RM.pl.y = cell[1]; rmRedraw(); return renderDrawer(); }
@@ -6147,7 +6189,9 @@ function onDrawerClick(e){
   if(t.dataset.host){ const h = t.dataset.host, i = h==='bed' ? -1 : space.things.findIndex(q=>q.u===h); RM.sel = h==='bed' ? {t:'item',id:'bed'} : i>=0 ? {t:'thing',i} : null; RM.pv = null; rmRedraw(); return renderDrawer(); }   // from a thing on furniture to the furniture itself
   if(t.dataset.choose){ RM.choose = t.dataset.choose; return renderDrawer(); }
   if(t.dataset.filter){ RM.filter = t.dataset.filter; return renderDrawer(); }
+  if(t.dataset.pick && isWall(catOf(t.dataset.pick))){ const c = catOf(t.dataset.pick); RM.list = null; RM.choose = null; RM.pl = {k:c.id, i:-1, wl:wallDefault(c, -1)}; rmRedraw(); return renderDrawer(); }
   if(t.dataset.pick){ const c = catOf(t.dataset.pick), f = firstFreeCell(c, -1); RM.list = null; RM.choose = null; RM.pl = {k:c.id, i:-1, x:f[0], y:f[1], o:0}; rmRedraw(); return renderDrawer(); }
+  if(t.dataset.unstow && isWall(catOf(space.things[+t.dataset.unstow].k))){ const i = +t.dataset.unstow, c = catOf(space.things[i].k); RM.list = null; RM.choose = null; RM.pl = {k:c.id, i, wl:wallDefault(c, i)}; rmRedraw(); return renderDrawer(); }
   if(t.dataset.unstow){ const i = +t.dataset.unstow, f = firstFreeCell(catOf(space.things[i].k), i, space.things[i].o); RM.list = null; RM.choose = null; RM.pl = {k:space.things[i].k, i, x:f[0], y:f[1], o:space.things[i].o||0}; rmRedraw(); return renderDrawer(); }
   if(t.dataset.fxopen){ RM.sel = {t:'item', id:t.dataset.fxopen}; RM.list = null; RM.pv = null; rmRedraw(); return renderDrawer(); }   // a fixture in the inventory: its own drawer (upgrades, place)
   if(t.dataset.fxmove){ const id = t.dataset.fxmove, f = space.fix[id]; RM.sel = null; RM.pv = null;
@@ -6160,15 +6204,20 @@ function onDrawerClick(e){
   if(t.dataset.nudge && RM.pl && RM.pl.fx==='bed'){ const [a,b] = t.dataset.nudge.split(',').map(Number), pl = RM.pl; if(bedFits({x:pl.x+a, y:pl.y+b, o:pl.o}, space.lv.bed)){ pl.x += a; pl.y += b; } rmRedraw(); return renderDrawer(); }
   if(t.dataset.place && RM.pl && RM.pl.fx){ const pl = RM.pl;
     if(pl.fx==='bed'){ if(!bedFits({x:pl.x, y:pl.y, o:pl.o}, space.lv.bed)) return; space.fix.bed = bedAtFor(space.lv.bed, {x:pl.x, y:pl.y, o:pl.o}); settleSurfaces(); }   // what lay on the bed comes along
-    else space.fix.window = winAtFor(space.lv.window, {w:pl.w, u:pl.u});
+    else { space.fix.window = winAtFor(space.lv.window, {w:pl.w, u:pl.u}); const n0 = stowedCount(); wallSettle(); RM.note = stowNote(stowedCount()-n0); }
     RM.pl = null; saveState(); rmRedraw(); settleFx(pl.fx==='bed' ? '[data-hit="item:bed"]' : '[data-hit="item:window"]', pl.fx!=='bed'); return renderDrawer(); }
+  if(t.dataset.wmv && RM.pl && RM.pl.wl){ const [da,dh] = t.dataset.wmv.split(',').map(Number), c = catOf(RM.pl.k); RM.pl.wl = wallClamp(c, {s:RM.pl.wl.s, a:RM.pl.wl.a+da*WALL_STEP, h:RM.pl.wl.h+dh*WALL_STEP}); rmRedraw(); return renderDrawer(); }
+  if(t.dataset.place && RM.pl && RM.pl.wl){ const pl = RM.pl, c = catOf(pl.k); if(!wallFree(c, pl.wl, pl.i)) return;
+    if(pl.i<0){ if(tokenBalance()<c.p) return; space.spent += c.p; space.things.push({k:pl.k, x:-1, y:-1, u:newUid(), wl:{...pl.wl}}); burstConfetti(10); }
+    else { const th = space.things[pl.i]; th.x = -1; th.y = -1; delete th.on; th.wl = {...pl.wl}; settleSurfaces(); }
+    const at = pl.i<0 ? space.things.length-1 : pl.i; RM.pl = null; saveState(); rmRedraw(); settleFx('[data-hit="thing:'+at+'"]'); return renderDrawer(); }
   if(t.dataset.turn){ const i = +t.dataset.turn, n0 = stowedCount(); if(turnThing(i)){ RM.note = stowNote(stowedCount()-n0); saveState(); } else RM.note = 'אין מקום לסובב כאן'; rmRedraw(); return renderDrawer(); }
   if(t.dataset.fxturn){ const n0 = stowedCount(); if(turnBed()){ RM.note = stowNote(stowedCount()-n0); saveState(); } else RM.note = 'אין מקום לסובב כאן'; rmRedraw(); return renderDrawer(); }
   if(t.dataset.pturn && RM.pl && !RM.pl.fx){ const pl = RM.pl, c = catOf(pl.k), no = nextO(c, pl.o);   // turning while placing: where it can stand turned
     if(pl.on){ pl.o = no; } else { const sp = turnedSpot(c, pl.x, pl.y, pl.o, no, pl.i); if(sp){ pl.x = sp[0]; pl.y = sp[1]; pl.o = no; } else RM.note = 'אין מקום לסובב כאן'; }
     rmRedraw(); return renderDrawer(); }
-  if(t.dataset.move){ const i = +t.dataset.move, th = space.things[i]; RM.sel = null; RM.pl = {k:th.k, i, x:th.x, y:th.y, o:th.o||0}; if(th.on) RM.pl.on = {...th.on}; rmRedraw(); return renderDrawer(); }
-  if(t.dataset.away){ const th = space.things[+t.dataset.away]; th.x = -1; th.y = -1; delete th.on; settleSurfaces(); RM.sel = null; saveState(); rmRedraw(); return renderDrawer(); }
+  if(t.dataset.move){ const i = +t.dataset.move, th = space.things[i]; RM.sel = null; if(th.wl){ RM.pl = {k:th.k, i, wl:{...th.wl}}; rmRedraw(); return renderDrawer(); } RM.pl = {k:th.k, i, x:th.x, y:th.y, o:th.o||0}; if(th.on) RM.pl.on = {...th.on}; rmRedraw(); return renderDrawer(); }
+  if(t.dataset.away){ const th = space.things[+t.dataset.away]; th.x = -1; th.y = -1; delete th.on; delete th.wl; settleSurfaces(); RM.sel = null; saveState(); rmRedraw(); return renderDrawer(); }
   if(t.dataset.nudge && RM.pl){   // one grid unit at a time: the arrows follow the screen (down-right is +x, down-left is +y)
     const [a,b] = t.dataset.nudge.split(',').map(Number), pl = RM.pl, it = catOf(pl.k);
     if(pl.on){ const dx = pl.on.dx+a, dy = pl.on.dy+b; if(surfFree(it, pl.on.h, dx, dy, pl.i)){ const cell = sitCell(pl.on.h, dx, dy); pl.on = {h:pl.on.h, dx, dy}; pl.x = cell[0]; pl.y = cell[1]; } }

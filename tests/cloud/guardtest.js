@@ -57,7 +57,7 @@ ok(await A.evaluate(()=>cloud.held.length)===1,'held again');
 await A.evaluate(()=>cloudHeldAct('heldtake',cloud.held[0].id)); await A.waitForTimeout(700);
 ok(await A.evaluate(()=>activeProfile().progress.space.earned)===0,'"take cloud" applied the cloud copy on purpose');
 // newer format is left alone
-srv.fams[fid][id]=Object.assign({},srv.fams[fid][id],{v:4,u:srv.fams[fid][id].u+10});
+srv.fams[fid][id]=Object.assign({},srv.fams[fid][id],{v:99,u:srv.fams[fid][id].u+10});
 const before=JSON.stringify(srv.fams[fid][id]); const nm=await A.evaluate(()=>activeProfile().name);
 await A.evaluate(()=>{ score+=5; persist(); cloudSync('manual'); }); await A.waitForTimeout(600);
 ok(JSON.stringify(srv.fams[fid][id])===before,'newer-format doc is never written');

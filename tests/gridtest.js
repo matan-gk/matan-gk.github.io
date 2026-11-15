@@ -13,7 +13,7 @@ const unitTap=async(ux,uy,z,ox)=>{const q=await ev(([ux,uy,z,ox])=>{const g=docu
 // the grid and the sizes
 ok(await ev(()=>GU===2&&ROOM_CELLS===20&&UX===25&&UY===12.5),'the room is 20 x 20 units, a unit is half an old cell');
 ok(await ev(()=>{const f=k=>fwOf(catOf(k))+'x'+fdOf(catOf(k));return ['lego','chess','tictac','puzzle','puzzle2','trainset','track','track2','markers'].every(k=>f(k)==='1x1')&&['teddy','pl00','chair','telescope'].every(k=>f(k)===({teddy:'2x2',pl00:'2x2',chair:'4x4',telescope:'4x4'})[k])&&f('desk')==='4x8'&&f('piano')==='8x4';}),'small things are 1x1 units, old one-cell things 2x2, old 2x2 things 4x4, the desk 4x8, the piano 8x4');
-ok(await ev(()=>ROOM_CATALOG.every(c=>Number.isInteger(c.fw)&&Number.isInteger(c.fd)&&c.fw>=1&&c.fd>=1)),'every item has a whole size in units');
+ok(await ev(()=>ROOM_CATALOG.filter(c=>!c.wall).every(c=>Number.isInteger(c.fw)&&Number.isInteger(c.fd)&&c.fw>=1&&c.fd>=1)),'every item has a whole size in units');
 ok(await ev(()=>['lego','chess','teddy','pl00','markers'].every(k=>canSit(catOf(k)))&&['chair','telescope','rug_sq','desk'].every(k=>!canSit(catOf(k)))),'what may stand on furniture: everything up to one old cell (small ones too)');
 // small things are drawn half size, exactly on their footprint corner (r scaled with the footprint)
 ok(await ev(()=>{const c=catOf('lego');return c.r[2]<=60&&c.r[3]<=40;}),'a small thing\'s picture is half the old size');
