@@ -634,3 +634,12 @@ After the reading section made the menu 9 buttons (10 with the room), the layout
 - **Not added.** The wall clock and treasure map (sheet c4) wait for wall mounting. New colour parts have Hebrew names in `PART_NAMES`.
 - **Numbers.** Catalog 113 items (price sum 419), 42 colourable part keys, 23 plants.
 - Tests: `tests/items4test.js` (new); counts updated in catalog, colour, space and back tests; the register's back cord is allowed to trail sideways in the ground test.
+
+## Step 40: pictures on the walls (branch `wall-items`, off `main`; version 2026.11.15c)
+
+- **Two wall items** from sheet c4: the clock (3 🪙) and the treasure map (3 🪙), group "קיר". `tools/walls.py` cuts them out. Both are drawn flat on the wall and sheared with it (no mirroring, so the clock keeps its numbers).
+- **Data.** A thing gets `wl = {s:'l'|'r', a, h}`: the wall, the distance of the picture's centre from the corner along the wall, and its height above the floor (wall pixels, steps of 25). Its `x,y` stay -1 (not on the floor). A wall item with no `wl` is in the inventory.
+- **Rules.** Pictures never overlap each other or the window; when a saved room, or a moved or upgraded window, makes them overlap, the first one stays and the other goes to the inventory (`wallSettle`, and the same check in `spaceClean`). A picture is clamped onto its wall.
+- **Placing.** Buy from the list (filter "קיר") or take one from the inventory: tap the wall, or nudge with the four arrows; green or red frame shows if the place is free. Move / put away work as for other things; no turn button.
+- **Sync format 4.** `things[].wl` is new, so `CLOUD_DOC_V` is 4 (the repo's rules file and its test follow). A device on an older build treats a profile written by this build as "newer format": it is left alone and not overwritten. The Firebase console rules are NOT required to change for this (the console's `minDocVersion()` may stay as it is: the protection comes from the clients).
+- Tests: `tests/walltest.js` (new); counts, grid and ground tests skip wall items; `guardtest` uses a far-future format number.

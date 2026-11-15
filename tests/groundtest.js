@@ -11,7 +11,7 @@ const p=await (await b.newContext({viewport:{width:390,height:844}})).newPage();
 await p.goto(T.URL);
 const rows=await p.evaluate(async()=>{
   const load=s=>new Promise(r=>{const i=new Image();i.onload=()=>r(i);i.src=s;});
-  const items=ROOM_CATALOG.map(c=>({id:c.id,src:c.src,r:c.r,fw:fwOf(c),fd:fdOf(c)}));
+  const items=ROOM_CATALOG.filter(c=>!c.wall).map(c=>({id:c.id,src:c.src,r:c.r,fw:fwOf(c),fd:fdOf(c)}));
   ROOM_CATALOG.forEach(c=>{ if(c.back) items.push({id:c.id+'#back',src:c.back.src,r:c.back.r,fw:fwOf(c),fd:fdOf(c)}); });   // the back pictures stand on the same footprint
   ROOM_ART.bed.forEach((a,i)=>items.push({id:'bed'+(i+1),src:a.src,r:a.r,fw:a.fp[0]*GU,fd:a.fp[1]*GU}));
   const out=[];
