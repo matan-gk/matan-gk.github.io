@@ -643,3 +643,9 @@ After the reading section made the menu 9 buttons (10 with the room), the layout
 - **Placing.** Buy from the list (filter "קיר") or take one from the inventory: tap the wall, or nudge with the four arrows; green or red frame shows if the place is free. Move / put away work as for other things; no turn button.
 - **Sync format 4.** `things[].wl` is new, so `CLOUD_DOC_V` is 4 (the repo's rules file and its test follow). A device on an older build treats a profile written by this build as "newer format": it is left alone and not overwritten. The Firebase console rules are NOT required to change for this (the console's `minDocVersion()` may stay as it is: the protection comes from the clients).
 - Tests: `tests/walltest.js` (new); counts, grid and ground tests skip wall items; `guardtest` uses a far-future format number.
+
+## Step 41: four-chair kids' table and the rocking horse's back (branch `table4-horse-back`, off `wall-items`; version 2026.11.15d)
+
+- **Kids' table.** Replaced by a four-chair picture (`art/ktable-4chairs.png`), the same from every side, so it has no turn button (`NO_TURN`) and no back picture. It now covers 3x3 cells (was 3x2); seats stay recolourable (`kidchair`); its top (2x2 cells, measured by `tools/surfaces.py`) still holds small things.
+- **Rocking horse.** Gets its back picture (`art/rhorse-back.png`), so it turns through four looks.
+- `tools/items5.py` makes both (run from the repo root; idempotent). Tests: `items3test`, `backtest` updated.

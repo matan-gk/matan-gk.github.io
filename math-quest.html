@@ -1417,10 +1417,10 @@ const ROOM_CATALOG = [
   {"id":"beanbag","n":"פוף","p":4,"g":"furniture","fw":4,"fd":4,"src":"assets/2e91bf9a126e.webp","base":"assets/9b58410b931e.webp","r":[-92.0,-118.2,184.0,216.9],"dc":"#ff9ec7","ref":0.9804,"pk":"beanbag","back":{"src":"assets/7f66001c8495.webp","base":"assets/4dfc79a9a079.webp","ref":0.9843,"r":[-92.0,-112.9,184.0,211.6]}},
   {"id":"tent","n":"אוהל קריאה","p":8,"g":"furniture","fw":6,"fd":6,"src":"assets/9e361f0e7068.webp","base":"assets/d4c984a0bf59.webp","r":[-138.0,-146.2,276.0,294.8],"dc":"#f48fd0","ref":0.9784,"pk":"tent","back":{"src":"assets/084f9e8d08f2.webp","base":"assets/0c617cfa047c.webp","ref":0.9824,"r":[-138.0,-147.6,276.0,296.2]}},
   {"id":"hammock","n":"כיסא ערסל","p":6,"g":"furniture","fw":4,"fd":4,"src":"assets/2ced3662f1ab.webp","base":"assets/61834914867a.webp","r":[-92.0,-85.9,184.0,184.4],"dc":"#b9a1e8","ref":0.9725,"pk":"hammock","back":{"src":"assets/96afed95c1d3.webp","base":"assets/e96dd09db063.webp","ref":0.9667,"r":[-92.0,-85.9,184.0,184.4]}},
-  {"id":"ktable","n":"שולחן ילדים עם כיסאות","p":6,"g":"furniture","fw":6,"fd":4,"src":"assets/fc857bca024f.webp","base":"assets/ca30f0f8dec5.webp","r":[-90.0,-55.1,230.0,178.7],"dc":"#6db3f2","ref":0.9569,"pk":"kidchair","top":{"c":[1,0,1,2],"z":45}},
+  {"id":"ktable","n":"שולחן ילדים עם כיסאות","p":6,"g":"furniture","fw":6,"fd":6,"src":"assets/c8f47235608a.webp","base":"assets/463f03d6c189.webp","r":[-138.0,-84.4,276.0,232.9],"dc":"#6db3f2","ref":0.9549,"pk":"kidchair","top":{"c":[0,0,2,2],"z":56}},
   {"id":"nstand","n":"שידת לילה","p":3,"g":"furniture","fw":2,"fd":2,"src":"assets/c2c5274b7bbc.webp","base":"assets/4b15ef558ab8.webp","r":[-42.0,-60.6,84.0,97.6],"dc":"#ffcc5c","ref":0.9804,"pk":"nstand","back":{"src":"assets/d955eed9b872.webp","r":[-42.0,-60.6,84.0,97.6],"top":{"c":[0,0,1,1],"z":62}},"top":{"c":[0,0,1,1],"z":62}},
   {"id":"toyshelf","n":"מדף צעצועים","p":5,"g":"furniture","fw":4,"fd":2,"src":"assets/ef6c7ab09d07.webp","base":"assets/25986e11f19f.webp","r":[-44.0,-83.4,138.0,157.0],"dc":"#9ad0f5","ref":0.9059,"pk":"bins","back":{"src":"assets/0c9b553f0043.webp","r":[-44.0,-71.7,138.0,145.3],"top":{"c":[0,0,2,1],"z":71}},"top":{"c":[0,0,2,1],"z":84}},
-  {"id":"rhorse","n":"סוס נדנדה","p":5,"g":"play","fw":4,"fd":2,"src":"assets/64ca06025432.webp","base":"assets/eee60f54604c.webp","r":[-44.0,-37.9,138.0,111.4],"dc":"#ef8a93","ref":0.9745,"pk":"horse"},
+  {"id":"rhorse","n":"סוס נדנדה","p":5,"g":"play","fw":4,"fd":2,"src":"assets/64ca06025432.webp","base":"assets/eee60f54604c.webp","r":[-44.0,-37.9,138.0,111.4],"dc":"#ef8a93","ref":0.9745,"pk":"horse","back":{"src":"assets/d8a2f461e4b5.webp","base":"assets/596f86ec1d3b.webp","ref":0.9569,"r":[-44.0,-101.1,138.0,174.9]}},
   {"id":"swingset","n":"נדנדות","p":8,"g":"play","fw":6,"fd":4,"src":"assets/4fed44d60c3f.webp","base":"assets/e3aeec4958ab.webp","r":[-90.0,-92.5,230.0,216.0],"dc":"#ffcc5c","ref":0.9255,"pk":"swing","back":{"src":"assets/97d2f579d6a9.webp","base":"assets/bdd8837fef05.webp","ref":0.7804,"r":[-90.0,-92.5,230.0,216.0]}},
   {"id":"shopcounter","n":"דוכן קאפקייקס","p":7,"g":"furniture","fw":6,"fd":2,"src":"assets/22ab0c4ce4be.webp","base":"assets/06bbdcc01cf5.webp","r":[-42.0,-147.4,184.0,246.1],"dc":"#ef8a93","ref":0.9667,"pk":"awning","back":{"src":"assets/614d991b9e56.webp","base":"assets/cea201d1fd2b.webp","ref":0.9706,"r":[-42.0,-146.3,184.0,244.9]}},
   {"id":"cuplamp","n":"מנורת קאפקייק","p":3,"g":"play","fw":2,"fd":2,"src":"assets/241e9d3ad5bd.webp","base":"assets/32f5feca5a87.webp","r":[-32.0,-59.9,64.0,96.9],"ref":0.9588,"dc":"#f48fd0","pk":"cuplamp"},
@@ -1463,7 +1463,7 @@ const oddO = o => (o||0) & 1;
 const fpOf = (c, o) => oddO(o) ? [fdOf(c), fwOf(c)] : [fwOf(c), fdOf(c)];   // the footprint in that orientation
 const footOf = t => fpOf(catOf(t.k), t.o);
 const ROOM_TURNED = {desk_turn:'desk', chair2:'chair', slide2:'slide', soccer2:'soccer'};   // catalog entries that became "the same item, turned": old saves are migrated
-const NO_TURN = /^(pl\d+|rug_\w+|globe|table|blocks|soccer|basketball|books2?|puzzle2?|lego|tictac|chess|markers|heart|star|track2?|trainset|mat)$/;   // the same from every side: no turn button
+const NO_TURN = /^(pl\d+|rug_\w+|globe|table|blocks|soccer|basketball|books2?|puzzle2?|lego|tictac|chess|markers|heart|star|track2?|trainset|mat|ktable)$/;   // the same from every side: no turn button
 const canTurn = c => !!c && !c.wall && !NO_TURN.test(c.id);
 const oStates = c => c.back ? 4 : 2;   // how many looks it has: 0 as drawn, 1 mirrored, and (with back art) 2 the back, 3 the back mirrored; an item without back art has just the first two (turned half way round it looks the same, or we have no picture yet)
 const lookOf = (c, o) => ((o||0) & 2) && c.back ? c.back : c;   // the picture record ({src, base, ref, r}) for that look
@@ -2555,7 +2555,7 @@ function cloudProfileFromDoc(C, helpers){
 // ===== CLOUD (Google sign-in, cloud progress, problem reports) =====
 // Local-first: the game always works from this device's storage. The cloud is a mirror, so no internet / no account / no quota never blocks play.
 // Everything here is off while CLOUD_CONFIG is null. See firebase/SETUP.md for how to create the (free) Firebase project and paste its settings below.
-const APP_VERSION = '2026.11.15c';       // keep equal to VERSION in sw.js (a test checks it)
+const APP_VERSION = '2026.11.15d';       // keep equal to VERSION in sw.js (a test checks it)
 const BUILD_COMMIT = '';                 // the full id of the commit this page was built from: the deploy workflow (.github/workflows/tests.yml) fills it in; empty in a plain checkout
 const REPO_URL = 'https://github.com/matan-gk/matan-gk.github.io';
 const CLOUD_CONFIG = {apiKey:"AIzaSyAlq_TJNGvWPJpUrpbdq_hkAoURydqMzm0", authDomain:"learning-quest-1.firebaseapp.com", projectId:"learning-quest-1", appId:"1:98931179722:web:78fb00084ccba3efb53433"};   // e.g. {apiKey:'...', authDomain:'xxx.firebaseapp.com', projectId:'xxx', appId:'...'}
