@@ -67,6 +67,7 @@ const TESTS = [
   ['leveltest','leveltest.js','space sections: 8 pictures and names, gendered first name, hidden sections, parent area keeps default names, coverage'],
   ['readingbank','readingbank.js','reading bank: every passage valid and playable, passages never pop up on the menu'],
   ['prizetest','prizetest.js','prize pop-up: appears mid-screen, flies to the gift box, never overlaps a party, reduced motion'],
+  ['items3','items3test.js','batch 3 items (kids furniture and play): catalog, back pictures, hosts, recolouring, transparent gaps'],
   ['menulayout','menulayout.js','main menu: even rows at phone, tablet and large-screen widths, with and without the room button'],
   ['rewardtest','rewardtest.js','space collectibles: 14+14 pictures, Hebrew names, workshop and upgrade wording, bonus trophy, extra mascot poses, sweets unchanged'],
   ['storytest','storytest.js','space stories: every question type in both themes, item pools, phrase map, help examples, praise, wrong-answer, bonus and party wording, sweets unchanged'],

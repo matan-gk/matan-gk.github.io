@@ -241,3 +241,9 @@ If it still comes back as a front view, ask for the item "seen from directly beh
 
 ## What I do when the sheets arrive
 Cut and fit with `tools/items2.py` (front) and `tools/backart.py` (back), measure the tops of hosts (kids' table, nightstand, toy shelf, shop counter, marble run base) with `tools/surfaces.py`, add the colourable parts to `tools/parts.py`, set the prices above, update `catalogtest`, `spacetest`, `groundtest`, `colortest` and `backtest`, and add a step to `docs/ENHANCEMENTS.md`. Two sheets per branch keeps them reviewable.
+
+## Sheet 1 results and what to redo
+Front sheet: all 9 usable and in the game (branch `room-items-1`). The kids' table came out with **3** chairs (the prompt said 2); that is fine, it is the picture in the game now.
+Back sheet: used for the bean bag, teepee, hammock chair, nightstand, toy shelf, swing set and counter. Redo these two (send each as its own image, with its FRONT picture from `art/sheet-c1-furniture.jpg` attached, and the opening paragraph of the single-item prompt above):
+- **Rocking horse.** The sheet's back picture is the front again. "Turn the horse 180 degrees about its vertical axis. The horse must now face away from the camera and to the back-left: we see its tail, its rump and the other side of the saddle blanket, and the back of its head with the ears; the face must NOT be visible. The two rocker runners stay on the same two floor corners."
+- **Kids' table with chairs.** "This picture shows a table with THREE chairs (one at the far left behind the table, one in front on the left, one on the right). Turn it 180 degrees about its vertical axis: the same THREE chairs, now the one that was at the far left is nearest on the right, and the two that were in front are now behind the table; we see the chairs' backrests from the other side. The table is the same."
