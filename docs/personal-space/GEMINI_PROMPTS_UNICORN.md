@@ -138,4 +138,4 @@ The attached picture is a piece of furniture in pixel art. Draw the same piece t
 ```
 
 ### What the game does with them
-The second try is in the game (; the first try is kept in ). The game already corrects the turn order for the standing mirror and the bench, whose backs were drawn the other way round (flag `bsw`). If the new backs are drawn the usual way (a true 180 degree turn), tell me and I will clear that flag.
+The second try is in the game (`art/sheet-u1-back.jpg`; the first try is kept in `style-refs/u1-back-first-try-smooth.jpg`). The game already corrects the turn order for the standing mirror and the bench, whose backs were drawn the other way round (flag `bsw`). If the new backs are drawn the usual way (a true 180 degree turn), tell me and I will clear that flag.
