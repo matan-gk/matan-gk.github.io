@@ -688,3 +688,13 @@ Plan step B. Eight glass shelves with their things on them (crystals, bubble tea
 - **Solid wall items.** A new flag `solid` on a wall item: the picture is drawn in the room's own isometric view, sticking out of the wall, and is not sheared; the left wall mirrors it (`wallXf(w, c)`). `c.r` is still the wall rectangle (the back edge, 180 wide, and how far up and down the shelf reaches), so placement, arrows, overlap and the window rules are the wall ones; `c.im` is where the picture goes relative to the anchor (the middle of the back edge at the wall point). The placement preview shows the picture plus the flat green or red rectangle.
 - `tools/shelves.py` cuts the pictures (pure-white background only, the glass is pale), measures the back edge from the slab's left tip and the right end, scales all to one size, and patches the catalog (singles cost 4, stacks 6). No new saved data (wall items use `wl`, format 4).
 Tests: `tests/shelftest.js` (new); `catalogtest` and `walltest` counts updated.
+
+## Step 47: cloud and unicorn set, topiary (branch `room-items-5`, off `wall-decor`; version 2026.11.16c)
+
+Plan step C-unicorn. 15 new items from three sheets: `art/sheet-u1-unicorn.jpg` (nine furniture items), `art/sheet-u1-back.jpg` (five back pictures) and `art/sheet-u2-topiary.jpg` (six plants); prompts in `docs/personal-space/GEMINI_PROMPTS_UNICORN.md`.
+- **Furniture (each has one magenta part, default colour baked, recolourable):** cloud armchair (5, back), cloud ottoman (4), unicorn mirror (5, back), rainbow curtain stand (4), unicorn rocking horse (6, back), heart bench (5, back), plush unicorn throne (6, back), star pouf (3, whole star), cloud lamp (4, base).
+- **Plants** `pl23` to `pl28` (cube, cone, ball, spiral, triple-ball topiary, and a 2x1 flower planter): recolour the pot like the other plants.
+- `tools/items6.py` (idempotent) reuses the cutter, colour baking and fitting of `tools/items4.py`, with a stricter background rule for white things: only pure white that touches the edge, or a large enclosed pure-white gap, is background (the clouds and pearl unicorns are nearly white; the lamp's soft glow is cut away).
+- No new saved data. The max-out price and the colour-part count are updated in the tests (51 parts; 128 floor items and 10 wall items).
+- Not done yet: sitting tops for the bench, ottoman and pouf (`tools/surfaces.py`).
+Tests: `tests/items6test.js` (new); `catalogtest`, `colortest`, `spacetest`, `groundtest` updated.
