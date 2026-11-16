@@ -15,7 +15,7 @@ ok(await ev(I=>I.every(id=>catOf(id).g==='plants'&&!catOf(id).pk),U2),'the six p
 ok(await ev(()=>['cloudarm','unimirror','unihorse','heartbench','unithrone'].every(id=>catOf(id).back&&catOf(id).back.src&&catOf(id).back.base)&&['cloudott','rbcurtain','starpouf','cloudlamp'].every(id=>!catOf(id).back)),'five items have a (colourable) back picture, four do not');
 ok(await ev(()=>catOf('cloudarm').fw===4&&catOf('cloudarm').fd===4&&catOf('unihorse').fw*catOf('unihorse').fd===8&&catOf('cloudott').fw===2),'footprints 2x2, 2x1 and 1x1 cells (in grid units)');
 // place, turn, colour, reload
-await ev(()=>{space.things=[{k:'unithrone',x:2*GU,y:2*GU,u:'t1'},{k:'cloudott',x:6*GU,y:6*GU,u:'t2'},{k:'pl28',x:8*GU,y:2*GU,u:'t3'}];rmRedraw();});
+await ev(()=>{space.things=[{k:'unithrone',x:14,y:14,u:'t1'},{k:'cloudott',x:6*GU,y:6*GU,u:'t2'},{k:'pl28',x:8*GU,y:2*GU,u:'t3'}];rmRedraw();});
 ok(await ev(()=>document.querySelectorAll('#rmSvg [data-hit^="thing:"]').length===3),'they are drawn');
 ok(await ev(()=>canTurn(catOf('unithrone'))&&canTurn(catOf('cloudott'))&&!canTurn(catOf('pl28'))),'the throne turns, the plants do not');
 await ev(()=>{space.things[0].o=1;rmRedraw();saveState();});
