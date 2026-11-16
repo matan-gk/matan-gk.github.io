@@ -733,3 +733,11 @@ The reading section now also draws short, generated questions: one or two fully 
 - Engine: `rdPick` — a passage in progress always continues; a new passage starts half as often as it is drawn (`RD_START`); with every passage read only short questions come. Skills are logged per type (`gShNotInText` etc., area reading, difficulty 2), each with a help entry.
 - Next groups: cause (reworded) + motive; word role, phrase, word meaning.
 Tests: new `readshorttest` (voweled, one right answer, variety); `readingtest`/`readingset`/`readingbank` play passages only (`pools[9]=[gReading]`) and the "everything read" cases now expect short questions.
+
+## Step 52: short reading questions, group B: cause and motive (branch `reading-short-b`, stacked on `reading-short-a`; version 2026.11.16h)
+
+- `gShCause`: two lines (what happened + a clue in other words) and "why"; the right answer is worded differently from the clue, so it takes a small inference (12 scenarios × name and gender).
+- `gShMotive`: an action plus a clue about the situation, and "why did they do it"; the answer is the goal ("כדי ..."; 10 scenarios).
+- The wrong answers are the right answers of the other scenarios in the same bank.
+- Weights: every new passage is preceded by 4 to 8 short questions (random each time, `rdGap`), and so is the start of a session; a passage in progress is never interrupted.
+- Tests: `readshorttest` also checks that the answer is not copied from the text and that the gaps between passages are 4 to 8.
