@@ -25,7 +25,7 @@ def cut_strict(im, box, big, thin=False):
     return Image.fromarray(out[ys.min():ys.max()+1, xs.min():xs.max()+1])
 items4.cut4 = cut_strict
 items4.SHEETS = {
- 'u1': (A+'sheet-u1-unicorn.jpg', ('blobs', 9), A+'sheet-u1-back.jpg', ('blobs', 5)),
+ 'u1': (A+'sheet-u1-unicorn.jpg', ('blobs', 9), A+'sheet-u1-back.jpg', ('rows', 7, [3, 2, 2])),   # the back sheet: armchair, mirror, horse / bench back, bench (a repeat of the front, unused) / throne three-quarter, throne straight (unused)
  'u2': (A+'sheet-u2-topiary.jpg', ('blobs', 6), A+'sheet-u2-topiary.jpg', ('blobs', 6)),
 }
 # id: (sheet, picture no., hebrew, price, group, fw, fd (cells), spot width, default colour, part key, back picture no. or None, flat, big, options)
@@ -34,9 +34,9 @@ items4.S = [
  ('cloudott',  'u1', 1, 'שרפרף ענן',            4, 'furniture', 1, 1, 78,  '#cdb4f5', 'cloudott',  None, 0, -2500, ''),
  ('unimirror', 'u1', 2, 'מראה חד קרן',          5, 'furniture', 1, 1, 70,  '#e6c8ff', 'unimirror', 1, 0, -2500, ''),
  ('rbcurtain', 'u1', 3, 'וילון קשת',            4, 'furniture', 1, 1, 84,  '#f4c25b', 'rbcurtain', None, 0, -2500, ''),
- ('unihorse',  'u1', 4, 'סוס נדנדה חד קרן',     6, 'play',      2, 1, 0,   '#f48fd0', 'unihorse',  2, 0, -1000, ''),
- ('heartbench','u1', 5, 'ספסל לב',              5, 'furniture', 2, 1, 0,   '#b79af0', 'heartbench',3, 0, -2500, ''),
- ('unithrone', 'u1', 6, 'כס בובת חד קרן',       6, 'furniture', 2, 2, 0,   '#cdb4f5', 'unithrone', 4, 0, -2500, ''),
+ ('unihorse',  'u1', 4, 'סוס נדנדה חד קרן',     6, 'play',      2, 1, 0,   '#f48fd0', 'unihorse',  2, 0, -400, ''),
+ ('heartbench','u1', 5, 'ספסל לב',              5, 'furniture', 1, 2, 0,   '#b79af0', 'heartbench',3, 0, -2500, ''),
+ ('unithrone', 'u1', 6, 'כס בובת חד קרן',       6, 'furniture', 2, 2, 0,   '#cdb4f5', 'unithrone', 5, 0, -2500, ''),
  ('starpouf',  'u1', 7, 'פוף כוכב',             3, 'furniture', 1, 1, 74,  '#f6d365', 'starpouf',  None, 0, -2500, ''),
  ('cloudlamp', 'u1', 8, 'מנורת ענן',            4, 'furniture', 1, 1, 62,  '#f4c25b', 'cloudlamp', None, 0, -7, ''),
  ('pl23', 'u2', 0, 'שיח קובייה',   3, 'plants', 1, 1, 70, '#cdb4f5', 'POT', None, 0, 6000, ''),
@@ -44,6 +44,14 @@ items4.S = [
  ('pl25', 'u2', 2, 'שיח כדור',     2, 'plants', 1, 1, 74, '#cdb4f5', 'POT', None, 0, 6000, ''),
  ('pl26', 'u2', 3, 'שיח ספירלה',   3, 'plants', 1, 1, 66, '#cdb4f5', 'POT', None, 0, 6000, ''),
  ('pl27', 'u2', 4, 'שיח שלושה כדורים', 3, 'plants', 1, 1, 60, '#cdb4f5', 'POT', None, 0, 6000, ''),
- ('pl28', 'u2', 5, 'ערוגת פרחים',  3, 'plants', 2, 1, 0,  '#cdb4f5', 'POT', None, 0, 6000, ''),
+ ('pl28', 'u2', 5, 'ערוגת פרחים',  3, 'plants', 2, 2, 0,  '#cdb4f5', 'POT', None, 0, 6000, ''),
 ]
-if __name__ == '__main__': items4.main()
+def main():
+    items4.main()
+    if '--preview' in sys.argv: return
+    p = items4.ROOT + 'math-quest.html'; t = open(p, encoding='utf-8').read()
+    for id_, extra in (('unimirror', '"bsw":1'), ('heartbench', '"bsw":1,"top":{"c":[0,0,1,2],"z":50}'), ('cloudott', '"top":{"c":[0,0,1,1],"z":30}'), ('starpouf', '"top":{"c":[0,0,1,1],"z":20}')):   # tops: the cells that hold things; the height z is measured by `python3 tools/surfaces.py` (run it after this script)   # the back pictures of the standing mirror and the bench are drawn the other way round from their fronts: the back looks swap which one is mirrored (so the turn order is a quarter turn each time and the bench's long side keeps its footprint)
+        k = '{"id":"%s",' % id_; i = t.index(k); j = t.index('\n', i)
+        if extra.split(':')[0] not in t[i:j]: t = t[:i] + k + extra + ',' + t[i+len(k):]
+    open(p, 'w', encoding='utf-8').write(t)
+if __name__ == '__main__': main()

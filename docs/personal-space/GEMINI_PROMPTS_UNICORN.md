@@ -108,3 +108,34 @@ Do not add any text, labels, numbers, cell borders, grid lines, floor shadows or
 
 ## What I do with the pictures
 Cut, fit and bake the colour parts (`tools/items2.py` / `items4.py` pattern: a new `tools/items6.py`), measure the tops (the bench and the ottoman get a sitting top where the art allows), add the back pictures (`tools/backart.py`), wire the catalog (group furniture, plants for U2), part names, tests' counts and the max-out price, docs, version. Branch `room-items-5`.
+
+---
+
+## Back pictures, second try: keep them pixel art like the fronts
+
+**Required only if you want the backs to match the fronts** (the game works with the first-try backs, which are in the game now). **Optional** otherwise.
+
+What went wrong the first time: the back prompt had no picture of the front sheet attached, so Gemini drew the backs as smooth vector cartoons (see `style-refs/u1-back-first-try-smooth.jpg`), while the fronts are pixel art. The fix is to attach the **front sheet itself** (`art/sheet-u1-unicorn.jpg`) so the style is copied from real pixels, and to say in words what "pixel art" means here.
+
+### Sheet prompt (attach `art/sheet-u1-unicorn.jpg`, then `room_template.png`)
+
+```
+The attached sheet shows nine pieces of furniture in a cute pixel-art game style. Draw the BACK VIEW of five of them, in exactly the same pixel-art style as the attached sheet: the same chunky visible pixels, the same 1-2 pixel dark outline, the same limited pastel palette with a few shade steps per colour (no smooth gradients, no vector look, no soft airbrush), the same tiny white sparkle pixels, the same lighting from the top-left, the same camera (isometric 2:1) and the same size as in the attached sheet. Each piece is turned 180 degrees about its vertical axis, so we see it from behind, and nothing else about it changes: same colours, same proportions, same trim. Keep the pure magenta (#FF00FF) parts magenta wherever they are still visible.
+
+Draw ONE image with 3 columns x 2 rows on a plain white background (the sixth cell stays empty), one piece per cell, centered, nothing cut off, no text, no cell borders, no floor or shadow:
+1. The CLOUD ARMCHAIR (row 1 of the attached sheet, first piece) seen from behind: the smooth puffy back and the outer sides of the arms; the magenta seat cushion peeks out only over the top.
+2. The UNICORN STANDING MIRROR (row 1, third piece) seen from behind: a plain pearly panel with a small gold hanging ring and the leaning support strut; no glass, no unicorn sticker.
+3. The UNICORN ROCKING HORSE (row 2, middle piece) seen from behind: the rump, the rainbow tail, the back of the magenta saddle, the runners; the face is hidden.
+4. The HEART BED-BENCH (row 2, right piece) seen from behind: the back of the low backrest with the heart cut-out, and the magenta seat from the other side.
+5. The PLUSH UNICORN THRONE (row 3, left piece) seen from behind: the rainbow mane flowing down the back, the back of the head, ears and horn, a little fluffy tail; no face.
+```
+
+### If a piece still comes out smooth: one at a time
+Attach the front sheet and **only that piece cropped**, and use:
+
+```
+The attached picture is a piece of furniture in pixel art. Draw the same piece turned 180 degrees about its vertical axis, so we see it from behind, in exactly the same pixel-art style: chunky visible pixels, a 1-2 pixel dark outline, flat pastel colours with a few shade steps, no gradients, no vector look, the same size and camera. Keep the pure magenta (#FF00FF) parts magenta. Plain white background, nothing else, no text.
+```
+
+### What the game does with them
+The second try is in the game (`art/sheet-u1-back.jpg`; the first try is kept in `style-refs/u1-back-first-try-smooth.jpg`). The game already corrects the turn order for the standing mirror and the bench, whose backs were drawn the other way round (flag `bsw`). If the new backs are drawn the usual way (a true 180 degree turn), tell me and I will clear that flag.

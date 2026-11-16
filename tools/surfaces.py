@@ -19,7 +19,8 @@ ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..') + '/'
 HTML = ROOT + 'math-quest.html'
 GU = int(re.search(r'const GU = (\d+);', open(HTML, encoding='utf-8').read()).group(1))   # grid units per old cell: catalog fw x fd are in units, the measuring is in cells
 # seed (fraction of the picture width, height) inside each top face; tol = colour tolerance, grad = outline barrier (None: dark pixels only)
-HOSTS = {'table': dict(seed=None, tol=28), 'desk': dict(seed=None, tol=28),
+HOSTS = {'cloudott': dict(mag=1), 'starpouf': dict(mag=1), 'heartbench': dict(mag=1),   # mag: the top is the recolourable (magenta) cushion of the original picture (`base`), when it is the thing's top
+         'table': dict(seed=None, tol=28), 'desk': dict(seed=None, tol=28),
          'toybox1': dict(seed=(.49, .29), tol=22, grad=10), 'toybox2': dict(seed=(.49, .27), tol=22, grad=10), 'toybox3': dict(seed='purple', tol=30),
          'ktable': dict(seed=(.5, .45), tol=22, grad=10), 'nstand': dict(seed=(.5, .22), tol=22, grad=10), 'toyshelf': dict(seed=(.5, .2), tol=22, grad=10)}
 # the same for the back pictures (`back` of the catalog entry): seed inside the lid of each
@@ -37,7 +38,14 @@ def load():
     arts = re.findall(r"\{src:'(assets/[^']+)',mask:'(assets/[^']+)',fp:\[(\d+),(\d+)\],r:\[([-\d.]+),([-\d.]+),([\d.]+),([\d.]+)\]\}", seg)
     return h, cat, arts
 
+def face_mag(c):
+    im = np.array(Image.open(ROOT + c['base']).convert('RGBA')).astype(int); R, G, B, A = [im[..., i] for i in range(4)]; r = c['r']; S = im.shape[1] / r[2]
+    m = nd.binary_opening((R > 200) & (B > 200) & (G < 140) & (A > 128), iterations=1); l, n = nd.label(m); sz = nd.sum(m, l, range(1, n + 1)); m = np.isin(l, [j + 1 for j, q in enumerate(sz) if q > .2 * max(sz)])
+    yy, xx = np.where(m); pts = np.c_[xx, yy] / S + np.array([r[0], r[1]])
+    return pts[ConvexHull(pts).vertices]
+
 def face(c, o):
+    if o.get('mag'): return face_mag(c)
     im = np.array(Image.open(ROOT + c['src']).convert('RGBA')).astype(float); r = c['r']; S = im.shape[1] / r[2]
     al = im[..., 3] > 128; lum = im[..., :3].mean(2)
     if o['seed'] is None:
@@ -74,7 +82,7 @@ def _pip(poly, p):
 def cell_center(c_x, c_y, z, ox): return (50 * (c_x + .5 - c_y - .5) + ox, 25 * (c_x + .5 + c_y + .5) - z)
 
 def host_top(idn, c, cat, back=False):
-    if back: c = dict(c, src=c['back']['src'], r=c['back']['r'])
+    if back: c = dict(c, src=c['back']['src'], r=c['back']['r'], base=c['back'].get('base'))
     hull = face(c, (HOSTS_BACK if back else HOSTS)[idn]); za, zb, _ = lift_est(c, hull); z = round((za + zb) / 2)
     cx, cy, cw, cd = c['top']['c']
     bad = [(i, j) for i in range(cx, cx + cw) for j in range(cy, cy + cd) if not _pip(hull.tolist(), cell_center(i, j, z, 0))]
@@ -131,6 +139,7 @@ def main():
         if m and m.group(2) in new:
             e = json.loads(m.group(1)); e['top']['z'] = new[m.group(2)]
             if m.group(2) in newb and e.get('back'): e['back']['top'] = dict(e['top'], z=newb[m.group(2)])
+            elif e.get('back'): e['back']['top'] = dict(e['top'])   # a host whose back picture hides its top (the heart bench): the same height and cells as the front
             line = '  ' + json.dumps(e, ensure_ascii=False, separators=(',', ':')) + (',' if line.rstrip().endswith(',') else '')
         out.append(line)
     h = '\n'.join(out); h = h.replace(page, want, 1)

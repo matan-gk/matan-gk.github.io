@@ -12,8 +12,12 @@ const U1=['cloudarm','cloudott','unimirror','rbcurtain','unihorse','heartbench',
 ok(await ev(I=>I.every(id=>{const c=catOf(id);return c&&c.n&&c.p>=2&&c.p<=6&&/^assets\//.test(c.src)&&c.r[2]>0&&c.r[3]>0&&c.base&&c.ref>0;}),[...U1,...U2]),'15 new items: name, price 2-6, picture, a colourable original');
 ok(await ev(I=>I.every(id=>catOf(id).pk&&PART_NAMES[catOf(id).pk]),U1),'the nine furniture items have a colour part with a Hebrew name');
 ok(await ev(I=>I.every(id=>catOf(id).g==='plants'&&!catOf(id).pk),U2),'the six plants are in the plants group and recolour the pot');
-ok(await ev(()=>['cloudarm','unimirror','unihorse','heartbench','unithrone'].every(id=>catOf(id).back&&catOf(id).back.src&&catOf(id).back.base)&&['cloudott','rbcurtain','starpouf','cloudlamp'].every(id=>!catOf(id).back)),'five items have a (colourable) back picture, four do not');
+ok(await ev(()=>['cloudarm','unimirror','unihorse','heartbench'].every(id=>catOf(id).back&&catOf(id).back.src&&catOf(id).back.base)&&catOf('unithrone').back&&catOf('unithrone').back.src&&['cloudott','rbcurtain','starpouf','cloudlamp'].every(id=>!catOf(id).back)),'five items have a back picture (the throne back shows so little of its cushion that it is not colourable), four do not');
 ok(await ev(()=>catOf('cloudarm').fw===4&&catOf('cloudarm').fd===4&&catOf('unihorse').fw*catOf('unihorse').fd===8&&catOf('cloudott').fw===2),'footprints 2x2, 2x1 and 1x1 cells (in grid units)');
+ok(await ev(()=>catOf('pl28').fw===4&&catOf('pl28').fd===4&&catOf('heartbench').fw===2&&catOf('heartbench').fd===4),'the flower planter is 2x2 cells and the bench is 1x2 (its long side runs the way its picture does)');
+ok(await ev(()=>PART_NAMES.unihorse==='אוכף'),'the horse\'s colour part is the saddle');
+ok(await ev(()=>['heartbench','cloudott','starpouf'].every(id=>catOf(id).top&&catOf(id).top.z>=20&&catOf(id).top.z<=70)),'the bench, ottoman and pouf hold things on top');
+ok(await ev(()=>{const m=catOf('unimirror'),h=catOf('heartbench');return m.bsw&&h.bsw&&[0,1,2,3].map(o=>oddO(o)^(m.bsw&&((o&2))?1:0)).join('')==='0110'&&!catOf('unihorse').bsw;}),'the mirror and the bench draw their back looks the other way round (turn order: as drawn, mirrored, back mirrored, back)');
 // place, turn, colour, reload
 await ev(()=>{space.things=[{k:'unithrone',x:14,y:14,u:'t1'},{k:'cloudott',x:6*GU,y:6*GU,u:'t2'},{k:'pl28',x:8*GU,y:2*GU,u:'t3'}];rmRedraw();});
 ok(await ev(()=>document.querySelectorAll('#rmSvg [data-hit^="thing:"]').length===3),'they are drawn');
@@ -22,5 +26,7 @@ await ev(()=>{space.things[0].o=1;rmRedraw();saveState();});
 ok(await ev(()=>document.querySelector('#rmSvg [data-hit="thing:0"] image').getAttribute('href')===catOf('unithrone').back.src||true),'a turned throne draws without error');
 await p.reload();await p.waitForTimeout(500);
 ok(await ev(()=>space.things.length===3&&space.things.every(t=>t.x>=0)),'they survive a reload');
+await ev(()=>{space.things=[{k:'heartbench',x:6,y:6,u:'hben'},{k:'pl25',x:6,y:8,u:'ppla',on:{h:'hben',dx:0,dy:2}},{k:'cloudott',x:12,y:6,u:'cott'},{k:'pl23',x:12,y:6,u:'pqla',on:{h:'cott',dx:0,dy:0}}];});
+ok(await ev(()=>{const c=spaceClean({...spaceSnap(),things:space.things.map(t=>({...t}))}).things;return c[1].on&&c[1].on.h==='hben'&&c[3].on&&c[3].on.h==='cott';}),'a plant stays on the bench and on the ottoman when saved and cleaned');
 ok(errs.length===0,'no page errors '+errs.join('|'));
 await b.close();process.exit(f?1:0);})();

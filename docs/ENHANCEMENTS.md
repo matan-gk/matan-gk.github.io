@@ -698,3 +698,19 @@ Plan step C-unicorn. 15 new items from three sheets: `art/sheet-u1-unicorn.jpg` 
 - No new saved data. The max-out price and the colour-part count are updated in the tests (51 parts; 128 floor items and 10 wall items).
 - Not done yet: sitting tops for the bench, ottoman and pouf (`tools/surfaces.py`).
 Tests: `tests/items6test.js` (new); `catalogtest`, `colortest`, `spacetest`, `groundtest` updated.
+
+## Step 48: fixes after the first look at the unicorn set and the shelves (branch `room-items-5`; version 2026.11.16d)
+
+- **Flower planter** is square: 2x2 cells (was 2x1), so its placement outline matches its picture.
+- **Heart bench** is 1x2 cells: its picture's long side runs along the room's y axis, which the 2x1 footprint had the wrong way round.
+- **Turn order of the standing mirror (and the bench):** their back pictures were drawn the other way round from their fronts, so turning went left, right, back-left, back-right. New catalog flag `bsw` swaps which of the two back looks is mirrored (`thingSVG`), so every press is a quarter turn the same way (left, right, back-right, back-left); the footprint rules are unchanged.
+- **Saddle:** the rocking horse's colour part is called "אוכף" (was the blanket).
+- **Wall shelves hang closer:** the back edge is now 175 (a multiple of the wall step 25) and the wall rectangle's height is rounded down to the step, so two shelves hang flush side by side and one above the other (was 180 and exact heights, which left a gap of up to 24 px at every step).
+- **More things hold things on top:** the heart bench, the cloud ottoman and the star pouf (`tools/surfaces.py` measures the recolourable cushion of the original picture, new option `mag`; the bench's back look uses the front's top). Not the armchair and the throne: their seat cushions are off-centre and half hidden by the arms, so the measuring is not reliable.
+- `tools/items6.py` adds the flags and tops after cutting (run `python3 tools/items6.py` and then `python3 tools/surfaces.py`).
+- Gemini prompts for pixel-art backs: `docs/personal-space/GEMINI_PROMPTS_UNICORN.md`, "Back pictures, second try".
+Tests: `items6test`, `shelftest`, `surfacetest` (11 hosts), `backtest` updated.
+
+## Step 49: pixel-art back pictures for the unicorn set (branch `room-items-5`; version 2026.11.16e)
+
+The second Gemini try (front sheet attached) is pixel art like the fronts and replaces the smooth backs for the armchair, mirror, horse, bench and throne (`art/sheet-u1-back.jpg`; the sheet also holds a repeat of the bench front and a straight rear of the throne, unused). `tools/items4.py` cells gain a `('rows', n, [per row])` layout. The throne's back shows its seat cushion too little to recolour, so the throne's back is not colourable. The horse's cutter threshold was lowered so the gap under the runners is cut out.
