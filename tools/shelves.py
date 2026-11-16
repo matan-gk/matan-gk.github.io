@@ -8,7 +8,7 @@ sys.path.insert(0, 'tools')
 from PIL import Image
 import items2, items4
 ROOT = items4.ROOT
-L_WALL = 180.0      # the back edge of every shelf, in wall pixels (the wall is 500 wide); one scale for all, from the single shelves
+L_WALL = 175.0      # the back edge of every shelf, in wall pixels (the wall is 500 wide), a multiple of the wall step (25) so two shelves can sit flush; one scale for all
 DEPTH = 0.075       # the slab's depth along the picture, as a share of its width (measured on the sheets)
 S = [  # id, sheet file, picture no., hebrew, price
  ('shelf_crystal', 'sheet-shelves.jpg', 0, 'מדף קריסטלים', 4), ('shelf_tea', 'sheet-shelves.jpg', 1, 'מדף משקאות בועות', 4),
@@ -50,8 +50,8 @@ def main():
         yback = ay0 + 0.5*(xs - ax0); sel = (xs >= ax0) & (xs <= ax1)
         up = float((yback[sel] - top[sel]).max()); down = float((bot[sel] - yback[sel]).max()); mid, ymid = float(mid), float(ymid)
         sz = (round(Wp*sc*items2.PX*2/1.5), round(Hp*sc*items2.PX*2/1.5)); src = items2.save(im.resize(sz, Image.LANCZOS))
-        Hw = (up+down)*sc; cy = (down-up)/2*sc   # the wall rectangle is centred on the anchor like every wall item's (placement and overlap code assume it); the picture is moved to match
-        e = {'id': id_, 'n': he, 'p': price, 'g': 'wall', 'wall': 1, 'solid': 1, 'src': src, 'r': [round(-L_WALL/2, 1), round(-Hw/2, 1), L_WALL, round(Hw, 1)],
+        Hf = max(25.0, float(int((up+down)*sc/25)*25)); cy = (down-up)/2*sc   # the wall rectangle is centred on the anchor like every wall item's (placement and overlap code assume it) and rounded down to the wall step so shelves can be hung flush above and beside each other; the picture is moved to match
+        e = {'id': id_, 'n': he, 'p': price, 'g': 'wall', 'wall': 1, 'solid': 1, 'src': src, 'r': [round(-L_WALL/2, 1), round(-Hf/2, 1), L_WALL, Hf],
              'im': [round(-mid*sc, 1), round(-ymid*sc - cy, 1), round(Wp*sc, 1), round(Hp*sc, 1)]}
         out.append(e); print(id_, src, e['r'], e['im'])
     if '--preview' in sys.argv: return

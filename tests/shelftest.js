@@ -9,7 +9,7 @@ await p.goto(T.URL);await ev(()=>localStorage.clear());await p.reload();
 await p.fill('#pfName','X');await p.click('.gopt:has(input[value=f])');await p.click('[data-pact=save]');await p.waitForTimeout(500);
 await ev(()=>{space.earned=1000;space.spent=0;space.unlocked=true;golden=['🍪'];renderLevels();openSpace();});
 const ids=['shelf_crystal','shelf_tea','shelf_ice','shelf_plush','stack_tea','stack_ice','stack_crystal','stack_sweets'];
-ok(await ev(i=>i.every(id=>{const c=catOf(id);return c&&c.wall&&c.solid&&c.g==='wall'&&c.r[2]===180&&c.im&&c.im[2]>c.r[2]&&/^assets\//.test(c.src);}),ids),'eight solid wall items, all with a 180 wide back edge');
+ok(await ev(i=>i.every(id=>{const c=catOf(id);return c&&c.wall&&c.solid&&c.g==='wall'&&c.r[2]===175&&c.im&&c.im[2]>c.r[2]&&/^assets\//.test(c.src);}),ids),'eight solid wall items, all with a 175 wide back edge');
 ok(await ev(i=>new Set(i.map(id=>catOf(id).src)).size===8,ids),'eight different pictures');
 ok(await ev(()=>{const c=catOf('shelf_tea'),r=wallXf({s:'r',a:300,h:300},c),l=wallXf({s:'l',a:300,h:300},c),fl=wallXf({s:'r',a:300,h:300},catOf('wallclock'));return !/matrix/.test(r)&&/scale\(-1 1\)/.test(l)&&!/scale/.test(r)&&/matrix/.test(fl);}),'a shelf is not sheared and is mirrored on the left wall; a flat picture is still sheared');
 // drawn through the room
@@ -20,6 +20,9 @@ ok(r.every(Boolean),'they keep their wall places when saved and cleaned');
 // overlap rules use the back edge rectangle
 await ev(()=>{space.things=[{k:'shelf_crystal',x:-1,y:-1,u:'s1',wl:{s:'r',a:125,h:500}}];});
 ok(await ev(()=>!wallFree(catOf('shelf_tea'),{s:'r',a:125,h:500},-1)&&wallFree(catOf('shelf_tea'),{s:'l',a:125,h:500},-1)),'two shelves cannot overlap on a wall, but the other wall is free');
+// close together: the back edge is 175 (a multiple of the wall step), so two shelves hang flush
+await ev(()=>{space.things=[{k:'shelf_tea',x:-1,y:-1,u:'s1',wl:{s:'l',a:100,h:300}}];});
+ok(await ev(()=>wallFree(catOf('shelf_ice'),{s:'l',a:275,h:300},-1)&&!wallFree(catOf('shelf_ice'),{s:'l',a:250,h:300},-1)&&wallFree(catOf('shelf_ice'),{s:'l',a:100,h:375},-1)),'two shelves hang flush side by side (175 apart) and one above the other (75 up)');
 // placing from the drawer
 await ev(()=>{space.things=[];RM.list='cat';RM.filter='wall';renderDrawer();});
 await p.click('.catcard[data-pick=shelf_ice]');
