@@ -14,7 +14,7 @@ const U=await ev(()=>GU);   // grid units per old cell: the cases below are writ
 const tapCell=async(x,y,w=U,d=U)=>{const pt=await ev(([x,y,w,d])=>{const g=document.getElementById('rmR'),m=g.getScreenCTM(),ux=(x-((w/GU)>>1))*GU+(w>>1)+.5,uy=(y-((d/GU)>>1))*GU+(d>>1)+.5,sx=500+(ux-uy)*UX,sy=400+(ux+uy)*UY;return [m.a*sx+m.c*sy+m.e,m.b*sx+m.d*sy+m.f];},[x,y,w,d]);await p.mouse.click(pt[0],pt[1]);};
 
 // catalog data
-ok(await ev(()=>ROOM_CATALOG.length===115&&ROOM_CATALOG.every(c=>c.n&&(c.id.startsWith('pl')?c.p<=3:c.p<=8)&&c.p>=1&&/^assets\//.test(c.src)&&(c.base?(c.src!==c.base&&c.ref>0):!c.dc)&&c.r&&c.r[2]>0&&c.r[3]>0&&true)&&new Set(ROOM_CATALOG.map(c=>c.id)).size===115),'catalog: 115 items; plants cost 1-3; colorable ones keep their magenta original');
+ok(await ev(()=>ROOM_CATALOG.length===123&&ROOM_CATALOG.every(c=>c.n&&(c.id.startsWith('pl')?c.p<=3:c.p<=8)&&c.p>=1&&/^assets\//.test(c.src)&&(c.base?(c.src!==c.base&&c.ref>0):!c.dc)&&c.r&&c.r[2]>0&&c.r[3]>0&&true)&&new Set(ROOM_CATALOG.map(c=>c.id)).size===123),'catalog: 123 items; plants cost 1-3; colorable ones keep their magenta original');
 ok(await ev(()=>/^pl/.test(ROOM_CATALOG[0].id)&&Object.keys(ROOM_GROUPS).includes('plants')),'plants are the first group');
 // default pot is brown, original magenta
 const px=await ev(async()=>{const get=src=>new Promise(r=>{const i=new Image();i.onload=()=>{const c=document.createElement('canvas');c.width=i.naturalWidth;c.height=i.naturalHeight;const x=c.getContext('2d');x.drawImage(i,0,0);r(x.getImageData(0,0,c.width,c.height).data);};i.src=src;});
@@ -34,7 +34,7 @@ ok(rc.blue>0.9&&rc.leaf>0.97,'recolor to blue turns the pot blue and leaves the 
 // drawer: idle buttons; catalog opens with filter chips and cards
 ok(await ev(()=>/פריטים ומלאי/.test(document.querySelector('#rmDrawer [data-list="cat"]').textContent)&&!document.querySelector('#rmDrawer [data-list="stock"]')&&!/במלאי/.test(document.getElementById('rmDrawer').textContent)),'idle drawer: one list button for shop and inventory (no separate stock button, no stock count while nothing is put away)');
 await click('[data-list="cat"]');
-ok(await ev(()=>document.querySelectorAll('#rmDrawer .catcard').length===115&&document.querySelectorAll('#rmDrawer .catchips .chip').length>=4&&!!document.querySelector('#rmDrawer .catchips [data-filter=own]')),'list: 88 cards and filter chips incl. "mine"');
+ok(await ev(()=>document.querySelectorAll('#rmDrawer .catcard').length===123&&document.querySelectorAll('#rmDrawer .catchips .chip').length>=4&&!!document.querySelector('#rmDrawer .catchips [data-filter=own]')),'list: 123 cards and filter chips incl. "mine"');
 ok(await ev(()=>{const c=document.querySelector('#rmDrawer .catcard');return /1 🪙/.test(c.textContent)&&c.querySelector('img').getAttribute('src')===ROOM_CATALOG[0].src;}),'a card shows the plant picture, its name and its price');
 await click('[data-filter="plants"]');
 ok(await ev(()=>document.querySelectorAll('#rmDrawer .catcard').length===23&&document.querySelector('.chip.on').dataset.filter==='plants'),'the plants filter works');
@@ -79,7 +79,7 @@ await ev(()=>onRoomTap('thing:0'));await click('[data-away]');
 ok(await ev(()=>space.things[0].x===-1&&space.things.length===3&&!document.querySelector('[data-hit="thing:0"]')&&space.spent===2),'put away: leaves the room, stays owned, nothing refunded');
 ok(await ev(()=>!document.querySelector('#rmDrawer [data-list="stock"]')&&/1 במלאי/.test(document.querySelector('#rmDrawer [data-list="cat"]').textContent)),'the single list button counts what is put away');
 await click('[data-list="cat"]');
-ok(await ev(()=>{const own=document.querySelectorAll('#rmDrawer .catcard.owned');const st=document.querySelectorAll('#rmDrawer .catcard[data-choose]');return own.length>=1&&st.length===1&&/🎒 1/.test(st[0].textContent)&&document.querySelectorAll('#rmDrawer .catcard').length===115;}),'the list shows everything; what you own is marked, and a card with a copy put away is marked 🎒');
+ok(await ev(()=>{const own=document.querySelectorAll('#rmDrawer .catcard.owned');const st=document.querySelectorAll('#rmDrawer .catcard[data-choose]');return own.length>=1&&st.length===1&&/🎒 1/.test(st[0].textContent)&&document.querySelectorAll('#rmDrawer .catcard').length===123;}),'the list shows everything; what you own is marked, and a card with a copy put away is marked 🎒');
 await click('[data-filter=own]');
 ok(await ev(()=>{const n=document.querySelectorAll('#rmDrawer .catcard').length;return n>=1&&n<10&&[...document.querySelectorAll('#rmDrawer .catcard')].every(c=>c.classList.contains('owned'));}),'"mine" filter lists only what you own');
 await click('[data-choose]');
@@ -96,7 +96,7 @@ const cl=await ev(()=>cleanProgress({space:{earned:50,spent:0,trued:true,unlocke
 ok(cl.length===5&&cl[0].x===5*U&&cl[1].x===-1&&cl[2].x===-1&&cl[3].x===-1&&cl[4].x===-1&&!cl.some(t=>t.k==='nope'),'bad things are dropped; double, blocked and off-floor cells go to the stock: '+JSON.stringify(cl));
 const mc=await ev(()=>roomMaxCost());
 const pcs=await ev(()=>ROOM_PATTERNS.reduce((a,q)=>a+q.p,0));   // every pattern once: bought once, usable everywhere
-ok(mc===18+14+17+425+42*19+pcs,'max-out cost = 86 (bed, window, 3 surfaces sharing one set of colours (17)) + 113 floor items (425) + 42 colorable parts x 19+ the patterns and the bed blanket pattern: '+mc);
+ok(mc===18+14+17+465+42*19+pcs,'max-out cost = 86 (bed, window, 3 surfaces sharing one set of colours (17)) + 113 floor items and 10 wall items (465) + 42 colorable parts x 19+ the patterns and the bed blanket pattern: '+mc);
 // bed footprint: 3 x 4 cells, and the code tracks it that way
 ok(await ev(()=>{const cnt=l=>{let n=0,all=true;for(let y=0;y<ROOM_CELLS;y++)for(let x=0;x<ROOM_CELLS;x++)if(roomBlocked(x,y,l)){n++;if(!(x<bedFp(l)[0]&&y<bedFp(l)[1]))all=false;}return [n,all];};return JSON.stringify([1,2,3,4,5].map(cnt))===JSON.stringify([[12,true],[12,true],[12,true],[9,true],[12,true]].map(([n,a])=>[n*GU*GU,a]));}),'the bed blocks its own footprint at the back corner: 3 x 4 = 12 cells for levels 1-3 and 5, 3 x 3 = 9 for level 4');
 // switching to a smaller bed frees cells; switching back stows what is in the way

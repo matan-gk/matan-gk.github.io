@@ -681,3 +681,10 @@ Plan step A. Three layers drawn by `atmoShell`, `atmoLight` and `atmoOverlay` in
 - **Overlay**: a soft vignette and fixed sparkles. Everything standing in the room sits in one group with a single colour-grade filter.
 - On by default; the sparkle button beside the zoom buttons switches it off, per device (`localStorage cq_atmo`, nothing synced, no format change).
 Tests: `tests/atmotest.js` (new).
+
+## Step 46: wall shelves (branch `wall-decor`, off `room-atmosphere`; version 2026.11.16b)
+
+Plan step B. Eight glass shelves with their things on them (crystals, bubble tea, ice cream, plushies; and four stacks of two or three tiers), from the sheets `art/sheet-shelves.jpg` and `art/sheet-shelf-stacks.jpg` (prompts: `docs/personal-space/GEMINI_PROMPTS_SHELVES.md`).
+- **Solid wall items.** A new flag `solid` on a wall item: the picture is drawn in the room's own isometric view, sticking out of the wall, and is not sheared; the left wall mirrors it (`wallXf(w, c)`). `c.r` is still the wall rectangle (the back edge, 180 wide, and how far up and down the shelf reaches), so placement, arrows, overlap and the window rules are the wall ones; `c.im` is where the picture goes relative to the anchor (the middle of the back edge at the wall point). The placement preview shows the picture plus the flat green or red rectangle.
+- `tools/shelves.py` cuts the pictures (pure-white background only, the glass is pale), measures the back edge from the slab's left tip and the right end, scales all to one size, and patches the catalog (singles cost 4, stacks 6). No new saved data (wall items use `wl`, format 4).
+Tests: `tests/shelftest.js` (new); `catalogtest` and `walltest` counts updated.

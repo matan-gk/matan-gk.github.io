@@ -73,6 +73,7 @@ const TESTS = [
   ['unkitems','unkitemstest.js','unknown items are kept, not deleted (format 5)'],
   ['wall','walltest.js','pictures on the walls: place, move, put away, overlaps, sync'],
   ['atmo','atmotest.js','room light and trim: layers, no touch capture, colours, toggle'],
+  ['shelf','shelftest.js','wall shelves: solid, mirrored, placement'],
   ['items4','items4test.js','batch 4 items (lights, music, learning, pets, plushies): catalog, backs, part names'],
   ['menulayout','menulayout.js','main menu: even rows at phone, tablet and large-screen widths, with and without the room button'],
   ['rewardtest','rewardtest.js','space collectibles: 14+14 pictures, Hebrew names, workshop and upgrade wording, bonus trophy, extra mascot poses, sweets unchanged'],
