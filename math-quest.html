@@ -1456,7 +1456,15 @@ const ROOM_CATALOG = [
   {"id":"pl22","n":"שיח תותים","p":2,"g":"plants","fw":2,"fd":2,"src":"assets/9bf4ff13be03.webp","base":"assets/9b57effba049.webp","r":[-50.0,-77.8,100.0,114.8],"ref":0.9529},
   {"id":"rug_star","n":"שטיח כוכב","p":4,"g":"rugs","fw":4,"fd":4,"src":"assets/b4fd69b1c5bf.webp","base":"assets/6314eb06b74d.webp","r":[-91.3,11.3,184.0,88.9],"flat":1,"ref":0.9804,"dc":"#f9a8d4","pk":"rug"},
   {"id":"wallclock","n":"שעון קיר","p":3,"g":"wall","wall":1,"src":"assets/2afe9b3247a1.webp","r":[-60.0,-64.5,120.0,129.0]},
-  {"id":"treasuremap","n":"מפת אוצר","p":3,"g":"wall","wall":1,"src":"assets/83282eb581d8.webp","r":[-75.0,-63.5,150.0,127.0]}
+  {"id":"treasuremap","n":"מפת אוצר","p":3,"g":"wall","wall":1,"src":"assets/83282eb581d8.webp","r":[-75.0,-63.5,150.0,127.0]},
+  {"id":"shelf_crystal","n":"מדף קריסטלים","p":4,"g":"wall","wall":1,"solid":1,"src":"assets/e8de2205e0e1.webp","r":[-90.0,-55.0,180.0,110.0],"im":[-104.6,-65.5,195.2,150.1]},
+  {"id":"shelf_tea","n":"מדף משקאות בועות","p":4,"g":"wall","wall":1,"solid":1,"src":"assets/5f8780decb6b.webp","r":[-90.0,-43.2,180.0,86.3],"im":[-104.3,-78.6,194.6,151.2]},
+  {"id":"shelf_ice","n":"מדף גלידות","p":4,"g":"wall","wall":1,"solid":1,"src":"assets/c7a935177fc9.webp","r":[-90.0,-48.4,180.0,96.8],"im":[-104.6,-76.5,195.2,154.5]},
+  {"id":"shelf_plush","n":"מדף בובות","p":4,"g":"wall","wall":1,"solid":1,"src":"assets/3e5edf4f6131.webp","r":[-90.0,-43.2,180.0,86.3],"im":[-104.6,-76.2,195.2,149.0]},
+  {"id":"stack_tea","n":"מגדל משקאות בועות","p":6,"g":"wall","wall":1,"solid":1,"src":"assets/4bc3a7cc82b7.webp","r":[-90.0,-110.4,180.0,220.8],"im":[-104.6,-143.5,195.2,282.6]},
+  {"id":"stack_ice","n":"מגדל גלידות","p":6,"g":"wall","wall":1,"solid":1,"src":"assets/642adf9edad9.webp","r":[-90.0,-114.2,180.0,228.5],"im":[-104.6,-141.3,195.2,283.7]},
+  {"id":"stack_crystal","n":"מגדל קריסטלים וכוכבים","p":6,"g":"wall","wall":1,"solid":1,"src":"assets/4c13efeb83dc.webp","r":[-90.0,-88.1,180.0,176.2],"im":[-104.6,-98.6,195.2,216.6]},
+  {"id":"stack_sweets","n":"מגדל ממתקים","p":6,"g":"wall","wall":1,"solid":1,"src":"assets/1dc5500f0582.webp","r":[-90.0,-102.3,180.0,204.5],"im":[-104.3,-118.7,194.6,245.2]}
 ];
 // every entry: g = group, fw x fd = floor cells it covers (x by y, default 1x1), dc = the color painted over its magenta parts by default (only items with magenta parts have `base` and `ref`)
 const ROOM_GROUPS = {plants:'צמחים', furniture:'רהיטים', rugs:'שטיחים', play:'צעצועים וקישוטים', wall:'קיר'};
@@ -2568,7 +2576,7 @@ function cloudProfileFromDoc(C, helpers){
 // ===== CLOUD (Google sign-in, cloud progress, problem reports) =====
 // Local-first: the game always works from this device's storage. The cloud is a mirror, so no internet / no account / no quota never blocks play.
 // Everything here is off while CLOUD_CONFIG is null. See firebase/SETUP.md for how to create the (free) Firebase project and paste its settings below.
-const APP_VERSION = '2026.11.16a';       // keep equal to VERSION in sw.js (a test checks it)
+const APP_VERSION = '2026.11.16b';       // keep equal to VERSION in sw.js (a test checks it)
 const BUILD_COMMIT = '';                 // the full id of the commit this page was built from: the deploy workflow (.github/workflows/tests.yml) fills it in; empty in a plain checkout
 const REPO_URL = 'https://github.com/matan-gk/matan-gk.github.io';
 const CLOUD_CONFIG = {apiKey:"AIzaSyAlq_TJNGvWPJpUrpbdq_hkAoURydqMzm0", authDomain:"learning-quest-1.firebaseapp.com", projectId:"learning-quest-1", appId:"1:98931179722:web:78fb00084ccba3efb53433"};   // e.g. {apiKey:'...', authDomain:'xxx.firebaseapp.com', projectId:'xxx', appId:'...'}
@@ -5955,8 +5963,8 @@ function fxPreviewSVG(pl){
   const l = space.lv.window, a = ROOM_ART.window[l-1], q = winAtFor(l, pl);
   return `<g class="rmghost" opacity=".62" transform="matrix(${q.w==='l'?-1:1} .5 0 1 500 400)">${windowSVG(l, q.u)}<rect class="rmtile pend" x="${(q.u-a.ax).toFixed(1)}" y="${(-WIN_SILL-a.ay).toFixed(1)}" width="${a.w}" height="${a.h}" fill="#7ee08a" fill-opacity=".25" stroke="#2e9d45" stroke-width="3"/></g>`;
 }
-const wallXf = w => `translate(${500+(w.s==='r'?1:-1)*w.a} ${400+w.a/2-w.h}) matrix(1 ${w.s==='r'?.5:-.5} 0 1 0 0)`;   // the wall's own plane: a picture drawn flat is sheared with the wall (no mirroring, so a clock keeps its numbers)
-const wallImgSVG = c => `<image href="${c.src}" x="${c.r[0]}" y="${c.r[1]}" width="${c.r[2]}" height="${c.r[3]}"/>`;
+const wallXf = (w, c) => c && c.solid ? `translate(${500+(w.s==='r'?1:-1)*w.a} ${400+w.a/2-w.h})${w.s==='l'?' scale(-1 1)':''}` : `translate(${500+(w.s==='r'?1:-1)*w.a} ${400+w.a/2-w.h}) matrix(1 ${w.s==='r'?.5:-.5} 0 1 0 0)`;   // a solid wall item (a shelf) is drawn in the room's own view, sticking out of the wall, and mirrored for the left wall; a flat one is sheared with the wall;   // the wall's own plane: a picture drawn flat is sheared with the wall (no mirroring, so a clock keeps its numbers)
+const wallImgSVG = c => { const m = c.im || c.r; return `<image href="${c.src}" x="${m[0]}" y="${m[1]}" width="${m[2]}" height="${m[3]}"/>`; };
 // ===== ATMOSPHERE (the room's light and trim: drawn over the walls and floor, never takes a touch; on by default, switched off per device with the sparkle button) =====
 const atmoOn = () => { try{ return localStorage.getItem('cq_atmo')!=='0'; }catch(e){ return true; } };
 const hexRGB = h => [1,3,5].map(i=>parseInt(h.slice(i,i+2),16));
@@ -6015,9 +6023,9 @@ function roomSVG(){
   const pl = RM.pl, shown = effLv('bed'), wl = effLv('window'), wp = winAtFor(wl, space.fix.window), bp = bedPos(shown);
   if(wp && !(pl && pl.fx==='window')) s += `<g data-hit="item:window" class="rmh${sel('item','window')}" transform="matrix(${wp.w==='l'?-1:1} .5 0 1 500 400)">${windowSVG(wl, wp.u)}</g>`;
   space.things.forEach((t,i)=>{ if(!t.wl || (pl && pl.i===i)) return; const c = catOf(t.k);
-    s += `<g data-hit="thing:${i}" class="rmh${RM.sel && RM.sel.t==='thing' && RM.sel.i===i ? ' sel' : ''}" transform="${wallXf(t.wl)}">${wallImgSVG(c)}</g>`; });
+    s += `<g data-hit="thing:${i}" class="rmh${RM.sel && RM.sel.t==='thing' && RM.sel.i===i ? ' sel' : ''}" transform="${wallXf(t.wl, c)}">${wallImgSVG(c)}</g>`; });
   if(pl && pl.wl){ const c = catOf(pl.k), ok = wallFree(c, pl.wl, pl.i);
-    s += `<g class="rmghost" opacity=".72" transform="${wallXf(pl.wl)}">${wallImgSVG(c)}<rect class="rmtile pend" x="${c.r[0]}" y="${c.r[1]}" width="${c.r[2]}" height="${c.r[3]}" fill="${ok?'#7ee08a':'#ff7b7b'}" fill-opacity=".25" stroke="${ok?'#2e9d45':'#c93a3a'}" stroke-width="3"/></g>`; }
+    s += `<g class="rmghost" opacity=".72" transform="${wallXf(pl.wl, c)}">${wallImgSVG(c)}</g><g class="rmghost" transform="${wallXf(pl.wl)}"><rect class="rmtile pend" x="${c.r[0]}" y="${c.r[1]}" width="${c.r[2]}" height="${c.r[3]}" fill="${ok?'#7ee08a':'#ff7b7b'}" fill-opacity=".25" stroke="${ok?'#2e9d45':'#c93a3a'}" stroke-width="3"/></g>`; }
   if(atmoOn()) s += atmoLight(wp, wl);
   const pvp = pvPart(), bedPend = !!(RM.pv && ((RM.pv.t==='lv' && RM.pv.id==='bed') || (pvp && RM.sel && RM.sel.t==='item' && RM.sel.id==='bed')));   // an upgrade or colour of the bed that is only previewed
   const bctx = {things: space.things, lv: {...space.lv, bed: shown}, fix: space.fix}, bt = topOf('bed', bctx), ents = [];   // everything standing on the floor, sorted back to front (the bed too, with what lies on it)

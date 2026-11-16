@@ -4,6 +4,9 @@ Why a new kind of picture: the clock and the map are drawn flat and sheared onto
 
 Companion to `GEMINI_PROMPTS.md` and `GEMINI_PROMPTS_BATCH3.md` (same camera and style; repeated inside the prompt so it can be pasted as it is).
 
+## Lesson from the first try (read this first)
+Gemini kept drawing a slab of wall behind each shelf, however firmly the prompt said not to, **because the template showed a grey wall plane**. The edited `shelf_template.png` (now in this folder) has **no wall**, only the red slab and the green "up" lines, and with it Gemini drew clean shelves (sheets `art/sheet-shelves.jpg` and `art/sheet-shelf-stacks.jpg`). Keep the wall out of any template; a picture-guide wins over the words of a prompt.
+
 ## What to send
 **Required**
 - Sheet S1 (4 shelves, 2x2): attach `shelf_template.png` (this folder) and the vision image (`fully_upgraded_room_example.jpg`) as a style reference, then paste the S1 prompt.
