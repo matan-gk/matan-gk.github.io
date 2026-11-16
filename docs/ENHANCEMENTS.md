@@ -714,3 +714,12 @@ Tests: `items6test`, `shelftest`, `surfacetest` (11 hosts), `backtest` updated.
 ## Step 49: pixel-art back pictures for the unicorn set (branch `room-items-5`; version 2026.11.16e)
 
 The second Gemini try (front sheet attached) is pixel art like the fronts and replaces the smooth backs for the armchair, mirror, horse, bench and throne (`art/sheet-u1-back.jpg`; the sheet also holds a repeat of the bench front and a straight rear of the throne, unused). `tools/items4.py` cells gain a `('rows', n, [per row])` layout. The throne's back shows its seat cushion too little to recolour, so the throne's back is not colourable. The horse's cutter threshold was lowered so the gap under the runners is cut out.
+
+## Step 50: exercises from the school sample worksheet (branch `exercises-shlav1`; version 2026.11.16f)
+
+Reviewed the Shlav 1 sample (2024) against the existing types. Already covered: missing number in an equation (`gFillNumber`), sharing problems (`gSharing`, `gGroups`), and all eight reading question kinds. Added what was missing:
+- `gDigitSymbol` (symbols, difficulty 3): a symbol is one digit inside a two-digit number (`🦄3 + 🦄5 = 88`, `🦄4 − 3 = 41`, `2🦄 + 3🦄 = 58`).
+- `gEvenShare` (stories, 2): which number of children can share N items with nothing left over (exactly one of four options divides).
+- `gDaysMore` (stories, 2): each day sells a fixed number more than the day before; total over three or four days.
+- Reading passage `sun` (12 lines, 8 questions in the standard order), an original text in the same style as the sample's: why it looks small, meaning of "למעשה", purpose of the boiling-water comparison.
+Each type has SKILL_META, SKILL_DIFFICULTY and a HELP entry with a worked example. Test: `shlav1test`; the reading bank test covers the passage. No saved-data change.

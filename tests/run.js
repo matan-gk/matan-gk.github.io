@@ -26,6 +26,7 @@ const TESTS = [
   ['readingtest','readingtest.js','reading section: passage with numbered lines, eight question types, resume, never repeated, not in the mix'],
   ['sections','sections.js','each type in exactly one section; areas match sections; bonus pools'],
   ['shoptest','shoptest.js','shop stories: wording, answers, variety, price questions'],
+  ['shlav1test','shlav1test.js','exercises from the sample worksheet: digit symbol, even share, days more'],
   ['shapetest','shapetest.js','shapes garden types: geometry, answers, help examples'],
   ['grptest','grptest.js','shape groups never split across lines; choices fit the screen'],
   ['splittest','splittest.js','the repository as site: small page, picture files listed and used, every picture, icon and font loads'],

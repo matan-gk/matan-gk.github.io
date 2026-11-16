@@ -2007,6 +2007,21 @@ gSingleSymbolMul:{
   think:['סופרים כמה פעמים מופיע הסמל.','חיבור של אותו מספר כמה פעמים הוא כפל, ולכן מחלקים את הסכום בכמות הסמלים.','בודקים: מחברים את המספר שמצאו כמה פעמים שצריך.'],
   ex:[{q:'<span class="eq">🍪 + 🍪 + 🍪 = 18</span><br>מה המספר של 🍪?',
     steps:['יש 3 סמלים זהים: [[3 × 🍪 = 18]]','[[18 ÷ 3 = 6]]','בודקים: [[6 + 6 + 6 = 18]] ✓'],a:'6'}]},
+gDigitSymbol:{
+  what:'סמל מייצג ספרה אחת (0 עד 9) בתוך מספר דו-ספרתי. צריך לגלות איזו ספרה.',
+  think:['זוכרים: בכתיב 34 יש 3 עשרות ו-4 יחידות, כלומר 30 + 4.','בודקים קודם את היחידות: איזו ספרה נותנת את ספרת היחידות של התוצאה?','אחר כך בודקים את העשרות. לבסוף מציבים את הספרה ובודקים.'],
+  ex:[{q:'<span class="eq">🦄3 + 🦄5 = 88</span><br>איזו ספרה מייצג 🦄?',
+    steps:['שני המספרים הם עשרות של 🦄 ועוד יחידות: [[3 + 5 = 8]] יחידות','ביחידות של התוצאה יש 8, וזה מתאים.','נשארו בעשרות [[88 − 8 = 80]], שהם שתי קבוצות של 🦄 עשרות: [[40 + 40]]','לכן [[🦄 = 4]]. בודקים: [[43 + 45 = 88]] ✓'],a:'4'}]},
+gEvenShare:{
+  what:'יש כמות של חפצים וצריך למצוא בין כמה ילדים אפשר לחלק אותם בלי שיישאר דבר.',
+  think:['בודקים כל תשובה: מחלקים את הכמות במספר הילדים.','אם יש שארית, אי אפשר לחלק שווה.','אפשר להיעזר בלוח הכפל: הכמות צריכה להופיע בטבלה של מספר הילדים.'],
+  ex:[{q:'יש 24 מדבקות. בין כמה ילדים אפשר לחלק אותן שווה, בלי שארית? (5, 6, 7, 9)',
+    steps:['בודקים 5: [[24 ÷ 5 = 4 ושארית 4]] ✗','בודקים 6: [[6 × 4 = 24]] ✓','בודקים 7: [[7 × 3 = 21]] ✗  ו-9: [[9 × 2 = 18, 9 × 3 = 27]] ✗'],a:'6'}]},
+gDaysMore:{
+  what:'בכל יום נמכרת כמות גדולה יותר מהיום שלפניו, באותו הפרש. שואלים כמה נמכר בסך הכול.',
+  think:['מחשבים את הכמות של כל יום בנפרד: כל יום מוסיפים את ההפרש.','רושמים את הכמויות בשורה.','מחברים את כולן יחד.'],
+  ex:[{q:'ביום הראשון נמכרו 5 מדבקות, ובכל יום נמכרו 3 יותר מביום שלפניו. כמה נמכרו בשלושת הימים?',
+    steps:['יום ראשון: [[5]]','יום שני: [[5 + 3 = 8]]','יום שלישי: [[8 + 3 = 11]]','בסך הכול: [[5 + 8 + 11 = 24]]'],a:'24'}]},
 gSumDiff:{
   what:'שני סמלים: ידוע הסכום שלהם וגם ההפרש (ההחסרה) ביניהם. שואלים מה המספר של אחד מהם.',
   think:['מחפשים שני מספרים שהסכום שלהם הוא הסכום הנתון. אפשר לרשום רשימה.','מהרשימה בוחרים את הזוג שההפרש שלו מתאים.','זכרו: הסמל שלפני סימן המינוס הוא הגדול מבין השניים.'],
@@ -2591,7 +2606,7 @@ function cloudProfileFromDoc(C, helpers){
 // ===== CLOUD (Google sign-in, cloud progress, problem reports) =====
 // Local-first: the game always works from this device's storage. The cloud is a mirror, so no internet / no account / no quota never blocks play.
 // Everything here is off while CLOUD_CONFIG is null. See firebase/SETUP.md for how to create the (free) Firebase project and paste its settings below.
-const APP_VERSION = '2026.11.16e';       // keep equal to VERSION in sw.js (a test checks it)
+const APP_VERSION = '2026.11.16f';       // keep equal to VERSION in sw.js (a test checks it)
 const BUILD_COMMIT = '';                 // the full id of the commit this page was built from: the deploy workflow (.github/workflows/tests.yml) fills it in; empty in a plain checkout
 const REPO_URL = 'https://github.com/matan-gk/matan-gk.github.io';
 const CLOUD_CONFIG = {apiKey:"AIzaSyAlq_TJNGvWPJpUrpbdq_hkAoURydqMzm0", authDomain:"learning-quest-1.firebaseapp.com", projectId:"learning-quest-1", appId:"1:98931179722:web:78fb00084ccba3efb53433"};   // e.g. {apiKey:'...', authDomain:'xxx.firebaseapp.com', projectId:'xxx', appId:'...'}
@@ -3352,7 +3367,7 @@ const SKILL_META = {
   gMulFact:{area:'numbers', he:'לוח הכפל'}, gCompareTotals:{area:'stories', he:'השוואת סכומים'}, gRoundsTransfer:{area:'stories', he:'משחק בסבבים'},
   gFillNumber:{area:'numbers', he:'השלימו את המספר'}, gDifferenceMore:{area:'stories', he:'בעיית הפרש'}, gGroups:{area:'stories', he:'בעיית קבוצות'}, gRemainder:{area:'stories', he:'בעיית שארית'},
   gTwoSymbols:{area:'symbols', he:'חידת סמלים'}, gThreeSymbols:{area:'symbols', he:'חידת סמלים משולשת'}, gCirclePattern:{area:'symbols', he:'מספרים בקשת'}, gInequality:{area:'symbols', he:'אי-שוויון'},
-  gSingleSymbolMul:{area:'symbols', he:'חידת סמל בודד'}, gSumDiff:{area:'symbols', he:'סכום והפרש'}, gCompareSymbols:{area:'symbols', he:'השוואת סמלים'},
+  gSingleSymbolMul:{area:'symbols', he:'חידת סמל בודד'}, gSumDiff:{area:'symbols', he:'סכום והפרש'}, gDigitSymbol:{area:'symbols', he:'ספרה בסמל'}, gEvenShare:{area:'stories', he:'חלוקה שווה'}, gDaysMore:{area:'stories', he:'סכום ימים'}, gCompareSymbols:{area:'symbols', he:'השוואת סמלים'},
   gMachine:{area:'patterns', he:'מכונת הקינוחים'}, gSequence:{area:'patterns', he:'סדרה'}, gMissingMiddleSeq:{area:'patterns', he:'סדרה עם חור'},
   gMoneyCoins:{area:'stories', he:'מטבעות'}, gCheaperBundle:{area:'stories', he:'השוואת מחירים: סך הכל'}, gCheaperPerItem:{area:'stories', he:'השוואת מחירים: ליחידה'}, gChange:{area:'stories', he:'עודף'}, gSplitCost:{area:'stories', he:'חלוקת הוצאה'},
   gAnalogyWord:{area:'logic', he:'אנלוגיה'}, gPairAnalogy:{area:'logic', he:'זוגות תואמים'}, gOddOneOutCategory:{area:'logic', he:'מי לא שייך (קבוצה)'}, gHiddenOdd:{area:'logic', he:'מי לא שייך'},
@@ -3406,7 +3421,7 @@ const SKILL_DIFFICULTY = {
   gCompareTotals:3, gRoundsTransfer:3, gMulFact:1,
   gLeftover:1, gDifferenceMore:1, gGroups:1, gSharing:2, gMultiplyChain:2, gRemainder:2,
   // symbol puzzles
-  gSingleSymbolMul:1, gCompareSymbols:1, gTwoSymbols:2, gCirclePattern:2, gInequality:2, gSumDiff:2, gThreeSymbols:3,
+  gSingleSymbolMul:1, gCompareSymbols:1, gTwoSymbols:2, gCirclePattern:2, gInequality:2, gSumDiff:2, gThreeSymbols:3, gDigitSymbol:3, gEvenShare:2, gDaysMore:2,
   // number patterns
   gFillNumber:1, gMissingMiddleSeq:1, gSequence:2, gMachine:2, gGrowingSteps:3,
   // money
@@ -4245,6 +4260,43 @@ function gSumDiff(){
   const askX = Math.random()<0.5;
   return {label:"חידת סכום והפרש", text:`<span class="eq">${s1} + ${s2} = <span class="hl">${sum}</span></span><br><span class="eq">${s1} − ${s2} = <span class="hl">${diff}</span></span><br>מה המספר של <span class="eq">${askX? s1 : s2}</span>?`,
     type:'mcq', answer: askX? x : y, choices: mcqFrom(askX? x : y, 4)};
+}
+// ---- digit puzzles: a symbol stands for ONE digit inside a two-digit number (from the school sample worksheet) ----
+function gDigitSymbol(){
+  const [S] = pickSyms(1);
+  const d = ri(1,9), kind = ri(0,2);
+  let eq, easy = false;
+  if(kind===0){            // symbol is the tens digit, twice
+    const a = ri(1,9), b = ri(1,9);
+    eq = `${S}${a} + ${S}${b} = ${hl(20*d+a+b)}`; easy = true;
+  } else if(kind===1){     // symbol is the tens digit, take away a number
+    const a = ri(0,9), k = ri(2,9), N = 10*d+a-k;
+    eq = `${S}${a} − ${k} = ${hl(N)}`; easy = true;
+  } else {                 // symbol is the units digit, twice
+    const a = ri(1,4), b = ri(1,4);
+    eq = `${a}${S} + ${b}${S} = ${hl(10*(a+b)+2*d)}`;
+  }
+  return {label:"ספרה בסמל",
+    text:`בכל תרגיל, הסמל <span class="eq">${S}</span> הוא ספרה אחת (0 עד 9), בכל מקום שבו הוא מופיע.<br><span class="eq">${eq}</span><br>איזו ספרה מייצג <span class="eq">${S}</span>?`,
+    type:'mcq', answer:d, choices:digChoices(d,[])};
+}
+function gEvenShare(){
+  const I = pickShop(), w = I.w, [p1] = pickPeople(1);
+  const kids = ri(3,9), per = ri(2,6), total = kids*per;
+  const wrong = [];
+  for(let c=2;c<=10 && wrong.length<12;c++) if(c!==kids && total%c!==0) wrong.push(c);
+  if(wrong.length<3) return gEvenShare();
+  const opts = shuffle([kids, ...shuffle(wrong).slice(0,3)]);
+  return {label:"חלוקה שווה", d:2, text:`${p1.n} לחלק ${hl(total)} ${w} בין ילדים, כך שכל ילד יקבל אותה כמות ולא יישאר דבר. בין כמה ילדים אפשר לחלק?`,
+    type:'mcq', answer:kids, choices:opts};
+}
+function gDaysMore(){
+  const I = pickShop(), w = I.w, [p1] = pickPeople(1);
+  const a = ri(3,12), d = ri(2,6), days = ri(0,1)? 4 : 3;
+  const total = days*a + d*days*(days-1)/2;
+  const dn = days===4 ? 'ארבעת' : 'שלושת';
+  const text = `ביום הראשון נמכרו בחנות ההפתעות ${hl(a)} ${w}. בכל יום נמכרו ${hl(d)} ${w} יותר מביום שלפניו. כמה ${w} נמכרו ב${dn} הימים הראשונים?`;
+  return {label:"סכום ימים", d:2, text, type:'mcq', answer:total, choices:mcqFrom(total, Math.max(5,total/5))};
 }
 function gCompareSymbols(){
   const [s1,s2,s3] = pickSyms(3);
@@ -5398,6 +5450,23 @@ const READING_BANK = [
     {skill:'rdWordMeaning', lines:[13], q:'בְּשׁוּרָה 13 כָּתוּב: "הוּא פּוֹלֵט כַּדּוּר קָטָן". מַה פֵּרוּשׁ הַמִּלָּה "פּוֹלֵט"?', a:'מוֹצִיא מִן הַפֶּה', w:['בּוֹלֵעַ','מְגַלְגֵּל','שׁוֹבֵר']},
     {skill:'rdMotive', lines:[6,7], q:'מַדּוּעַ הַיַּנְשׁוּף מַסֵּב אֶת הָרֹאשׁ? (שׁוּרוֹת 6 וְ-7)', a:'כִּי הָעֵינַיִם שֶׁלּוֹ לֹא זָזוֹת לַצְּדָדִים', w:['כִּי הוּא רוֹצֶה לְהַפְחִיד אֶת הָעַכְבָּר','כִּי הוּא מְנַסֶּה לְהִתְחַמֵּם','כִּי הוּא רוֹצֶה לִישֹׁן']},
     {skill:'rdSynonyms', lines:[], q:'מִילִּים נִרְדָּפוֹת הֵן מִילִּים שֶׁיֵּשׁ לָהֶן אוֹתָהּ מַשְׁמָעוּת אוֹ מַשְׁמָעוּת דּוֹמָה מְאֹד. בְּאֵיזֶה זוּג הַמִּילִּים אֵינָן נִרְדָּפוֹת?', a:'חֹשֶׁךְ – אוֹר', w:['רַךְ – עָדִין','מִתְקָרֵב – נִגָּשׁ','מַזִּיק – פּוֹגֵעַ']}
+   ]},
+  {id:'sun', title:'הַשֶּׁמֶשׁ',
+   paras:[
+    ['הַשֶּׁמֶשׁ נִרְאֵית בַּשָּׁמַיִם כְּמוֹ כַּדּוּר קָטָן וְצָהֹב.','אֲבָל לְמַעֲשֶׂה הִיא גְּדוֹלָה מְאֹד.','אֶפְשָׁר לְהַכְנִיס בְּתוֹכָהּ יוֹתֵר מִמִּילְיוֹן כַּדּוּרִים בְּגֹדֶל כַּדּוּר הָאָרֶץ.'],
+    ['הַשֶּׁמֶשׁ נִרְאֵית קְטַנָּה כִּי הִיא רְחוֹקָה מְאֹד.','גַּם מְכוֹנִית שֶׁנּוֹסַעַת רָחוֹק נִרְאֵית קְטַנָּה וְקְטַנָּה.','אִם הָיִינוּ נוֹסְעִים בִּמְכוֹנִית אֶל הַשֶּׁמֶשׁ, הַנְּסִיעָה הָיְתָה אוֹרֶכֶת יוֹתֵר מִמֵּאָה שָׁנָה.'],
+    ['הַשֶּׁמֶשׁ חַמָּה מְאֹד.','מַיִם רוֹתְחִים בְּסִיר חַמִּים מְאֹד, אַךְ הַשֶּׁמֶשׁ חַמָּה פִּי כַּמָּה וְכַמָּה.'],
+    ['הַשֶּׁמֶשׁ נוֹתֶנֶת לָנוּ אוֹר וְחֹם.','בִּזְכוּתָהּ הַצְּמָחִים גְּדֵלִים.','בְּלִי הַשֶּׁמֶשׁ לֹא הָיוּ חַיִּים עַל כַּדּוּר הָאָרֶץ.','בַּקַּיִץ הַשֶּׁמֶשׁ חֲזָקָה, וְלָכֵן כְּדַאי לִשְׁתּוֹת הַרְבֵּה מַיִם.']
+   ],
+   qs:[
+    {skill:'rdCause', lines:[4,5], q:'מַדּוּעַ הַשֶּׁמֶשׁ נִרְאֵית לָנוּ קְטַנָּה? (שׁוּרוֹת 4 וְ-5)', a:'כִּי הִיא רְחוֹקָה מְאֹד מִמֶּנּוּ', w:['כִּי הִיא קְטַנָּה מְאֹד','כִּי הֶעָנָן מַסְתִּיר אוֹתָהּ','כִּי הִיא לֹא חַמָּה'] },
+    {skill:'rdWordRole', lines:[2], q:'שׁוּרָה 2 מַתְחִילָה בַּמִּלָּה "אֲבָל". מָה הַמִּלָּה הַזֹּאת מְסַמֶּנֶת?', a:'שֶׁמַּגִּיעַ דָּבָר שֶׁשּׁוֹנֶה מִמָּה שֶׁנֶּאֱמַר קֹדֶם', w:['שֶׁהַמִּשְׁפָּט הוּא הַמִּשְׁפָּט הָאַחֲרוֹן','שֶׁזּוֹ עוֹד דֻּגְמָה לְאוֹתוֹ דָּבָר','שֶׁקָּרָה מַשֶּׁהוּ מַצְחִיק']},
+    {skill:'rdPhrase', lines:[9,10], q:'בְּשׁוּרָה 10 כָּתוּב: "בִּזְכוּתָהּ הַצְּמָחִים גְּדֵלִים". מָה הַכַּוָּנָה?', a:'הַצְּמָחִים גְּדֵלִים בִּגְלַל הַשֶּׁמֶשׁ', w:['הַצְּמָחִים גְּדֵלִים גַּם בְּלִי שֶׁמֶשׁ','הַצְּמָחִים מְגִינִים עַל הַשֶּׁמֶשׁ','הַשֶּׁמֶשׁ גְּדֵלָה בִּגְלַל הַצְּמָחִים']},
+    {skill:'rdPurpose', lines:[8], q:'הַמַּטָּרָה שֶׁל שׁוּרָה 8, עַל מַיִם רוֹתְחִים בְּסִיר, הִיא –', a:'לְהַסְבִּיר כַּמָּה הַשֶּׁמֶשׁ חַמָּה', w:['לְלַמֵּד אֵיךְ מְבַשְּׁלִים','לְהַזְהִיר אוֹתָנוּ מִסִּירִים','לְהַסְבִּיר מַדּוּעַ יֵשׁ יַמִּים']},
+    {skill:'rdNotInText', lines:[], q:'עַל אֵיזוֹ שְׁאֵלָה מֵהַשְּׁאֵלוֹת שֶׁלִּפְנֵיכֶם אֵין תְּשׁוּבָה בַּקֶּטַע?', a:'בְּאֵיזֶה גִּיל הִתְחִילָה הַשֶּׁמֶשׁ לְהָאִיר?', w:['מַדּוּעַ הַשֶּׁמֶשׁ נִרְאֵית קְטַנָּה?','מָה הַשֶּׁמֶשׁ נוֹתֶנֶת לָנוּ?','מָה קוֹרֶה לַצְּמָחִים בִּזְכוּת הַשֶּׁמֶשׁ?']},
+    {skill:'rdWordMeaning', lines:[2], q:'בְּשׁוּרָה 2 כָּתוּב: "לְמַעֲשֶׂה הִיא גְּדוֹלָה מְאֹד". מַה פֵּרוּשׁ הַמִּלָּה "לְמַעֲשֶׂה"?', a:'בֶּאֱמֶת, בַּמְּצִיאוּת', w:['בְּקָרוֹב','לִפְעָמִים','בַּלַּיְלָה']},
+    {skill:'rdMotive', lines:[12], q:'מַדּוּעַ כְּדַאי לִשְׁתּוֹת הַרְבֵּה מַיִם בַּקַּיִץ? (שׁוּרָה 12)', a:'כִּי הַשֶּׁמֶשׁ חֲזָקָה בַּקַּיִץ', w:['כִּי בַּקַּיִץ יֵשׁ פָּחוֹת מַיִם','כִּי הַשֶּׁמֶשׁ רְחוֹקָה בַּקַּיִץ','כִּי הַצְּמָחִים שׁוֹתִים אֶת כָּל הַמַּיִם']},
+    {skill:'rdSynonyms', lines:[], q:'מִילִּים נִרְדָּפוֹת הֵן מִילִּים שֶׁיֵּשׁ לָהֶן אוֹתָהּ מַשְׁמָעוּת אוֹ מַשְׁמָעוּת דּוֹמָה מְאֹד. בְּאֵיזֶה זוּג הַמִּילִּים אֵינָן נִרְדָּפוֹת?', a:'רָחוֹק – קָרוֹב', w:['קָטָן – זָעִיר','רוֹתֵחַ – לוֹהֵט','צָהֹב – צָהַבְהַב']}
    ]}
 ];
 const RD_DAYS_DEFAULT = 30, RD_DAYS_CHOICES = [7,14,30,60,90,0];   // 0 = a finished passage never returns
@@ -5472,8 +5541,8 @@ function rdQuestionUI(area){
 const NUMBERS_POOL = [gDigitOf, gBuildNumber, gWordsToNum, gNumToWords, gDigitCompare, gFindByDigit, gBiggestOfFour, gOrderNumbers, gMissingDigit, gBetween, gNumberRiddle, gPredSucc, gFillNumber,
   gAddTwoDigit, gAddCarry, gSubTwoDigit, gSubBorrow, gBiggerExpr, gDigitsMinMaxDiff, gHowManyBuild, gMulFact];
 const STORIES_POOL = [gSharing, gMultiplyChain, gLeftover, gDifferenceMore, gGroups, gRemainder, gCompareChain, gWorkBackwards, gPartWhole, gTookAway, gGotMore, gTwoGroups, gMadeAndLeft,
-  gMoneyCoins, gCheaperBundle, gCheaperPerItem, gChange, gSplitCost, gBudget, gCompareTotals, gRoundsTransfer];
-const SYMBOLS_POOL = [gTwoSymbols, gThreeSymbols, gCirclePattern, gInequality, gSingleSymbolMul, gSumDiff, gCompareSymbols, gFourLinkChain, gSymbolsMul];
+  gMoneyCoins, gCheaperBundle, gCheaperPerItem, gChange, gSplitCost, gBudget, gCompareTotals, gRoundsTransfer, gEvenShare, gDaysMore];
+const SYMBOLS_POOL = [gTwoSymbols, gThreeSymbols, gCirclePattern, gInequality, gSingleSymbolMul, gSumDiff, gCompareSymbols, gFourLinkChain, gSymbolsMul, gDigitSymbol];
 const CLOCK_POOL = [gClockHour, gClockQuarter, gClockFive, gClockWords, gClockPick, gClockLater, gSchedule];
 const PATTERNS_POOL = [gMachine, gSequence, gMissingMiddleSeq, gInterleavedSeq, gSkipPair, gSkipFill, gSkipMember, gCountInSeries, gGrowingSteps, gShapeSequence, gCountingPattern, gShapeAnalogy, gComboRule, gTwoRules, gMovingSquare];
 const LOGIC_POOL = [gAnalogyWord, gPairAnalogy, gOddOneOutCategory, gOddOneOutShape, gHiddenOdd, gOddGrid, gHeightOrder, gLogicGrid, gCountAttribute, gCountCircles, gCondCount];
