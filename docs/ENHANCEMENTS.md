@@ -672,3 +672,12 @@ Once the room is unlocked, the top-left of the screen shows the coin balance (th
 **Known remaining gap (not new).** Unknown colour indices or other unknown option values inside the room are still normalised by older builds; only items are kept.
 
 Tests: `tests/unkitemstest.js` (new); `walltest.js` accepts format 4 or later; rules tests moved to format 5.
+
+## Step 45: room light and trim (branch `room-atmosphere`, off `main`; version 2026.11.16a)
+
+Plan step A. Three layers drawn by `atmoShell`, `atmoLight` and `atmoOverlay` in `roomSVG()`, all `pointer-events:none`:
+- **Shell** (over walls and floor): corner shade, baseboards, crown, corner post, floor sheen and bevelled tile lines, all coloured from the surface colour (`atmoBase`; rainbow and patterns use a soft violet), plus a milky layer (`atmoMilk`) that turns rainbow and strong colours pastel.
+- **Light**: a glow on the window's wall, a beam and a patch of light on the floor; none when the window is stowed.
+- **Overlay**: a soft vignette and fixed sparkles. Everything standing in the room sits in one group with a single colour-grade filter.
+- On by default; the sparkle button beside the zoom buttons switches it off, per device (`localStorage cq_atmo`, nothing synced, no format change).
+Tests: `tests/atmotest.js` (new).

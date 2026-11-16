@@ -52,7 +52,7 @@ Plus one **grade on the things**: a single filter on the group holding all floor
 
 **Rainbow and very saturated colours:** a milky layer (white, 30 to 40%) over walls and floor when the colour is rainbow or highly saturated (saturation measured from the colour), a lighter one (about 10%) otherwise. Result: rainbow reads as pastel rainbow.
 
-**Setting (decided):** on by default, with an "atmosphere" toggle in the room's settings, stored in the profile (the one new saved value; see "Format and rollout"). Reason for the toggle: SVG filters on a weak tablet.
+**Setting (decided):** on by default, with a sparkle button beside the zoom buttons, stored **per device** in localStorage (`cq_atmo`); nothing new is synced. Reason for the toggle: SVG filters on a weak tablet.
 
 **Performance budget (acceptance):** room redraw under 40 ms on a mid phone profile (Playwright CPU throttle 4x), no per-item filters, one filter on one group; if the room is panned or zoomed the layers are not re-created.
 
@@ -160,7 +160,7 @@ About two to three days of code, plus one small art sheet (3 to 4 shelf types, w
 
 ## Format and rollout
 
-- A saves one new value (the atmosphere toggle) in the profile settings, outside `space`, so it does not change the room's format. It is a new profile field, so it follows the usual rule: a newer build writes it, an older one ignores it.
+- A saves nothing to the cloud: the atmosphere toggle is per device (localStorage `cq_atmo`), so no format change.
 - D1 (an item option), D2 (a ceiling position) and E (a wall-host flag) each change the room data; each is its own format bump, announced in its step, and none needs a console rules change.
 - Items add catalog ids only. After Step 0 an older build keeps what it cannot show instead of deleting it.
 - The wall decor adds no new saved fields (it uses `wl`, format 4).
@@ -168,5 +168,5 @@ About two to three days of code, plus one small art sheet (3 to 4 shelf types, w
 
 ## Still open
 
-- Whether the atmosphere toggle lives in the profile (my choice: in profile settings, outside the room data, so no room-format change) or in the room data.
+- (Decided: the atmosphere toggle is per device.)
 - D1: whether the default wood changes at all (decide after the prototype).
