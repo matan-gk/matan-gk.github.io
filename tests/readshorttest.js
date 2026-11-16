@@ -27,9 +27,19 @@ const o=await p.evaluate(()=>{
     if(ask==='not'&&(n!==3||isSyn(q.answer))) fails.push('syn not: '+q.choices);
     if(ask==='yes'&&(n!==1||!isSyn(q.answer))) fails.push('syn yes: '+q.choices);
     const words=q.choices.join(' – ').split(' – '); if(new Set(words).size!==8) fails.push('syn repeated word '+q.choices); }
+  // cause and motive: the answer is not a copy of a sentence of the text, and the question is about the first line
+  for(let i=0;i<400;i++) for(const g of [gShCause,gShMotive]){ const q=g(); const lines=q.text.split('<br>');
+    if(lines.length!==3) fails.push(g.name+' lines');
+    if(lines.slice(0,2).some(l=>l.includes(String(q.answer).replace(/^כִּי |^כְּדֵי /,'')))) fails.push(g.name+' answer copied from the text: '+q.answer); }
+  // weights: 4 to 8 short questions before every new passage
+  const gaps=[]; { const bankSave=READING_BANK.slice(); rd=rdClean({}); rdGap=0; let run=0, started=0;
+    for(let i=0;i<300&&started<4;i++){ const gen=rdPick(pools[9], pools[9][ri(0,pools[9].length-1)]);
+      if(gen===gReading){ const n=rdNext(); if(rd.cur.i===0 && run>=0 && started>=0){ if(started>0||run>0) gaps.push(run); started++; run=0; }
+        rdFinish(n.p); } else run++; } }
+  if(gaps.length<3||gaps.some(x=>x<4||x>8)) fails.push('gaps between passages: '+gaps);
   const variety=Object.fromEntries(Object.entries(seen).map(([k,v])=>[k,v.size]));
   return {fails:[...new Set(fails)].slice(0,8),variety,
-    meta:['gShNotInText','gShSynonyms','gShPurpose'].every(k=>SKILL_META[k]&&SKILL_META[k].area==='reading'&&SKILL_DIFFICULTY[k]&&HELP[k]&&HELP[k].ex.length),
+    meta:['gShNotInText','gShSynonyms','gShPurpose','gShCause','gShMotive'].every(k=>SKILL_META[k]&&SKILL_META[k].area==='reading'&&SKILL_DIFFICULTY[k]&&HELP[k]&&HELP[k].ex.length),
     inPool:pools[9].includes(gReading)&&SHORT_READING_POOL.every(g=>pools[9].includes(g)), noMix:!pools[5].some(g=>SHORT_READING_POOL.includes(g))};
 });
 console.log('variety (distinct texts in 800 draws):',JSON.stringify(o.variety));

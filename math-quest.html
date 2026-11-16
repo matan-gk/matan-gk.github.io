@@ -1956,6 +1956,14 @@ gInequality:{
     steps:['בשני הצדדים מוסיפים ל-47, לכן מספיק להשוות: [[15 &lt; __]]','המספר החסר צריך להיות גדול מ-15, למשל 20.','בודקים: [[62 &lt; 67]] ✓'],a:'מספר גדול מ-15, למשל 20'},
       {q:'<span class="mono">87 − __ &gt; 87 − 15</span>',
     steps:['בשני הצדדים מחסירים מ-87. כשמחסירים פחות, נשאר יותר.','כדי שהצד השמאלי יהיה גדול יותר, צריך להחסיר פחות מ-15, למשל 10.','בודקים: [[87 − 10 = 77]] ו-[[87 − 15 = 72]], וגם [[77 &gt; 72]] ✓'],a:'מספר קטן מ-15, למשל 10'}]},
+gShCause:{
+  what:'שני משפטים: מה קרה, ורמז לסיבה. הרמז כתוב במילים אחרות מהתשובה, וצריך להבין מה הסיבה.',
+  think:['קוראים את שני המשפטים וחושבים: מה הרמז אומר על הסיבה?','מחפשים תשובה שמתאימה לרמז, גם אם היא כתובה במילים אחרות.','בודקים: אם הסיבה הזאת נכונה, האם מה שקרה מתאים לה?'],
+  ex:[{q:'הילד פתח מטריה. מן העננים ירדו טיפות. מדוע הילד פתח מטריה?',steps:['הרמז: [[מן העננים ירדו טיפות]]','טיפות מהעננים זה [[גשם]].','התשובה: [[כי ירד גשם]]'],a:'כי ירד גשם'}]},
+gShMotive:{
+  what:'מישהו עושה משהו, ורמז מספר מה קורה סביב. שואלים למה הוא עשה את זה: מה הוא רצה שיקרה.',
+  think:['שואלים: מה הוא רצה להשיג? התשובה מתחילה בדרך כלל ב"כדי".','הרמז מספר איזו בעיה או איזה אירוע יש, והפעולה היא הפתרון.','בוחרים את המטרה שהפעולה באמת מקדמת.'],
+  ex:[{q:'דני כתב רשימה לפני שיצא לחנות. בבית חסרים הרבה דברים. מדוע דני כתב רשימה?',steps:['חסרים הרבה דברים: קשה לזכור הכול.','הרשימה עוזרת [[לזכור מה לקנות]].','התשובה: [[כדי לא לשכוח מה לקנות]]'],a:'כדי לא לשכוח מה לקנות'}]},
 gShNotInText:{
   what:'טקסט קצר של שורה או שתיים, ואחריו ארבע שאלות. על שלוש מהן יש תשובה בטקסט, ועל אחת אין. צריך למצוא את זו שאין לה תשובה.',
   think:['קוראים את הטקסט ורושמים בראש מה סופר: איפה, מה אוכל, איזה צבע, איזה גודל.','עוברים על כל שאלה ובודקים אם התשובה כתובה בטקסט.','השאלה שהתשובה שלה לא כתובה היא התשובה, גם אם אתם יודעים אותה מהחיים.'],
@@ -2618,7 +2626,7 @@ function cloudProfileFromDoc(C, helpers){
 // ===== CLOUD (Google sign-in, cloud progress, problem reports) =====
 // Local-first: the game always works from this device's storage. The cloud is a mirror, so no internet / no account / no quota never blocks play.
 // Everything here is off while CLOUD_CONFIG is null. See firebase/SETUP.md for how to create the (free) Firebase project and paste its settings below.
-const APP_VERSION = '2026.11.16g';       // keep equal to VERSION in sw.js (a test checks it)
+const APP_VERSION = '2026.11.16h';       // keep equal to VERSION in sw.js (a test checks it)
 const BUILD_COMMIT = '';                 // the full id of the commit this page was built from: the deploy workflow (.github/workflows/tests.yml) fills it in; empty in a plain checkout
 const REPO_URL = 'https://github.com/matan-gk/matan-gk.github.io';
 const CLOUD_CONFIG = {apiKey:"AIzaSyAlq_TJNGvWPJpUrpbdq_hkAoURydqMzm0", authDomain:"learning-quest-1.firebaseapp.com", projectId:"learning-quest-1", appId:"1:98931179722:web:78fb00084ccba3efb53433"};   // e.g. {apiKey:'...', authDomain:'xxx.firebaseapp.com', projectId:'xxx', appId:'...'}
@@ -3376,7 +3384,7 @@ const SKILL_META = {
   gSharing:{area:'stories', he:'בעיית חלוקה'}, gMultiplyChain:{area:'stories', he:'בעיית כפל'}, gLeftover:{area:'stories', he:'בעיית שאריות'},
   rdCause:{area:'reading', he:'קריאה: סיבה'}, rdWordRole:{area:'reading', he:'קריאה: תפקיד מילה'}, rdPhrase:{area:'reading', he:'קריאה: משמעות ביטוי'}, rdPurpose:{area:'reading', he:'קריאה: מטרת משפט'},
   rdNotInText:{area:'reading', he:'קריאה: מה אין בקטע'}, rdWordMeaning:{area:'reading', he:'קריאה: פירוש מילה'}, rdMotive:{area:'reading', he:'קריאה: למה עשה'}, rdSynonyms:{area:'reading', he:'מילים נרדפות'},
-  gShNotInText:{area:'reading', he:'קריאה קצרה: מה אין בטקסט'}, gShSynonyms:{area:'reading', he:'קריאה קצרה: מילים נרדפות'}, gShPurpose:{area:'reading', he:'קריאה קצרה: מטרת הטקסט'},
+  gShNotInText:{area:'reading', he:'קריאה קצרה: מה אין בטקסט'}, gShSynonyms:{area:'reading', he:'קריאה קצרה: מילים נרדפות'}, gShPurpose:{area:'reading', he:'קריאה קצרה: מטרת הטקסט'}, gShCause:{area:'reading', he:'קריאה קצרה: סיבה'}, gShMotive:{area:'reading', he:'קריאה קצרה: למה עשה'},
   gMulFact:{area:'numbers', he:'לוח הכפל'}, gCompareTotals:{area:'stories', he:'השוואת סכומים'}, gRoundsTransfer:{area:'stories', he:'משחק בסבבים'},
   gFillNumber:{area:'numbers', he:'השלימו את המספר'}, gDifferenceMore:{area:'stories', he:'בעיית הפרש'}, gGroups:{area:'stories', he:'בעיית קבוצות'}, gRemainder:{area:'stories', he:'בעיית שארית'},
   gTwoSymbols:{area:'symbols', he:'חידת סמלים'}, gThreeSymbols:{area:'symbols', he:'חידת סמלים משולשת'}, gCirclePattern:{area:'symbols', he:'מספרים בקשת'}, gInequality:{area:'symbols', he:'אי-שוויון'},
@@ -3430,7 +3438,7 @@ const DIFFICULTY = {
 };
 const SKILL_DIFFICULTY = {
   // word problems
-  rdCause:2, rdWordRole:3, rdPhrase:2, rdPurpose:3, rdNotInText:3, rdWordMeaning:2, rdMotive:2, rdSynonyms:2, gShNotInText:2, gShSynonyms:2, gShPurpose:2,
+  rdCause:2, rdWordRole:3, rdPhrase:2, rdPurpose:3, rdNotInText:3, rdWordMeaning:2, rdMotive:2, rdSynonyms:2, gShNotInText:2, gShSynonyms:2, gShPurpose:2, gShCause:2, gShMotive:2,
   gCompareTotals:3, gRoundsTransfer:3, gMulFact:1,
   gLeftover:1, gDifferenceMore:1, gGroups:1, gSharing:2, gMultiplyChain:2, gRemainder:2,
   // symbol puzzles
@@ -5628,16 +5636,55 @@ function gShPurpose(){
   return {label:'📖 קְרִיאָה קְצָרָה', text:`${pick(T[kind])}<br>מָה הַמַּטָּרָה שֶׁל הַטֶּקְסְט?`, type:'mcq', wide:true,
     answer:RS_PURPOSE[kind], choices:shuffle([kind,...others].map(k=>RS_PURPOSE[k]))};
 }
-const SHORT_READING_POOL = [gShNotInText, gShSynonyms, gShPurpose];
-// reading draw: a passage in progress always continues; a new passage starts only now and then (RD_START); with every passage read, only short questions
-const RD_START = 0.5;
+
+// -- cause and motive: two lines (what happened + a clue worded differently); the answer is worded differently from the question too --
+// each entry: [what happened, clue, question, right answer]; g(m,f) agrees with the name's gender
+const RS_CAUSE = [
+  (n,g)=>[`${n} ${g('לָבַשׁ','לָבְשָׁה')} מְעִיל וְכוֹבַע.`, `בַּחוּץ נָשְׁבָה רוּחַ וְהָאֲוִיר הָיָה קָפוּא.`, `מַדּוּעַ ${n} ${g('לָבַשׁ','לָבְשָׁה')} מְעִיל?`, `כִּי בַּחוּץ הָיָה קַר מְאֹד`],
+  (n,g)=>[`${n} ${g('פָּתַח','פָּתְחָה')} מִטְרִיָּה.`, `מִן הָעֲנָנִים יָרְדוּ טִפּוֹת.`, `מַדּוּעַ ${n} ${g('פָּתַח','פָּתְחָה')} מִטְרִיָּה?`, `כִּי יָרַד גֶּשֶׁם`],
+  (n,g)=>[`${n} ${g('שָׁתָה','שָׁתְתָה')} שָׁלֹשׁ כּוֹסוֹת מַיִם.`, `הַשֶּׁמֶשׁ לָהֲטָה וְהַגָּרוֹן הָיָה יָבֵשׁ.`, `מַדּוּעַ ${n} ${g('שָׁתָה','שָׁתְתָה')} הַרְבֵּה מַיִם?`, `כִּי ${g('הוּא','הִיא')} ${g('הָיָה','הָיְתָה')} ${g('צָמֵא','צְמֵאָה')}`],
+  (n,g)=>[`הַפֶּרַח בַּגִּנָּה נָבַל.`, `כְּבָר שִׁבְעָה יָמִים לֹא יָרְדָה טִפָּה, וְהָאֲדָמָה הָיְתָה סְדוּקָה.`, `מַדּוּעַ הַפֶּרַח נָבַל?`, `כִּי הוּא לֹא קִבֵּל מַיִם`],
+  (n,g)=>[`${n} ${g('הִדְלִיק','הִדְלִיקָה')} אֶת הָאוֹר בַּחֶדֶר.`, `הַשֶּׁמֶשׁ שָׁקְעָה, וְהַכֹּל סְבִיבוֹ הָיָה שָׁחוֹר.`, `מַדּוּעַ ${n} ${g('הִדְלִיק','הִדְלִיקָה')} אֶת הָאוֹר?`, `כִּי הָיָה חֹשֶׁךְ`],
+  (n,g)=>[`${n} ${g('נִרְדַּם','נִרְדְּמָה')} עַל הַסַּפָּה.`, `כָּל הַיּוֹם ${g('רָץ','רָצָה')} ${n} בַּגַּן וְ${g('שִׂחֵק','שִׂחֲקָה')} בְּלִי הַפְסָקָה.`, `מַדּוּעַ ${n} ${g('נִרְדַּם','נִרְדְּמָה')} עַל הַסַּפָּה?`, `כִּי ${g('הוּא','הִיא')} ${g('הָיָה','הָיְתָה')} ${g('עָיֵף','עֲיֵפָה')} מְאֹד`],
+  (n,g)=>[`הַחַד־קֶרֶן הִסְתַּתֵּר מֵאֲחוֹרֵי הָעֵץ.`, `בַּשָּׁמַיִם נִשְׁמַע פִּתְאוֹם קוֹל חָזָק שֶׁל רַעַם.`, `מַדּוּעַ הַחַד־קֶרֶן הִסְתַּתֵּר?`, `כִּי הוּא נִבְהַל מֵהַקּוֹל`],
+  (n,g)=>[`הַקֶּרַח שֶׁבַּכּוֹס נֶעֱלַם.`, `הַכּוֹס עָמְדָה שָׁעָה שְׁלֵמָה בַּשֶּׁמֶשׁ הַלּוֹהֶטֶת.`, `מַדּוּעַ הַקֶּרַח נֶעֱלַם?`, `כִּי הוּא הוּמַס מֵהַחֹם`],
+  (n,g)=>[`הַחֲנוּת הָיְתָה סְגוּרָה הַיּוֹם.`, `עַל הַדֶּלֶת תָּלוּי שֶׁלֶט: "חַג שָׂמֵחַ לַכֹּל!"`, `מַדּוּעַ הַחֲנוּת הָיְתָה סְגוּרָה?`, `כִּי הָיָה יוֹם חַג`],
+  (n,g)=>[`${n} ${g('הָלַךְ','הָלְכָה')} הַבַּיְתָה בְּרִיצָה.`, `עֲנָנִים כֵּהִים כִּסּוּ אֶת כָּל הַשָּׁמַיִם.`, `מַדּוּעַ ${n} ${g('הָלַךְ','הָלְכָה')} הַבַּיְתָה בְּרִיצָה?`, `כִּי עָמַד לָרֶדֶת גֶּשֶׁם`],
+  (n,g)=>[`הַדְּרָקוֹן הַקָּטָן בָּכָה.`, `הַגּוֹלָה הַקְּסוּמָה שֶׁלּוֹ נֶעֶלְמָה, וְהוּא חִפֵּשׂ אוֹתָהּ בְּכָל מָקוֹם.`, `מַדּוּעַ הַדְּרָקוֹן בָּכָה?`, `כִּי הוּא אִבֵּד אֶת הַצַּעֲצוּעַ שֶׁלּוֹ`],
+  (n,g)=>[`הַיְּלָדִים צָחֲקוּ בְּקוֹל רָם.`, `הַקּוֹסֵם הוֹצִיא אַרְנָב מִתּוֹךְ הַכּוֹבַע שֶׁלּוֹ.`, `מַדּוּעַ הַיְּלָדִים צָחֲקוּ?`, `כִּי הַקֶּסֶם שֶׁל הַקּוֹסֵם הָיָה מַצְחִיק`]
+];
+const RS_MOTIVE = [
+  (n,g)=>[`${n} ${g('בָּנָה','בָּנְתָה')} חוֹמָה גְּבוֹהָה מֵחוֹל סְבִיב הַטִּירָה.`, `הַגַּל הַבָּא כְּבָר הָיָה קָרוֹב.`, `מַדּוּעַ ${n} ${g('בָּנָה','בָּנְתָה')} חוֹמָה?`, `כְּדֵי לְהָגֵן עַל הַטִּירָה`],
+  (n,g)=>[`${n} ${g('שָׁמַר','שָׁמְרָה')} חֲצִי מֵהָעוּגָה בַּמְּקָרֵר.`, `אִמָּא עוֹד לֹא חָזְרָה מֵהָעֲבוֹדָה.`, `מַדּוּעַ ${n} ${g('שָׁמַר','שָׁמְרָה')} חֲצִי עוּגָה?`, `כְּדֵי שֶׁתִּהְיֶה עוּגָה גַּם לְאִמָּא`],
+  (n,g)=>[`${n} ${g('כָּתַב','כָּתְבָה')} רְשִׁימָה לִפְנֵי שֶׁ${g('יָצָא','יָצְאָה')} לַחֲנוּת.`, `בַּבַּיִת הָיוּ חֲסֵרִים הַרְבֵּה דְּבָרִים.`, `מַדּוּעַ ${n} ${g('כָּתַב','כָּתְבָה')} רְשִׁימָה?`, `כְּדֵי לֹא לִשְׁכֹּחַ מָה לִקְנוֹת`],
+  (n,g)=>[`${n} ${g('הִתְאַמֵּן','הִתְאַמְּנָה')} בְּשִׁירָה כָּל יוֹם.`, `בְּעוֹד שָׁבוּעַ תִּהְיֶה הַצָּגָה בַּגַּן.`, `מַדּוּעַ ${n} ${g('הִתְאַמֵּן','הִתְאַמְּנָה')} בְּשִׁירָה?`, `כְּדֵי לְהַצְלִיחַ בַּהַצָּגָה`],
+  (n,g)=>[`${n} ${g('כִּבָּה','כִּבְּתָה')} אֶת הַמַּחְשֵׁב וְ${g('הָלַךְ','הָלְכָה')} לִישֹׁן מֻקְדָּם.`, `מָחָר יֵשׁ מִבְחָן חָשׁוּב.`, `מַדּוּעַ ${n} ${g('הָלַךְ','הָלְכָה')} לִישֹׁן מֻקְדָּם?`, `כְּדֵי לִהְיוֹת עֵר וּמְרֻכָּז בַּמִּבְחָן`],
+  (n,g)=>[`הַמּוֹכֶרֶת צִיְּרָה שֶׁמֶשׁ גְּדוֹלָה עַל הַחַלּוֹן.`, `הַיְּלָדִים נִכְנְסוּ לַחֲנוּת עֲצוּבִים.`, `מַדּוּעַ הַמּוֹכֶרֶת צִיְּרָה שֶׁמֶשׁ?`, `כְּדֵי לְשַׂמֵּחַ אֶת הַיְּלָדִים`],
+  (n,g)=>[`הַדְּרָקוֹן הִסְתַּתֵּר בְּתוֹךְ הַמְּעָרָה.`, `הַפָּרָשִׁים הִתְקָרְבוּ וְהַחֲרָבוֹת בְּיָדָם.`, `מַדּוּעַ הַדְּרָקוֹן הִסְתַּתֵּר?`, `כְּדֵי שֶׁלֹּא יִמְצְאוּ אוֹתוֹ`],
+  (n,g)=>[`${n} ${g('שָׂם','שָׂמָה')} כּוֹבַע וְכַפְּפוֹת לִפְנֵי שֶׁ${g('יָצָא','יָצְאָה')}.`, `בַּחוּץ יָרַד שֶׁלֶג.`, `מַדּוּעַ ${n} ${g('שָׂם','שָׂמָה')} כּוֹבַע וְכַפְּפוֹת?`, `כְּדֵי לֹא לְהִתְקָרֵר`],
+  (n,g)=>[`${n} ${g('קָנָה','קָנְתָה')} מַתָּנָה וְ${g('עָטַף','עָטְפָה')} אוֹתָהּ בְּנְיָר צִבְעוֹנִי.`, `מָחָר יוֹם הֻלֶּדֶת שֶׁל סָבְתָא.`, `מַדּוּעַ ${n} ${g('עָטַף','עָטְפָה')} אֶת הַמַּתָּנָה?`, `כְּדֵי לְהַפְתִּיעַ אֶת סָבְתָא`],
+  (n,g)=>[`הַמּוֹכֵר סִדֵּר אֶת הַסּוּכָּרִיּוֹת עַל הַמַּדָּף הַנָּמוּךְ.`, `יְלָדִים קְטַנִּים לֹא מַגִּיעִים לְמַדָּפִים גְּבוֹהִים.`, `מַדּוּעַ הַמּוֹכֵר סִדֵּר אֶת הַסּוּכָּרִיּוֹת בַּמַּדָּף הַנָּמוּךְ?`, `כְּדֵי שֶׁהַיְּלָדִים יוּכְלוּ לְהַגִּיעַ אֲלֵיהֶן`]
+];
+function rsInfer(bank){
+  const per = pick(RS_NAMES), g = (m,f)=>rsG(per,m,f);
+  const all = bank.map(f=>f(per.n,g)), i = ri(0,all.length-1), [e,c,q,a] = all[i];
+  const wrong = shuffle(all.filter((_,k)=>k!==i).map(x=>x[3])).slice(0,3);
+  return {label:'📖 קְרִיאָה קְצָרָה', text:`${e}<br>${c}<br>${q}`, type:'mcq', wide:true, answer:a, choices:shuffle([a,...wrong])};
+}
+const gShCause = () => rsInfer(RS_CAUSE);
+const gShMotive = () => rsInfer(RS_MOTIVE);
+Object.defineProperty(gShCause,'name',{value:'gShCause'}); Object.defineProperty(gShMotive,'name',{value:'gShMotive'});
+const SHORT_READING_POOL = [gShNotInText, gShSynonyms, gShPurpose, gShCause, gShMotive];
+// reading draw: a passage in progress always continues; 4 to 8 short questions come before each new passage (and at the start of a session); with every passage read, only short questions
+let rdGap = ri(4,8);
 function rdPick(pool, gen){
   if(!pool.includes(gReading)) return gen;
   const shorts = pool.filter(g=>g!==gReading);
   if(rd.cur && rdPassage(rd.cur.id) && !rd.done.includes(rd.cur.id)) return gReading;
-  if(!rdAvailable()) return shorts.length ? (gen!==gReading ? gen : pick(shorts)) : gReading;
-  if(gen===gReading && shorts.length && Math.random()>=RD_START) return pick(shorts);
-  return gen;
+  if(!shorts.length) return gReading;
+  if(!rdAvailable()) return gen!==gReading ? gen : pick(shorts);
+  if(rdGap>0){ rdGap--; return gen!==gReading ? gen : pick(shorts); }
+  rdGap = ri(4,8); return gReading;
 }
 
 // ---- SECTION POOLS (one topic per section; see CATEGORIES.md). A question type is in exactly one section, and the mix level (5) has them all. ----
