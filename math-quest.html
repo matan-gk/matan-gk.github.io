@@ -1956,6 +1956,18 @@ gInequality:{
     steps:['בשני הצדדים מוסיפים ל-47, לכן מספיק להשוות: [[15 &lt; __]]','המספר החסר צריך להיות גדול מ-15, למשל 20.','בודקים: [[62 &lt; 67]] ✓'],a:'מספר גדול מ-15, למשל 20'},
       {q:'<span class="mono">87 − __ &gt; 87 − 15</span>',
     steps:['בשני הצדדים מחסירים מ-87. כשמחסירים פחות, נשאר יותר.','כדי שהצד השמאלי יהיה גדול יותר, צריך להחסיר פחות מ-15, למשל 10.','בודקים: [[87 − 10 = 77]] ו-[[87 − 15 = 72]], וגם [[77 &gt; 72]] ✓'],a:'מספר קטן מ-15, למשל 10'}]},
+gShNotInText:{
+  what:'טקסט קצר של שורה או שתיים, ואחריו ארבע שאלות. על שלוש מהן יש תשובה בטקסט, ועל אחת אין. צריך למצוא את זו שאין לה תשובה.',
+  think:['קוראים את הטקסט ורושמים בראש מה סופר: איפה, מה אוכל, איזה צבע, איזה גודל.','עוברים על כל שאלה ובודקים אם התשובה כתובה בטקסט.','השאלה שהתשובה שלה לא כתובה היא התשובה, גם אם אתם יודעים אותה מהחיים.'],
+  ex:[{q:'הדב גר ביער. הדב אוכל דבש. הדב חום. על איזו שאלה אין תשובה בטקסט? (איפה הדב גר? / מה הדב אוכל? / כמה שנים הדב חי? / מה צבע הדב?)',steps:['איפה גר: [[ביער]] ✓ כתוב','מה אוכל: [[דבש]] ✓ כתוב','מה הצבע: [[חום]] ✓ כתוב','כמה שנים חי: לא כתוב בשום מקום.'],a:'כמה שנים הדב חי?'}]},
+gShSynonyms:{
+  what:'מילים נרדפות הן מילים שמשמעותן דומה. שואלים באיזה זוג המילים אינן נרדפות, או באיזה זוג הן נרדפות.',
+  think:['לכל זוג שואלים: אפשר להחליף בין המילים במשפט והוא יישאר דומה?','זוג של הפכים (חם וקר) אינו נרדף.','זוג של מילים שאין ביניהן קשר גם אינו נרדף.'],
+  ex:[{q:'באיזה זוג המילים אינן נרדפות? (גדול – ענק / קטן – זעיר / חם – קר / יפה – נאה)',steps:['גדול וענק: שתיהן על גודל ✓','קטן וזעיר: שתיהן על קטן ✓','יפה ונאה: שתיהן על יופי ✓','חם וקר: [[הפכים]], לא נרדפות.'],a:'חם – קר'}]},
+gShPurpose:{
+  what:'טקסט קצר (שלט, הזמנה, הוראות, פרסומת...) ושואלים מה המטרה שלו: למה הוא נכתב.',
+  think:['שואלים: מה הכותב רוצה שיקרה אחרי שנקרא?','"נא לא" או "זהירות" אומרים להזהיר. "בואו" או "מוזמנים" אומרים להזמין.','"קודם... אחר כך" אומר להסביר איך עושים. "קנו" אומר לפרסם.'],
+  ex:[{q:'כתוב בשלט: "נא לא להאכיל את הברווזים." מה המטרה של הטקסט?',steps:['"נא לא" אומר שמבקשים ממישהו לא לעשות משהו.','המטרה: [[להזהיר או לבקש שלא יעשו משהו]]'],a:'להזהיר או לבקש שלא יעשו משהו'}]},
 rdCause:{
   what:'שאלת "מדוע" על הקטע. התשובה היא הסיבה, והיא כתובה בקטע או נובעת ממנו.',
   think:['מוצאים בקטע את המקום שמדבר על העניין, אפשר לפתוח את הקטע בכפתור.','הסיבה עונה על השאלה "בגלל מה?". מחפשים מילים כמו "כי", "לכן", "כדי".','בודקים שהתשובה שבחרתם באמת מופיעה בקטע, ולא רק נשמעת הגיונית.'],
@@ -2606,7 +2618,7 @@ function cloudProfileFromDoc(C, helpers){
 // ===== CLOUD (Google sign-in, cloud progress, problem reports) =====
 // Local-first: the game always works from this device's storage. The cloud is a mirror, so no internet / no account / no quota never blocks play.
 // Everything here is off while CLOUD_CONFIG is null. See firebase/SETUP.md for how to create the (free) Firebase project and paste its settings below.
-const APP_VERSION = '2026.11.16f';       // keep equal to VERSION in sw.js (a test checks it)
+const APP_VERSION = '2026.11.16g';       // keep equal to VERSION in sw.js (a test checks it)
 const BUILD_COMMIT = '';                 // the full id of the commit this page was built from: the deploy workflow (.github/workflows/tests.yml) fills it in; empty in a plain checkout
 const REPO_URL = 'https://github.com/matan-gk/matan-gk.github.io';
 const CLOUD_CONFIG = {apiKey:"AIzaSyAlq_TJNGvWPJpUrpbdq_hkAoURydqMzm0", authDomain:"learning-quest-1.firebaseapp.com", projectId:"learning-quest-1", appId:"1:98931179722:web:78fb00084ccba3efb53433"};   // e.g. {apiKey:'...', authDomain:'xxx.firebaseapp.com', projectId:'xxx', appId:'...'}
@@ -3364,6 +3376,7 @@ const SKILL_META = {
   gSharing:{area:'stories', he:'בעיית חלוקה'}, gMultiplyChain:{area:'stories', he:'בעיית כפל'}, gLeftover:{area:'stories', he:'בעיית שאריות'},
   rdCause:{area:'reading', he:'קריאה: סיבה'}, rdWordRole:{area:'reading', he:'קריאה: תפקיד מילה'}, rdPhrase:{area:'reading', he:'קריאה: משמעות ביטוי'}, rdPurpose:{area:'reading', he:'קריאה: מטרת משפט'},
   rdNotInText:{area:'reading', he:'קריאה: מה אין בקטע'}, rdWordMeaning:{area:'reading', he:'קריאה: פירוש מילה'}, rdMotive:{area:'reading', he:'קריאה: למה עשה'}, rdSynonyms:{area:'reading', he:'מילים נרדפות'},
+  gShNotInText:{area:'reading', he:'קריאה קצרה: מה אין בטקסט'}, gShSynonyms:{area:'reading', he:'קריאה קצרה: מילים נרדפות'}, gShPurpose:{area:'reading', he:'קריאה קצרה: מטרת הטקסט'},
   gMulFact:{area:'numbers', he:'לוח הכפל'}, gCompareTotals:{area:'stories', he:'השוואת סכומים'}, gRoundsTransfer:{area:'stories', he:'משחק בסבבים'},
   gFillNumber:{area:'numbers', he:'השלימו את המספר'}, gDifferenceMore:{area:'stories', he:'בעיית הפרש'}, gGroups:{area:'stories', he:'בעיית קבוצות'}, gRemainder:{area:'stories', he:'בעיית שארית'},
   gTwoSymbols:{area:'symbols', he:'חידת סמלים'}, gThreeSymbols:{area:'symbols', he:'חידת סמלים משולשת'}, gCirclePattern:{area:'symbols', he:'מספרים בקשת'}, gInequality:{area:'symbols', he:'אי-שוויון'},
@@ -3417,7 +3430,7 @@ const DIFFICULTY = {
 };
 const SKILL_DIFFICULTY = {
   // word problems
-  rdCause:2, rdWordRole:3, rdPhrase:2, rdPurpose:3, rdNotInText:3, rdWordMeaning:2, rdMotive:2, rdSynonyms:2,
+  rdCause:2, rdWordRole:3, rdPhrase:2, rdPurpose:3, rdNotInText:3, rdWordMeaning:2, rdMotive:2, rdSynonyms:2, gShNotInText:2, gShSynonyms:2, gShPurpose:2,
   gCompareTotals:3, gRoundsTransfer:3, gMulFact:1,
   gLeftover:1, gDifferenceMore:1, gGroups:1, gSharing:2, gMultiplyChain:2, gRemainder:2,
   // symbol puzzles
@@ -5488,16 +5501,6 @@ function rdExpire(now){
 }
 // when the first finished passage returns (ms), or 0 when none will
 function rdReturnAt(){ if(!rd.days || !rd.done.length) return 0; return Math.min(...rd.done.map(id=>(rd.t[id]||Date.now()) + rd.days*86400000)); }
-function rdDoneText(){
-  const at = rdReturnAt(), left = at ? Math.max(1, Math.ceil((at-Date.now())/86400000)) : 0;
-  return 'סיימת לקרוא את כל הסיפורים! 🎉' + (left ? ` סיפור חדש יחזור בעוד ${left===1?'יום אחד':left+' ימים'}.` : ' כשיהיו סיפורים חדשים, הם יחכו לך כאן.');
-}
-function rdNote(text){
-  rdClose();
-  const o = document.createElement('div'); o.id='rdOverlay'; o.className='rdov'; o.setAttribute('role','dialog'); o.setAttribute('aria-modal','true');
-  o.innerHTML = `<div class="rdbox rdnote"><h2>📖 ספריית הסיפורים</h2><p>${esc(text)}</p><button type="button" class="btn rdclose">הבנתי</button></div>`;
-  document.body.appendChild(o); o.querySelector('.rdclose').onclick = rdClose;
-}
 function rdSnap(){ return rdClean(rd); }
 const rdPassage = id => READING_BANK.find(p=>p.id===id) || null;
 function rdAvailable(){ rdExpire(); return READING_BANK.some(p=>!rd.done.includes(p.id)); }
@@ -5515,7 +5518,8 @@ function rdAnswered(info){
   rd.cur.i++; if(rd.cur.i>=p.qs.length) rdFinish(p);
 }
 function gReading(){
-  const n = rdNext(); const q = n.p.qs[n.i];
+  const n = rdNext(); if(!n){ const g = pick(SHORT_READING_POOL); return {...g(), rdSkill:g.name}; }   // every passage read: a short question instead
+  const q = n.p.qs[n.i];
   return {label:`📖 ${n.p.title} · שְׁאֵלָה ${n.i+1} מִתּוֹךְ ${n.p.qs.length}`, text:q.q, type:'mcq', wide:true, answer:q.a, choices:shuffle([q.a, ...q.w]),
     rd:{id:n.p.id, i:n.i, lines:q.lines||[]}, rdSkill:q.skill};
 }
@@ -5537,6 +5541,105 @@ function rdQuestionUI(area){
   if(gameView==='play' && !rdSeen.has(current.rd.id)){ rdSeen.add(current.rd.id); rdOpen(current.rd.id, [], true); }   // the first question of a passage in this session opens the passage
 }
 
+// ---- SHORT READING QUESTIONS: one or two voweled lines and one question. Unlike the passages they are generated, so they never run out. ----
+// (every string here is fully voweled; a test checks that no Hebrew word is left bare)
+const RS_NAMES = [{n:'דָּנִי',g:'m'},{n:'תֹּם',g:'m'},{n:'אִיתַי',g:'m'},{n:'יוּבַל',g:'m'},{n:'עוֹמֵר',g:'m'},{n:'נָדָב',g:'m'},
+  {n:'דָּנָה',g:'f'},{n:'נֹעָה',g:'f'},{n:'לִיָּה',g:'f'},{n:'מַאיָה',g:'f'},{n:'שִׁירָה',g:'f'},{n:'יַעֵל',g:'f'}];
+const rsG = (x,m,f) => x.g==='m' ? m : f;
+// -- what is NOT in the text: a creature of the game's world, three facts stated, one question with no answer --
+const RS_CREATURES = [
+  {the:'הַדֹּב', g:'m', home:['בַּיַּעַר','בִּמְעָרָה'], food:['דְּבַשׁ','דָּגִים']},
+  {the:'הַפִּיל', g:'m', home:['בְּאַפְרִיקָה','בַּסָּוָנָה'], food:['עָלִים','פֵּרוֹת']},
+  {the:'הָאַרְנָב', g:'m', home:['בְּחוֹר בָּאֲדָמָה','בַּשָּׂדֶה'], food:['גֶּזֶר','חַסָּה']},
+  {the:'הַצָּב', g:'m', home:['בַּבְּרֵכָה','בַּגַּן'], food:['חַסָּה','עֲשָׂבִים']},
+  {the:'הַקּוֹף', g:'m', home:['עַל עֵץ גָּבוֹהַּ','בַּיַּעַר'], food:['בָּנָנוֹת','אֱגוֹזִים']},
+  {the:'הַדְּרָקוֹן', g:'m', home:['בְּהַר גָּבוֹהַּ','בְּטִירָה יְשָׁנָה'], food:['סוּכָּרִיּוֹת','עוּגִיּוֹת']},
+  {the:'הַחַד־קֶרֶן', g:'m', home:['בְּאֶרֶץ הַקֶּשֶׁת','בַּיַּעַר הַקָּסוּם'], food:['סֻכָּר','תּוּתֵי שָׂדֶה']},
+  {the:'הַחֲתוּלָה', g:'f', home:['בַּבַּיִת','עַל הַגַּג'], food:['דָּגִים','חָלָב']},
+  {the:'הַצִּפּוֹר', g:'f', home:['בְּקֵן','עַל הָעֵץ'], food:['זְרָעִים','תּוּתִים']},
+  {the:'הַדֻּבָּה', g:'f', home:['בַּיַּעַר','בִּמְעָרָה'], food:['דְּבַשׁ','תּוּתִים']},
+  {the:'הַסּוּסָה', g:'f', home:['בָּאֻרְוָה','בַּשָּׂדֶה'], food:['חָצִיר','תַּפּוּחִים']}
+];
+const RS_COLORS = [['חוּם','חוּמָה'],['לָבָן','לְבָנָה'],['אָפֹר','אֲפוֹרָה'],['צָהֹב','צְהֻבָּה'],['וָרֹד','וְרֻדָּה'],['כָּחֹל','כְּחֻלָּה']];
+const RS_SIZES = [['גָּדוֹל','גְּדוֹלָה'],['קָטָן','קְטַנָּה'],['גָּבוֹהַּ','גְּבוֹהָה'],['נָמוּךְ','נְמוּכָה']];
+const RS_SKILLS = ['לָרוּץ מַהֵר','לִקְפֹּץ גָּבוֹהַּ','לָשִׁיר','לִשְׁחוֹת','לְצַיֵּר','לָרְקֹד'];
+function gShNotInText(){
+  const c = pick(RS_CREATURES), g = (m,f)=>c.g==='m'?m:f, the = c.the;
+  const col = pick(RS_COLORS), sz = pick(RS_SIZES);
+  const F = {
+    home:{s:`${the} ${g('גָּר','גָּרָה')} ${pick(c.home)}.`, q:`אֵיפֹה ${the} ${g('גָּר','גָּרָה')}?`},
+    food:{s:`${the} ${g('אוֹכֵל','אוֹכֶלֶת')} ${pick(c.food)}.`, q:`מָה ${the} ${g('אוֹכֵל','אוֹכֶלֶת')}?`},
+    color:{s:`${the} ${g(col[0],col[1])}.`, q:`מָה ${g('צִבְעוֹ','צִבְעָהּ')} שֶׁל ${the}?`},
+    size:{s:`${the} ${g(sz[0],sz[1])}.`, q:`מָה גֹּדֶל ${the}?`},
+    skill:{s:`${the} ${g('יוֹדֵעַ','יוֹדַעַת')} ${pick(RS_SKILLS)}.`, q:`מָה ${the} ${g('יוֹדֵעַ','יוֹדַעַת')} לַעֲשׂוֹת?`}
+  };
+  const keys = shuffle(Object.keys(F)), stated = keys.slice(0,3), missing = keys[3];
+  const text = `${F[stated[0]].s}<br>${F[stated[1]].s} ${F[stated[2]].s}<br>עַל אֵיזוֹ שְׁאֵלָה אֵין תְּשׁוּבָה בַּטֶּקְסְט?`;
+  return {label:'📖 קְרִיאָה קְצָרָה', text, type:'mcq', wide:true, answer:F[missing].q, choices:shuffle([F[missing].q, ...stated.map(k=>F[k].q)])};
+}
+// -- synonyms: a pair is "not synonyms" when it is an opposite or two words of different kinds --
+const RS_SYN = [['גָּדוֹל','עֲנָק','size'],['קָטָן','זָעִיר','size'],['יָפֶה','נָאֶה','look'],['מָהִיר','זָרִיז','speed'],['שָׂמֵחַ','עַלִּיז','feel'],
+  ['עָצוּב','נוּגֶה','feel'],['כּוֹעֵס','זוֹעֵם','feel'],['חָכָם','נָבוֹן','mind'],['קַר','צוֹנֵן','temp'],['לָלֶכֶת','לִצְעֹד','move'],['לִקְנוֹת','לִרְכֹּשׁ','trade'],
+  ['לִבְנוֹת','לְהָקִים','make'],['לְדַבֵּר','לְשׂוֹחֵחַ','talk'],['לְהִתְחַבֵּא','לְהִסְתַּתֵּר','hide'],['אוֹצָר','מַטְמוֹן','thing'],['שֶׁקֶט','שַׁלְוָה','calm'],
+  ['חָבֵר','יָדִיד','people'],['פַּחַד','אֵימָה','fear'],['חַם','לוֹהֵט','temp']];
+const RS_OPP = [['חַם','קַר'],['גָּדוֹל','קָטָן'],['מָהִיר','אִטִּי'],['שָׂמֵחַ','עָצוּב'],['חָזָק','חָלָשׁ'],['אוֹר','חֹשֶׁךְ'],['קָרוֹב','רָחוֹק'],
+  ['יוֹם','לַיְלָה'],['מָלֵא','רֵיק'],['כָּבֵד','קַל'],['חָדָשׁ','יָשָׁן'],['גָּבוֹהַּ','נָמוּךְ']];
+function gShSynonyms(){
+  const askSyn = Math.random()<0.3;                 // 3 in 10: "which pair IS synonyms"
+  const syn = shuffle(RS_SYN.slice());
+  const used = new Set(), pairs = [];
+  const take = (a,b)=>{ if(used.has(a)||used.has(b)) return false; used.add(a); used.add(b); pairs.push(`${a} – ${b}`); return true; };
+  const nSyn = askSyn ? 1 : 3, nNot = askSyn ? 3 : 1;
+  const synOut = []; for(const x of syn){ if(synOut.length<nSyn && take(x[0],x[1])) synOut.push(pairs[pairs.length-1]); }
+  const notOut = [];
+  while(notOut.length<nNot){
+    let a,b;
+    if(Math.random()<0.5){ const o = pick(RS_OPP); const sw = Math.random()<0.5; a = o[sw?1:0]; b = o[sw?0:1]; }
+    else { const x = pick(RS_SYN), y = pick(RS_SYN); if(x[2]===y[2]) continue; a = x[0]; b = y[Math.random()<0.5?0:1]; }
+    if(take(a,b)) notOut.push(pairs[pairs.length-1]);
+  }
+  const answer = askSyn ? synOut[0] : notOut[0];
+  const def = 'מִילִּים נִרְדָּפוֹת הֵן מִילִּים שֶׁיֵּשׁ לָהֶן אוֹתָהּ מַשְׁמָעוּת אוֹ מַשְׁמָעוּת דּוֹמָה מְאֹד.';
+  return {label:'📖 קְרִיאָה קְצָרָה', text:`${def}<br>${askSyn?'בְּאֵיזֶה זוּג הַמִּילִּים הַמִּילִּים נִרְדָּפוֹת?':'בְּאֵיזֶה זוּג הַמִּילִּים אֵינָן נִרְדָּפוֹת?'}`,
+    type:'mcq', wide:true, answer, choices:shuffle(pairs)};
+}
+// -- purpose of a short text: warn / invite / instruct / advertise / describe / tell --
+const RS_PURPOSE = {
+  warn:'לְהַזְהִיר אוֹ לְבַקֵּשׁ שֶׁלֹּא יַעֲשׂוּ מַשֶּׁהוּ', invite:'לְהַזְמִין אֲנָשִׁים לְאֵרוּעַ', instruct:'לְהַסְבִּיר אֵיךְ עוֹשִׂים מַשֶּׁהוּ',
+  advertise:'לְשַׁכְנֵעַ לִקְנוֹת מַשֶּׁהוּ', describe:'לְתָאֵר אֵיךְ מַשֶּׁהוּ נִרְאֶה', tell:'לְסַפֵּר מָה קָרָה'
+};
+const RS_FOODS = ['קֶמַח','סֻכָּר','חָלָב','שׁוֹקוֹלָד','בֵּיצָה','חֶמְאָה'];
+const RS_THINGS = ['סוּכָּרִיּוֹת','קַאפְּקֵייקְס','מַדְבֵּקוֹת','בַּלּוֹנִים','יוֹ־יוֹ מְנַצְנְצִים','כּוֹבָעֵי קוֹסְמִים'];
+const RS_DAYS = ['שִׁשִּׁי','רִאשׁוֹן','חֲמִישִׁי','שְׁלִישִׁי'];
+const RS_WINGS = ['כְּחֻלּוֹת','יְרֻקּוֹת','אֲדֻמּוֹת','צְהֻבּוֹת','סְגֻלּוֹת'];
+const RS_BEASTS = ['הַדְּרָקוֹנִים הַקְּטַנִּים','הַבַּרְוָזִים','הַחַד־קַרְנַיִם','הָאַרְנָבִים'];
+function gShPurpose(){
+  const kind = pick(Object.keys(RS_PURPOSE)), per = pick(RS_NAMES);
+  const [f1,f2] = shuffle(RS_FOODS.slice()), th = pick(RS_THINGS);
+  const T = {
+    warn:[`כָּתוּב בַּשֶּׁלֶט: "נָא לֹא לְהַאֲכִיל אֶת ${pick(RS_BEASTS)}."`, `עַל הַדֶּלֶת שֶׁל חֲנוּת הַהַפְתָּעוֹת תָּלוּי שֶׁלֶט: "זְהִירוּת! הָרִצְפָּה רְטוּבָה."`, `הַמּוֹכֶרֶת אָמְרָה לַיְּלָדִים: "אַל תִּגְּעוּ בַּקָּרָמֶל הַחַם!"`],
+    invite:[`בְּיוֹם ${pick(RS_DAYS)} תִּהְיֶה מְסִבָּה בַּחֲנוּת הַהַפְתָּעוֹת. כֻּלָּם מוּזְמָנִים לָבוֹא!`, `${per.n} ${rsG(per,'מַזְמִין','מַזְמִינָה')} אֶתְכֶם לְיוֹם הֻלֶּדֶת בַּגַּן. בֹּאוּ לַחֲגֹג אִתָּנוּ!`],
+    instruct:[`קֹדֶם מְעַרְבְּבִים ${f1} וְ${f2}, וְאַחַר כָּךְ מוֹסִיפִים מַיִם.`, `פּוֹתְחִים אֶת הַקֻּפְסָה, מוֹצִיאִים אֶת הַמַּפָּה וּמְפַשְּׁטִים אוֹתָהּ עַל הַשֻּׁלְחָן.`],
+    advertise:[`בַּחֲנוּת שֶׁלָּנוּ מְחַכִּים לָכֶם ${th}! בֹּאוּ לִקְנוֹת!`, `מִבְצָע בַּחֲנוּת הַהַפְתָּעוֹת: קוֹנִים שְׁנַיִם וּמְשַׁלְּמִים עַל אֶחָד! כְּדַאי לְמַהֵר!`],
+    describe:[`לַדְּרָקוֹן יֵשׁ כְּנָפַיִם ${pick(RS_WINGS)} וְזָנָב אָרֹךְ.`, `בַּחֲנוּת הַהַפְתָּעוֹת יֵשׁ מַדָּפִים גְּבוֹהִים, וְעַל כָּל מַדָּף עוֹמְדוֹת צִנְצֶנֶת זְכוּכִית צִבְעוֹנִית.`],
+    tell:[`אֶתְמוֹל ${rsG(per,'הָלַךְ','הָלְכָה')} ${per.n} לַחֲנוּת הַהַפְתָּעוֹת, וְ${rsG(per,'קָנָה','קָנְתָה')} ${th}.`, `בַּבֹּקֶר יָרַד גֶּשֶׁם, וְהַיְּלָדִים נִכְנְסוּ לַחֲנוּת לְהִתְחַמֵּם.`]
+  };
+  const keys = Object.keys(RS_PURPOSE), others = shuffle(keys.filter(k=>k!==kind)).slice(0,3);
+  return {label:'📖 קְרִיאָה קְצָרָה', text:`${pick(T[kind])}<br>מָה הַמַּטָּרָה שֶׁל הַטֶּקְסְט?`, type:'mcq', wide:true,
+    answer:RS_PURPOSE[kind], choices:shuffle([kind,...others].map(k=>RS_PURPOSE[k]))};
+}
+const SHORT_READING_POOL = [gShNotInText, gShSynonyms, gShPurpose];
+// reading draw: a passage in progress always continues; a new passage starts only now and then (RD_START); with every passage read, only short questions
+const RD_START = 0.5;
+function rdPick(pool, gen){
+  if(!pool.includes(gReading)) return gen;
+  const shorts = pool.filter(g=>g!==gReading);
+  if(rd.cur && rdPassage(rd.cur.id) && !rd.done.includes(rd.cur.id)) return gReading;
+  if(!rdAvailable()) return shorts.length ? (gen!==gReading ? gen : pick(shorts)) : gReading;
+  if(gen===gReading && shorts.length && Math.random()>=RD_START) return pick(shorts);
+  return gen;
+}
+
 // ---- SECTION POOLS (one topic per section; see CATEGORIES.md). A question type is in exactly one section, and the mix level (5) has them all. ----
 const NUMBERS_POOL = [gDigitOf, gBuildNumber, gWordsToNum, gNumToWords, gDigitCompare, gFindByDigit, gBiggestOfFour, gOrderNumbers, gMissingDigit, gBetween, gNumberRiddle, gPredSucc, gFillNumber,
   gAddTwoDigit, gAddCarry, gSubTwoDigit, gSubBorrow, gBiggerExpr, gDigitsMinMaxDiff, gHowManyBuild, gMulFact];
@@ -5549,7 +5652,7 @@ const LOGIC_POOL = [gAnalogyWord, gPairAnalogy, gOddOneOutCategory, gOddOneOutSh
 const SHAPES_POOL = [gShapeSides, gWhichShape, gCountSquares, gCompleteShape, gPolygonName, gPerimeter, gSymmetryLine, gRectPerimeter, gLPerimeter, gMissingSide];
 const pools = {
   7: NUMBERS_POOL, 1: STORIES_POOL, 2: SYMBOLS_POOL, 6: CLOCK_POOL, 3: PATTERNS_POOL, 4: LOGIC_POOL, 8: SHAPES_POOL,
-  9: [gReading],
+  9: [gReading, ...SHORT_READING_POOL],
   5: [...NUMBERS_POOL, ...STORIES_POOL, ...SYMBOLS_POOL, ...CLOCK_POOL, ...PATTERNS_POOL, ...LOGIC_POOL, ...SHAPES_POOL]   // the mix never contains reading (section 9)
 };
 
@@ -5674,7 +5777,7 @@ function renderLevels(){
     const cut = themeId===THEME_DEFAULT ? LEVEL_ICON_IMG[l.id] : null;
     const pic = skinImg('level', l.id, cut || null);
     b.innerHTML = (pic ? `<span class="emoji"><img class="lvimg${cut&&pic===cut?' cut':''}" src="${pic}" alt=""></span>` : `<span class="emoji">${l.emoji}</span>`) + esc(levelName(l));
-    b.onclick = l.id===9 ? ()=>{ if(rdAvailable()) openGame(9); else rdNote(rdDoneText()); } : ()=>openGame(l.id);
+    b.onclick = ()=>openGame(l.id);
     el.appendChild(b);
   });
   addRoomBtn(el);
@@ -6688,19 +6791,13 @@ function nextQuestion(){
   document.getElementById('nextBtn').style.display='none';
   document.getElementById('feedback').textContent='';
   document.getElementById('feedback').className='feedback';
-  if(level===9 && !rdAvailable()){   // every passage has been read
-    const playing = gameView==='play';
-    level = 5;                       // leave the empty section, so that a reload or a profile switch does not land in it again
-    showHome();
-    if(playing) rdNote(rdDoneText());   // the message only follows a tap or the last answer, never a page load or a profile switch
-    saveState(); return;
-  }
   let pool = poolFor(level);
   if(!pool.length){ renderLevels(); pool = poolFor(level); }          // safety: the section was emptied while it was open
   if(!pool.length) pool = filterByDifficultySet(pools[level], activeDifficultyIds());
   const pr = activeProfile();
   const warming = warmOn && sessionDraws < WARMUP.count; sessionDraws++;
-  const gen = pickGenerator(pool, pr && pr.stats, focusOn, current && current.skill, undefined, warming);
+  let gen = pickGenerator(pool, pr && pr.stats, focusOn, current && current.skill, undefined, warming);
+  if(level===9) gen = rdPick(pool, gen);
   current = themeStory(gen()); current.skill = current.rdSkill || gen.name; current.d = questionDifficulty({d:current.d, skill:current.skill}); current.isBonus = false; startQTimer();
   document.getElementById('qlabel').textContent = current.label;
   document.getElementById('qtext').innerHTML = grpShapes(current.text);

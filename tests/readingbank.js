@@ -6,6 +6,7 @@ const b=await chromium.launch(T.launchOpts); const p=await (await b.newContext({
 await p.goto(T.URL); await p.evaluate(()=>localStorage.clear()); await p.reload();
 await p.fill('#pfName','נועה'); await p.click('.gopt:has(input[value=f])'); await p.click('[data-pact=save]'); await p.waitForTimeout(300);
 const E=(fn,...a)=>p.evaluate(fn,...a);
+await E(()=>{ pools[9]=[gReading]; });   // passages only: the short questions have their own test
 const SK=['rdCause','rdWordRole','rdPhrase','rdPurpose','rdNotInText','rdWordMeaning','rdMotive','rdSynonyms'];
 const rep=await E(()=>READING_BANK.map(x=>{ const lines=[].concat(...x.paras); const bad=[];
   if(x.qs.length!==8) bad.push('questions '+x.qs.length);
@@ -38,7 +39,7 @@ for(let k=0;k<rep.length;k++){
 ok(new Set(seen).size===rep.length&&await E(()=>rd.done.length===READING_BANK.length),'all '+rep.length+' passages were offered once each and finished: '+seen.join(','));
 // the passage itself must not open on the menu: a passage in progress, level 9 saved, then a reload
 await E(()=>{ rd=rdClean({done:[],cur:{id:READING_BANK[1].id,i:2},t:{}}); level=9; gameView='home'; saveState(); });
-await p.reload(); await p.waitForTimeout(500);
+await p.reload(); await p.waitForTimeout(500); await E(()=>{ pools[9]=[gReading]; });
 ok(await E(()=>!document.getElementById('rdOverlay')&&gameView==='home'),'reload with a passage in progress: the menu shows no passage');
 await E(()=>{ [...document.querySelectorAll('#levels .levelbtn')].find(x=>x.textContent.includes('ספריית')).click(); }); await p.waitForTimeout(250);
 ok(await E(()=>gameView==='play'&&!!document.getElementById('rdOverlay')&&current.rd.i===2),'tapping the section opens the passage, at the question she had reached');
