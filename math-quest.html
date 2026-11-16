@@ -1022,7 +1022,7 @@ body[data-view="space"] #spaceView{box-sizing:border-box; display:flex; flex-dir
     <div class="spacehead"><button type="button" class="btn ghost" id="spaceBack">→ חזרה</button><div class="roomtitle">🏰 החדר של קאפקייק</div></div>
     <div class="rmlayout">
       <div class="rmstage"><div class="rmview" id="rmView"></div>
-        <div class="rmzoom"><button type="button" class="rmz" data-z="1" aria-label="הגדלה">＋</button><button type="button" class="rmz" data-z="-1" aria-label="הקטנה">－</button><button type="button" class="rmz" data-z="0" aria-label="איפוס">⤢</button></div>
+        <div class="rmzoom"><button type="button" class="rmz" data-z="1" aria-label="הגדלה">＋</button><button type="button" class="rmz" data-z="-1" aria-label="הקטנה">－</button><button type="button" class="rmz" data-z="0" aria-label="איפוס">⤢</button><button type="button" class="rmz" id="rmAtmo" data-atmo="1" aria-label="אור ואווירה" aria-pressed="true" title="אור ואווירה">✨</button></div>
         <aside class="rmdrawer" id="rmDrawer" hidden></aside></div>
     </div>
   </section>
@@ -2568,7 +2568,7 @@ function cloudProfileFromDoc(C, helpers){
 // ===== CLOUD (Google sign-in, cloud progress, problem reports) =====
 // Local-first: the game always works from this device's storage. The cloud is a mirror, so no internet / no account / no quota never blocks play.
 // Everything here is off while CLOUD_CONFIG is null. See firebase/SETUP.md for how to create the (free) Firebase project and paste its settings below.
-const APP_VERSION = '2026.11.15g';       // keep equal to VERSION in sw.js (a test checks it)
+const APP_VERSION = '2026.11.16a';       // keep equal to VERSION in sw.js (a test checks it)
 const BUILD_COMMIT = '';                 // the full id of the commit this page was built from: the deploy workflow (.github/workflows/tests.yml) fills it in; empty in a plain checkout
 const REPO_URL = 'https://github.com/matan-gk/matan-gk.github.io';
 const CLOUD_CONFIG = {apiKey:"AIzaSyAlq_TJNGvWPJpUrpbdq_hkAoURydqMzm0", authDomain:"learning-quest-1.firebaseapp.com", projectId:"learning-quest-1", appId:"1:98931179722:web:78fb00084ccba3efb53433"};   // e.g. {apiKey:'...', authDomain:'xxx.firebaseapp.com', projectId:'xxx', appId:'...'}
@@ -5957,6 +5957,51 @@ function fxPreviewSVG(pl){
 }
 const wallXf = w => `translate(${500+(w.s==='r'?1:-1)*w.a} ${400+w.a/2-w.h}) matrix(1 ${w.s==='r'?.5:-.5} 0 1 0 0)`;   // the wall's own plane: a picture drawn flat is sheared with the wall (no mirroring, so a clock keeps its numbers)
 const wallImgSVG = c => `<image href="${c.src}" x="${c.r[0]}" y="${c.r[1]}" width="${c.r[2]}" height="${c.r[3]}"/>`;
+// ===== ATMOSPHERE (the room's light and trim: drawn over the walls and floor, never takes a touch; on by default, switched off per device with the sparkle button) =====
+const atmoOn = () => { try{ return localStorage.getItem('cq_atmo')!=='0'; }catch(e){ return true; } };
+const hexRGB = h => [1,3,5].map(i=>parseInt(h.slice(i,i+2),16));
+const mixC = (a,b,t) => a.map((v,i)=>v+(b[i]-v)*t);
+const rgbCss = a => 'rgb('+a.map(v=>Math.max(0,Math.min(255,Math.round(v)))).join(',')+')';
+const atmoBase = idx => typeof idx==='string' ? [201,189,240] : ROOM_COLORS[idx].h==='rainbow' ? [176,160,224] : hexRGB(ROOM_COLORS[idx].h);   // the colour a surface reads as (a pattern: a soft violet)
+const satOf = c => { const mx = Math.max(...c), mn = Math.min(...c); return mx ? (mx-mn)/mx : 0; };
+const atmoMilk = (idx, floor) => { const r = typeof idx!=='string' && ROOM_COLORS[idx].h==='rainbow', sat = typeof idx==='string' ? .1 : satOf(atmoBase(idx)); return Math.max(0, (r ? .36 : .06 + .22*sat) - (floor ? .06 : 0)); };   // a milky layer: rainbow and strong colours turn pastel, soft ones barely change
+const flP = (x,y) => [500+25*(x-y), 400+12.5*(x+y)], wlP = (a,h) => [500-a, 400+a/2-h], wrP = (a,h) => [500+a, 400+a/2-h];
+const ptsS = a => a.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' ');
+function atmoShell(cl, cr, cf){
+  const bl = atmoBase(cl), br = atmoBase(cr), bf = atmoBase(cf), L = 'points="0,50 500,-200 500,400 0,650"', R = 'points="500,-200 1000,50 1000,650 500,400"', F = 'points="500,400 1000,650 500,900 0,650"';
+  const shade = c => rgbCss(mixC(c.map(v=>v*.5), [70,40,140], .3)), light = c => rgbCss(mixC(c, [255,255,255], .72)), edge = c => rgbCss(mixC(c, [80,50,150], .35));
+  const ml = atmoMilk(cl), mr = atmoMilk(cr), mf = atmoMilk(cf, true);
+  let d = `<defs><linearGradient id="atAoL" x1="0" x2="1" y1="0" y2="0"><stop offset=".55" stop-color="${shade(bl)}" stop-opacity="0"/><stop offset="1" stop-color="${shade(bl)}" stop-opacity=".30"/></linearGradient>
+    <linearGradient id="atAoR" x1="1" x2="0" y1="0" y2="0"><stop offset=".55" stop-color="${shade(br)}" stop-opacity="0"/><stop offset="1" stop-color="${shade(br)}" stop-opacity=".30"/></linearGradient>
+    <linearGradient id="atTop" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".16"/><stop offset=".45" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#3a1f7a" stop-opacity=".08"/></linearGradient>
+    <linearGradient id="atSheen" x1="0" x2="1" y1="0" y2="1"><stop offset=".25" stop-color="#fff" stop-opacity="0"/><stop offset=".5" stop-color="#fff" stop-opacity=".24"/><stop offset=".75" stop-color="#fff" stop-opacity="0"/></linearGradient>
+    <filter id="atGrade" filterUnits="userSpaceOnUse" x="-60" y="-260" width="1120" height="1260"><feColorMatrix type="matrix" values="0.96 0.02 0.04 0 0.005  0.02 0.94 0.06 0 0  0.04 0.05 1 0 0.03  0 0 0 1 0"/><feDropShadow dx="0" dy="0" stdDeviation="4" flood-color="#b096ff" flood-opacity=".4"/></filter></defs>`;
+  let grid = ''; for(let i=1;i<ROOM_CELLS;i++){ grid += `M${flP(i,0)} L${flP(i,ROOM_CELLS)} M${flP(0,i)} L${flP(ROOM_CELLS,i)} `; }
+  return d + `<g class="atmo" pointer-events="none">
+    ${ml ? `<polygon ${L} fill="#fff" fill-opacity="${ml.toFixed(3)}"/>` : ''}${mr ? `<polygon ${R} fill="#fff" fill-opacity="${mr.toFixed(3)}"/>` : ''}${mf ? `<polygon ${F} fill="#fff" fill-opacity="${mf.toFixed(3)}"/>` : ''}
+    <polygon ${L} fill="url(#atAoL)"/><polygon ${R} fill="url(#atAoR)"/><polygon ${L} fill="url(#atTop)"/><polygon ${R} fill="url(#atTop)"/>
+    <polygon points="${ptsS([wlP(0,0),wlP(500,0),wlP(500,26),wlP(0,26)])}" fill="${light(bl)}" fill-opacity=".9"/><polygon points="${ptsS([wlP(0,26),wlP(500,26),wlP(500,30),wlP(0,30)])}" fill="${edge(bl)}" fill-opacity=".7"/>
+    <polygon points="${ptsS([wrP(0,0),wrP(500,0),wrP(500,26),wrP(0,26)])}" fill="${light(br)}" fill-opacity=".9"/><polygon points="${ptsS([wrP(0,26),wrP(500,26),wrP(500,30),wrP(0,30)])}" fill="${edge(br)}" fill-opacity=".7"/>
+    <polygon points="${ptsS([wlP(0,600),wlP(500,600),wlP(500,578),wlP(0,578)])}" fill="${light(bl)}" fill-opacity=".8"/><polygon points="${ptsS([wrP(0,600),wrP(500,600),wrP(500,578),wrP(0,578)])}" fill="${light(br)}" fill-opacity=".8"/>
+    <polygon points="${ptsS([wlP(0,0),wlP(14,0),wlP(14,600),wlP(0,600)])}" fill="#fff" fill-opacity=".3"/>
+    <polygon ${F} fill="url(#atSheen)"/><path d="${grid}" stroke="#fff" stroke-opacity=".3" stroke-width="1.6" fill="none" transform="translate(0,1.8)"/></g>`;
+}
+function atmoLight(wp, lvl){   // the window's glow on its wall, a beam, and a patch of light on the floor
+  const a = wp && ROOM_ART.window[lvl-1]; if(!a) return '';
+  const hw = a.w/2, ac = wp.u - a.ax + hw, v0 = WIN_SILL + a.ay - a.h, vc = v0 + a.h/2, f = wp.w==='r' ? wrP : wlP, half = Math.max(3, hw/25*.9), g = ac/25, cl = v => Math.max(0, Math.min(ROOM_CELLS, v));
+  const q = wp.w==='r' ? [flP(cl(g-half),0), flP(cl(g+half),0), flP(cl(g+half+8),9), flP(cl(g-half+8),9)] : [flP(0,cl(g-half)), flP(0,cl(g+half)), flP(9,cl(g+half+8)), flP(9,cl(g-half+8))], gc = f(ac, vc);
+  return `<g class="atmo" pointer-events="none" style="mix-blend-mode:screen"><defs><radialGradient id="atGlow" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#fff" stop-opacity=".5"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
+    <linearGradient id="atBeam" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#fff6d0" stop-opacity=".45"/><stop offset="1" stop-color="#fff6d0" stop-opacity="0"/></linearGradient>
+    <radialGradient id="atPatch" cx=".5" cy=".5" r=".6"><stop offset="0" stop-color="#fff4c4" stop-opacity=".6"/><stop offset="1" stop-color="#fff4c4" stop-opacity="0"/></radialGradient></defs>
+    <ellipse cx="${gc[0].toFixed(1)}" cy="${gc[1].toFixed(1)}" rx="${(hw*1.6).toFixed(1)}" ry="${(a.h*.9).toFixed(1)}" fill="url(#atGlow)" opacity=".5"/>
+    <polygon points="${ptsS([f(ac-hw*.85, v0), f(ac+hw*.85, v0), q[2], q[3]])}" fill="url(#atBeam)" opacity=".5"/><polygon points="${ptsS(q)}" fill="url(#atPatch)"/></g>`;
+}
+const ATMO_SPARKS = [[230,200],[330,320],[760,230],[860,360],[160,520],[420,640],[700,700],[820,540],[600,300],[260,420],[930,520],[540,780],[300,720],[640,150]];
+function atmoOverlay(){   // a soft vignette and a few sparkles
+  let s = `<g class="atmo" pointer-events="none"><defs><radialGradient id="atVig" cx="500" cy="420" r="640" gradientUnits="userSpaceOnUse"><stop offset=".6" stop-color="#2b1366" stop-opacity="0"/><stop offset="1" stop-color="#2b1366" stop-opacity=".2"/></radialGradient></defs><polygon points="0,50 500,-200 1000,50 1000,650 500,900 0,650" fill="url(#atVig)"/>`;
+  ATMO_SPARKS.forEach(([x,y],i)=>{ const r = 5 + (i%3)*2.5; s += `<path d="M${x},${y-r*1.6} L${x+r*.35},${y-r*.35} L${x+r*1.6},${y} L${x+r*.35},${y+r*.35} L${x},${y+r*1.6} L${x-r*.35},${y+r*.35} L${x-r*1.6},${y} L${x-r*.35},${y-r*.35}Z" fill="#fff" fill-opacity="${(.5+.1*(i%3)).toFixed(2)}"/>`; });
+  return s + '</g>';
+}
 function roomSVG(){
   const cl = effCol('wl'), cr = effCol('wr'), cf = effCol('fl');
   const sel = (t,id) => RM.sel && RM.sel.t===t && (RM.sel.id||RM.sel.k)===id ? ' sel' : '';
@@ -5966,12 +6011,14 @@ function roomSVG(){
   s += `<g data-hit="surf:wr" class="rmh${sel('surf','wr')}"><polygon points="500,-200 1000,50 1000,650 500,400" fill="${surfFill(cr,'wr')}" stroke="#5b3a2a" stroke-width="4" stroke-linejoin="round"/><polygon points="500,-200 1000,50 1000,650 500,400" fill="#000" opacity=".10"/><polygon points="500,360 1000,610 1000,650 500,400" fill="#000" opacity=".08"/>${pvk==='wr' ? pendEdge('500,-200 1000,50 1000,650 500,400') + pendTag(750,225) : ''}</g>`;
   let grid = ''; for(let i=1;i<10;i++){ const a=gx2s(i*GU,0),b=gx2s(i*GU,ROOM_CELLS),c=gx2s(0,i*GU),d=gx2s(ROOM_CELLS,i*GU); grid += `M${a} L${b} M${c} L${d} `; }
   s += `<g data-hit="surf:fl" class="rmh${sel('surf','fl')}"><polygon points="500,400 1000,650 500,900 0,650" fill="${surfFill(cf,'fl')}" stroke="#5b3a2a" stroke-width="4" stroke-linejoin="round"/><path d="${grid}" stroke="#5b3a2a" stroke-opacity=".16" stroke-width="2" fill="none"/>${pvk==='fl' ? pendEdge('500,400 1000,650 500,900 0,650') + pendTag(500,650) : ''}</g>`;
+  if(atmoOn()) s += atmoShell(cl, cr, cf);
   const pl = RM.pl, shown = effLv('bed'), wl = effLv('window'), wp = winAtFor(wl, space.fix.window), bp = bedPos(shown);
   if(wp && !(pl && pl.fx==='window')) s += `<g data-hit="item:window" class="rmh${sel('item','window')}" transform="matrix(${wp.w==='l'?-1:1} .5 0 1 500 400)">${windowSVG(wl, wp.u)}</g>`;
   space.things.forEach((t,i)=>{ if(!t.wl || (pl && pl.i===i)) return; const c = catOf(t.k);
     s += `<g data-hit="thing:${i}" class="rmh${RM.sel && RM.sel.t==='thing' && RM.sel.i===i ? ' sel' : ''}" transform="${wallXf(t.wl)}">${wallImgSVG(c)}</g>`; });
   if(pl && pl.wl){ const c = catOf(pl.k), ok = wallFree(c, pl.wl, pl.i);
     s += `<g class="rmghost" opacity=".72" transform="${wallXf(pl.wl)}">${wallImgSVG(c)}<rect class="rmtile pend" x="${c.r[0]}" y="${c.r[1]}" width="${c.r[2]}" height="${c.r[3]}" fill="${ok?'#7ee08a':'#ff7b7b'}" fill-opacity=".25" stroke="${ok?'#2e9d45':'#c93a3a'}" stroke-width="3"/></g>`; }
+  if(atmoOn()) s += atmoLight(wp, wl);
   const pvp = pvPart(), bedPend = !!(RM.pv && ((RM.pv.t==='lv' && RM.pv.id==='bed') || (pvp && RM.sel && RM.sel.t==='item' && RM.sel.id==='bed')));   // an upgrade or colour of the bed that is only previewed
   const bctx = {things: space.things, lv: {...space.lv, bed: shown}, fix: space.fix}, bt = topOf('bed', bctx), ents = [];   // everything standing on the floor, sorted back to front (the bed too, with what lies on it)
   if(bp && !(pl && pl.fx==='bed')){ const f = bedFp(shown, bp.o);
@@ -5979,7 +6026,7 @@ function roomSVG(){
   space.things.forEach((t,i)=>{ if(t.x<0 || t.on || (pl && pl.i===i)) return; const c = catOf(t.k), tp = topOf(t);
     const q = footOf(t); ents.push({f:isFlat(c)?0:1, d:t.x+q[0]+t.y+q[1], svg:`<g data-hit="thing:${i}" class="rmh${RM.sel && RM.sel.t==='thing' && RM.sel.i===i ? ' sel' : ''}">${thingSVG(c, t.x, t.y, i, t.o)}${pvp && RM.sel && RM.sel.t==='thing' && RM.sel.i===i ? pendEdge(footPts(t.x, t.y, q[0], q[1])) : ''}</g>` + (tp && t.u ? sittersSVG(t.u, tp.x, tp.y, tp.z, tp.ox) : '')}); });   // a host and what is on it are drawn as one group
   ents.sort((a,b)=>a.f-b.f || a.d-b.d);   // rugs and other flat things first, then further back first
-  s += ents.map(q=>q.svg).join('');
+  s += atmoOn() ? `<g id="atEnts" filter="url(#atGrade)">${ents.map(q=>q.svg).join('')}</g>` : ents.map(q=>q.svg).join('');   // one filter on the whole group: the things share the room's tint and glow
   if(pl && pl.fx) s += fxPreviewSVG(pl);
   else if(pl && !pl.wl){ const c = catOf(pl.k), [fw, fd] = fpOf(c, pl.o);
     if(canSit(c)) for(const sf of surfaces(pl.i)){   // a small thing can also go on furniture: the units where it could stand are lit
@@ -5994,6 +6041,7 @@ function roomSVG(){
       s += pendTile(q, true) + `<g class="rmghost" opacity=".62">${thingSVG(c, pl.x, pl.y, undefined, pl.o)}</g>`;
       const mv = pl.i>=0 ? space.things[pl.i] : null, tp = mv && mv.u ? topOf({k:mv.k, x:pl.x, y:pl.y, u:mv.u, o:pl.o}) : null;   // a host being moved brings its things along in the preview
       if(tp) s += `<g class="rmghost" opacity=".62">${sittersSVG(mv.u, tp.x, tp.y, tp.z, tp.ox)}</g>`; } }
+  if(atmoOn()) s += atmoOverlay();
   s += `</g></g>`;
   return `<svg id="rmSvg" viewBox="0 0 ${RM.W} ${RM.H}" role="img" aria-label="החדר">${s}</svg>`;
 }
@@ -6006,7 +6054,7 @@ function openSpace(){
 }
 function closeSpace(){ RM.sel = null; RM.pv = null; RM.pl = null; RM.list = null; document.getElementById('spaceView').hidden = true; showHome(); }
 function renderSpace(){ document.getElementById('rmView').innerHTML = roomSVG(); renderDrawer(); }
-function rmRedraw(){ const v=document.getElementById('rmView'); if(v) v.innerHTML = roomSVG(); }
+function rmRedraw(){ const v=document.getElementById('rmView'); if(v) v.innerHTML = roomSVG(); const b=document.getElementById('rmAtmo'); if(b){ const on=atmoOn(); b.setAttribute('aria-pressed', on?'true':'false'); b.style.opacity = on ? '1' : '.5'; } }
 function rmPan(dx,dy){ RM.tx += dx; RM.ty += dy; rmClamp(); rmApply(); }
 function rmClamp(){ RM.k = Math.max(1, Math.min(3, RM.k)); RM.tx = Math.min(0, Math.max((1-RM.k)*RM.W, RM.tx)); RM.ty = Math.min(0, Math.max((1-RM.k)*RM.H, RM.ty)); }
 function rmApply(){ const g=document.getElementById('rmG'); if(g) g.setAttribute('transform',`translate(${RM.tx} ${RM.ty}) scale(${RM.k})`); }
@@ -6274,6 +6322,7 @@ function spaceInit(){
   const ov = document.getElementById('spaceView');
   document.getElementById('spaceBack').onclick = closeSpace;
   ov.addEventListener('click', e=>{ if(e.target.closest('#rmDrawer')){ if(RM.tapTouch && performance.now()-RM.tapAt<GHOST_MS) return; onDrawerClick(e); }   // a touch on the room opens the drawer under the finger, and the browser then sends its click to whatever is there now: ignore it
+   const at=e.target.closest('[data-atmo]'); if(at){ try{ localStorage.setItem('cq_atmo', atmoOn() ? '0' : '1'); }catch(err){} rmRedraw(); return; }
    const z=e.target.closest('.rmz'); if(z){ const d=+z.dataset.z; if(d===0){RM.k=1;RM.tx=0;RM.ty=0;rmApply();} else rmZoomAt(RM.k*(d>0?1.4:1/1.4), RM.W/2, RM.H/2); } });
   const ptr = new Map(); let moved = false, last = null, pinch = 0, startHit = null;
   ov.addEventListener('pointerdown', e=>{ const v=e.target.closest('#rmView'); if(!v) return; v.setPointerCapture && v.setPointerCapture(e.pointerId); ptr.set(e.pointerId,[e.clientX,e.clientY]); moved=false; startHit=(e.target.closest('[data-hit]')||{dataset:{}}).dataset.hit||null; if(ptr.size===2){ const [a,b]=[...ptr.values()]; pinch=Math.hypot(a[0]-b[0],a[1]-b[1]); } last=[e.clientX,e.clientY]; });
