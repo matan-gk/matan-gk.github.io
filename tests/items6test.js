@@ -12,7 +12,7 @@ const U1=['cloudarm','cloudott','unimirror','rbcurtain','unihorse','heartbench',
 ok(await ev(I=>I.every(id=>{const c=catOf(id);return c&&c.n&&c.p>=2&&c.p<=6&&/^assets\//.test(c.src)&&c.r[2]>0&&c.r[3]>0&&c.base&&c.ref>0;}),[...U1,...U2]),'15 new items: name, price 2-6, picture, a colourable original');
 ok(await ev(I=>I.every(id=>catOf(id).pk&&PART_NAMES[catOf(id).pk]),U1),'the nine furniture items have a colour part with a Hebrew name');
 ok(await ev(I=>I.every(id=>catOf(id).g==='plants'&&!catOf(id).pk),U2),'the six plants are in the plants group and recolour the pot');
-ok(await ev(()=>['cloudarm','unimirror','unihorse','heartbench','unithrone'].every(id=>catOf(id).back&&catOf(id).back.src&&catOf(id).back.base)&&['cloudott','rbcurtain','starpouf','cloudlamp'].every(id=>!catOf(id).back)),'five items have a (colourable) back picture, four do not');
+ok(await ev(()=>['cloudarm','unimirror','unihorse','heartbench'].every(id=>catOf(id).back&&catOf(id).back.src&&catOf(id).back.base)&&catOf('unithrone').back&&catOf('unithrone').back.src&&['cloudott','rbcurtain','starpouf','cloudlamp'].every(id=>!catOf(id).back)),'five items have a back picture (the throne's shows so little of its cushion that it is not colourable), four do not');
 ok(await ev(()=>catOf('cloudarm').fw===4&&catOf('cloudarm').fd===4&&catOf('unihorse').fw*catOf('unihorse').fd===8&&catOf('cloudott').fw===2),'footprints 2x2, 2x1 and 1x1 cells (in grid units)');
 ok(await ev(()=>catOf('pl28').fw===4&&catOf('pl28').fd===4&&catOf('heartbench').fw===2&&catOf('heartbench').fd===4),'the flower planter is 2x2 cells and the bench is 1x2 (its long side runs the way its picture does)');
 ok(await ev(()=>PART_NAMES.unihorse==='אוכף'),'the horse\'s colour part is the saddle');

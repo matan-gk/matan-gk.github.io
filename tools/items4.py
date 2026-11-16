@@ -58,6 +58,10 @@ def cells(im, lay):
         if k == lay[1]: break
     else: raise SystemExit('expected %d pictures, found %d' % (lay[1], k))
     sl = nd.find_objects(lab); sl.sort(key=lambda o: (o[0].start + o[0].stop))   # by height, then split into rows
+    if lay[0] == 'rows':   # ('rows', n, [pictures in each row]): rows of different lengths
+        out = []; i = 0
+        for m in lay[2]: out += sorted(sl[i:i+m], key=lambda o: o[1].start); i += m
+        return [(max(0, o[1].start-4), max(0, o[0].start-4), min(W, o[1].stop+4), min(H, o[0].stop+4)) for o in out]
     n = lay[1]; cols = 3 if n > 3 else n; out = []
     for i in range(0, n, cols): out += sorted(sl[i:i+cols], key=lambda o: o[1].start)
     return [(max(0, o[1].start-4), max(0, o[0].start-4), min(W, o[1].stop+4), min(H, o[0].stop+4)) for o in out]

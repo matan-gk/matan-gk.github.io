@@ -710,3 +710,7 @@ Tests: `tests/items6test.js` (new); `catalogtest`, `colortest`, `spacetest`, `gr
 - `tools/items6.py` adds the flags and tops after cutting (run `python3 tools/items6.py` and then `python3 tools/surfaces.py`).
 - Gemini prompts for pixel-art backs: `docs/personal-space/GEMINI_PROMPTS_UNICORN.md`, "Back pictures, second try".
 Tests: `items6test`, `shelftest`, `surfacetest` (11 hosts), `backtest` updated.
+
+## Step 49: pixel-art back pictures for the unicorn set (branch `room-items-5`; version 2026.11.16e)
+
+The second Gemini try (front sheet attached) is pixel art like the fronts and replaces the smooth backs for the armchair, mirror, horse, bench and throne (`art/sheet-u1-back.jpg`; the sheet also holds a repeat of the bench front and a straight rear of the throne, unused). `tools/items4.py` cells gain a `('rows', n, [per row])` layout. The throne's back shows its seat cushion too little to recolour, so the throne's back is not colourable. The horse's cutter threshold was lowered so the gap under the runners is cut out.

@@ -25,7 +25,7 @@ def cut_strict(im, box, big, thin=False):
     return Image.fromarray(out[ys.min():ys.max()+1, xs.min():xs.max()+1])
 items4.cut4 = cut_strict
 items4.SHEETS = {
- 'u1': (A+'sheet-u1-unicorn.jpg', ('blobs', 9), A+'sheet-u1-back.jpg', ('blobs', 5)),
+ 'u1': (A+'sheet-u1-unicorn.jpg', ('blobs', 9), A+'sheet-u1-back.jpg', ('rows', 7, [3, 2, 2])),   # the back sheet: armchair, mirror, horse / bench back, bench (a repeat of the front, unused) / throne three-quarter, throne straight (unused)
  'u2': (A+'sheet-u2-topiary.jpg', ('blobs', 6), A+'sheet-u2-topiary.jpg', ('blobs', 6)),
 }
 # id: (sheet, picture no., hebrew, price, group, fw, fd (cells), spot width, default colour, part key, back picture no. or None, flat, big, options)
@@ -34,9 +34,9 @@ items4.S = [
  ('cloudott',  'u1', 1, 'שרפרף ענן',            4, 'furniture', 1, 1, 78,  '#cdb4f5', 'cloudott',  None, 0, -2500, ''),
  ('unimirror', 'u1', 2, 'מראה חד קרן',          5, 'furniture', 1, 1, 70,  '#e6c8ff', 'unimirror', 1, 0, -2500, ''),
  ('rbcurtain', 'u1', 3, 'וילון קשת',            4, 'furniture', 1, 1, 84,  '#f4c25b', 'rbcurtain', None, 0, -2500, ''),
- ('unihorse',  'u1', 4, 'סוס נדנדה חד קרן',     6, 'play',      2, 1, 0,   '#f48fd0', 'unihorse',  2, 0, -1000, ''),
+ ('unihorse',  'u1', 4, 'סוס נדנדה חד קרן',     6, 'play',      2, 1, 0,   '#f48fd0', 'unihorse',  2, 0, -400, ''),
  ('heartbench','u1', 5, 'ספסל לב',              5, 'furniture', 1, 2, 0,   '#b79af0', 'heartbench',3, 0, -2500, ''),
- ('unithrone', 'u1', 6, 'כס בובת חד קרן',       6, 'furniture', 2, 2, 0,   '#cdb4f5', 'unithrone', 4, 0, -2500, ''),
+ ('unithrone', 'u1', 6, 'כס בובת חד קרן',       6, 'furniture', 2, 2, 0,   '#cdb4f5', 'unithrone', 5, 0, -2500, ''),
  ('starpouf',  'u1', 7, 'פוף כוכב',             3, 'furniture', 1, 1, 74,  '#f6d365', 'starpouf',  None, 0, -2500, ''),
  ('cloudlamp', 'u1', 8, 'מנורת ענן',            4, 'furniture', 1, 1, 62,  '#f4c25b', 'cloudlamp', None, 0, -7, ''),
  ('pl23', 'u2', 0, 'שיח קובייה',   3, 'plants', 1, 1, 70, '#cdb4f5', 'POT', None, 0, 6000, ''),
