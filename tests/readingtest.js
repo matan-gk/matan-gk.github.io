@@ -50,7 +50,7 @@ await p.evaluate(()=>rdClose()); await p.evaluate(()=>{ renderLevels(); [...docu
 ok(await p.evaluate(()=>!!document.getElementById('rdOverlay')&&gameView==='home'),'tapping the section when it is empty shows the message and does not open a question');
 await p.evaluate(()=>rdClose());
 // a reload, or a profile switch, with every story read must not pop the message up on the menu
-await p.evaluate(()=>{ rd.done=['hedgehog','camel','bee','owl']; level=9; saveState(); }); await p.reload(); await p.waitForTimeout(500);
+await p.evaluate(()=>{ rd.done=["hedgehog","camel","bee","owl","sun"]; level=9; saveState(); }); await p.reload(); await p.waitForTimeout(500);
 ok(await p.evaluate(()=>!document.getElementById('rdOverlay')&&gameView==='home'&&level!==9),'page load with every story read: no message on the menu, and she is no longer parked in the empty section');
 await p.evaluate(()=>{ level=9; nextQuestion(); });
 ok(await p.evaluate(()=>!document.getElementById('rdOverlay')),'the empty section reached without a tap (profile switch) stays silent');
