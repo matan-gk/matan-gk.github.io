@@ -723,3 +723,13 @@ Reviewed the Shlav 1 sample (2024) against the existing types. Already covered: 
 - `gDaysMore` (stories, 2): each day sells a fixed number more than the day before; total over three or four days.
 - Reading passage `sun` (12 lines, 8 questions in the standard order), an original text in the same style as the sample's: why it looks small, meaning of "למעשה", purpose of the boiling-water comparison.
 Each type has SKILL_META, SKILL_DIFFICULTY and a HELP entry with a worked example. Test: `shlav1test`; the reading bank test covers the passage. No saved-data change.
+
+## Step 51: short reading questions, group A (branch `reading-short-a`, stacked on `exercises-shlav1`; version 2026.11.16g)
+
+The reading section now also draws short, generated questions: one or two fully voweled lines and one question, in the story world (shop, dragons, unicorns). They never run out, so the section no longer empties when every passage is read (the "all stories read" message is gone).
+- `gShNotInText`: a creature (11 of them) with three stated facts out of five (home, food, colour, size, skill); which of four questions has no answer in the text.
+- `gShSynonyms`: three synonym pairs and one opposite/unrelated pair (or the reverse, 3 in 10); definition line as in the passages.
+- `gShPurpose`: a short sign, invitation, instruction, advert, description or story; the purpose among six.
+- Engine: `rdPick` — a passage in progress always continues; a new passage starts half as often as it is drawn (`RD_START`); with every passage read only short questions come. Skills are logged per type (`gShNotInText` etc., area reading, difficulty 2), each with a help entry.
+- Next groups: cause (reworded) + motive; word role, phrase, word meaning.
+Tests: new `readshorttest` (voweled, one right answer, variety); `readingtest`/`readingset`/`readingbank` play passages only (`pools[9]=[gReading]`) and the "everything read" cases now expect short questions.

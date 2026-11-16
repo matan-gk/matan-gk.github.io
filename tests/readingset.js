@@ -6,6 +6,7 @@ const p=await (await b.newContext({viewport:{width:390,height:900}})).newPage();
 await p.goto(T.URL);await p.evaluate(()=>localStorage.clear());await p.reload();
 await p.fill('#pfName','גאיה'); await p.click('.gopt:has(input[value=f])'); await p.click('[data-pact=save]'); await p.waitForTimeout(300);
 await p.evaluate(()=>{ document.querySelectorAll('.milestone').forEach(e=>e.remove()); });
+await p.evaluate(()=>{ pools[9]=[gReading]; });
 const D=86400000;
 // --- ageing: per story, default 30 days
 const a=await p.evaluate(()=>{ const now=Date.now(); const r0=rdClean({}); 

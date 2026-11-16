@@ -67,6 +67,7 @@ const TESTS = [
   ['famtest','cloud/famtest.js','family model: Google account, anonymous backup and codes, joining, migration, modes'],
   ['leveltest','leveltest.js','space sections: 8 pictures and names, gendered first name, hidden sections, parent area keeps default names, coverage'],
   ['readingbank','readingbank.js','reading bank: every passage valid and playable, passages never pop up on the menu'],
+  ['readshorttest','readshorttest.js','short reading questions: voweled, one right answer, varied, reading section only'],
   ['prizetest','prizetest.js','prize pop-up: appears mid-screen, flies to the gift box, never overlaps a party, reduced motion'],
   ['items3','items3test.js','batch 3 items (kids furniture and play): catalog, back pictures, hosts, recolouring, transparent gaps'],
   ['tokbadge','tokbadgetest.js','coin balance next to the gift square once the room is unlocked'],
