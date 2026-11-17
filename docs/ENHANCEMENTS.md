@@ -741,3 +741,12 @@ Tests: new `readshorttest` (voweled, one right answer, variety); `readingtest`/`
 - The wrong answers are the right answers of the other scenarios in the same bank.
 - Weights: every new passage is preceded by 4 to 8 short questions (random each time, `rdGap`), and so is the start of a session; a passage in progress is never interrupted.
 - Tests: `readshorttest` also checks that the answer is not copied from the text and that the gaps between passages are 4 to 8.
+
+## Step 53: short reading questions, group C: word role, phrase, word meaning (branch `reading-short-c`, stacked on `reading-short-b`; version 2026.11.16i)
+
+- `gShWordRole` (difficulty 3): one sentence with a small word (אֲבָל, כִּי, לָכֵן, גַּם, אִם, רַק); what does it tell the reader. 18 sentences over 6 roles.
+- `gShPhrase` (2): a phrase in context ("לֵב זָהָב", "כְּמוֹ רוּחַ", "פַּרְפָּרִים בַּבֶּטֶן"...); 12 phrases, each with its own context lines, gender-agreed with the name.
+- `gShWordMeaning` (2): the meaning of a word from the sentence around it; 13 words.
+- `rsInfer` now takes an entry of any number of lines plus question and answer, and the three wrong answers are the other entries' answers (de-duplicated, so two sentences with the same connective never give the same wrong answer twice).
+- The reading section now has eight short types in all; each has SKILL_META, SKILL_DIFFICULTY and a help entry.
+- Test: `readshorttest` checks the quoted word or phrase is really in the text (a girl's name inflects it), and that the role matches the word.
