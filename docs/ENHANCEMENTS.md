@@ -757,3 +757,13 @@ The reading section ("ספריית הסיפורים", section 9) now has its own
 - selection-screen icon: `LEVEL_ICON_IMG["9"]` (256×256, transparent, same cut-out style as the dessert machine, detective and symbols icons);
 - landscape backdrop `BACKDROP_IMG["9"]` (960×536) and portrait backdrop `BACKDROP_IMG_P["9"]` (720×1290): the magic library with the dome, spiral stairs and the central book (pixel art, like the other backdrops).
 Tests updated: `leveltest` (4 hand-made icons), `loctest` (every section, including the 9th, has a backdrop, in portrait and landscape too), `splittest` (4 icons load). The space theme still has no picture for this section (its coverage report keeps saying 8 of 9). The version moved to 2026.11.17a on that branch and to 2026.11.17b here, after the merge with the reading work (Steps 51–53).
+
+## Step 56: prompts and guides for 3D wall items (branch `wall-3d-prompts`; docs and tools only, no game change, no version bump)
+
+The windows, the clock and the map frame are flat pictures sheared onto the wall, so they look pasted on. Like the shelves, they should be drawn already in the room's view as solid things attached to the wall. This step prepares the Gemini work:
+- `docs/personal-space/GEMINI_PROMPTS_WALL3D.md`: what is required and what is optional up front, then the camera rules (front face sheared 26.57 degrees, sticks out toward the lower left, front + thin top + RIGHT end visible), and the prompts: W1 (windows 1 to 3), W2 (windows 4 and 5), C1 (the cupcake clock), A1 (six hanging pictures: two framed prints, a canvas, a scroll poster, bunting, a photo string), optional A2 (six more) and a pixel-art style B; checks, and what the game does with the pictures afterwards.
+- `tools/wall_templates.py` makes the guide pictures `wallitem_template_windows_a/b.png`, `_clock.png`, `_art_a/b.png`: only the box each item fills (no wall, which Gemini copies), sizes taken from the catalog.
+- `style-refs/windows-current.png` and `clock-map-current.png`: the current pictures as style references.
+- Open decision for the owner: smooth outlined cartoon (like the current windows and furniture) or pixel art (like the shelves).
+- Correction to the shelf notes: the visible short end of a wall item on the right wall is its RIGHT end (away from the corner), not the left one.
+- Not built yet: the game side (windows move from the flat `windowSVG` to the solid-item drawing; clock and posters become `solid` catalog wall items). It starts when the sheets exist.
