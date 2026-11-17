@@ -1,0 +1,18 @@
+DRAFT for discussion only. No images generated yet. Counts and style for faces are NOT decided.
+
+SHEET A: candidate icons for the logic-grid cards (10 new, 1 reused)
+Order in the grid, left to right, top to bottom:
+Pets: dog, cat, rabbit, fish, parrot, hamster
+Fruits: apple, banana, grapes, watermelon
+(Strawberry is a confirmed mapped asset in the game (ICON_IMG) and is reused.)
+UNREVIEWED: the repo's assets/ folder has about 1,200 hash-named files that are not all mapped to names. They have not been checked for pet, fruit or face art. Review them before commissioning new art, so the list above may shrink.
+
+STYLE (taken from docs/ICONS.md; confirm it is still right)
+Match the existing unicorn and reward art: soft outline, pastel, same light direction and outline weight across the sheet. One icon per cell, centered, plain flat background, about 96 px is enough (shown at 24 to 64 px). Each icon must be readable at small size. No text in the pictures.
+
+SHEET B: faces for the kid cards
+Name pool (verified in the generator, const PEOPLE, math-quest.html near line 3865, main 50a3ed1): 16 names. Boys (8): דני, תום, איתי, יובל, עומר, גיא, ארי, נדב. Girls (8): דנה, נועה, ליה, מאיה, רוני, שירה, יעל, אלה. Matan conditionally wants one dedicated consistent face per name if the amount is reasonable. That would be 16 faces (8 + 8). Not decided: whether he accepts 16, and the style.
+OPEN: style (simple round faces, animal heads, avatars like the existing boy and girl images), and whether faces are tied to the 16 first names in the game. Confirmed mapped faces in the game: avatar_boy, avatar_girl, avatar_neutral. The unreviewed hash-named pool may hold more. Not decided.
+
+MARKS
+Check and cross are drawn in code. A confirmed mapped question_mark image exists. Not decided whether to use it.
