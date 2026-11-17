@@ -654,10 +654,17 @@ body[data-view="play"] .card{background:color-mix(in srgb, var(--card) 76%, tran
 .pa-h{font-size:1.02rem; font-weight:800; margin:0 0 4px; color:var(--text)}
 .mxd>summary{cursor:pointer; list-style:none; margin:0}
 .mxd>summary::-webkit-details-marker{display:none}
-.welcome-detail>summary{list-style:none; display:flex; align-items:center; gap:8px}
+.welcome-detail{margin:6px 0 16px; background:var(--card2); border-radius:14px}
+.welcome-detail>summary{list-style:none; display:flex; align-items:center; gap:8px; cursor:pointer; padding:12px 14px; font-weight:700; border-radius:14px}
 .welcome-detail>summary::-webkit-details-marker{display:none}
 .welcome-detail>summary::after{content:'▾'; color:var(--muted); font-size:.8rem; margin-inline-start:auto; transition:transform .15s ease}
 .welcome-detail[open]>summary::after{transform:rotate(180deg)}
+.welcome-detail>summary:focus-visible{outline:2px solid var(--purple); outline-offset:2px}
+.welcome-body{padding:2px 14px 14px; font-size:.92rem; line-height:1.55}
+.welcome-body ul{list-style:none; margin:0; padding:0; display:grid; gap:10px}
+.welcome-body li{display:flex; gap:10px; align-items:flex-start}
+.welcome-body li .wi{flex:none; font-size:1.15rem; line-height:1.4}
+.welcome-note{margin:12px 0 0; padding-top:12px; border-top:1px solid color-mix(in srgb, var(--muted) 25%, transparent); color:var(--muted)}
 .mxtag{font-size:.7rem; font-weight:700; background:var(--card2); color:var(--purple); padding:2px 8px; border-radius:999px; margin-inline-start:6px}
 .mxwrap{overflow-x:auto}
 table.qmx{width:100%; table-layout:fixed; border-collapse:collapse; font-size:.85rem}
@@ -2642,7 +2649,7 @@ function cloudProfileFromDoc(C, helpers){
 // ===== CLOUD (Google sign-in, cloud progress, problem reports) =====
 // Local-first: the game always works from this device's storage. The cloud is a mirror, so no internet / no account / no quota never blocks play.
 // Everything here is off while CLOUD_CONFIG is null. See firebase/SETUP.md for how to create the (free) Firebase project and paste its settings below.
-const APP_VERSION = '2026.11.17b';       // keep equal to VERSION in sw.js (a test checks it)
+const APP_VERSION = '2026.11.17c';       // keep equal to VERSION in sw.js (a test checks it)
 const BUILD_COMMIT = '';                 // the full id of the commit this page was built from: the deploy workflow (.github/workflows/tests.yml) fills it in; empty in a plain checkout
 const REPO_URL = 'https://github.com/matan-gk/matan-gk.github.io';
 const CLOUD_CONFIG = {apiKey:"AIzaSyAlq_TJNGvWPJpUrpbdq_hkAoURydqMzm0", authDomain:"learning-quest-1.firebaseapp.com", projectId:"learning-quest-1", appId:"1:98931179722:web:78fb00084ccba3efb53433"};   // e.g. {apiKey:'...', authDomain:'xxx.firebaseapp.com', projectId:'xxx', appId:'...'}
@@ -7107,32 +7114,23 @@ function renderProfilesInner(){
     const editing = profMode.editId ? store.profiles.find(x=>x.id===profMode.editId) : null;
     document.getElementById('profTitle').textContent = profMode.first ? '👋 ברוכים הבאים!' : (editing ? '✏️ עריכת פרופיל' : '➕ פרופיל חדש');
     const welcomeDetail = profMode.first ? `
-      <details class="welcome-detail" style="margin:12px 0 16px; padding:12px; background:var(--card2); border-radius:12px;">
-        <summary style="cursor:pointer; font-weight:700; display:flex; align-items:center; gap:8px; list-style:none;">
-          <span style="font-size:1.1rem;">📖</span> עוד פרטים על המשחק
-        </summary>
-        <div style="margin-top:12px; line-height:1.6; font-size:.9rem;">
-          <p><b>דוגמאות לשאלות:</b></p>
-          <ul style="margin:8px 0; padding-inline-start:20px;">
-            <li>חיבור וחיסור עד 20: "יש 7 תפוחים, אכלנו 3. כמה נשארו?"</li>
-            <li>השוואת כמויות: "למי יותר מדבקות, לי עם 12 או לך עם 9?"</li>
-            <li>זיהוי תבניות: "מה הצורה הבאה? 🔴🔵🔴🔵🔴 ?"</li>
-            <li>סדרות מספרים: "השלם: 2, 4, 6, __"</li>
-            <li>בעיות מילוליות קצרות עם איורים</li>
+      <details class="welcome-detail">
+        <summary><span aria-hidden="true">📖</span> מה יש במשחק?</summary>
+        <div class="welcome-body">
+          <ul>
+            <li><span class="wi" aria-hidden="true">🗺️</span><span>תשעה מקומות קסומים לשחק בהם: מספרים, חנות עם בעיות מילוליות, סימנים, שעון, צורות, היגיון, ספריית סיפורים ועוד.</span></li>
+            <li><span class="wi" aria-hidden="true">🎁</span><span>על כל תשובה נכונה מקבלים מתנה, ואוספים אותן בחדר של קאפקייק.</span></li>
+            <li><span class="wi" aria-hidden="true">💡</span><span>נתקעים? כפתור "עזרה" מסביר ומראה דוגמה.</span></li>
+            <li><span class="wi" aria-hidden="true">👪</span><span>ההתקדמות נשמרת במכשיר. באזור ההורים אפשר לגבות אותה ולהמשיך גם ממכשיר אחר.</span></li>
           </ul>
-          <p style="margin-top:12px; padding-top:12px; border-top:1px solid var(--card3);">
-            <b>צילום מסך:</b> המשחק מציג שאלות עם איורים צבעוניים, משוב מיידי, ואזור מתנות שגדל עם כל תשובה נכונה.
-          </p>
-          <p style="margin-top:12px; font-style:italic; color:var(--muted);">
-            פיתחתי את המשחק עבור הבת שלי, והוא ממשיך לגדול לפי הבקשות שלה.
-            אשמח לקבל תגובות מכולם — בתוך המשחק (כפתור "דיווח") או ישירות במייל.
-          </p>
+          <p class="welcome-note">פיתחתי את המשחק בשביל הבת שלי, והוא ממשיך לגדול לפי הבקשות שלה. יש הערה או רעיון? נשמח לשמוע, דרך כפתור "דיווח" שבתוך המשחק.</p>
         </div>
       </details>
     ` : '';
     body.innerHTML = `<div class="pform">
-      ${profMode.first?'<p class="pa-sub" style="text-align:center">מתמטיקה בכיף — תרגילים קצרים, משוב מיידי, אוסף מתנות שגדל עם כל הצלחה.</p>':''}
+      ${profMode.first?'<p class="pa-sub" style="text-align:center">תרגילי חשבון וקריאה קצרים, משוב מיידי ומתנות קסומות על כל הצלחה.</p>':''}
       ${welcomeDetail}
+      ${profMode.first?'<p class="pa-sub" style="text-align:center; margin:0 0 10px">מי משחק? אפשר להוסיף עוד פרופילים בהמשך.</p>':''}
       <div class="pa-field"><label for="pfName">שם (אפשר להשאיר ריק)</label>
       <input type="text" id="pfName" maxlength="20" autocomplete="off" value="${editing?esc(editing.name):''}"></div>
       <div class="pa-field"><label>איך פונים אל השחקן?</label>
