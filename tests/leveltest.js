@@ -7,7 +7,7 @@ await p.fill('#pfName','נועה'); await p.click('.gopt:has(input[value=f])'); 
 const E=(fn,...a)=>p.evaluate(fn,...a);
 const btns=()=>E(()=>[...document.querySelectorAll('#levels .levelbtn')].map(b=>({t:b.textContent.trim(),img:!!b.querySelector('img.lvimg'),src:(b.querySelector('img.lvimg')||{}).src||'',w:b.querySelector('img.lvimg')?b.querySelector('img.lvimg').offsetWidth:0})));
 const sw=await btns();
-ok(sw.length===9&&sw.filter(x=>x.img).length===3&&sw[0].t.includes('ארמון המספרים')&&sw[7].t.includes('אתגר הקשת בענן')&&sw[8].t.includes('ספריית הסיפורים'),'sweets: names and emoji unchanged, the reading section last');
+ok(sw.length===9&&sw.filter(x=>x.img).length===4&&sw[0].t.includes('ארמון המספרים')&&sw[7].t.includes('אתגר הקשת בענן')&&sw[8].t.includes('ספריית הסיפורים'),'sweets: names and emoji unchanged, the reading section last');
 await E(()=>setProfileTheme(activeProfile(),'space')); await p.waitForTimeout(100);
 const sp=await btns();
 const names=sp.map(x=>x.t);
@@ -35,7 +35,7 @@ ok(par.length===7&&par.some(n=>n.includes('ארמון המספרים'))&&!par.so
 await E(()=>closeProfiles());
 // back to sweets
 await E(()=>setProfileTheme(activeProfile(),'sweets'));
-const back=await btns(); ok(back.filter(x=>x.img).length===3&&back[0].t.includes('ארמון המספרים'),'switching back restores names and emoji');
+const back=await btns(); ok(back.filter(x=>x.img).length===4&&back[0].t.includes('ארמון המספרים'),'switching back restores names and emoji');
 // coverage
 await E(()=>setProfileTheme(activeProfile(),'space'));
 ok(await E(()=>{ const g=themeCoverage('space').find(x=>x.id==='level'); return g.have===8&&g.need===9; }),'coverage: section pictures 8 of 9 (the reading section has none yet, and the report says so)');

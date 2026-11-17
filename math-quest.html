@@ -2638,7 +2638,7 @@ function cloudProfileFromDoc(C, helpers){
 // ===== CLOUD (Google sign-in, cloud progress, problem reports) =====
 // Local-first: the game always works from this device's storage. The cloud is a mirror, so no internet / no account / no quota never blocks play.
 // Everything here is off while CLOUD_CONFIG is null. See firebase/SETUP.md for how to create the (free) Firebase project and paste its settings below.
-const APP_VERSION = '2026.11.16i';       // keep equal to VERSION in sw.js (a test checks it)
+const APP_VERSION = '2026.11.17b';       // keep equal to VERSION in sw.js (a test checks it)
 const BUILD_COMMIT = '';                 // the full id of the commit this page was built from: the deploy workflow (.github/workflows/tests.yml) fills it in; empty in a plain checkout
 const REPO_URL = 'https://github.com/matan-gk/matan-gk.github.io';
 const CLOUD_CONFIG = {apiKey:"AIzaSyAlq_TJNGvWPJpUrpbdq_hkAoURydqMzm0", authDomain:"learning-quest-1.firebaseapp.com", projectId:"learning-quest-1", appId:"1:98931179722:web:78fb00084ccba3efb53433"};   // e.g. {apiKey:'...', authDomain:'xxx.firebaseapp.com', projectId:'xxx', appId:'...'}
@@ -5844,13 +5844,13 @@ BONUS_POOLS[5] = [].concat(...Object.values(BONUS_POOLS));
 
 // ---- game selection screen and location backdrops ----
 // a backdrop per section id for the default theme; another theme has its own (THEME_ASSETS.<theme>.backdrop), and a section without one gets a plain solid background
-const BACKDROP_IMG = {"3": "assets/8027a6388985.webp", "2": "assets/756c7c723d7b.webp", "4": "assets/526410a856b0.webp", "6": "assets/5ff1a85d4a61.webp", "5": "assets/f73daa6fd2ce.webp", "7": "assets/d29e9c1a11a7.webp", "8": "assets/ee58df7731d9.webp", "1": "assets/5c3ff554ac50.webp"};
+const BACKDROP_IMG = {"3": "assets/8027a6388985.webp", "2": "assets/756c7c723d7b.webp", "4": "assets/526410a856b0.webp", "6": "assets/5ff1a85d4a61.webp", "5": "assets/f73daa6fd2ce.webp", "7": "assets/d29e9c1a11a7.webp", "8": "assets/ee58df7731d9.webp", "1": "assets/5c3ff554ac50.webp", "9": "assets/34cbe9304fb9.webp"};
 function backdropFor(id){
   if(themeId===THEME_DEFAULT) return BACKDROP_IMG[id] || null;
   const t = THEME_ASSETS[themeId]; return (t && t.backdrop && t.backdrop[id]) || null;
 }
 // selection-screen icons for the default theme: only the sections that have a hand-made picture; the others keep their emoji picture
-const LEVEL_ICON_IMG = {"3": "assets/351c47991def.webp", "4": "assets/34c7cd709f15.webp", "2": "assets/621cba713823.webp"};
+const LEVEL_ICON_IMG = {"3": "assets/351c47991def.webp", "4": "assets/34c7cd709f15.webp", "2": "assets/621cba713823.webp", "9": "assets/338ab8de5e9f.webp"};
 // the selection screen's own backdrop (the world map) for the default theme; a theme without one gets a plain solid background
 const HOME_BACKDROP_IMG = "assets/7affaa85c609.webp";
 function homeBackdrop(){
@@ -5858,7 +5858,7 @@ function homeBackdrop(){
   const t = THEME_ASSETS[themeId]; return (t && t.backdrop && t.backdrop.home) || null;
 }
 // portrait versions of the backdrops (used when the screen is taller than wide); a section without one keeps its landscape picture
-const BACKDROP_IMG_P = {"1": "assets/9e5239a3a5f3.webp", "7": "assets/03837586d0b1.webp", "5": "assets/fed218d245d3.webp", "2": "assets/4ed84836fcee.webp", "6": "assets/d297c2987cc5.webp", "4": "assets/cfae52f6551f.webp", "8": "assets/48667ee78f5e.webp", "3": "assets/aafc49481cb7.webp"};
+const BACKDROP_IMG_P = {"1": "assets/9e5239a3a5f3.webp", "7": "assets/03837586d0b1.webp", "5": "assets/fed218d245d3.webp", "2": "assets/4ed84836fcee.webp", "6": "assets/d297c2987cc5.webp", "4": "assets/cfae52f6551f.webp", "8": "assets/48667ee78f5e.webp", "3": "assets/aafc49481cb7.webp", "9": "assets/44ac4ccb0fc3.webp"};
 const HOME_BACKDROP_IMG_P = "assets/ea3655c1f3e5.webp";
 function backdropPFor(id){
   if(themeId===THEME_DEFAULT) return id==='home' ? HOME_BACKDROP_IMG_P : (BACKDROP_IMG_P[id] || null);
