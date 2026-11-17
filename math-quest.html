@@ -1964,6 +1964,18 @@ gShMotive:{
   what:'מישהו עושה משהו, ורמז מספר מה קורה סביב. שואלים למה הוא עשה את זה: מה הוא רצה שיקרה.',
   think:['שואלים: מה הוא רצה להשיג? התשובה מתחילה בדרך כלל ב"כדי".','הרמז מספר איזו בעיה או איזה אירוע יש, והפעולה היא הפתרון.','בוחרים את המטרה שהפעולה באמת מקדמת.'],
   ex:[{q:'דני כתב רשימה לפני שיצא לחנות. בבית חסרים הרבה דברים. מדוע דני כתב רשימה?',steps:['חסרים הרבה דברים: קשה לזכור הכול.','הרשימה עוזרת [[לזכור מה לקנות]].','התשובה: [[כדי לא לשכוח מה לקנות]]'],a:'כדי לא לשכוח מה לקנות'}]},
+gShWordRole:{
+  what:'משפט אחד ובו מילה קטנה (אבל, כי, לכן, גם, אם, רק). שואלים מה המילה הזאת אומרת לקורא.',
+  think:['קוראים את המשפט פעם עם המילה ופעם בלעדיה, ורואים מה משתנה.','"אבל" מראה ניגוד. "כי" מביא סיבה. "לכן" מביא תוצאה.','"גם" מוסיף עוד דבר. "אם" אומר תנאי. "רק" אומר שאין עוד.'],
+  ex:[{q:'יורד גשם, לכן הרצפה רטובה. מה המילה "לכן" מסמנת?',steps:['לפני "לכן": [[יורד גשם]]','אחרי "לכן": [[הרצפה רטובה]]','הגשם גרם לרצפה להירטב, לכן מה שאחרי "לכן" הוא [[התוצאה]].'],a:'שמה שבא אחריה הוא התוצאה'}]},
+gShPhrase:{
+  what:'ביטוי הוא כמה מילים ביחד שמשמעותן שונה ממה שכתוב בהן ממש. צריך להבין מה הכוונה.',
+  think:['קוראים את המשפט כולו ושואלים מה הוא מספר על האדם.','לא מבינים את הביטוי מילה אחר מילה: "לב זהב" אינו לב עשוי זהב.','בוחרים את התשובה שמתאימה לכל המשפט.'],
+  ex:[{q:'דנה עזרה לכולם. יש לה לב זהב. מה הכוונה בביטוי "לב זהב"?',steps:['דנה עזרה לכולם: [[היא טובה]].','הביטוי מתאר את האדם, לא את הלב עצמו.','הכוונה: [[אדם טוב ונדיב]]'],a:'אדם טוב ונדיב'}]},
+gShWordMeaning:{
+  what:'משפט אחד ובו מילה מודגשת. שואלים מה פירוש המילה.',
+  think:['קוראים את המשפט ומנסים לשים במקום המילה מילה שאתם מכירים.','בודקים איזו תשובה מתאימה לכל המשפט.','אם אין ברירה, מוציאים את התשובות שלא מתאימות למשפט.'],
+  ex:[{q:'התינוק נרדם מיד אחרי השיר. מה פירוש המילה "מיד"?',steps:['נרדם "מיד" אחרי השיר: אחרי השיר ולא אחרי הרבה זמן.','אפשר לומר במקומה [[מייד = באותו רגע]].','התשובה: [[באותו רגע, בלי לחכות]]'],a:'באותו רגע, בלי לחכות'}]},
 gShNotInText:{
   what:'טקסט קצר של שורה או שתיים, ואחריו ארבע שאלות. על שלוש מהן יש תשובה בטקסט, ועל אחת אין. צריך למצוא את זו שאין לה תשובה.',
   think:['קוראים את הטקסט ורושמים בראש מה סופר: איפה, מה אוכל, איזה צבע, איזה גודל.','עוברים על כל שאלה ובודקים אם התשובה כתובה בטקסט.','השאלה שהתשובה שלה לא כתובה היא התשובה, גם אם אתם יודעים אותה מהחיים.'],
@@ -2626,7 +2638,7 @@ function cloudProfileFromDoc(C, helpers){
 // ===== CLOUD (Google sign-in, cloud progress, problem reports) =====
 // Local-first: the game always works from this device's storage. The cloud is a mirror, so no internet / no account / no quota never blocks play.
 // Everything here is off while CLOUD_CONFIG is null. See firebase/SETUP.md for how to create the (free) Firebase project and paste its settings below.
-const APP_VERSION = '2026.11.16h';       // keep equal to VERSION in sw.js (a test checks it)
+const APP_VERSION = '2026.11.16i';       // keep equal to VERSION in sw.js (a test checks it)
 const BUILD_COMMIT = '';                 // the full id of the commit this page was built from: the deploy workflow (.github/workflows/tests.yml) fills it in; empty in a plain checkout
 const REPO_URL = 'https://github.com/matan-gk/matan-gk.github.io';
 const CLOUD_CONFIG = {apiKey:"AIzaSyAlq_TJNGvWPJpUrpbdq_hkAoURydqMzm0", authDomain:"learning-quest-1.firebaseapp.com", projectId:"learning-quest-1", appId:"1:98931179722:web:78fb00084ccba3efb53433"};   // e.g. {apiKey:'...', authDomain:'xxx.firebaseapp.com', projectId:'xxx', appId:'...'}
@@ -3384,7 +3396,7 @@ const SKILL_META = {
   gSharing:{area:'stories', he:'בעיית חלוקה'}, gMultiplyChain:{area:'stories', he:'בעיית כפל'}, gLeftover:{area:'stories', he:'בעיית שאריות'},
   rdCause:{area:'reading', he:'קריאה: סיבה'}, rdWordRole:{area:'reading', he:'קריאה: תפקיד מילה'}, rdPhrase:{area:'reading', he:'קריאה: משמעות ביטוי'}, rdPurpose:{area:'reading', he:'קריאה: מטרת משפט'},
   rdNotInText:{area:'reading', he:'קריאה: מה אין בקטע'}, rdWordMeaning:{area:'reading', he:'קריאה: פירוש מילה'}, rdMotive:{area:'reading', he:'קריאה: למה עשה'}, rdSynonyms:{area:'reading', he:'מילים נרדפות'},
-  gShNotInText:{area:'reading', he:'קריאה קצרה: מה אין בטקסט'}, gShSynonyms:{area:'reading', he:'קריאה קצרה: מילים נרדפות'}, gShPurpose:{area:'reading', he:'קריאה קצרה: מטרת הטקסט'}, gShCause:{area:'reading', he:'קריאה קצרה: סיבה'}, gShMotive:{area:'reading', he:'קריאה קצרה: למה עשה'},
+  gShNotInText:{area:'reading', he:'קריאה קצרה: מה אין בטקסט'}, gShSynonyms:{area:'reading', he:'קריאה קצרה: מילים נרדפות'}, gShPurpose:{area:'reading', he:'קריאה קצרה: מטרת הטקסט'}, gShCause:{area:'reading', he:'קריאה קצרה: סיבה'}, gShMotive:{area:'reading', he:'קריאה קצרה: למה עשה'}, gShWordRole:{area:'reading', he:'קריאה קצרה: תפקיד מילה'}, gShPhrase:{area:'reading', he:'קריאה קצרה: משמעות ביטוי'}, gShWordMeaning:{area:'reading', he:'קריאה קצרה: פירוש מילה'},
   gMulFact:{area:'numbers', he:'לוח הכפל'}, gCompareTotals:{area:'stories', he:'השוואת סכומים'}, gRoundsTransfer:{area:'stories', he:'משחק בסבבים'},
   gFillNumber:{area:'numbers', he:'השלימו את המספר'}, gDifferenceMore:{area:'stories', he:'בעיית הפרש'}, gGroups:{area:'stories', he:'בעיית קבוצות'}, gRemainder:{area:'stories', he:'בעיית שארית'},
   gTwoSymbols:{area:'symbols', he:'חידת סמלים'}, gThreeSymbols:{area:'symbols', he:'חידת סמלים משולשת'}, gCirclePattern:{area:'symbols', he:'מספרים בקשת'}, gInequality:{area:'symbols', he:'אי-שוויון'},
@@ -3438,7 +3450,7 @@ const DIFFICULTY = {
 };
 const SKILL_DIFFICULTY = {
   // word problems
-  rdCause:2, rdWordRole:3, rdPhrase:2, rdPurpose:3, rdNotInText:3, rdWordMeaning:2, rdMotive:2, rdSynonyms:2, gShNotInText:2, gShSynonyms:2, gShPurpose:2, gShCause:2, gShMotive:2,
+  rdCause:2, rdWordRole:3, rdPhrase:2, rdPurpose:3, rdNotInText:3, rdWordMeaning:2, rdMotive:2, rdSynonyms:2, gShNotInText:2, gShSynonyms:2, gShPurpose:2, gShCause:2, gShMotive:2, gShWordRole:3, gShPhrase:2, gShWordMeaning:2,
   gCompareTotals:3, gRoundsTransfer:3, gMulFact:1,
   gLeftover:1, gDifferenceMore:1, gGroups:1, gSharing:2, gMultiplyChain:2, gRemainder:2,
   // symbol puzzles
@@ -5667,14 +5679,77 @@ const RS_MOTIVE = [
 ];
 function rsInfer(bank){
   const per = pick(RS_NAMES), g = (m,f)=>rsG(per,m,f);
-  const all = bank.map(f=>f(per.n,g)), i = ri(0,all.length-1), [e,c,q,a] = all[i];
-  const wrong = shuffle(all.filter((_,k)=>k!==i).map(x=>x[3])).slice(0,3);
-  return {label:'📖 קְרִיאָה קְצָרָה', text:`${e}<br>${c}<br>${q}`, type:'mcq', wide:true, answer:a, choices:shuffle([a,...wrong])};
+  const all = bank.map(f=>f(per.n,g)), i = ri(0,all.length-1), x = all[i];
+  const a = x[x.length-1], q = x[x.length-2], lines = x.slice(0,-2);   // an entry is: line(s), question, right answer
+  const wrong = shuffle([...new Set(all.map(y=>y[y.length-1]))].filter(t=>t!==a)).slice(0,3);
+  return {label:'📖 קְרִיאָה קְצָרָה', text:`${lines.join('<br>')}<br>${q}`, type:'mcq', wide:true, answer:a, choices:shuffle([a,...wrong])};
 }
 const gShCause = () => rsInfer(RS_CAUSE);
 const gShMotive = () => rsInfer(RS_MOTIVE);
 Object.defineProperty(gShCause,'name',{value:'gShCause'}); Object.defineProperty(gShMotive,'name',{value:'gShMotive'});
-const SHORT_READING_POOL = [gShNotInText, gShSynonyms, gShPurpose, gShCause, gShMotive];
+
+// -- word role: what a small word ("אֲבָל", "כִּי", "לָכֵן"...) tells the reader --
+const RS_ROLE = {'אֲבָל':'שֶׁמַּגִּיעַ דָּבָר שֶׁשּׁוֹנֶה מִמָּה שֶׁנֶּאֱמַר קֹדֶם', 'כִּי':'שֶׁמַּסְבִּירִים אֶת הַסִּבָּה', 'לָכֵן':'שֶׁמָּה שֶׁבָּא אַחֲרֶיהָ הוּא הַתּוֹצָאָה',
+  'גַּם':'שֶׁיֵּשׁ עוֹד דָּבָר מֵאוֹתוֹ סוּג', 'אִם':'שֶׁזֶּה תְּנַאי: מַשֶּׁהוּ יִקְרֶה רַק אִם מַשֶּׁהוּ אַחֵר יִקְרֶה', 'רַק':'שֶׁזֶּה הַדָּבָר הַיָּחִיד, אֵין עוֹד'};
+const rsRole = (w, line) => [line, `מָה הַמִּלָּה "${w}" מְסַמֶּנֶת?`, RS_ROLE[w]];
+const RS_WORDROLE = [
+  (n,g)=>rsRole('אֲבָל',`${n} ${g('רָצָה','רָצְתָה')} לִקְנוֹת סוּכָּרִיָּה, אֲבָל הַחֲנוּת הָיְתָה סְגוּרָה.`),
+  (n,g)=>rsRole('אֲבָל',`הַדְּרָקוֹן גָּדוֹל, אֲבָל הוּא לֹא מַפְחִיד.`),
+  (n,g)=>rsRole('אֲבָל',`${n} ${g('חִפֵּשׂ','חִפְּשָׂה')} אֶת הַמַּפְתֵּחַ בְּכָל מָקוֹם, אֲבָל לֹא ${g('מָצָא','מָצְאָה')} אוֹתוֹ.`),
+  (n,g)=>rsRole('כִּי',`${n} ${g('שָׂמַח','שָׂמְחָה')}, כִּי ${g('קִבֵּל','קִבְּלָה')} מַתָּנָה.`),
+  (n,g)=>rsRole('כִּי',`הַפֶּרַח נָבַל, כִּי לֹא הִשְׁקוּ אוֹתוֹ.`),
+  (n,g)=>rsRole('כִּי',`${n} ${g('לָבַשׁ','לָבְשָׁה')} מְעִיל, כִּי הָיָה קַר.`),
+  (n,g)=>rsRole('לָכֵן',`יָרַד גֶּשֶׁם, לָכֵן הָרִצְפָּה רְטוּבָה.`),
+  (n,g)=>rsRole('לָכֵן',`הַדְּרָקוֹן הָיָה רָעֵב, לָכֵן הוּא אָכַל הַרְבֵּה עוּגִיּוֹת.`),
+  (n,g)=>rsRole('לָכֵן',`${n} ${g('עָיֵף','עֲיֵפָה')}, לָכֵן ${g('הָלַךְ','הָלְכָה')} לִישֹׁן מֻקְדָּם.`),
+  (n,g)=>rsRole('גַּם',`בַּחֲנוּת יֵשׁ סוּכָּרִיּוֹת, וְגַם בַּלּוֹנִים.`.replace('וְגַם','גַּם')),
+  (n,g)=>rsRole('גַּם',`${n} ${g('אוֹהֵב','אוֹהֶבֶת')} שׁוֹקוֹלָד, וְגַם עוּגִיּוֹת.`.replace('וְגַם','גַּם')),
+  (n,g)=>rsRole('גַּם',`הַחַד־קֶרֶן יוֹדֵעַ לָרוּץ, וְגַם לָעוּף.`.replace('וְגַם','גַּם')),
+  (n,g)=>rsRole('אִם',`אִם יֵרֵד גֶּשֶׁם, נִשָּׁאֵר בַּבַּיִת.`),
+  (n,g)=>rsRole('אִם',`אִם ${n} ${g('יִגְמֹר','תִּגְמֹר')} אֶת הַשִּׁעוּרִים, ${g('יוּכַל','תּוּכַל')} לְשַׂחֵק.`),
+  (n,g)=>rsRole('אִם',`אִם תִּלְחֲצוּ עַל הַכַּפְתּוֹר, הַמְּנוֹרָה תִּדָּלֵק.`),
+  (n,g)=>rsRole('רַק',`בַּשַּׂקִּית נִשְׁאֲרָה רַק סוּכָּרִיָּה אַחַת.`),
+  (n,g)=>rsRole('רַק',`${n} ${g('אָכַל','אָכְלָה')} רַק חֲצִי מֵהָעוּגָה.`),
+  (n,g)=>rsRole('רַק',`רַק הַדְּרָקוֹן הָיָה בַּמְּעָרָה.`)
+];
+// -- the meaning of a phrase --
+const rsPh = (lines, ph, meaning) => [...lines, `מָה הַכַּוָּנָה בַּבִּטּוּי "${ph}"?`, meaning];
+const RS_PHRASE = [
+  (n,g)=>rsPh([`${n} ${g('עָזַר','עָזְרָה')} לְכֻלָּם.`, `${g('יֵשׁ לוֹ','יֵשׁ לָהּ')} לֵב זָהָב.`],'לֵב זָהָב','אָדָם טוֹב וְנָדִיב'),
+  (n,g)=>rsPh([`${n} ${g('רָץ','רָצָה')} כְּמוֹ רוּחַ`, `וְ${g('הִגִּיעַ','הִגִּיעָה')} רִאשׁוֹן לַסּוֹף.`],'כְּמוֹ רוּחַ','מַהֵר מְאֹד'),
+  (n,g)=>rsPh([`${n} ${g('שָׁר','שָׁרָה')} אֶת הַשִּׁיר בְּכָל הַלֵּב.`],'בְּכָל הַלֵּב','בִּרְצוֹן וּבְהִתְלַהֲבוּת'),
+  (n,g)=>rsPh([`${n} ${g('יָשַׁב','יָשְׁבָה')} בַּכִּתָּה עִם הָרֹאשׁ בֶּעָנָנִים.`, `${g('הוּא','הִיא')} לֹא ${g('שָׁמַע','שָׁמְעָה')} אֶת הַמּוֹרָה.`],'הָרֹאשׁ בֶּעָנָנִים',g('חוֹלֵם וְלֹא מַקְשִׁיב','חוֹלֶמֶת וְלֹא מַקְשִׁיבָה')),
+  (n,g)=>rsPh([`הַתִּיק שֶׁל ${n} קַל כְּמוֹ נוֹצָה.`],'קַל כְּמוֹ נוֹצָה','קַל מְאֹד'),
+  (n,g)=>rsPh([`${n} שָׂמֵחַ עַד הַשָּׁמַיִם.`.replace('שָׂמֵחַ',g('שָׂמֵחַ','שְׂמֵחָה')), `${g('הוּא','הִיא')} ${g('קִבֵּל','קִבְּלָה')} אֶת הַמַּתָּנָה שֶׁרָצָה.`],g('שָׂמֵחַ','שְׂמֵחָה')+' עַד הַשָּׁמַיִם',g('שָׂמֵחַ','שְׂמֵחָה')+' מְאֹד מְאֹד'),
+  (n,g)=>rsPh([`${n} ${g('שָׂם','שָׂמָה')} לֵב לַהוֹרָאוֹת שֶׁל הַמּוֹרָה.`],g('שָׂם','שָׂמָה')+' לֵב',g('מַקְשִׁיב בִּתְשׂוּמַת לֵב','מַקְשִׁיבָה בִּתְשׂוּמַת לֵב')),
+  (n,g)=>rsPh([`בַּחֲנוּת הָיוּ כָּל כָּךְ הַרְבֵּה אֲנָשִׁים.`, `הִיא הָיְתָה מְלֵאָה עַד אֶפֶס מָקוֹם.`],'עַד אֶפֶס מָקוֹם','מְלֵאָה לְגַמְרֵי, אֵין מָקוֹם'),
+  (n,g)=>rsPh([`${n} ${g('לֹא הֶאֱמִין','לֹא הֶאֱמִינָה')} לָעֵינַיִם`, `כְּשֶׁ${g('רָאָה','רָאֲתָה')} אֶת הָעוּגָה הַגְּדוֹלָה.`],g('לֹא הֶאֱמִין','לֹא הֶאֱמִינָה')+' לָעֵינַיִם',g('הִתְפַּלֵּא','הִתְפַּלְּאָה')+' מְאֹד'),
+  (n,g)=>rsPh([`לִפְנֵי הַהַצָּגָה ${g('הָיוּ לוֹ','הָיוּ לָהּ')} פַּרְפָּרִים בַּבֶּטֶן.`],'פַּרְפָּרִים בַּבֶּטֶן','הִתְרַגְּשׁוּת לִפְנֵי מַשֶּׁהוּ'),
+  (n,g)=>rsPh([`בַּגַּן ${n} ${g('מַרְגִּישׁ','מַרְגִּישָׁה')} כְּמוֹ דָּג בַּמַּיִם.`],'כְּמוֹ דָּג בַּמַּיִם',g('מַרְגִּישׁ בְּנוֹחַ, כְּאִלּוּ זֶה הַמָּקוֹם שֶׁלּוֹ','מַרְגִּישָׁה בְּנוֹחַ, כְּאִלּוּ זֶה הַמָּקוֹם שֶׁלָּהּ')),
+  (n,g)=>rsPh([`${n} ${g('שָׁבַר','שָׁבְרָה')} אֶת הָרֹאשׁ עַל הַחִידָה.`],g('שָׁבַר','שָׁבְרָה')+' אֶת הָרֹאשׁ',g('חָשַׁב','חָשְׁבָה')+' הַרְבֵּה כְּדֵי לִפְתּוֹר')
+];
+// -- the meaning of a word, from the sentence around it --
+const rsWm = (line, w, meaning) => [line, `מַה פֵּרוּשׁ הַמִּלָּה "${w}"?`, meaning];
+const RS_WORDMEANING = [
+  (n,g)=>rsWm(`הַתִּינוֹק נִרְדַּם מִיָּד אַחֲרֵי הַשִּׁיר.`,'מִיָּד','בְּאוֹתוֹ רֶגַע, בְּלִי לְחַכּוֹת'),
+  (n,g)=>rsWm(`לְפֶתַע נִשְׁמַע קוֹל חָזָק בַּחוּץ.`,'לְפֶתַע','פִּתְאוֹם'),
+  (n,g)=>rsWm(`בְּתוֹךְ הַקֻּפְסָה הָיָה פֶּרַח זָעִיר.`,'זָעִיר','קָטָן מְאֹד'),
+  (n,g)=>rsWm(`${n} ${g('נִדְהַם','נִדְהֲמָה')} כְּשֶׁ${g('רָאָה','רָאֲתָה')} אֶת הַדְּרָקוֹן.`,g('נִדְהַם','נִדְהֲמָה'),g('הִתְפַּלֵּא','הִתְפַּלְּאָה')+' מְאֹד'),
+  (n,g)=>rsWm(`${n} ${g('הִתְחַבֵּא','הִתְחַבְּאָה')} מֵאֲחוֹרֵי הַדֶּלֶת.`,g('הִתְחַבֵּא','הִתְחַבְּאָה'),'הִסְתִּיר אֶת עַצְמוֹ כְּדֵי שֶׁלֹּא יִרְאוּ'.replace('הִסְתִּיר אֶת עַצְמוֹ',g('הִסְתִּיר אֶת עַצְמוֹ','הִסְתִּירָה אֶת עַצְמָהּ'))),
+  (n,g)=>rsWm(`הַפִּירָטִים מָצְאוּ אוֹצָר בַּחוֹל.`,'אוֹצָר','דָּבָר יָקָר מְאֹד, כְּמוֹ זָהָב'),
+  (n,g)=>rsWm(`${n} ${g('נָשָׂא','נָשְׂאָה')} אֶת הַכּוֹס בִּזְהִירוּת.`,'בִּזְהִירוּת','לְאַט וּבְתְשׂוּמַת לֵב, כְּדֵי לֹא לִפֹּל'),
+  (n,g)=>rsWm(`לְעִתִּים קְרוֹבוֹת יוֹרֵד גֶּשֶׁם בַּחֹרֶף.`,'לְעִתִּים קְרוֹבוֹת','הַרְבֵּה פְּעָמִים'),
+  (n,g)=>rsWm(`${n} ${g('הִגִּיעַ','הִגִּיעָה')} מְאֻחָר לַהַצָּגָה.`,'מְאֻחָר','אַחֲרֵי הַזְּמַן שֶׁצָּרִיךְ, בְּלִי לִהְיוֹת בַּזְּמַן'),
+  (n,g)=>rsWm(`הַמִּגְדָּל נִרְאָה מֵרָחוֹק.`,'מֵרָחוֹק','מִמָּקוֹם שֶׁנִּמְצָא רָחוֹק'),
+  (n,g)=>rsWm(`${n} ${g('הִרְגִּיעַ','הִרְגִּיעָה')} אֶת הַכֶּלֶב הַפּוֹחֵד.`,g('הִרְגִּיעַ','הִרְגִּיעָה'),'עָזַר לוֹ לִהְיוֹת שָׁקֵט'.replace('עָזַר',g('עָזַר','עָזְרָה'))),
+  (n,g)=>rsWm(`${n} ${g('נִסָּה','נִסְּתָה')} לְשַׁכְנֵעַ אֶת הַמּוֹכֵר לְהוֹרִיד אֶת הַמְּחִיר.`,'לְשַׁכְנֵעַ','לְהַסְבִּיר עַד שֶׁמִּישֶׁהוּ מַסְכִּים'),
+  (n,g)=>rsWm(`${n} ${g('מִתְנַדֵּב','מִתְנַדֶּבֶת')} בַּחֲנוּת וְעוֹזֵר לַלָּקוֹחוֹת.`.replace('וְעוֹזֵר',g('וְעוֹזֵר','וְעוֹזֶרֶת')),g('מִתְנַדֵּב','מִתְנַדֶּבֶת'),'עוֹזֵר בְּלִי לְקַבֵּל כֶּסֶף'.replace('עוֹזֵר',g('עוֹזֵר','עוֹזֶרֶת')))
+];
+const gShWordRole = () => rsInfer(RS_WORDROLE);
+const gShPhrase = () => rsInfer(RS_PHRASE);
+const gShWordMeaning = () => rsInfer(RS_WORDMEANING);
+['gShWordRole','gShPhrase','gShWordMeaning'].forEach(k=>Object.defineProperty(eval(k),'name',{value:k}));
+const SHORT_READING_POOL = [gShNotInText, gShSynonyms, gShPurpose, gShCause, gShMotive, gShWordRole, gShPhrase, gShWordMeaning];
 // reading draw: a passage in progress always continues; 4 to 8 short questions come before each new passage (and at the start of a session); with every passage read, only short questions
 let rdGap = ri(4,8);
 function rdPick(pool, gen){
