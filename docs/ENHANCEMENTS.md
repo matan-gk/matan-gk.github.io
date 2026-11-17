@@ -750,3 +750,10 @@ Tests: new `readshorttest` (voweled, one right answer, variety); `readingtest`/`
 - `rsInfer` now takes an entry of any number of lines plus question and answer, and the three wrong answers are the other entries' answers (de-duplicated, so two sentences with the same connective never give the same wrong answer twice).
 - The reading section now has eight short types in all; each has SKILL_META, SKILL_DIFFICULTY and a help entry.
 - Test: `readshorttest` checks the quoted word or phrase is really in the text (a girl's name inflects it), and that the role matches the word.
+
+## Step 54: story-library icon and backdrops (branch `library-assets`, merged on top of `reading-short-c`; version 2026.11.17b)
+
+The reading section ("ספריית הסיפורים", section 9) now has its own pictures in the default theme, so it no longer falls back to the emoji and a plain background:
+- selection-screen icon: `LEVEL_ICON_IMG["9"]` (256×256, transparent, same cut-out style as the dessert machine, detective and symbols icons);
+- landscape backdrop `BACKDROP_IMG["9"]` (960×536) and portrait backdrop `BACKDROP_IMG_P["9"]` (720×1290): the magic library with the dome, spiral stairs and the central book (pixel art, like the other backdrops).
+Tests updated: `leveltest` (4 hand-made icons), `loctest` (every section, including the 9th, has a backdrop, in portrait and landscape too), `splittest` (4 icons load). The space theme still has no picture for this section (its coverage report keeps saying 8 of 9). The version moved to 2026.11.17a on that branch and to 2026.11.17b here, after the merge with the reading work (Steps 51–53).
