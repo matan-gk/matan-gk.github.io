@@ -1,0 +1,20 @@
+// First-run welcome: a short, accurate explanation that opens on tap and never crowds the form
+const T=require('./lib.js');
+const {chromium}=require('playwright');
+let bad=0; const ok=(c,m)=>{console.log((c?'ok   ':'FAIL ')+m); if(!c) bad++;};
+(async()=>{const b=await chromium.launch({...T.launchOpts});
+const p=await (await b.newContext({viewport:{width:390,height:844}})).newPage(); const errs=[]; p.on('pageerror',e=>errs.push(e.message));
+await p.goto(T.URL); await p.evaluate(()=>localStorage.clear()); await p.reload(); await p.waitForTimeout(500);
+const d=p.locator('.welcome-detail');
+ok(await d.count()===1&&!(await d.evaluate(e=>e.open)),'welcome: one explanation block, closed to start with');
+ok(await p.evaluate(()=>{const t=document.getElementById('profTitle'); return t.scrollWidth<=t.clientWidth+1;}),'welcome: the title is not cut off on a phone');
+await p.click('.welcome-detail>summary'); await p.waitForTimeout(150);
+const txt=await d.innerText();
+ok(await d.evaluate(e=>e.open)&&txt.includes('עזרה')&&txt.includes('דיווח'),'welcome: opens on tap and points to the help and report buttons');
+ok(!/צילום מסך|במייל|עד 20/.test(txt),'welcome: no leftover claims that are not true (screenshot, e-mail, "up to 20")');
+ok(await p.evaluate(()=>[...document.querySelectorAll('.welcome-detail *')].every(e=>getComputedStyle(e).fontStyle!=='italic')),'welcome: no italic Hebrew');
+ok(await p.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth),'welcome: no sideways scroll');
+await p.fill('#pfName','נועה'); await p.click('.gopt:has(input[value=f])'); await p.click('[data-pact=save]'); await p.waitForTimeout(400);
+ok(await p.evaluate(()=>store.profiles.length===1&&!document.querySelector('.welcome-detail').offsetParent),'welcome: saving still creates the profile and the welcome panel closes');
+ok(errs.length===0,'no page errors '+errs.join());
+await b.close(); process.exit(bad?1:0);})();

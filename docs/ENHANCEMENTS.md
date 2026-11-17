@@ -762,3 +762,12 @@ Tests updated: `leveltest` (4 hand-made icons), `loctest` (every section, includ
 
 The magic clock ("שעון הקסמים", section 6) and the rainbow challenge ("אתגר הקשת בענן", section 5) now have hand-made selection-screen icons in the default theme: `LEVEL_ICON_IMG["6"]` and `LEVEL_ICON_IMG["5"]` (256×256, transparent, same cut-out style as the other hand-made icons). Only the icons changed: no backdrop was touched. The white background of each picture was cut out; white inside the artwork is kept.
 Tests updated: `leveltest` and `splittest` (six hand-made icons, three emoji-based), `loctest` (six cut-out icons).
+
+## Step 55: first-run welcome rewritten (branch `welcome-screen-update`, merged with main; version 2026.11.17c)
+
+The branch (an expandable "more about the game" block on the first-run profile screen) was ~50 commits behind, so main was merged in first (no conflicts), then the text and the look were fixed:
+- Wording: the old text promised things the game does not do ("up to 20", a "screenshot" paragraph that showed no screenshot, "directly by email" with no address, an italic Hebrew note, English-looking quotes with a trailing "?9" that broke in right-to-left). The new text says what is really there: nine places, a gift for every correct answer (collected in Kapcake's room), the "עזרה" button, where progress is kept and how a parent backs it up, and a short note from the author pointing to the "דיווח" button.
+- Tagline: "תרגילי חשבון וקריאה קצרים, משוב מיידי ומתנות קסומות על כל הצלחה" (reading is now part of the game). The "who is playing? more profiles can be added later" line is back, under the block.
+- UI: the inline styles moved into CSS classes (`.welcome-detail`, `.welcome-body`, `.welcome-note`); one emoji per row in a tidy list instead of bullets; keyboard focus ring on the summary; the arrow turns when open; no italics.
+- The title stays "ברוכים הבאים!" (a longer title was cut off on a phone).
+- Test: `welcometest` (closed to start with, title fits, opens on tap and mentions the help and report buttons, no leftover claims, no italic, no sideways scroll, saving still works).

@@ -654,6 +654,17 @@ body[data-view="play"] .card{background:color-mix(in srgb, var(--card) 76%, tran
 .pa-h{font-size:1.02rem; font-weight:800; margin:0 0 4px; color:var(--text)}
 .mxd>summary{cursor:pointer; list-style:none; margin:0}
 .mxd>summary::-webkit-details-marker{display:none}
+.welcome-detail{margin:6px 0 16px; background:var(--card2); border-radius:14px}
+.welcome-detail>summary{list-style:none; display:flex; align-items:center; gap:8px; cursor:pointer; padding:12px 14px; font-weight:700; border-radius:14px}
+.welcome-detail>summary::-webkit-details-marker{display:none}
+.welcome-detail>summary::after{content:'▾'; color:var(--muted); font-size:.8rem; margin-inline-start:auto; transition:transform .15s ease}
+.welcome-detail[open]>summary::after{transform:rotate(180deg)}
+.welcome-detail>summary:focus-visible{outline:2px solid var(--purple); outline-offset:2px}
+.welcome-body{padding:2px 14px 14px; font-size:.92rem; line-height:1.55}
+.welcome-body ul{list-style:none; margin:0; padding:0; display:grid; gap:10px}
+.welcome-body li{display:flex; gap:10px; align-items:flex-start}
+.welcome-body li .wi{flex:none; font-size:1.15rem; line-height:1.4}
+.welcome-note{margin:12px 0 0; padding-top:12px; border-top:1px solid color-mix(in srgb, var(--muted) 25%, transparent); color:var(--muted)}
 .mxtag{font-size:.7rem; font-weight:700; background:var(--card2); color:var(--purple); padding:2px 8px; border-radius:999px; margin-inline-start:6px}
 .mxwrap{overflow-x:auto}
 table.qmx{width:100%; table-layout:fixed; border-collapse:collapse; font-size:.85rem}
@@ -7102,8 +7113,24 @@ function renderProfilesInner(){
   if(profMode.view==='form'){
     const editing = profMode.editId ? store.profiles.find(x=>x.id===profMode.editId) : null;
     document.getElementById('profTitle').textContent = profMode.first ? '👋 ברוכים הבאים!' : (editing ? '✏️ עריכת פרופיל' : '➕ פרופיל חדש');
+    const welcomeDetail = profMode.first ? `
+      <details class="welcome-detail">
+        <summary><span aria-hidden="true">📖</span> מה יש במשחק?</summary>
+        <div class="welcome-body">
+          <ul>
+            <li><span class="wi" aria-hidden="true">🗺️</span><span>תשעה מקומות קסומים לשחק בהם: מספרים, חנות עם בעיות מילוליות, סימנים, שעון, צורות, היגיון, ספריית סיפורים ועוד.</span></li>
+            <li><span class="wi" aria-hidden="true">🎁</span><span>על כל תשובה נכונה מקבלים מתנה, ואוספים אותן בחדר של קאפקייק.</span></li>
+            <li><span class="wi" aria-hidden="true">💡</span><span>נתקעים? כפתור "עזרה" מסביר ומראה דוגמה.</span></li>
+            <li><span class="wi" aria-hidden="true">👪</span><span>ההתקדמות נשמרת במכשיר. באזור ההורים אפשר לגבות אותה ולהמשיך גם ממכשיר אחר.</span></li>
+          </ul>
+          <p class="welcome-note">פיתחתי את המשחק בשביל הבת שלי, והוא ממשיך לגדול לפי הבקשות שלה. יש הערה או רעיון? נשמח לשמוע, דרך כפתור "דיווח" שבתוך המשחק.</p>
+        </div>
+      </details>
+    ` : '';
     body.innerHTML = `<div class="pform">
-      ${profMode.first?'<p class="pa-sub" style="text-align:center">מי משחק? אפשר להוסיף עוד פרופילים בהמשך.</p>':''}
+      ${profMode.first?'<p class="pa-sub" style="text-align:center">תרגילי חשבון וקריאה קצרים, משוב מיידי ומתנות קסומות על כל הצלחה.</p>':''}
+      ${welcomeDetail}
+      ${profMode.first?'<p class="pa-sub" style="text-align:center; margin:0 0 10px">מי משחק? אפשר להוסיף עוד פרופילים בהמשך.</p>':''}
       <div class="pa-field"><label for="pfName">שם (אפשר להשאיר ריק)</label>
       <input type="text" id="pfName" maxlength="20" autocomplete="off" value="${editing?esc(editing.name):''}"></div>
       <div class="pa-field"><label>איך פונים אל השחקן?</label>
