@@ -758,6 +758,11 @@ The reading section ("ספריית הסיפורים", section 9) now has its own
 - landscape backdrop `BACKDROP_IMG["9"]` (960×536) and portrait backdrop `BACKDROP_IMG_P["9"]` (720×1290): the magic library with the dome, spiral stairs and the central book (pixel art, like the other backdrops).
 Tests updated: `leveltest` (4 hand-made icons), `loctest` (every section, including the 9th, has a backdrop, in portrait and landscape too), `splittest` (4 icons load). The space theme still has no picture for this section (its coverage report keeps saying 8 of 9). The version moved to 2026.11.17a on that branch and to 2026.11.17b here, after the merge with the reading work (Steps 51–53).
 
+## Step 55: icons for the clock and rainbow sections (branch `clock-rainbow-icons`, on top of `main` after Step 54; version 2026.11.17c)
+
+The magic clock ("שעון הקסמים", section 6) and the rainbow challenge ("אתגר הקשת בענן", section 5) now have hand-made selection-screen icons in the default theme: `LEVEL_ICON_IMG["6"]` and `LEVEL_ICON_IMG["5"]` (256×256, transparent, same cut-out style as the other hand-made icons). Only the icons changed: no backdrop was touched. The white background of each picture was cut out; white inside the artwork is kept.
+Tests updated: `leveltest` and `splittest` (six hand-made icons, three emoji-based), `loctest` (six cut-out icons).
+
 ## Step 55: first-run welcome rewritten (branch `welcome-screen-update`, merged with main; version 2026.11.17c)
 
 The branch (an expandable "more about the game" block on the first-run profile screen) was ~50 commits behind, so main was merged in first (no conflicts), then the text and the look were fixed:
