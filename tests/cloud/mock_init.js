@@ -17,6 +17,9 @@ window.__mockAd = function(){
     async list(fid){ net(); return call('list',{fid}); },
     async put(fid,id,doc){ net(); return call('put',{fid,id,doc}); },
     async wipe(fid){ return call('wipe',{fid}); },
+    async snapList(fid){ net(); return call('snapList',{fid}); },
+    async snapPut(fid,id,doc){ net(); return call('snapPut',{fid,id,doc}); },
+    async snapDelete(fid,id){ return call('snapDelete',{fid,id}); },
     async legacyList(uid){ net(); return call('legacyList',{uid}); },
     async legacyDelete(uid){ return call('legacyDelete',{uid}); },
     async report(o){ net(); return call('report',{o, uid:user.uid}); }

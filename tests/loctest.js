@@ -11,12 +11,12 @@ ok(await vis('#levels'),'home: level buttons visible');
 ok(!await vis('#card'),'home: question card hidden');
 ok(!await vis('#backBtn'),'home: back button hidden');
 ok(await p.evaluate(()=>document.getElementById('backdrop').style.backgroundImage.includes('url(')&&document.body.dataset.bd==='1'&&getComputedStyle(document.getElementById('backdrop')).display==='block'),'home: world-map backdrop shown (sweets)');
-ok(await p.evaluate(()=>['3','4','2'].every(k=>LEVEL_ICON_IMG[k])&&document.querySelectorAll('#levels .lvimg.cut').length===3),'dessert machine, detective and magical symbols use the new icons');
+ok(await p.evaluate(()=>['3','4','2','9'].every(k=>LEVEL_ICON_IMG[k])&&document.querySelectorAll('#levels .lvimg.cut').length===4),'dessert machine, detective, magical symbols and story library use the new icons');
 const n=await p.evaluate(()=>document.querySelectorAll('#levels .levelbtn').length);
 const h1home=await p.evaluate(()=>document.querySelector('h1').textContent);
 for(let i=0;i<n;i++){
  await p.evaluate(()=>showHome());
- await p.locator('#levels .levelbtn').nth(i).click();await p.waitForTimeout(150);
+ await p.locator('#levels .levelbtn').nth(i).click();await p.waitForTimeout(150);await p.evaluate(()=>rdClose());   // the reading section opens its passage first
  const s=await p.evaluate(()=>({v:document.body.dataset.view,h1:document.querySelector('h1').textContent,bg:document.getElementById('backdrop').style.backgroundImage,q:document.getElementById('qtext').textContent.length}));
  ok(s.v==='play'&&s.q>0,'game '+(i+1)+': opens with a question');
  ok(s.h1!==h1home,'game '+(i+1)+': title changes ('+s.h1+')');
@@ -68,12 +68,12 @@ const sm=await q.evaluate(()=>{const i=document.getElementById('charImg').getBou
 {const q=await (await b.newContext({viewport:{width:390,height:844}})).newPage();await q.goto(T.URL);await q.evaluate(()=>localStorage.clear());await q.reload();
  await q.fill('#pfName','X');await q.click('.gopt:has(input[value=f])');await q.click('[data-pact=save]');await q.waitForTimeout(300);
  const bg=()=>q.evaluate(()=>getComputedStyle(document.getElementById('backdrop')).backgroundImage);
- const ids=['home',1,2,3,4,5,6,7,8];
+ const ids=['home',1,2,3,4,5,6,7,8,9];
  const grab=async id=>{await q.evaluate(i=>i==='home'?showHome():openGame(i),id);await q.waitForTimeout(150);return bg();};
  const P={};for(const id of ids) P[id]=await grab(id);
  await q.setViewportSize({width:844,height:390});await q.waitForTimeout(200);
  const L={};for(const id of ids) L[id]=await grab(id);
- ok(ids.every(id=>P[id].includes('url(')&&P[id]!==L[id]),'portrait screens use the portrait backdrop (home screen and all 8 games)');
+ ok(ids.every(id=>P[id].includes('url(')&&P[id]!==L[id]),'portrait screens use the portrait backdrop (home screen and all 9 games)');
  ok(new Set(ids.map(id=>P[id])).size===ids.length,'each portrait backdrop is different');
 }
 // space theme: no backdrop, neutral background

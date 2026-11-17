@@ -69,7 +69,7 @@ const r=await p.evaluate(()=>{
   // skill meta / difficulty / help
   o.noMeta=names.filter(n=>!SKILL_META[n]||!(n in SKILL_DIFFICULTY)); o.noHelp=names.filter(n=>!HELP[n]||!HELP[n].ex||!HELP[n].ex.length);
   o.cov={}; o.covBad=[];
-  for(const [lv,pool] of Object.entries(pools)){ if(lv==='5') continue; for(const d of [1,2,3]){ const k=new Set(pool.filter(g=>skillDifficulty(g.name)===d).map(g=>g.name)).size; o.cov[lv+'/'+d]=k; if(k<2) o.covBad.push(lv+'/'+d);} }
+  for(const [lv,pool] of Object.entries(pools)){ if(lv==='5'||lv==='9') continue; for(const d of [1,2,3]){ const k=new Set(pool.filter(g=>skillDifficulty(g.name)===d).map(g=>g.name)).size; o.cov[lv+'/'+d]=k; if(k<2) o.covBad.push(lv+'/'+d);} }
   o.bonus7=BONUS_POOLS[7].map(g=>g.name).join();
   o.lv=LEVELS.map(l=>l.id).join();
   o.mix=names.filter(n=>!n.startsWith('b')).every(n=>pools[5].some(g=>g.name===n));
@@ -81,6 +81,6 @@ for(const [n,bd] of Object.entries(r.gen)) if(bd.length) ok(false,'generator '+n
 ok(r.sem.length===0,'semantics '+JSON.stringify(r.sem));
 ok(r.noMeta.length===0,'meta+difficulty '+r.noMeta);ok(r.noHelp.length===0,'help '+r.noHelp);
 ok(r.covBad.length===0,'coverage >=2 per section x level: '+r.covBad);ok(r.mix,'all regular new types in mix');ok(r.areaOk,'areas all known');
-ok(r.lv==='7,1,2,6,3,4,8,5','level order '+r.lv);
+ok(r.lv==='7,1,2,6,3,4,8,5,9','level order '+r.lv);
 ok(errs.length===0,'no page errors '+errs);
 await b.close();process.exit(f?1:0);})();

@@ -1,0 +1,25 @@
+// the coins next to the gift square at the top: only once the room is unlocked, only on wider screens, and it follows the balance
+const T=require('./lib.js');
+const {chromium}=require('playwright');
+let f=0;const ok=(c,m)=>{console.log((c?'ok   ':'FAIL ')+m);if(!c)f++;};
+(async()=>{const b=await chromium.launch({...T.launchOpts});
+const errs=[];
+const ctx=await b.newContext({viewport:{width:1100,height:800}});const p=await ctx.newPage();p.on('pageerror',e=>errs.push(e.message));
+await p.goto(T.URL);await p.evaluate(()=>localStorage.clear());await p.reload();
+await p.fill('#pfName','X');await p.click('.gopt:has(input[value=f])');await p.click('[data-pact=save]');await p.waitForTimeout(500);
+const vis=()=>p.evaluate(()=>{const e=document.getElementById('tokBadge');const r=e.getBoundingClientRect();return {shown:!!(e.offsetWidth&&e.offsetHeight),txt:e.textContent.trim(),img:!!e.querySelector('img'),x:r.x,sq:document.getElementById('rewardsStrip').getBoundingClientRect().x,top:r.top,sqtop:document.getElementById('rewardsStrip').getBoundingClientRect().top};});
+let v=await vis();ok(!v.shown,'locked room: no coins at the top');
+await p.evaluate(()=>{space.earned=12;space.spent=2;space.unlocked=true;golden=['🍪'];saveState();renderRewards();});
+v=await vis();ok(v.shown&&v.txt==='10'&&v.img,'unlocked: the balance (10) with a coin picture ('+v.txt+')');
+ok(v.x>v.sq&&Math.abs(v.top-v.sqtop)<6,'beside the gift square (the square stays at the far left) on the same line');
+await p.evaluate(()=>{space.spent=7;saveState();});
+v=await vis();ok(v.txt==='5','spending updates it ('+v.txt+')');
+await p.evaluate(()=>{space.earned=0;space.spent=0;saveState();});
+v=await vis();ok(v.shown&&/0$/.test(v.txt),'zero coins shows 0');
+await p.setViewportSize({width:400,height:800});
+v=await vis();ok(!v.shown,'phone width: not shown');
+await p.setViewportSize({width:1100,height:800});
+await p.evaluate(()=>{space.unlocked=false;saveState();});
+v=await vis();ok(!v.shown,'locking again hides it');
+ok(errs.length===0,'no page errors '+errs.join('|'));
+await b.close();process.exit(f?1:0);})();

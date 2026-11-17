@@ -6,7 +6,7 @@ Last updated: 2026-11-01. This file is kept current with every change: what is b
 
 | Area | Status |
 |---|---|
-| Game: 8 levels (sections), 105 question types (14 bonus), help page for every type | Built |
+| Game: 8 levels (sections), 108 question types (14 bonus), help page for every type | Built |
 | Profiles (name optional, girl / boy / neutral wording), switching from the top menu (the menu holds only the switcher and "parent area") | Built |
 | Difficulty (easy / medium / hard) per type; parent switch per profile | Built |
 | Progress tab: per-skill strength labels, trend, activity, common wrong answers | Built |
@@ -209,7 +209,7 @@ Target about 200 to 250 tokens for everything. Small items 2 to 3, medium 4 to 6
    - **Drawer.** Floats over the room on phones, sits beside it on wide screens (the room never moves or resizes). It shows the coins, the price ("צריך 3 מטבעות. יש לך 2"; "צריך מטבע אחד. יש לך 0") and Buy / Cancel. Nothing is bought without a preview: tapping an upgrade or a new color draws it in the room first. Colors already owned switch back for free. No refunds or selling.
    - **Items and prices.** Bed (3, 4, 5, 6 tokens) and window (2, 3, 4, 5), 5 levels each, drawn from the Gemini pictures (`ROOM_ART`: size and anchor point per level). The window keeps its sill height and grows up the wall with each level; the bed sits in the back corner (`BED_AT`, front corner of a roughly 2x3 footprint). The bed has a soft floor shadow (`BED_FOOT`) so it stands on the floor. The bedding, pillow and curtains are white until the coloring step (step 4); the original magenta pictures are kept in `outputs/room-art/originals/` for it. The drawer shows small pictures of every higher level: the next one is open (tap to preview, price shown), the ones after it are locked until the one before is owned. Walls and floor use the 16 paintbrush pictures as the color buttons; a new color costs 1 token per surface (gold, silver and rainbow 2), the starting color is free. `roomMaxCost()` = 57 for the two items + 3 x (13 + 3 x 2 - 1) = 54 for colors = 111 tokens for what exists today.
    - **State:** `space = {earned, spent, trued, unlocked, surf:{wl,wr,fl}, own:{wl,wr,fl}, lv:{bed,window}}`, sanitized in `spaceClean`. Tests: `spacetest`. `uSpeed` slows or speeds the gate and ceremony timers (tests set it near 0).
-   - **Not done:** debug-tab cost line, per-surface item colors (step 4).
+   - **Not done:** debug-tab cost line.
 3. **Catalog drawer and buying.** The drawer (both tabs, all card states), buying with the confirm sheet, floor items (placed freely on the grid; the cost is separate: plants first, then rug, toy box), placement by drag with the validity rules, put away, and several copies. Best done after the repository move (see the engineering section), because the room's sprites would push the old artifact channel over its file limit.
 3. **Catalog, buying and floor items (BUILT 2026-11-06 on branch `catalog`, on top of `room-fixes`; version 2026.11.06d).**
    - **Catalog.** `ROOM_CATALOG`: 21 plants (all 1x1; Hebrew names; 1 to 3 tokens (no plant costs more than 3), 40 in all for one of each) from Matan's plant sheet. Each has `src` (the pot painted brown, what the room shows) and `base` (the original with a magenta pot), a size and anchor in room units (the pot's bottom centre sits on the middle of its cell), and `ref` (the pot's light level). `ROOM_GROUPS` and `catGroup()` carry the filter chips (all / plants for now); a new sheet adds a group.
@@ -220,7 +220,15 @@ Target about 200 to 250 tokens for everything. Small items 2 to 3, medium 4 to 6
    - **Polish (branch `polish`, version 2026.11.06e).** The bed covers 3 x 4 cells (from the back corner; now per level, see Grounding). Its floor shadow follows the four feet measured on the art and the bed sits 7 units lower, so the legs touch the floor. The catalog or stock closes when anything in the room is tapped (the bed, a wall, the floor, a plant, empty space); the only mode that ignores room taps is placing a floor item. The rainbow color is a 7-stop pastel rainbow (red to violet) on every surface.
    - **Furniture and toys (branch `furniture`, version 2026.11.06f).** 17 more catalog items from Matan's second sheet; the catalog is now 38 items in three groups (plants, furniture, toys and decor) with chips. Footprints (`fw` x `fd` cells, x by y; default 1x1): three toy boxes, the cloud couch and the armchair are 2x2; the desk is 2x4 and has its own mirrored entry that is 4x2 (a separate item to buy, as Matan asked); the piano is 4x2 because the picture is long along x (Matan called it 2x4, the art decides); everything else 1x1. Prices: markers 1; book, teddy, cushions 2; mirror, tablet, unicorn 3; telescope and the first toy box 4; second toy box 5; treasure box, couches and desk 6; piano 8. Placement: the tapped cell is the middle of the item, it is kept on the floor, and it may not overlap the bed or another item (`footFree`); things are drawn back to front by their front corner; `spaceClean` sends any item that is off the floor, over the bed or overlapping to the stock. **Default colors for magenta surfaces** (`dc`, baked into `src`; `base` keeps the magenta original and `ref` the light level for `recolorSprite`): toy box 1 sky blue, toy box 2 pink, treasure box lilac, desk light wood, armchair pink, heart cushion rose, star cushion yellow. Items with no magenta (cloud couch, piano, the plushies, mirror and so on) have no `base`.
    - **Levels stay owned (same version).** `space.top[id]` is the highest level bought of the bed or window; `space.lv[id]` is the one shown. In the drawer all five levels appear: those up to `top` are owned (tap to switch for free, in either direction, nothing spent), `top+1` is open to buy (its price), the rest are locked. Buying records the new `top`. The saved `top` is never below `lv`.
-   - **Grounding (branch `grounding`, version 2026.11.07a).** Items and the bed floated because their art was placed by hand-tuned offsets. Now every floor sprite carries `r = [dx,dy,w,h]`, its picture's place relative to the back corner of its footprint, fitted from the sprite's own pixels so its contact points land on the footprint corners (`spriteSVG`, one function for the bed and every item). The bed has a footprint per level (`ROOM_ART.bed[l].fp`: levels 1-3 are 3 x 4, levels 4-5 are 3 x 3 because that art is drawn nearly square); `roomBlocked` follows the shown level and `stowBlocked` puts away items that would end up under a bigger bed. The floor shadow is the footprint polygon. `BED_SCALE`, `BED_AT`, `BED_CELLS` and the foot ellipses are gone, `WIN_U` is back to 250. Small items (1 x 1) stand on the middle of their cell. Why it happened and how it was measured: `docs/GROUNDING.md`. Test: `groundtest` reads the real sprite pixels and checks every item and bed level.
+   - **Grounding (branch `grounding`, version 2026.11.07a).** Items and the bed floated because their art was placed by hand-tuned offsets. Now every floor sprite carries `r = [dx,dy,w,h]`, its picture's place relative to the back corner of its footprint, fitted from the sprite's own pixels so its contact points land on the footprint corners (`spriteSVG`, one function for the bed and every item). The bed has a footprint per level (`ROOM_ART.bed[l].fp`: levels 1-3 are 3 x 4, level 4 is 3 x 3 because that art is drawn nearly square (level 5 was made 3 x 4 in the next step)); `roomBlocked` follows the shown level and `stowBlocked` puts away items that would end up under a bigger bed. The floor shadow is the footprint polygon. `BED_SCALE`, `BED_AT`, `BED_CELLS` and the foot ellipses are gone, `WIN_U` is back to 250 (later 300, sill 235: the window moved a tile right and three tiles up). Small items (1 x 1) stand on the middle of their cell. Why it happened and how it was measured: `docs/GROUNDING.md`. Test: `groundtest` reads the real sprite pixels and checks every item and bed level.
+   - **Step 4: colorable parts (branch `colors`, version 2026.11.07c).** Tapping an item shows a **colors** row under its other buttons (move, put away, upgrade levels stay). Each part opens a palette: the original, the 16 brushes (premium ones cost 2), and patterns where one is offered.
+     - **Parts.** Bed: blanket, sheet, pillow (levels 1-3) and also curtains (levels 4-5); the colors belong to the bed and carry across levels. Plants: the pot, one shared set (a pot color bought once works on every plant; each plant chooses its own). Furniture with a magenta surface (toy boxes 1-3, desk and its turned version, armchair, heart and star pillows): that surface, own set per item. Items with no magenta surface (telescope, mirror, cloud couch, piano and the like) and the window have none yet.
+     - **Prices.** Per part and option, like the walls: basic color 1 token, premium 2, pattern 2; owned options switch for free, the original is always free; new ones are previewed first, then bought or cancelled. Max-out cost is now **425** (195 + 12 parts x 19 + 2 for the blanket pattern): tell me if parts should be cheaper.
+     - **Patterns.** `ROOM_PATTERNS` (id, name, tile, scale, price, `parts` = where it is offered). First one: rainbow unicorns on the bed blanket (tile cut from the Gemini bed picture, `art/unicorn-bed-reference.png`). A pattern is available only on the parts that list it.
+     - **How it works.** Bed: each level has a mask picture (`mask`, red blanket / green sheet / pillow blue / yellow curtains) made by `tools/parts.py` from the patches of white linen in the art; the part's color is multiplied by the pixel's own shading. Items: the existing magenta trick (`paintItem`). Repainted pictures are made once and cached (`PAINT`). Saved as `space.po` (owned options per part key), `space.bc` (the bed's choices) and `c` on each placed item; `spaceClean` drops anything not owned or unknown. Test: `colortest`.
+     - **Limits.** The bed masks come from the white parts of the art, so a few specks (sparkles, the folded sheet next to the curtain on level 5) follow the curtain color. New bed art drawn with magenta parts would be cleaner (see the Gemini prompts).
+
+   - **Taller walls, smaller top bed (branch `walls-bed5`, version 2026.11.07b).** Walls are 600 units high (was 400, +50%): `RM_DY` 250, room frame 1000 x 1150. Bed level 5 now has the same 3 x 4 footprint as levels 1-3 and its picture is scaled to 0.85 and centred in the 3 x 4 block like the other levels (level 4 stays 3 x 3). Gemini prompts updated with measured perspective rules (exact 26.57 degree edges, feet on the diamond corners, same footprint for all bed levels, 12-unit walls, a check list); the template image still shows 8-unit walls.
    - **Not done (later):** drag to place (placement is tap on a cell), alpha hit test, confirm sheet with balance before and after, a turn button for rotating any item (only the desk has a turned version), wall and ceiling items. Tests: `catalogtest`.
 4. **Item colors and patterns.** Per-item bought colors with the magenta-key recolor, the full 16 brushes with premium colors, generated surface patterns.
 5. **More items in batches** (art-driven; each batch is a Gemini sheet plus a catalog entry): sweets shelf and mirror (wall), chandelier (ceiling), desk, cloud chairs, telescope, balcony; then price tuning with the max-out check.
@@ -377,3 +385,375 @@ Chosen design: **three options on the Backup page** (see Built). A recovery-code
 - **Tests:** `tests/` (42 tests, one command, about 1.5 minutes; `--quick` skips two slow ones). Pure logic is read from the game file at run time, so it never tests a stale copy. Run it before every publish.
 
 - **Publishing note (2026-11-02):** an artifact may hold at most 512 files, so `tools/build_split.py` now keeps pictures under 10 KB inside the page (`MIN_SPLIT`, default 10000 bytes; the page is about 2 MB) and only splits larger ones; when republishing, delete assets that the new `assets.json` no longer lists (map form `"assets/x.webp": null`).
+
+## Step 5: 45 new items and rugs (branch `items2`, on top of `colors`)
+
+- **Art**: two sprite sheets (`art/sheet-a-rugs-furniture.png`, `art/sheet-b-toys.jpg`) cut with `tools/sheetcut.py`, baked/fitted/written into `ROOM_CATALOG` by `tools/items2.py` (rerun-safe: it replaces entries with the same ids). Magenta surfaces are baked to a default colour exactly like earlier items (`base` = magenta original, `dc` = default, `ref` = brightness reference).
+- **Catalog now 83 items** (was 38), price sum 297. **25 colorable part keys** (was 12). Max-out cost is **860** (was 425): each new colorable key adds 19.
+- **Flat things** (`flat:true`; 13 items: 5 rugs, 3 train tracks/trainset, mat, tic-tac-toe, chess, 2 puzzles) lie on the floor. Rule: a flat thing only excludes other flat things; every other item can stand on it. They are drawn first (under everything), then solid things by depth, and have no drop shadow. Implemented in `isFlat`, `footFree`, `spaceClean` (separate `occF` occupancy) and `roomSVG` ordering.
+- **Rugs** are a new drawer group `rugs` ("שטיחים") and share one part key `rug` through the new optional catalog field `pk` (`partKeyOf` uses `c.pk` first), so a bought rug colour applies to every rug.
+- **Defaults and sizes** (fw x fd, price): rug_sq 2x2 mint, 3; rug_sq2 3x3 pink, 5; rug_rd 2x2 lilac, 3; rug_rd2 3x3 yellow, 5; rug_fluffy 2x2 pale pink, 5; tracks 3x3 red/blue, trainset 3x4; dollhouse 2x2; wardrobes 2x1; slides 1x3 / 3x1; small toys 1x1.
+- **Not colorable**: guitar2 (no magenta in the art), plus items without a magenta surface.
+- **Part names** added for: dollhouse, wardrobe, chair, slide, track, guitar, rug, dressbox, car, laptop, monkey, ladybug, bunny.
+- **Known soft spots**: sheet A is low resolution; flat fits for track2 and mat are loose (groundtest has documented per-item tolerances `FLATTOL`, `WIDE`); some near-duplicate pictures (soccer/soccer2, laptop/laptop2) were kept.
+- **Tests**: new `flattest.js`; `catalogtest`, `spacetest`, `colortest`, `groundtest` updated (83 items, 860 max-out, 25 keys).
+- Version 2026.11.07d.
+
+## Step 6: fixes after testing (branch `fixes-items`, off main)
+
+- **Bed level 5 sheet**: the mattress visible between the pillow and the blanket was joined to the right-hand curtain in the mask, so it took the curtain colour. `tools/parts.py` now cuts that patch apart (`SPLITS`: patch 182 eroded 3px, the left piece becomes sheet, the rest stays curtain); the level 5 mask picture is regenerated. Test: `colortest` counts sheet-coloured mask pixels there.
+- **Dark mode**: the colour buttons (`.partbtn`, `.brush .bsw`) use `var(--text)` (was the browser default black). Test: computed colour is light in dark mode.
+- **Default colour = a brush**: the colour an item comes in is pre-purchased and is shown as the brush closest to it (`nearBrush`), on the part buttons and as the first option in the palette, like the walls' starting brush. The palette hides the colour that brush stands in for, so the same brush is not shown twice (a palette now has 16 options, 17 with the blanket pattern).
+- **Footprints**: train toys (small track, round track, wooden train set), chess, tic-tac-toe, both puzzles and the Lego arch are 1x1 solid things (not flat): nothing can be placed on them. Chair (both turns), costume box and telescope are 2x2. Only the 5 rugs and the drawing mat are flat now.
+- **Small train tracks re-cut** with `sheetcut.cut_soft` (upscale first, alpha from the distance to white, white un-mixed from the edges: no grey halo). Chairs use it too. The telescope source is saved in `art/telescope-source.png`.
+- `tools/items2.py` stays the single place where these items' sizes, flat flag, prices and default colours are set; rerun it, then `python3 tools/externalize.py`.
+- Version 2026.11.07e.
+
+## Step 7: bed sheet strip, delete, one list for shop and inventory (branch `fixes-items`)
+
+- **Bed sheet, both sides**: on beds 1-3 the sheet is also turned down along the back edge of the blanket (the strip above the fold line, next to the pillow). It was part of the blanket in the colour map; `tools/parts.py` `STRIPS` now assigns it to the sheet (a half-plane cut along the fold line, per level). Test: `colortest` counts sheet-coloured mask pixels in that strip on beds 1-3.
+- **Delete**: the "put in the inventory" button on a placed item is now "מחיקה", with a note that a bought item stays yours and can be placed again from the list. (Still `data-away`: the copy leaves the room and stays owned, nothing is refunded.)
+- **One list**: the separate shop and inventory are one list (button "פריטים ומלאי", with how many copies are put away). It shows every item; what you own is outlined and marked "✓ ×n", a copy put away is marked 🎒. A "שלי" (mine) chip filters to owned items. Tapping an item with no copy put away goes straight to buy-and-place; tapping an item with a copy put away opens a choice: place it from the inventory (free) or buy another one (`RM.choose`). `RM.list==='stock'` no longer exists.
+- Version 2026.11.07f.
+
+## Step 8: things on furniture, phase 1 (branch `items-on-furniture-p1`)
+
+Data model, rules and save cleaning only (nothing drawn yet); design and phases in `docs/ITEMS_ON_FURNITURE.md`. New: thing ids `u`, `thing.on = {h,dx,dy}`, catalog `top` on 6 hosts, `BED_TOP`, `canSit`, `surfFree`, `topOf`, `settleSurfaces`, `SURF_SUB`/`space.sub` (for a finer grid later). Moving a host carries its sitters; deleting it or upgrading the bed sends sitters with no place to the inventory. The delete note names how many things go along, only when there are some. Test: `surfacetest.js`. Version 2026.11.07g.
+
+## Step 12: stale tests fixed, gift room filter (branch `fix-stale-tests`, off main)
+
+The three tests that failed on main tested things that were changed on purpose later: the sweets theme wording ("שמח" / "ננסה עוד משימה!" / "💖 משימת בונוס"), the gift room layout, and the debug panel that is now remembered on the device. storytest, rewardtest and layerstest follow the current behaviour. The gift room had two overlapping sections (all past gifts, and magic gifts); it is now one section with a filter: all (default), current (in the collection, newest first), past (merged into an upgrade, marked ✨), with counts on the chips; opening the room resets it to all. New test `tests/roomfiltertest.js`. Merging no longer moves gifts in the list: an upgraded item now remembers where its ten gifts stood in the order received (`golden` strings get `@p1,..,p10`, parsed by `goldSlots`; `kOf` and `goldCombos` ignore the suffix; `allRewardsList` puts each merged gift back in its place and gives every entry its `slot`). Older upgraded items have no places and are listed first, as before; damaged places are ignored. The room's list (all / current / past) is one list, newest first. Version 2026.11.08c.
+
+## Step 13: things on furniture, phase 2 (branch `items-on-furniture-p2`, off phase 1)
+
+Drawing and interaction (details in `docs/ITEMS_ON_FURNITURE.md`): sitters drawn with their host at the top's height; lit free top cells while placing/moving a small thing; tap a lit cell to put it there, tap the floor for the floor; tapping a sitter selects it, with a "select the table / the bed" button; moves between floor and tops; a host's things follow it (and show in its move preview). Placing drawer hints that small things can go on a lit top. `catalogtest` now expects the foot of the bed (not a lit top) to refuse a plant. Test: `surfaceuitest.js`. Version 2026.11.07h.
+
+## Step 14: things on furniture, phase 3 (branch `items-on-furniture-p3`, off phase 2)
+
+Calibration from the pictures (details in `docs/ITEMS_ON_FURNITURE.md`): `tools/surfaces.py` replaces the estimated heights with measured ones (table 27, desk 110, toy boxes 53/56/53) and measures the bed: per level a height `z`, a sideways shift `ox` and the list of visible cells (`BED_TOP[level].cells`, so the pillow end is out and levels 4-5 take only 3-4 cells). New: `top.ox`, `top.cells` honoured by `topOf`, `surfFree`, sitter drawing, lit cells, the placing preview and `topCellAt`. Tests: `surfacegroundtest.js` (numbers against pictures, via `tools/surfaces.py --check`); `surfacetest`/`surfaceuitest` updated for the bed's irregular top. Version 2026.11.07i.
+
+## Step 15: things on furniture, phase 4 (branch `items-on-furniture-p4`, off phase 3)
+
+Polish. Previewing a bed level upgrade now draws the bed's sitters on that level's top and hides those that would not fit (`wouldStow(to)`); the preview drawer says how many things will go to the inventory; after switching or buying a bed level a one-time notice (`RM.note`, `.rmnote`) says how many did. New test `tests/surfacemsgtest.js` (preview, notices, save and reload). Also: on narrow screens (under 900px) the drawer shrinks to a bar (title, price, the warning, buy / cancel and a maximize button) while a purchase or placement is being previewed, so the room stays visible; the maximize button opens the full drawer, which then has a minimize button. Wide screens are unchanged. Version 2026.11.08g.
+
+## Step 16: denser room grid (branch `denser_room_grid`, off main)
+
+One grid unit is half an old cell (`GU = 2`): the room is 20 x 20 units, catalog sizes are in units, and floor things, things on furniture and the tops all count in the same unit (the separate surface unit `SURF_SUB` and the per-item `ss` size are gone). Small items (lego, chess, tic-tac-toe, puzzles, trains, marker cup) are 1x1 units with half-size pictures; plants stay 2x2 for now. Taps pick the unit under the pointer; the placing drawer has four nudge arrows (also in the phone's small bar). Older saves are converted on load (`space.sub`). The lit tops are drawn per unit; `settleSurfaces` keeps the first of two overlapping sitters. Tools (`surfaces.py`, `ground.py`) read GU. Tests: new `tests/gridtest.js`; `surfacetest`, `surfaceuitest`, `catalogtest`, `flattest`, `groundtest` now work in units (cases written in cells and scaled by GU). Details in `docs/ITEMS_ON_FURNITURE.md`, "Grid units". Version 2026.11.08i.
+
+
+## Step 17: movable bed and window (branch `movable-bed-window`, off main)
+
+The bed and the window are still in the default room, but can now be moved, put away (deleted into the inventory) and placed again; each keeps its level, owned levels and upgrades while it is away, and can be upgraded while it is in the inventory. New saved state `space.fix = {bed:{x,y}|null, window:{w:'l'|'r', u}|null}` (null = in the inventory; a save without `fix` loads with the bed at 0,0 and the window on the right wall at u=300; positions of older saves are scaled by `space.sub` like everything else). `roomBlocked`, `topOf('bed')`, `bedSVG`, `surfaces()` and `wouldStow` use the bed's position; `bedFits(p, level)` checks the room edge and floor things; a bigger level at the edge is pushed back into the room (`bedAtFor`, `winAtFor`, applied in `stowBlocked`). The bed is drawn sorted among the floor things (with what lies on it as one group). Things on the bed move with it (`settleSurfaces`); deleting the bed sends them to the inventory with a notice. The window sits at a fixed sill height on either wall, anywhere along it in one-unit steps; the left wall draws the same art mirrored (`matrix(-1 .5 0 1 500 400)`). UI: the bed/window drawer has move (a placing mode `RM.pl = {fx:'bed'|'window'}` with tap, nudge arrows, place/cancel) and delete; fixtures in the inventory are cards in the items list (`data-fxopen`) whose drawer shows upgrades and a place button (colour parts of the bed are hidden while it is away). Test: `tests/fixturetest.js`. Not done: rotating the bed.
+
+## Step 18: room fills wide screens (branch `room-fill-large-screen`, off `movable-bed-window`)
+
+On screens 900px wide and up the room page no longer stops at 1200px: the room uses all the width and height left beside the fixed-width drawer.
+
+## Step 19: patterns for walls, floor and bed (branch `more-patterns`, off `room-fill-large-screen`)
+
+41 new patterns (from three Gemini sheets; 6 duplicates removed; each tile is mirrored 2x2 so it repeats without a seam, stored as `assets/<sha1>.webp`) are added to `ROOM_PATTERNS`. `parts` says where each is offered: wood/tile ones only on the floor (`fl`); checkers, hexagons, stripes and grid on walls, floor and bed; the rest on the walls (`wl`, `wr`) and the bed's blanket, sheet and curtain. A wall or floor value (`space.surf[k]`, `space.own[k]`) is now a colour index or a pattern `'p:id'` (validated per surface in `spaceClean`). Walls and floor draw it as an SVG `<pattern>` with a `patternTransform` matching the surface (floor `matrix(T*UX T*UY -T*UX T*UY 500 400)`, right wall `matrix(T T/2 0 T ...)`, left wall mirrored), so no perspective-corrected art is needed. Sizes: `FLOOR_TILE` (grid units), `WALL_TILE` (pixels). Price 2 coins each. Test: `tests/surfpattest.js`. Not done: the 16 patterned beds sheet (different bed art; its blanket themes could be made as flat tiles).
+
+Update (same branch): 16 bed patterns (dinosaurs, race cars, waves, teddy bears, space, wildflowers, clouds, sun and rainbows, toys, forest animals, sweets, fruit, music, monsters, unicorns, butterflies; `b_*` ids, mirrored 2x2 like the others, `sc` .4) are offered on the bed's blanket, sheet and curtain only. The wall/floor patterns are no longer offered on the bed. The walls and the floor now share what was bought: `space.own.wl/wr/fl` always hold the same list (colours and patterns; `spaceClean` merges them, buying adds to all three), so a colour or pattern is bought once and used on all three; `roomMaxCost` counts that shared set once. The bed's own options are still bought per part. Version 2026.11.08k.
+
+Correction (same branch, version 2026.11.08l): every pattern (the 41 + the 16 bed ones + the unicorn) is offered on the walls, the floor and the bed's blanket, sheet and curtain (`PAT_PARTS`). A pattern is bought once for all of them: `sharePattern` adds it to `space.own.wl/wr/fl` and to `space.po` of the three bed parts (and `spaceClean` merges them on load). Colours are shared by the walls and floor only; the bed's colours are still bought per part. `roomMaxCost` counts every pattern once. This replaces the earlier "bed has its own patterns" and "wall patterns not on the bed" notes above.
+
+Update (same branch, version 2026.11.08m): the five wood floors (parquet, blue, teddy, cars, trees) are floor-only again (`parts:['fl']`; `patOn(o,k)` checks it for saved bed/wall values and `sharePattern`); the other tile patterns stay everywhere. The left wall's pattern now carries on from the right wall round the corner as a single wallpaper: unmirrored, `matrix(T -T/2 0 T 500 400)` against the right wall's `matrix(T T/2 0 T 500 400)` (the pattern x runs negative on the left wall), so a motif is not flipped and the rows line up at the corner.
+
+## Step 20: turning items, phase 1: the mirrored look (branch `rotate-mirror`, off `rotate-plan`; version 2026.11.09a)
+
+Plan: `docs/ROTATION_PLAN.md`. A placed thing has `o` (saved only when not 0): 0 = the picture as drawn, 1 = its mirror image (facing front-left); an odd `o` swaps the footprint (`fpOf(c,o)`, `footOf(t)`); a thing's `x,y` is always the back corner of the footprint it has now. The mirror is made at draw time (`spriteSVG(..., mir)`: the picture is flipped about the vertical centre line of the footprint diamond, which maps the diamond of an fd x fw footprint exactly onto fw x fd), so there are no new assets. Items turn from their drawer (`↻ סיבוב`, `turnThing`) or while being placed (`data-pturn`): the footprint pivots on its middle, and if that does not fit it takes the nearest spot within 2 units (`turnedSpot`), otherwise a notice says there is no room. What lies on a host turns with it (`turnKids`: x and y swap on the top, each sitter's own `o` turns), a host's top is mirrored (`orientTop`: c, cells, and the sideways shift `ox` flip). The bed: `space.fix.bed = {x, y, o?}`; `bedFp(level, o)`, the bed top, the room's blocking checks and the placing mode all follow `o`; `turnBed`. Items that look the same from every side (plants, rugs, balls, small desk toys, table, tracks, cushions, mat, globe: `NO_TURN`) have no button. The four old "turned" catalog entries (`desk_turn`, `chair2`, `slide2`, `soccer2`) are removed and old saves are migrated (`ROOM_TURNED`: the same item with `o: 1`; the pink chair2 and mint slide2 now use the item's own colour); `tools/ground.py`, `tools/surfaces.py`, `tools/items2.py` and the tests that named them were updated. Test: `tests/rotatetest.js`. Limits: only two looks until back art exists (`c.back`, phases 2 and 3 of the plan); in the bed's moving mode there is no turn (turn it after placing); the light direction is mirrored with the picture.
+
+## Step 21: no ghost tap on small screens (branch `fix-drawer-ghost-tap`, off `rotate-mirror`; version 2026.11.09b)
+
+Bug: on a phone, touching a room item opened the drawer (a bottom sheet) at once, and the browser's click for that same touch then landed on whatever button was now under the finger: the bed was deleted, or the floor got a pattern. Fix: the room's `pointerup` handler records `RM.tapAt` and `RM.tapTouch` (any pointer that is not a mouse); the drawer click handler ignores clicks for `GHOST_MS` (600 ms) after such a tap. A mouse is never delayed. Test: `tests/ghosttaptest.js`.
+
+## Automatic tests on GitHub (branch `ci-tests`, off main; no version change)
+
+`.github/workflows/tests.yml` runs the whole suite (`tests/`, about 5 minutes) on every pull request, every push to `main` and by hand (Actions tab, "Run workflow"). It installs Node, Playwright and Chromium on a fresh Ubuntu runner, runs `node run.js`, and retries a failed test once (a few checks, such as one in `layerstest`, are random); logs and screenshots of a failed run are kept for 7 days as the `test-output` download.
+
+To make a failing run block a merge: Settings > Branches > add a rule for `main` > "Require status checks to pass" > choose `test`.
+
+Optional gated deploy: the workflow also has a `deploy` job that publishes the site (the repository root, as today) only after `test` passes. It is off until the repository variable `PAGES_VIA_ACTIONS` is `true` (Settings > Secrets and variables > Actions > Variables) and Settings > Pages > Source is "GitHub Actions". Until then Pages keeps deploying from the branch as before. To go back, set Source to "Deploy from a branch". Hosting stays free and the address does not change; with this source Jekyll is not run, so files are served as they are.
+
+Update (branch `ci-node24`, off main): the workflow's actions are moved to the versions that run on Node 24 (GitHub is retiring Node 20 for actions): checkout v5, setup-node v5, upload-artifact v6, upload-pages-artifact v5, deploy-pages v5, configure-pages v6. This is separate from the Node 22 the tests themselves run on. The deploy job can only be seen running after a merge to main.
+
+## Step 22: white walls for new profiles (branch `white-default-walls`, off main; version 2026.11.10a)
+
+A profile made from now on starts with both walls white (colour index 0): the white brush is selected and already owned, and purple is a normal purchase like the other colours. The floor stays brown. The profile is marked in its save with `space.dw = 1` (set where a new profile is made, kept by `spaceClean`, so save codes and cloud sync carry it). A save without `dw` is an older profile and keeps the old defaults (`ROOM_DEFAULT`, purple walls), whether or not it ever opened the room, so no existing profile or save changes. The marker only decides what a missing value falls back to and which default colour is always owned; anything the player chose or bought stays as saved. Test: `tests/whitedefaulttest.js`.
+
+## Step 23: placed vs. not placed yet (branch `pending-look`, off main; version 2026.11.10b)
+
+Everything that is not placed yet is drawn the same way; a placed thing never is.
+- **Marching dashes** (class `pend`, one animation `rmants` for all of them, constant size on screen at any zoom via `vector-effect`): around the footprint of an item, the bed or the window being placed or moved (the tile keeps green / red for fits / does not fit), around a wall or the floor shown in a colour or pattern that is not bought yet (with a "תצוגה מקדימה" tag in the middle of that surface), around the bed or an item while an upgrade or colour of it is previewed, and on the lit squares where a small thing could stand on furniture. A white line under the dashed one keeps them visible on any colour.
+- **Ghost:** an item being placed is see-through (about 60%) and pulses gently (`rmpulse`).
+- **Drawer:** the buy / place / cancel bar has the same dashed line on top (same speed).
+- **Settle:** when something is confirmed (placed, moved, bought, or an owned colour chosen) it settles: items bob into place (`rmsettle`), surfaces and windows flash (`rmflash`), and a few sparkles fly out (`settleFx`). All of it goes away by itself.
+- With "reduce motion" on in the device nothing moves; the dashes stay.
+Test: `tests/pendingtest.js`. No new artwork.
+
+## Step 24: the version in the parent area, and a way to the commit (branch `version-in-parent`, off `pending-look`; version 2026.11.10c)
+
+- **Parent area:** every tab ends with "גרסה <version>" (`versionHTML()`, element `#paVer`); the report tab shows it too, as before.
+- **From the deployed site to the commit:** `BUILD_COMMIT` in `math-quest.html` is empty in the repository. The deploy job in `.github/workflows/tests.yml` writes the full id of the commit being deployed into that line (and fails if it did not get in), so on the live site the version is followed by the short id as a link to `github.com/matan-gk/matan-gk.github.io/commit/<id>`. In a plain checkout or on any other host there is just the version.
+- **From a version to the commit:** `python3 tools/version_commit.py 2026.11.10b` prints the first and last commit that have that version and the merge that brought it into main (a version can span several commits when fixes are made before the next bump). `python3 tools/version_commit.py <short id>` gives the version of a commit; with no argument it uses the working copy's version. It needs the full history (`git fetch --unshallow` in a shallow clone).
+- Test: `tests/versiontest.js` runs the workflow's real stamp step on a copy of the page and checks the parent area with and without the stamp.
+
+## Step 25: the drawer's buttons stay in view (branch `drawer-sticky-buttons`, off main; version 2026.11.11a)
+
+The drawer is now three parts (`pinDrawerParts`): the title and coins on top (`.rmd-top`), the part that scrolls in the middle (`.rmd-body`: the item list, brushes, level thumbnails, parts), and the pinned bottom (`.rmd-foot`): the cost line, buy / place / cancel (and the other main button row), close, and "shrink to see the room". The drawer itself no longer scrolls, so with many items on a large screen only the items scroll and the buttons are always visible. This also holds in the phone's bottom sheet; the small "mini" drawer shown during a preview on a narrow screen is unchanged (it already shows the buttons, and has no close button). A redraw keeps the scroll position of the list. Test: `tests/drawerpintest.js` (large, large and short, phone).
+
+## Step 26: full turning, first batch of back pictures (branch `rotate-art-1`, off `drawer-sticky-buttons`; version 2026.11.11b)
+
+Rotation phase 2 for the first sheet (see `docs/ROTATION_PLAN.md`, "Phase 2 status"). Seven items now have a back picture (`back` in the catalog: cloud sofa, wardrobe, big wardrobe, bookshelf, piano, dollhouse, standing mirror) and turn through four looks: as drawn, mirrored, back, back mirrored (`o` 0..3; `oStates` is 4 for them, 2 for the rest). The back picture is fitted to the same footprint as the front (`tools/backart.py`, same method as `items2.py` / `ground.py`), repainted from its own base when it has a colourable part (the dollhouse roof), and mirrored at draw time for look 3. What lies on a host moves through the looks as a group (`turnKids`, step `a xor b`: swap x and y, the other end, or both), also when a thing is turned while it is being placed. The desk needs no back picture (it looks the same from both ends); the chair's picture on the sheet is a front view, so the chair is not wired yet (the plan has the corrected prompt). `tests/groundtest.js` now checks every back picture stands on its footprint; `tests/backtest.js` covers the cycle, drawing, painting, placing, hosts and saves.
+
+## Step 27: back views, toy boxes and chair (branch `rotate-art-2`, off main; version 2026.11.11d)
+
+The three toy boxes (`toybox1`, `toybox2`, `toybox3`) now have a back picture and four looks like the seven items of Step 26. `tools/backart.py` takes a list of sheets (the second is `art/back-views-b.jpg`; its first row is cut by boxes because the pictures below it touch). The toy boxes are hosts, so `tools/surfaces.py` also measures the top of each back picture (`HOSTS_BACK`; stored as `back.top`, the same cells with their own `z`), and `--check` verifies it. The rest of sheet b and the retry sheet are not wired: the costume box, canopy beds 4 and 5 and the chair are front views again (new prompts in `docs/personal-space/GEMINI_PROMPTS.md`, G.2); the plain beds are good but need a separate bed step (see `docs/ROTATION_PLAN.md`). Tests: `tests/backtest.js` covers the toy boxes in the cycle and as hosts; `groundtest` checks their back pictures stand on the footprint.
+
+The chair is wired too (version 2026.11.11d): its retry picture (`art/back-views-c-retry.jpg`, 2x2 sheet, bottom right) is a true back view, with the backrest nearest and its plain back showing; it is cut by its box (`BOX_B`) and fitted like the other items. `backart.py` keeps an existing `back.top` when it rewrites a catalog entry. The chair is not a host.
+
+## Step 28: sync safety, phase 1: the server lock (branch `sync-lock-1`, off `rotate-art-2`; version 2026.11.13a)
+
+Plan and rollout order: `docs/SYNC_SAFETY_PLAN.md`. Cloud documents are written in format 2 (`CLOUD_DOC_V`), and `firebase/firestore.rules` refuses any write below `minDocVersion()` and any write that would lower the stored number, so an older build can no longer overwrite a profile (it can still read). A live profile cannot be deleted: "delete my cloud data" marks every profile deleted, then deletes it (two batches). Moving a profile from the pre-family location upgrades its number. The admin page shows each profile's format, the room (items and tokens spent/earned) and warns about a profile with no room data. New tests: `tests/cloud/locktest.js` (the game's number, the rules and the admin page agree; delete rules; the wipe order), the fake servers of `cloudtest` and `famtest` now refuse writes below format 2 as the rules would, and `firebase/rules-test` runs the rules against the Firestore emulator in CI (new `rules` job in `.github/workflows/tests.yml`; it can't run where the emulator can't be downloaded, so the first CI run is its first run). The rules take effect only when pasted into the Firebase console (see the rollout in the plan).
+
+## Step 29: sync safety, phase 2: client guards (branch `sync-guard-2`, off `sync-lock-1`; version 2026.11.13b)
+
+- **Loss guard (`cloudLoss`):** a pull (or the reverse, a conflict push) that would remove the room, lower the earned tokens or lower the rewards is not applied. The profile goes to `cloud.held`, nothing is written on either side, and the backup tab shows three buttons: keep what is not being replaced, take the other side, or keep both (the cloud copy is added as a new profile "(מהענן)"). The decision is remembered per cloud version in `cloud.allow`.
+- **Newer format:** cloud documents with `v` above `CLOUD_DOC_V` are neither read into the game nor written; the backup tab asks to update the app.
+- **Clock:** a local change time more than 10 minutes ahead is pulled back to now at the start of each sync. A legacy save with no change time now gets `u:0` (the oldest), not "now".
+- **Safety copies:** `_before_sync` (one copy, overwritten by the next sync) is replaced by `_snaps`, a ring of the last 8 copies of the affected profiles (`snapAdd`, `cloudSnapSave`), dropping the oldest when storage is full.
+- Test: `tests/cloud/guardtest.js` (new). `cloudtest.js` now checks `_snaps`.
+- Reminder: adding a persistent progress field means bumping `CLOUD_DOC_V` and `minDocVersion()` together.
+
+## Step 30: sync safety, phase 3: daily backups (branch `sync-backup-3`, off `sync-guard-2`; version 2026.11.13c)
+
+- **Cloud copies:** after a good sync, once a day, each profile is copied to `families/{fid}/snaps/{day}_{profile}` (progress and stats; stats dropped if over 700 KB). The security rules make a copy create-only, with a stamp near the server clock, and deletable only when older than 8 days. The game prunes to the newest 7 days (`snapPrune`). No copy is made while a profile is held by the guard.
+- **Device copies:** `_daily` in localStorage keeps the last 7 days (progress only), next to the `_snaps` ring of Step 29.
+- **Extra copy:** before the parent chooses on a held profile, the cloud copy about to be replaced is saved as `{day}_{profile}_x{time}`.
+- **Limits:** a profile that is damaged and then synced every day will push good copies out after 7 days; the guard of Step 29 is what stops the damage from being synced in the first place. Restoring from a copy is not built yet (the copies can be read in the Firebase console, and the admin page can be extended).
+- Tests: `tests/cloud/backuptest.js` (new), `locktest.js` (rules and game agree on the 8 days), `firebase/rules-test/rules.test.js` (emulator, CI only).
+- **Rollout:** paste the new `firestore.rules` into the Firebase console (together with phase 1's), after every device runs version 2026.11.13c or newer; without the rules the copies are refused and silently skipped.
+
+## Step 30a: format upgrade in place (branch `sync-upgrade-4`, off `main`; version 2026.11.14a)
+
+Found after rollout: with every device on 2026.11.13c the admin page still showed documents in format v1. Reason: a profile is uploaded only when it changes, so a profile that was in sync before the update was never rewritten, and kept the format number it was first stored with. The lock (Step 28) only protects a document that carries the current number.
+
+- New plan step `upgrade` in `cloudPlan`: a profile that is in sync (nobody changed it) but stored in an older format is rewritten once, with the same content and the same change time, and the current format number. The security rules still check that nobody changed it in between.
+- It costs one write per old profile, once, on the first sync of an updated device. A fresh install or a changed profile already writes the current format.
+- Deleted-profile markers (tombstones) that were written by older builds keep their old number; they carry no data, so the admin page may still show a v1 on a deleted profile. They are cleaned when the family's cloud data is deleted.
+- Test: `tests/cloud/upgradetest.js` (new).
+## Step 31: math types from the gifted-students sample test (branch `test-math-types`, off `sync-backup-3`; version 2026.11.13d)
+
+Source: the Ministry of Education "מבחן סינון, כיתה ב'" sample (Part 2, the math tasks). Part 1 (reading passages) is a separate phase, see the plan below.
+
+Already covered, nothing built: two-digit add and subtract (`gAddCarry`, `gSubBorrow`), the "eggs in trays" remainder (`gRemainder`), the picture equations with two symbols (`gTwoSymbols`, `gSumDiff`).
+
+- **New `gMulFact`** (numbers, easy): a plain 2 to 9 times-table exercise, `8 × 3 = __`.
+- **Extended `gFillNumber`:** two new forms, `82 − __ = 11` (missing subtrahend) and `__ + 15 = 62` (missing first addend). Help page has the subtraction example.
+- **Extended `gInequality`:** besides the same-factor form, `47 + 15 < 47 + __` and `87 − __ > 87 − 15` (the direction flips when the subtracted number grows). Multiple-choice with exactly one valid choice, the equal value is always one of the wrong ones. Also fixed an old flaw: with a small first number the same-factor form offered only 3 choices.
+- **New `gCompareTotals`** (stories, hard): two kinds of animals with 2 and 4 legs, how much bigger one total is than the other.
+- **New `gRoundsTransfer`** (stories, hard): two players start equal, the loser of each round gives the winner a fixed amount; either one player lost every round or lost some and won some. Wrong choices are the usual slips (swapped, one round only, one side forgotten). The sum of the two is checked by the test.
+- **Extended `gThreeSymbols`:** a second form where the long line is the short line plus several copies of the third symbol (house + car = 19, four suns + house + car = 27).
+- Test: `tests/testmath.js` (800 draws per type: four distinct choices, the answer present, answers recomputed from the text, forms present, help and registration).
+
+### Plan: the reading section (phase 2, not built)
+
+Decisions from the owner (2026-11-13):
+- Line numbers, not quoted sentences, tie a question to the text. The numbers belong to the text's own lines, and the next number must sit next to the correct line even when a line wraps into 2 or 3 screen lines (a numbered-line layout, each text line a row with its own number gutter).
+- The reading passages are not part of the rainbow mix (5 to 7 questions per passage breaks its format). They live in a section of their own, with their own rules.
+- Passages cannot be generated, so the profile records which passages it has finished (every question answered), and a finished passage is never offered again; the section announces when the bank is used up.
+- Eight question types (cause, role of a word, meaning of a phrase, purpose of a sentence, what the text does not answer, word in context, motive, not-a-synonym pair), each its own skill id so the progress tab can show them.
+
+## Step 32: reading section, first slice (branch `reading-1`, off `test-math-types`; version 2026.11.13e)
+
+Section 9, "ספריית הסיפורים" (📖), with one passage ("הקפוד", 15 numbered lines) and its eight questions, one per type. Rules of the section, as decided:
+
+- **Numbered lines.** The passage opens in a full-screen panel. Each authored line is a row with its number in the right-hand gutter; when a line wraps onto 2 or 3 screen lines the number appears once, beside the first. Questions say "בשורה 7" and the "📖 הקטע" button reopens the passage with those lines highlighted. The first question of a passage in a session opens it automatically.
+- **One passage at a time, never repeated.** The profile keeps `progress.rd = {done:[ids], cur:{id, i}}`. A passage is done when all its questions are answered (right or wrong); it resumes at question `i` after a reload; a done passage is never offered again. When every passage is done the section leaves the menu and the game returns home.
+- **Its own rules.** Not in the rainbow mix (`pools[5]` excludes it), no bonus question or bonus party in this section, answers in one column, difficulty switches still apply (rated 2), and the cell matrix and hidden-types controls do not list it yet.
+- **Skills.** Each question's type is its own skill (`rdCause`, `rdWordRole`, `rdPhrase`, `rdPurpose`, `rdNotInText`, `rdWordMeaning`, `rdMotive`, `rdSynonyms`) in a new area "קריאה והבנה"; each has a help page.
+- **Sync format 3.** `progress.rd` is a new saved field, so `CLOUD_DOC_V` and `minDocVersion()` in the rules are now 3 (see `docs/SYNC_SAFETY_PLAN.md`: raising them makes older builds read-only). New in `locktest`: a list of the progress keys, so adding a field without raising the format fails a test. **Rollout:** paste the rules only after every device runs 2026.11.13e or newer; until then keep the version-2 rules.
+- **Level 9 loads.** `cleanProgress` accepted levels 1 to 8 only; now 1 to 9.
+- **To do next (phase 2 continued):** more passages (about 12 in all, you review the vowels), a parent-area switch for the section, the section's own picture, a message when the last passage is finished, read-aloud (optional), and the same loss guard for `rd` (a pull that would lower the done list is held).
+- Tests: `tests/readingtest.js` (new), and the sync tests now expect format 3.
+
+## Step 33: reading section, parent switch and returning stories (branch `reading-2`, off `reading-1`; version 2026.11.14c)
+
+- **Parent switch.** Settings tab, new card "📖 ספריית הסיפורים", per profile (also for a profile that is not the active one): show or hide the section in the child's menu.
+- **Empty section stays.** When every story is finished the section is still in the menu; tapping it shows a message ("סיימת לקרוא את כל הסיפורים! סיפור חדש יחזור בעוד N ימים") instead of opening a question. After the last answer of the last story the game goes home and shows the same message. (Step 32 hid the section instead.)
+- **Stories come back.** A finished story returns after `days` days (default 30). The age is kept per story: `progress.rd.t[id]` is the time that story was finished. Choices in the card: 7, 14, 30, 60, 90 days or never; the setting is `progress.rd.days`. A returning story starts again from question 1. A finished story with no time recorded gets today's, once.
+- **Story list in the card:** each story with its state (not read, in progress at question N of M, read on D, returns on D / will not return) and a "להחזיר עכשיו" button.
+- **Saved fields.** All inside `progress.rd` ({done, t, cur, days, off}), so the list of progress keys, and the sync format (3, not yet released), are unchanged. If `reading-1` has already been released with the shorter `rd`, the format number must be raised again before this ships.
+- Tests: `tests/readingset.js` (new), `readingtest.js` updated.
+
+## Step 34: main menu layout fix (branch `menu-layout-fix`; version 2026.11.14d)
+
+After the reading section made the menu 9 buttons (10 with the room), the layout broke on tablets and large screens: a vertical list of wide buttons on large screens, and on tablets a button count that did not add up to even rows.
+
+- **Cause.** The phone-only "short last row" rules (`data-rem`, thirds) were not scoped to phones, so they also applied on larger screens. They out-ranked the four-per-row rules (`data-rem4`) there, and on large screens the grid had 4 columns while the buttons still spanned 3 of 12, so each button took a whole row.
+- **Fix.** The `data-rem` rules apply only below 720px. From 720px up the menu is one 12-column grid, 4 buttons per row, with a short last row stretched to full width (`data-rem4`). The large-screen column overrides were removed.
+- Tests: `tests/menulayout.js` (new) measures real button positions at 390, 600, 820, 1024, 1280 and 1920px, with and without the room button: even rows, last row fills the width, no narrow buttons. It fails on the old CSS (18 failures) and passes now.
+
+## Step 35: story message no longer pops up on the menu (branch `story-popup-fix`; version 2026.11.14e)
+
+- **Cause.** With every story read, the section stays in the menu and shows a message when tapped. But a child who finished the last story was left with `level = 9` saved, and every page load (and profile switch) called `nextQuestion()` for that empty section, which showed the message.
+- **Fix.** `nextQuestion()` now moves her out of the empty section (to the mix) and shows the message only when she was playing, i.e. after a tap on the section or her last answer. Page loads and profile switches stay silent.
+- Test: `readingtest.js` reloads with all stories read and checks there is no message and she is not parked in the section (fails on the old code).
+
+## Step 36: three more stories, and the passage no longer opens on the menu (branch `more-stories`; version 2026.11.14g)
+
+- **Passage popup on the menu (bug).** If she had left a story half done, a page load or profile switch with that section as the current one prepared the next question, and the first question of a passage opens the passage, so the story covered the menu. Now the passage opens only while she is inside the section (`gameView==='play'`), it is not marked as seen otherwise (so it opens when she taps the section), and going home closes it.
+- **Stories.** The bank now has 4 passages: הַקִּפּוֹד, הַגָּמָל (14 lines), הַדְּבוֹרָה (15) and הַיַּנְשׁוּף (15), each with the same eight question types in the same order. **The vowel marks are mine and need your review**, especially the new three.
+- Order of play is random among the passages not yet finished; finished ones return after the number of days set in the parent area.
+- Tests: `tests/readingbank.js` (new) checks every passage (8 questions in order, 3 distinct wrong answers, line numbers in range and matching the question text, no broken characters), plays all passages to the end one after another, and checks the popup bug (fails on the old code). `readingtest.js` plays with the first passage only.
+- To do: more passages (about 12 in all), the section's own picture, a loss guard for `progress.rd`.
+- Review fixes (2026.11.14g): "מְפַחֵד" instead of "מִתְפַּחֵד" in the hedgehog passage (line 6 and its question); camel synonym question now uses "שׁוֹמֵר – מֵגֵן" (a real pair, from the text) instead of "מַהֵר – בִּמְהִירוּת".
+
+## Step 37: the prize pops up and flies to the gift box (branch `prize-pop`, on top of `more-stories`; version 2026.11.14h)
+
+- **What she sees.** A right answer (and the two prizes of a bonus question) now shows the prize in a card in the middle of the screen: it pops in with a bounce, a glow and a few sparkles (about 0.65 s), stays for half a second, then flies (0.7 s) to the gift box in the top corner, which bumps when it arrives. The new item in the gift box stays hidden until the prize lands, then appears with its usual pop. Nothing blocks the screen: the prize ignores taps, and she can already press "next".
+- **No collisions.** `afterPrize(fn, gap)` runs a function once no prize is in the air: the 5th-in-a-row party (`showMilestone`), the merge celebrations (`flushCelebs`, also after a bonus) wait for the landing plus a short gap (party 350 ms, celebrations 450 ms). The prize sits below the party (z-index 58 against 60) in case they ever meet. A profile switch (`refreshAll`) clears a prize in flight. A safety timer removes it after 3.5 s whatever happens.
+- **Reduced motion.** With "reduce motion" on, the prize is shown without moving for one second and removed.
+- **Kept.** The feedback line with the prize name, the confetti, and the mascot's small peek on short screens are unchanged.
+- Tests: `tests/prizetest.js` (new): the prize appears mid-screen at a visible size, the gift-box item waits, the prize moves toward the corner, is gone after landing, the box bumps, a wrong answer shows nothing, the party never shares the screen with the prize and starts after it, a profile switch clears it, reduced motion.
+
+## Step 38: nine new room items, sheet c1 (branch `room-items-1`, on top of `room-items-prompts`; version 2026.11.15a)
+
+- **Art.** `art/sheet-c1-furniture.jpg` (front, 3x3) and `art/sheet-c1-back.jpg` (turned half way round), made with the prompts of `docs/personal-space/GEMINI_PROMPTS_BATCH3.md`. `tools/items3.py` (new, idempotent) cuts, bakes the magenta part to a default colour and fits each picture to its footprint like `items2.py` / `backart.py`; footprints in the script are in cells (catalog stores cells x `GU`). A small change from the older cutter: white areas enclosed in a picture stay (the awning's stripes) unless they are bigger than a per-picture limit (`BIG`: the gaps in the swing frame, hammock stand, rocking horse, handle loop), so frames are not filled with white.
+- **Items (name, price, footprint in cells, colourable part).** פוף bean bag 4, 2x2, the bag; אוהל קריאה teepee 8, 3x3, the fabric; כיסא ערסל hammock chair 6, 2x2, the cushion; שולחן ילדים עם כיסאות kids table 6, 3x2, the chair seats; שידת לילה nightstand 3, 1x1, the drawer front; מדף צעצועים toy shelf 5, 2x1, the bins; סוס נדנדה rocking horse 5, 2x1, the saddle blanket; נדנדות swing set 8, 3x2, the seats; דוכן קאפקייקס cupcake counter 7, 3x1, the awning. Each has its own colour key (9 new keys, `PART_NAMES`).
+- **Back pictures (7).** bean bag, teepee, hammock, nightstand, toy shelf, swing set, counter: they turn through four looks. The nightstand's and the shelf's backs have no magenta (the drawer and bins are on the front only), the others keep their coloured part. **Not used:** the kids table (the sheet's back picture has 2 chairs, the front has 3) and the rocking horse (the back picture is the front again). Prompts to redo these two are in the Gemini file.
+- **Hosts.** The kids table (top = the middle column, 1x2 cells), the nightstand (1x1) and the toy shelf (2x1) can carry things (`top` measured by `tools/surfaces.py`: new entries in `HOSTS` / `HOSTS_BACK`; the nightstand's and shelf's back tops too). The shelf's back picture is drawn lower than its front (top z 71 against 84), so a thing on it moves slightly when the shelf is turned. The counter is not a host (the display case and awning cover its top).
+- **Numbers.** Catalog 88 items (price sum 330), 34 colourable part keys; max-out cost 1143 (was 860 by the old comment; the test computes it).
+- Tests: `tests/items3test.js` (new): the 9 items, their keys, the back pictures, the hosts and a thing staying on a host through all four looks, repainting, no white in the gaps. Updated for the new counts: `catalogtest`, `colortest`, `surfacetest`, `backtest`.
+
+## Step 39: 25 more room items, sheets c2 to c4 (branch `room-items-2`, on top of `room-items-1`; version 2026.11.15b)
+
+- **Art.** `art/sheet-c2-lights-music.jpg` + `sheet-c2-music-back.jpg`, `sheet-c3-learning-pets.jpg` + `sheet-c3-back.jpg`, `sheet-c4-plush-plants-wall.jpg` + `sheet-c4-back.jpg`. `tools/items4.py` cuts and fits them (blobs or the 3x2 grid of the c4 back; the yellow floor diamond under the plush backs is removed).
+- **Items.** Lights and music: cup lamp, star lamp, lava lamp, disco ball, light pole, crystal ball, music box, xylophone, drum. Learning and pets: abacus, register, microscope, magnetic board, marble run, robot, fish bowl, fish tank, hamster. Plushies and plants: elephant, sleeping cat, penguin, sloth, sunflower (pl21), strawberry (pl22), star rug.
+- **Back pictures (11):** music box, register, microscope, magnetic board, marble run, robot, fish tank, elephant, cat, penguin, sloth.
+- **Not added.** The wall clock and treasure map (sheet c4) wait for wall mounting. New colour parts have Hebrew names in `PART_NAMES`.
+- **Numbers.** Catalog 113 items (price sum 419), 42 colourable part keys, 23 plants.
+- Tests: `tests/items4test.js` (new); counts updated in catalog, colour, space and back tests; the register's back cord is allowed to trail sideways in the ground test.
+
+## Step 40: pictures on the walls (branch `wall-items`, off `main`; version 2026.11.15c)
+
+- **Two wall items** from sheet c4: the clock (3 🪙) and the treasure map (3 🪙), group "קיר". `tools/walls.py` cuts them out. Both are drawn flat on the wall and sheared with it (no mirroring, so the clock keeps its numbers).
+- **Data.** A thing gets `wl = {s:'l'|'r', a, h}`: the wall, the distance of the picture's centre from the corner along the wall, and its height above the floor (wall pixels, steps of 25). Its `x,y` stay -1 (not on the floor). A wall item with no `wl` is in the inventory.
+- **Rules.** Pictures never overlap each other or the window; when a saved room, or a moved or upgraded window, makes them overlap, the first one stays and the other goes to the inventory (`wallSettle`, and the same check in `spaceClean`). A picture is clamped onto its wall.
+- **Placing.** Buy from the list (filter "קיר") or take one from the inventory: tap the wall, or nudge with the four arrows; green or red frame shows if the place is free. Move / put away work as for other things; no turn button.
+- **Sync format 4.** `things[].wl` is new, so `CLOUD_DOC_V` is 4 (the repo's rules file and its test follow). A device on an older build treats a profile written by this build as "newer format": it is left alone and not overwritten. The Firebase console rules are NOT required to change for this (the console's `minDocVersion()` may stay as it is: the protection comes from the clients).
+- Tests: `tests/walltest.js` (new); counts, grid and ground tests skip wall items; `guardtest` uses a far-future format number.
+
+## Step 41: four-chair kids' table and the rocking horse's back (branch `table4-horse-back`, off `wall-items`; version 2026.11.15d)
+
+- **Kids' table.** Replaced by a four-chair picture (`art/ktable-4chairs.png`), the same from every side, so it has no turn button (`NO_TURN`) and no back picture. It now covers 3x3 cells (was 3x2); seats stay recolourable (`kidchair`); its top (2x2 cells, measured by `tools/surfaces.py`) still holds small things.
+- **Rocking horse.** Gets its back picture (`art/rhorse-back.png`), so it turns through four looks.
+- `tools/items5.py` makes both (run from the repo root; idempotent). Tests: `items3test`, `backtest` updated.
+
+## Step 42: bed colours (branch `bed-colors`, off `table4-horse-back`; version 2026.11.15e)
+
+Marked on a screenshot of the bed (b = blanket, s = sheet, p = pillow), two parts of the part mask were wrong:
+- The narrow band along the blanket's top edge (the fold, between the blanket and the pillow) was sheet. It is now blanket.
+- The small piece left of the pillow (a bit of sheet showing) was pillow. It is now sheet.
+`tools/bedmask.py` fixes the masks of levels 1 to 4 (level 5, the canopy bed, has neither; the same band is on levels 2 to 4, so it is changed there too). New masks are lossless files. `tests/bedmasktest.js` checks the marked points.
+
+## Step 43: coins next to the gift square (branch `prize-corner`, off `bed-colors`; version 2026.11.15f)
+
+Once the room is unlocked, the top-left of the screen shows the coin balance (the coin picture for the amount, as in the gift room, and the number) in a small card beside the gift square, so the balance is visible without opening anything. It follows the balance (every save), is hidden while the room is locked, and is left out on phone widths (under 600 px). Not tappable. Interpretation of the request: "also the number of tokens" next to the prizes. `renderTokBadge()`; `tests/tokbadgetest.js`.
+
+## Step 44: unknown items are kept; sync format 5 (branch `unknown-items-safe`, off `prize-corner` with `main` merged; version 2026.11.15g)
+
+**The gap.** The server rules stop a build from writing a *lower* format number than the stored one, but adding catalog items does not change the number. An older build loaded the profile, dropped the things whose item id it did not know (`spaceClean` filtered them out) and uploaded the result the next time anything changed, so new items could be deleted from the saved room.
+
+**The fix.** `spaceClean` now keeps those things in `space.unk` (not drawn, not counted, positions converted to the saved unit like everything else, at most 100, each under 400 characters and with a short id; anything oversized or malformed is not kept). A thing standing on an unknown item is kept with it. `spent` is not touched. When a build that knows the item loads the profile, the entries come back as normal things at their places.
+
+**The bump.** `space.unk` is new saved data, and builds without this fix would keep dropping new items, so `CLOUD_DOC_V` is 5 and `minDocVersion()` in the repo's rules is 5 (the emulator tests use 5 as current, 4 as old, 6 as newer). Every build older than this one becomes read-only against a profile written by it. Console: no change is required (the protection is the stored-format rule that is already deployed, plus the clients). From here on, new art batches need no format bump.
+
+**Known remaining gap (not new).** Unknown colour indices or other unknown option values inside the room are still normalised by older builds; only items are kept.
+
+Tests: `tests/unkitemstest.js` (new); `walltest.js` accepts format 4 or later; rules tests moved to format 5.
+
+## Step 45: room light and trim (branch `room-atmosphere`, off `main`; version 2026.11.16a)
+
+Plan step A. Three layers drawn by `atmoShell`, `atmoLight` and `atmoOverlay` in `roomSVG()`, all `pointer-events:none`:
+- **Shell** (over walls and floor): corner shade, baseboards, crown, corner post, floor sheen and bevelled tile lines, all coloured from the surface colour (`atmoBase`; rainbow and patterns use a soft violet), plus a milky layer (`atmoMilk`) that turns rainbow and strong colours pastel.
+- **Light**: a glow on the window's wall, a beam and a patch of light on the floor; none when the window is stowed.
+- **Overlay**: a soft vignette and fixed sparkles. Everything standing in the room sits in one group with a single colour-grade filter.
+- On by default; the sparkle button beside the zoom buttons switches it off, per device (`localStorage cq_atmo`, nothing synced, no format change).
+Tests: `tests/atmotest.js` (new).
+
+## Step 46: wall shelves (branch `wall-decor`, off `room-atmosphere`; version 2026.11.16b)
+
+Plan step B. Eight glass shelves with their things on them (crystals, bubble tea, ice cream, plushies; and four stacks of two or three tiers), from the sheets `art/sheet-shelves.jpg` and `art/sheet-shelf-stacks.jpg` (prompts: `docs/personal-space/GEMINI_PROMPTS_SHELVES.md`).
+- **Solid wall items.** A new flag `solid` on a wall item: the picture is drawn in the room's own isometric view, sticking out of the wall, and is not sheared; the left wall mirrors it (`wallXf(w, c)`). `c.r` is still the wall rectangle (the back edge, 180 wide, and how far up and down the shelf reaches), so placement, arrows, overlap and the window rules are the wall ones; `c.im` is where the picture goes relative to the anchor (the middle of the back edge at the wall point). The placement preview shows the picture plus the flat green or red rectangle.
+- `tools/shelves.py` cuts the pictures (pure-white background only, the glass is pale), measures the back edge from the slab's left tip and the right end, scales all to one size, and patches the catalog (singles cost 4, stacks 6). No new saved data (wall items use `wl`, format 4).
+Tests: `tests/shelftest.js` (new); `catalogtest` and `walltest` counts updated.
+
+## Step 47: cloud and unicorn set, topiary (branch `room-items-5`, off `wall-decor`; version 2026.11.16c)
+
+Plan step C-unicorn. 15 new items from three sheets: `art/sheet-u1-unicorn.jpg` (nine furniture items), `art/sheet-u1-back.jpg` (five back pictures) and `art/sheet-u2-topiary.jpg` (six plants); prompts in `docs/personal-space/GEMINI_PROMPTS_UNICORN.md`.
+- **Furniture (each has one magenta part, default colour baked, recolourable):** cloud armchair (5, back), cloud ottoman (4), unicorn mirror (5, back), rainbow curtain stand (4), unicorn rocking horse (6, back), heart bench (5, back), plush unicorn throne (6, back), star pouf (3, whole star), cloud lamp (4, base).
+- **Plants** `pl23` to `pl28` (cube, cone, ball, spiral, triple-ball topiary, and a 2x1 flower planter): recolour the pot like the other plants.
+- `tools/items6.py` (idempotent) reuses the cutter, colour baking and fitting of `tools/items4.py`, with a stricter background rule for white things: only pure white that touches the edge, or a large enclosed pure-white gap, is background (the clouds and pearl unicorns are nearly white; the lamp's soft glow is cut away).
+- No new saved data. The max-out price and the colour-part count are updated in the tests (51 parts; 128 floor items and 10 wall items).
+- Not done yet: sitting tops for the bench, ottoman and pouf (`tools/surfaces.py`).
+Tests: `tests/items6test.js` (new); `catalogtest`, `colortest`, `spacetest`, `groundtest` updated.
+
+## Step 48: fixes after the first look at the unicorn set and the shelves (branch `room-items-5`; version 2026.11.16d)
+
+- **Flower planter** is square: 2x2 cells (was 2x1), so its placement outline matches its picture.
+- **Heart bench** is 1x2 cells: its picture's long side runs along the room's y axis, which the 2x1 footprint had the wrong way round.
+- **Turn order of the standing mirror (and the bench):** their back pictures were drawn the other way round from their fronts, so turning went left, right, back-left, back-right. New catalog flag `bsw` swaps which of the two back looks is mirrored (`thingSVG`), so every press is a quarter turn the same way (left, right, back-right, back-left); the footprint rules are unchanged.
+- **Saddle:** the rocking horse's colour part is called "אוכף" (was the blanket).
+- **Wall shelves hang closer:** the back edge is now 175 (a multiple of the wall step 25) and the wall rectangle's height is rounded down to the step, so two shelves hang flush side by side and one above the other (was 180 and exact heights, which left a gap of up to 24 px at every step).
+- **More things hold things on top:** the heart bench, the cloud ottoman and the star pouf (`tools/surfaces.py` measures the recolourable cushion of the original picture, new option `mag`; the bench's back look uses the front's top). Not the armchair and the throne: their seat cushions are off-centre and half hidden by the arms, so the measuring is not reliable.
+- `tools/items6.py` adds the flags and tops after cutting (run `python3 tools/items6.py` and then `python3 tools/surfaces.py`).
+- Gemini prompts for pixel-art backs: `docs/personal-space/GEMINI_PROMPTS_UNICORN.md`, "Back pictures, second try".
+Tests: `items6test`, `shelftest`, `surfacetest` (11 hosts), `backtest` updated.
+
+## Step 49: pixel-art back pictures for the unicorn set (branch `room-items-5`; version 2026.11.16e)
+
+The second Gemini try (front sheet attached) is pixel art like the fronts and replaces the smooth backs for the armchair, mirror, horse, bench and throne (`art/sheet-u1-back.jpg`; the sheet also holds a repeat of the bench front and a straight rear of the throne, unused). `tools/items4.py` cells gain a `('rows', n, [per row])` layout. The throne's back shows its seat cushion too little to recolour, so the throne's back is not colourable. The horse's cutter threshold was lowered so the gap under the runners is cut out.
+
+## Step 50: exercises from the school sample worksheet (branch `exercises-shlav1`; version 2026.11.16f)
+
+Reviewed the Shlav 1 sample (2024) against the existing types. Already covered: missing number in an equation (`gFillNumber`), sharing problems (`gSharing`, `gGroups`), and all eight reading question kinds. Added what was missing:
+- `gDigitSymbol` (symbols, difficulty 3): a symbol is one digit inside a two-digit number (`🦄3 + 🦄5 = 88`, `🦄4 − 3 = 41`, `2🦄 + 3🦄 = 58`).
+- `gEvenShare` (stories, 2): which number of children can share N items with nothing left over (exactly one of four options divides).
+- `gDaysMore` (stories, 2): each day sells a fixed number more than the day before; total over three or four days.
+- Reading passage `sun` (12 lines, 8 questions in the standard order), an original text in the same style as the sample's: why it looks small, meaning of "למעשה", purpose of the boiling-water comparison.
+Each type has SKILL_META, SKILL_DIFFICULTY and a HELP entry with a worked example. Test: `shlav1test`; the reading bank test covers the passage. No saved-data change.
+
+## Step 51: short reading questions, group A (branch `reading-short-a`, stacked on `exercises-shlav1`; version 2026.11.16g)
+
+The reading section now also draws short, generated questions: one or two fully voweled lines and one question, in the story world (shop, dragons, unicorns). They never run out, so the section no longer empties when every passage is read (the "all stories read" message is gone).
+- `gShNotInText`: a creature (11 of them) with three stated facts out of five (home, food, colour, size, skill); which of four questions has no answer in the text.
+- `gShSynonyms`: three synonym pairs and one opposite/unrelated pair (or the reverse, 3 in 10); definition line as in the passages.
+- `gShPurpose`: a short sign, invitation, instruction, advert, description or story; the purpose among six.
+- Engine: `rdPick` — a passage in progress always continues; a new passage starts half as often as it is drawn (`RD_START`); with every passage read only short questions come. Skills are logged per type (`gShNotInText` etc., area reading, difficulty 2), each with a help entry.
+- Next groups: cause (reworded) + motive; word role, phrase, word meaning.
+Tests: new `readshorttest` (voweled, one right answer, variety); `readingtest`/`readingset`/`readingbank` play passages only (`pools[9]=[gReading]`) and the "everything read" cases now expect short questions.
+
+## Step 52: short reading questions, group B: cause and motive (branch `reading-short-b`, stacked on `reading-short-a`; version 2026.11.16h)
+
+- `gShCause`: two lines (what happened + a clue in other words) and "why"; the right answer is worded differently from the clue, so it takes a small inference (12 scenarios × name and gender).
+- `gShMotive`: an action plus a clue about the situation, and "why did they do it"; the answer is the goal ("כדי ..."; 10 scenarios).
+- The wrong answers are the right answers of the other scenarios in the same bank.
+- Weights: every new passage is preceded by 4 to 8 short questions (random each time, `rdGap`), and so is the start of a session; a passage in progress is never interrupted.
+- Tests: `readshorttest` also checks that the answer is not copied from the text and that the gaps between passages are 4 to 8.
+
+## Step 53: short reading questions, group C: word role, phrase, word meaning (branch `reading-short-c`, stacked on `reading-short-b`; version 2026.11.16i)
+
+- `gShWordRole` (difficulty 3): one sentence with a small word (אֲבָל, כִּי, לָכֵן, גַּם, אִם, רַק); what does it tell the reader. 18 sentences over 6 roles.
+- `gShPhrase` (2): a phrase in context ("לֵב זָהָב", "כְּמוֹ רוּחַ", "פַּרְפָּרִים בַּבֶּטֶן"...); 12 phrases, each with its own context lines, gender-agreed with the name.
+- `gShWordMeaning` (2): the meaning of a word from the sentence around it; 13 words.
+- `rsInfer` now takes an entry of any number of lines plus question and answer, and the three wrong answers are the other entries' answers (de-duplicated, so two sentences with the same connective never give the same wrong answer twice).
+- The reading section now has eight short types in all; each has SKILL_META, SKILL_DIFFICULTY and a help entry.
+- Test: `readshorttest` checks the quoted word or phrase is really in the text (a girl's name inflects it), and that the role matches the word.
+
+## Step 54: story-library icon and backdrops (branch `library-assets`, merged on top of `reading-short-c`; version 2026.11.17b)
+
+The reading section ("ספריית הסיפורים", section 9) now has its own pictures in the default theme, so it no longer falls back to the emoji and a plain background:
+- selection-screen icon: `LEVEL_ICON_IMG["9"]` (256×256, transparent, same cut-out style as the dessert machine, detective and symbols icons);
+- landscape backdrop `BACKDROP_IMG["9"]` (960×536) and portrait backdrop `BACKDROP_IMG_P["9"]` (720×1290): the magic library with the dome, spiral stairs and the central book (pixel art, like the other backdrops).
+Tests updated: `leveltest` (4 hand-made icons), `loctest` (every section, including the 9th, has a backdrop, in portrait and landscape too), `splittest` (4 icons load). The space theme still has no picture for this section (its coverage report keeps saying 8 of 9). The version moved to 2026.11.17a on that branch and to 2026.11.17b here, after the merge with the reading work (Steps 51–53).

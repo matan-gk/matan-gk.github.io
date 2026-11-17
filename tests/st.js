@@ -9,7 +9,7 @@ await pg.reload();
 let r=await pg.evaluate(()=>({v:store.version,st:store.profiles.map(p=>!!p.stats&&p.stats.log.length===0),score,coll:collection.length}));
 ok(r.st.every(Boolean)&&r.score===50&&r.coll===2,'v2 store loads, empty stats added, progress intact');
 // every generator in every pool/bonus pool has skill metadata
-const miss=await pg.evaluate(()=>{const s=new Set();Object.values(pools).concat(Object.values(BONUS_POOLS)).flat().forEach(f=>s.add(f.name));LOGIC_POOL.forEach(f=>s.add(f.name));return [...s].filter(n=>!SKILL_META[n]);});
+const miss=await pg.evaluate(()=>{const s=new Set();Object.values(pools).concat(Object.values(BONUS_POOLS)).flat().forEach(f=>s.add(f.name));LOGIC_POOL.forEach(f=>s.add(f.name));return [...s].filter(n=>!SKILL_META[n]&&n!=='gReading');});   // gReading is the reading section's pseudo-generator: each question carries its own rd... skill
 ok(miss.length===0,'all generators have SKILL_META ('+miss.join(',')+')');
 // play 120 questions across levels (some wrong)
 const res=await pg.evaluate(()=>{let n=0;for(let lv=1;lv<=5;lv++){level=lv;for(let i=0;i<24;i++){nextQuestion();const wrong=(i%4===3);checkAnswer(wrong?'__wrong__':current.answer,null,null);n++;}}

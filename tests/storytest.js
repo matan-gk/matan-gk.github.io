@@ -55,9 +55,9 @@ await E(()=>document.querySelector('.milestone').click()); await p.waitForTimeou
 // ---- sweets: all original
 await E(()=>setProfileTheme(activeProfile(),'sweets'));
 const pr2=await E(()=>{ const a=new Set(); for(let i=0;i<400;i++) a.add(praise()); return [...a]; });
-ok(pr2.includes('קאפקייק שמחה מאוד! 🦄')&&!pr2.some(x=>x.includes('ברק')),'sweets praise unchanged');
-await E(()=>{ level=1; nextQuestion(); checkAnswer('__wrong__',null,null); }); ok((await p.textContent('#feedback')).includes('ננסה עוד אחת קסומה!'),'sweets wrong answer unchanged');
-await E(()=>{ level=1; renderBonus(); }); ok((await p.textContent('#qlabel')).includes('🍭 שאלת בונוס'),'sweets bonus tag unchanged'); await E(()=>nextQuestion());
+ok(pr2.includes('קאפקייק שמח מאוד! 🦄')&&!pr2.some(x=>x.includes('ברק')),'sweets praise (current wording)');
+await E(()=>{ level=1; nextQuestion(); checkAnswer('__wrong__',null,null); }); ok((await p.textContent('#feedback')).includes('ננסה עוד משימה!'),'sweets wrong answer (current wording)');
+await E(()=>{ level=1; renderBonus(); }); ok((await p.textContent('#qlabel')).includes('💖 משימת בונוס'),'sweets bonus tag (current wording)'); await E(()=>nextQuestion());
 ok((await p.textContent('#nextBtn')).includes('🍭 לשאלה הבאה'),'sweets: next-question button unchanged');
 await E(()=>{ golden=Array(10).fill('🦄'); renderRewards(); openRoom(); renderRoom(); }); ok(!(await p.textContent('#roomBody')).includes('לוק'),'sweets: the room offers no look any more'); await E(()=>{ golden=[]; closeRoom(); });
 await E(()=>showMilestone()); await p.waitForTimeout(100);

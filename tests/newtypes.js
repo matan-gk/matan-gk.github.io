@@ -8,7 +8,7 @@ const r=await p.evaluate(()=>{
   const o={};
   // coverage: section x difficulty
   o.cov={};o.covBad=[];
-  for(const [lv,pool] of Object.entries(pools)){ if(lv==='5') continue;
+  for(const [lv,pool] of Object.entries(pools)){ if(lv==='5'||lv==='9') continue;
     for(const d of [1,2,3]){ const n=new Set(pool.filter(g=>skillDifficulty(g.name)===d).map(g=>g.name)).size; o.cov[lv+'/'+d]=n; if(n<2) o.covBad.push(lv+'/'+d); } }
   o.bonusAll3=Object.values(BONUS_POOLS).flat().every(g=>skillDifficulty(g.name)===3);
   o.bonusNames=Object.values(BONUS_POOLS).flat().map(g=>g.name);

@@ -48,3 +48,7 @@ Run `node run.js --list` for the current list. In groups:
 ## The adult check
 
 The parent area asks for a birth year first. So that the other tests can open it, `lib.js` passes the check automatically after every page load. `adulttest.js` is the one test that sees the real check (`T.gate.on()` before launching).
+
+## On GitHub
+
+`.github/workflows/tests.yml` runs this suite on every pull request and every push to `main` (see docs/ENHANCEMENTS.md, "Automatic tests on GitHub").

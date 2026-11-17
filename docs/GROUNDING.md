@@ -4,7 +4,7 @@
 1. **Wrong contact points.** The old bed feet were found as the lowest opaque pixel in each third of the picture. On the left third that was the footboard rail, not the leg, so the "feet" were in the wrong place.
 2. **The bottom of the picture is not a footprint corner.** The lowest pixel of a sprite is one leg or the front edge; the floor block's corners are further left, right and back.
 3. **The art is not drawn at 2:1 isometric.** Edge slopes measure 0.57-0.72 instead of 0.5, so one uniform scale can never put all contact points on the diamond. Width and height need separate scales (the vertical one is 0.77-0.92 of the horizontal).
-4. **Bed levels 4 and 5 are drawn almost square**, so they fit a 3 x 3 block, not 3 x 4.
+4. **Bed level 4 is drawn almost square**, so it fits a 3 x 3 block (level 5 was later scaled down onto 3 x 4), not 3 x 4.
 5. **Hand offsets.** A single offset (`BED_AT`, `+4`) was tuned for one level and one item; any other sprite inherited the error. Transparent padding differs per picture.
 
 The suggestion to scale by `widthTiles` and anchor the bottom of the image to the floor does not solve this: it assumes the image bottom is the footprint corner (finding 2) and the art is 2:1 (finding 3).

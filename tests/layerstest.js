@@ -204,7 +204,9 @@ await p.click('[data-pact=dbgkind][data-id="🧁"]');await p.fill('#dbgN','5');a
 const oth=await p.evaluate(()=>({b:cleanProgress(store.profiles[1].progress).collection.filter(x=>kOf(x)==='🧁').length,act:store.activeId===store.profiles[0].id,mine:collection.filter(x=>kOf(x)==='🧁').length}));
 ok(oth.b===5&&oth.act&&oth.mine===3,'rewards can be added to a profile that is not the active one');
 await p.evaluate(()=>closeProfiles());await p.evaluate(()=>openPanel('profiles'));await p.evaluate(()=>profileAction('tab','debug'));
-ok(await p.locator('#dbgN').count()===0,'the debug panel locks again after the parent area is closed');
+ok(await p.locator('#dbgN').count()===1,'the debug panel stays unlocked after the parent area is closed (it is remembered on the device)');
+await p.evaluate(()=>profileAction('dbglock'));
+ok(await p.locator('#dbgN').count()===0&&await p.evaluate(()=>localStorage.getItem('cq_dbg_ok'))==='0','the lock button locks it again, and that is remembered too');
 // 9l. heart 🩷: color + frame decoration + pattern overlay, "none" for both frames and overlays
 const ht=await p.evaluate(()=>{const L=LAYERS['🩷'];let bad=0,n=0;
  for(let b=0;b<L.bases.length;b++)for(let f=0;f<L.fros.length;f++)for(let t=0;t<L.tops.length;t++){n++;

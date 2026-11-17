@@ -22,7 +22,7 @@ await p.goto('http://localhost:'+port+'/math-quest.html');await p.evaluate(()=>l
 await p.fill('#pfName','X');await p.click('.gopt:has(input[value=f])');await p.click('[data-pact=save]');await p.waitForTimeout(600);
 const home=await p.evaluate(()=>({ic:[...document.querySelectorAll('#levels .ic')].map(e=>getComputedStyle(e).backgroundImage.includes('url(')),imgs:[...document.querySelectorAll('#levels img.lvimg')].map(i=>i.complete&&i.naturalWidth>0),bd:getComputedStyle(document.getElementById('backdrop')).backgroundImage}));
 ok(home.ic.length===5&&home.ic.every(Boolean),'the five emoji-based game icons have their pictures');
-ok(home.imgs.length===3&&home.imgs.every(Boolean),'the three hand-made game icons load');
+ok(home.imgs.length===4&&home.imgs.every(Boolean),'the four hand-made game icons load');
 ok(home.bd.includes('assets/'),'selection-screen backdrop is a linked file');
 for(const id of [1,3,6]){await p.evaluate(i=>openGame(i),id);await p.waitForTimeout(300);}
 const play=await p.evaluate(async()=>{const u=getComputedStyle(document.getElementById('backdrop')).backgroundImage.match(/url\("?([^")]+)/);const im=new Image();im.src=u[1];await im.decode().catch(()=>{});return {w:im.naturalWidth,mood:await (async()=>{const m=document.getElementById('charImg');return m.complete&&m.naturalWidth>0})()}});

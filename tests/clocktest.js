@@ -7,7 +7,7 @@ await p.goto(T.URL);await p.evaluate(()=>localStorage.clear());await p.reload();
 await p.fill('#pfName','X');await p.click('.gopt:has(input[value=m])');await p.click('[data-pact=save]');await p.waitForTimeout(300);
 // level order and button
 const lv=await p.evaluate(()=>[...document.querySelectorAll('.levelbtn')].map(b=>b.innerText.replace(/\s+/g,' ')));
-console.log(lv);ok(lv.length===8&&lv[3].includes('שעון'),'clock level listed fourth (after the numbers castle)');
+console.log(lv);ok(lv.length===9&&lv[3].includes('שעון'),'clock level listed fourth (after the numbers castle)');
 // angles + time words
 const r=await p.evaluate(()=>{
  const out={angles:[],words:[],bad:[]};

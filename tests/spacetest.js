@@ -97,7 +97,7 @@ ok(await ev(()=>space.lv.bed===1&&space.top.bed===2&&space.spent===3&&!RM.pv&&do
 await ev(()=>document.querySelectorAll('#rmDrawer .lvthumb')[1].click());
 ok(await ev(()=>space.lv.bed===2&&space.spent===3),'and back to level 2, still free');
 await ev(()=>document.querySelector('#rmDrawer .lvthumb:not(.locked):not(.owned)').click());
-ok(await ev(()=>RM.pv&&RM.pv.to===3&&document.querySelector('#rmDrawer .lvthumb.cur')&&!!document.querySelector('[data-buy]')),'tapping the open one previews it and offers Buy / Cancel');
+ok(await ev(()=>{if(!RM.pv||RM.pv.to!==3||!document.querySelector('[data-buy]')||!document.querySelector('[data-cancel]'))return false;const m=document.getElementById('rmDrawer').classList.contains('mini');if(m)document.querySelector('[data-max]').click();const ok=!!document.querySelector('#rmDrawer .lvthumb.cur');if(m)document.querySelector('[data-min]').click();return ok;}),'tapping the open one previews it and offers Buy / Cancel (on a phone the drawer is minimized, the thumbnails show after maximizing)');
 // view level 1 and buy level 3: the next is top+1, not current+1
 await ev(()=>{RM.pv=null;space.lv.bed=1;onRoomTap('item:bed');document.querySelector('#rmDrawer .lvthumb:not(.locked):not(.owned)').click();});
 ok(await ev(()=>RM.pv.to===3),'viewing level 1 with 2 bought, the open level is still 3');
@@ -128,9 +128,9 @@ ok(await ev(()=>space.lv.bed===2&&space.spent===3&&tokenBalance()===7&&document.
 // 10. grammar
 await ev(()=>{space.spent=space.earned;onRoomTap('item:window');document.querySelector('[data-prev="window"]').click();});
 ok(await ev(()=>/צריך 2 מטבעות\. יש לך 0/.test(document.getElementById('rmDrawer').textContent)&&document.querySelector('[data-buy]').disabled),'too poor: "צריך 2 מטבעות. יש לך 0", buy disabled');
-await ev(()=>{space.spent=space.earned-1;onRoomTap('surf:wl');document.querySelector('[data-col="0"]').click();});
+await ev(()=>{space.spent=space.earned-1;onRoomTap('surf:wl');document.querySelector('[data-col="3"]').click();});
 ok(await ev(()=>/צריך מטבע אחד\. יש לך 1/.test(document.getElementById('rmDrawer').textContent)&&!document.querySelector('[data-buy]').disabled),'one token: "צריך מטבע אחד. יש לך 1"');
-await ev(()=>{space.spent=space.earned;onRoomTap('surf:wl');document.querySelector('[data-col="0"]').click();});
+await ev(()=>{space.spent=space.earned;onRoomTap('surf:wl');document.querySelector('[data-col="3"]').click();});
 ok(await ev(()=>/צריך מטבע אחד\. יש לך 0/.test(document.getElementById('rmDrawer').textContent)),'zero tokens, 1-token color: "צריך מטבע אחד. יש לך 0" (not the old wording)');
 // 12. titles
 await ev(()=>onRoomTap('surf:wr'));ok(await ev(()=>/צבע לקיר הימני/.test(document.querySelector('#rmDrawer .rmsh-t').textContent)&&!/להקיר/.test(document.getElementById('rmDrawer').textContent)),'title "צבע לקיר הימני"');
@@ -139,10 +139,10 @@ await ev(()=>onRoomTap('surf:fl'));ok(await ev(()=>/צבע לרצפה/.test(docu
 ok(await ev(()=>document.querySelectorAll('#rmDrawer .brush img').length===16&&[...document.querySelectorAll('#rmDrawer .brush img')].every(i=>/^assets\//.test(i.getAttribute('src')))),'16 brush pictures as the color buttons');
 // colors: preview, buy 1 token, switch back free, premium 2
 await ev(()=>{space.spent=0;onRoomTap('surf:wl');document.querySelector('[data-col="2"]').click();});
-ok(await ev(()=>RM.pv&&RM.pv.idx===2&&space.surf.wl===3&&document.querySelector('[data-hit="surf:wl"] polygon').getAttribute('fill')===ROOM_COLORS[2].h),'a new color is previewed on the wall first');
+ok(await ev(()=>RM.pv&&RM.pv.idx===2&&space.surf.wl===0&&document.querySelector('[data-hit="surf:wl"] polygon').getAttribute('fill')===ROOM_COLORS[2].h),'a new color is previewed on the wall first');
 await ev(()=>document.querySelector('[data-buy]').click());
 ok(await ev(()=>space.surf.wl===2&&space.spent===1&&space.own.wl.includes(2)),'bought: 1 token');
-await ev(()=>document.querySelector('[data-col="3"]').click());await ev(()=>document.querySelector('[data-col="2"]').click());
+await ev(()=>document.querySelector('[data-col="0"]').click());await ev(()=>document.querySelector('[data-col="2"]').click());
 ok(await ev(()=>space.surf.wl===2&&space.spent===1),'switching between owned colors is free');
 await ev(()=>document.querySelector('[data-col="15"]').click());
 ok(await ev(()=>RM.pv.idx===15&&/צריך 2 מטבעות/.test(document.getElementById('rmDrawer').textContent)&&document.querySelector('[data-hit="surf:wl"] polygon').getAttribute('fill')==='url(#rmRainbow)'),'rainbow costs 2 and previews as a gradient');
@@ -152,9 +152,9 @@ ok(await ev(()=>space.surf.wl===2&&!RM.pv),'cancel leaves the wall as it was');
 await p.reload();await p.waitForTimeout(500);
 ok(await ev(()=>space.unlocked&&space.lv.bed===2&&space.surf.wl===2&&space.spent===1),'room state survives a reload');
 const cl=await ev(()=>cleanProgress({space:{earned:50,spent:2,trued:true,unlocked:true,surf:{wl:99,wr:'x',fl:5},own:{fl:[5,5,77,1]},lv:{bed:9,window:2,ghost:3}}}).space);
-ok(cl.surf.wl===3&&cl.surf.wr===3&&cl.surf.fl===5&&cl.lv.bed===1&&cl.lv.window===2&&!('ghost' in cl.lv)&&JSON.stringify(cl.own.fl)==='[1,5,12]','bad colors and levels fall back; current and starting colors are always owned: '+JSON.stringify(cl.own));
+ok(cl.surf.wl===3&&cl.surf.wr===3&&cl.surf.fl===5&&cl.lv.bed===1&&cl.lv.window===2&&!('ghost' in cl.lv)&&JSON.stringify(cl.own.fl)==='[1,3,5,12]','bad colors and levels fall back; current and starting colors are always owned: '+JSON.stringify(cl.own));
 const mc=await ev(()=>roomMaxCost());
-ok(mc===(3+4+5+6)+(2+3+4+5)+3*(13+6-1)+109,'room max-out cost = bed 18 + window 14 + 3 surfaces x (13 + 3 premium x2 - 1 start) + one of each of the 38 floor items (109) = 195, got '+mc);
+ok(mc===(3+4+5+6)+(2+3+4+5)+(13+6-2)+524+51*19+(await ev(()=>ROOM_PATTERNS.reduce((a,q)=>a+q.p,0))),'room max-out cost = bed 18 + window 14 + the 3 surfaces share one set of colours (17) + 113 floor items and 10 wall items (465) + 42 colorable parts x 19 + the patterns, got '+mc);
 ok(await ev(()=>JSON.stringify(ROOM_ITEMS.bed.up)==='[0,3,4,5,6]'&&JSON.stringify(ROOM_ITEMS.window.up)==='[0,2,3,4,5]'),'upgrade prices: bed 3,4,5,6 and window 2,3,4,5');
 ok(await ev(()=>{onRoomTap(null);space.surf.wl=15;rmRedraw();const st=[...document.querySelectorAll('#rmRainbow stop')];return st.length>=6&&document.querySelector('[data-hit="surf:wl"] polygon').getAttribute('fill')==='url(#rmRainbow)'&&new Set(st.map(x=>x.getAttribute('stop-color'))).size===st.length;}),'the rainbow is a real rainbow: 6+ different color stops on every surface');
 // a profile already above 10 tokens: ceremony gate on first start

@@ -9,7 +9,7 @@ await p.fill('#pfName','X');await p.click('.gopt:has(input[value=n])');await p.c
 // merge a kind through the real flow
 await p.evaluate(()=>{collection=Array(23).fill('✨');saveState();renderRewards();});
 await p.evaluate(()=>{doMerge('✨');}); await p.waitForTimeout(1200);await p.evaluate(()=>closeCeleb());
-let st=await p.evaluate(()=>({c:collection.filter(x=>x==='✨').length,g:golden.filter(x=>x==='✨').length}));
+let st=await p.evaluate(()=>({c:collection.filter(x=>x==='✨').length,g:golden.filter(x=>kOf(x)==='✨').length}));
 ok(st.c===13&&st.g===1,'merge used 10 ('+JSON.stringify(st)+')');
 // the upgraded item is a memory vault: tapping it shows the 10 rewards inside, nothing can be taken apart
 await p.click('#rewardsStrip');await p.waitForTimeout(300);
