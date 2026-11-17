@@ -11,7 +11,7 @@ ok(await vis('#levels'),'home: level buttons visible');
 ok(!await vis('#card'),'home: question card hidden');
 ok(!await vis('#backBtn'),'home: back button hidden');
 ok(await p.evaluate(()=>document.getElementById('backdrop').style.backgroundImage.includes('url(')&&document.body.dataset.bd==='1'&&getComputedStyle(document.getElementById('backdrop')).display==='block'),'home: world-map backdrop shown (sweets)');
-ok(await p.evaluate(()=>['3','4','2','9'].every(k=>LEVEL_ICON_IMG[k])&&document.querySelectorAll('#levels .lvimg.cut').length===4),'dessert machine, detective, magical symbols and story library use the new icons');
+ok(await p.evaluate(()=>['3','4','2','9','6','5'].every(k=>LEVEL_ICON_IMG[k])&&document.querySelectorAll('#levels .lvimg.cut').length===6),'dessert machine, detective, magical symbols, story library, magic clock and rainbow challenge use the new icons');
 const n=await p.evaluate(()=>document.querySelectorAll('#levels .levelbtn').length);
 const h1home=await p.evaluate(()=>document.querySelector('h1').textContent);
 for(let i=0;i<n;i++){
