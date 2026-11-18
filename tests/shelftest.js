@@ -11,7 +11,7 @@ await ev(()=>{space.earned=1000;space.spent=0;space.unlocked=true;golden=['🍪'
 const ids=['shelf_crystal','shelf_tea','shelf_ice','shelf_plush','stack_tea','stack_ice','stack_crystal','stack_sweets'];
 ok(await ev(i=>i.every(id=>{const c=catOf(id);return c&&c.wall&&c.solid&&c.g==='wall'&&c.r[2]===175&&c.im&&c.im[2]>c.r[2]&&/^assets\//.test(c.src);}),ids),'eight solid wall items, all with a 175 wide back edge');
 ok(await ev(i=>new Set(i.map(id=>catOf(id).src)).size===8,ids),'eight different pictures');
-ok(await ev(()=>{const c=catOf('shelf_tea'),r=wallXf({s:'r',a:300,h:300},c),l=wallXf({s:'l',a:300,h:300},c),fl=wallXf({s:'r',a:300,h:300},catOf('wallclock'));return !/matrix/.test(r)&&/scale\(-1 1\)/.test(l)&&!/scale/.test(r)&&/matrix/.test(fl);}),'a shelf is not sheared and is mirrored on the left wall; a flat picture is still sheared');
+ok(await ev(()=>{const c=catOf('shelf_tea'),r=wallXf({s:'r',a:300,h:300},c),l=wallXf({s:'l',a:300,h:300},c),fl=wallXf({s:'r',a:300,h:300},catOf('treasuremap'));return !/matrix/.test(r)&&/scale\(-1 1\)/.test(l)&&!/scale/.test(r)&&/matrix/.test(fl);}),'a shelf is not sheared and is mirrored on the left wall; a flat picture (the map frame) is still sheared');
 // drawn through the room
 await ev(()=>{space.things=[{k:'shelf_crystal',x:-1,y:-1,u:'s1',wl:{s:'r',a:125,h:500}},{k:'shelf_tea',x:-1,y:-1,u:'s2',wl:{s:'l',a:125,h:200}},{k:'stack_ice',x:-1,y:-1,u:'s3',wl:{s:'l',a:375,h:400}}];rmRedraw();});
 ok(await ev(()=>document.querySelectorAll('#rmSvg g[data-hit^="thing:"] > image').length===3),'all three are drawn once');
