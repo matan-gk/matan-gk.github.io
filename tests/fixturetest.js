@@ -93,7 +93,7 @@ ok(await ev(()=>RM.pl.u<=500-(ROOM_ART.window[0].w-ROOM_ART.window[0].ax)),'it s
 await ev(()=>{RM.pl.w='l';RM.pl.u=200;rmRedraw();renderDrawer();});
 await click('[data-place]');
 ok(await ev(()=>space.fix.window.w==='l'&&space.fix.window.u===200),'placed on the left wall');
-ok(await ev(()=>/matrix\(-1 \.5 0 1 500 400\)/.test(document.getElementById('rmR').innerHTML)),'drawn mirrored on the left wall');
+ok(await ev(()=>/scale\(-1 1\)/.test(document.querySelector('#rmR [data-hit="item:window"] > g').getAttribute('transform'))),'drawn mirrored on the left wall');
 // saved and loaded
 const rt=await ev(()=>JSON.stringify(spaceClean(JSON.parse(JSON.stringify(space)),[],0).fix));
 ok(rt===await fx(),'the places survive saving and loading '+rt);

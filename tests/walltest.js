@@ -21,7 +21,7 @@ r=await clean([{k:'wallclock',x:-1,y:-1,u:'wc01',wl:{s:w.w,a:w.u,h:295}}]);
 ok(!r[0].wl,'a picture on the window is refused');
 // placing through the drawer
 await ev(()=>{space.things=[];RM.list='cat';RM.filter='wall';renderDrawer();});
-ok(await p.locator('.catcard').count()===10,'the wall chip lists the two pictures and the eight shelves');
+ok(await p.locator('.catcard').count()===22,'the wall chip lists the two pictures, the eight shelves and the twelve art pieces');
 await p.click('.catcard[data-pick=wallclock]');
 ok(await ev(()=>!!RM.pl&&!!RM.pl.wl&&RM.pl.i<0),'buying starts a wall placement');
 const wl0=await ev(()=>({...RM.pl.wl}));
