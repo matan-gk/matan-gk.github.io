@@ -1466,7 +1466,7 @@ const ROOM_CATALOG = [
   {"id":"pl21","n":"חמנייה","p":2,"g":"plants","fw":2,"fd":2,"src":"assets/bc9d98a1f10e.webp","base":"assets/c50ecd60e467.webp","r":[-39.0,-123.9,78.0,160.9],"ref":0.8725},
   {"id":"pl22","n":"שיח תותים","p":2,"g":"plants","fw":2,"fd":2,"src":"assets/9bf4ff13be03.webp","base":"assets/9b57effba049.webp","r":[-50.0,-77.8,100.0,114.8],"ref":0.9529},
   {"id":"rug_star","n":"שטיח כוכב","p":4,"g":"rugs","fw":4,"fd":4,"src":"assets/b4fd69b1c5bf.webp","base":"assets/6314eb06b74d.webp","r":[-91.3,11.3,184.0,88.9],"flat":1,"ref":0.9804,"dc":"#f9a8d4","pk":"rug"},
-  {"id":"wallclock","n":"שעון קיר","p":3,"g":"wall","wall":1,"src":"assets/2afe9b3247a1.webp","r":[-60.0,-64.5,120.0,129.0]},
+  {"id":"wallclock","n":"שעון קיר","p":3,"g":"wall","wall":1,"solid":1,"src":"assets/4cf34f1da808.webp","r":[-75.0,-62.5,150.0,125.0],"im":[-101.9,-95.3,177.2,204.3]},
   {"id":"treasuremap","n":"מפת אוצר","p":3,"g":"wall","wall":1,"src":"assets/83282eb581d8.webp","r":[-75.0,-63.5,150.0,127.0]},
   {"id":"shelf_crystal","n":"מדף קריסטלים","p":4,"g":"wall","wall":1,"solid":1,"src":"assets/b6a15502f054.webp","r":[-87.5,-50.0,175.0,100.0],"im":[-101.7,-63.7,189.8,145.9]},
   {"id":"shelf_tea","n":"מדף משקאות בועות","p":4,"g":"wall","wall":1,"solid":1,"src":"assets/c14ad09f1207.webp","r":[-87.5,-37.5,175.0,75.0],"im":[-101.4,-76.4,189.2,147.0]},
@@ -2666,7 +2666,7 @@ function cloudProfileFromDoc(C, helpers){
 // ===== CLOUD (Google sign-in, cloud progress, problem reports) =====
 // Local-first: the game always works from this device's storage. The cloud is a mirror, so no internet / no account / no quota never blocks play.
 // Everything here is off while CLOUD_CONFIG is null. See firebase/SETUP.md for how to create the (free) Firebase project and paste its settings below.
-const APP_VERSION = '2026.11.17d';       // keep equal to VERSION in sw.js (a test checks it)
+const APP_VERSION = '2026.11.17e';       // keep equal to VERSION in sw.js (a test checks it)
 const BUILD_COMMIT = '';                 // the full id of the commit this page was built from: the deploy workflow (.github/workflows/tests.yml) fills it in; empty in a plain checkout
 const REPO_URL = 'https://github.com/matan-gk/matan-gk.github.io';
 const CLOUD_CONFIG = {apiKey:"AIzaSyAlq_TJNGvWPJpUrpbdq_hkAoURydqMzm0", authDomain:"learning-quest-1.firebaseapp.com", projectId:"learning-quest-1", appId:"1:98931179722:web:78fb00084ccba3efb53433"};   // e.g. {apiKey:'...', authDomain:'xxx.firebaseapp.com', projectId:'xxx', appId:'...'}
