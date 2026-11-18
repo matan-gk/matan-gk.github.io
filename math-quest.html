@@ -2477,9 +2477,9 @@ gHeightOrder:{
     steps:['רמז 1: דני מעל נועה.','רמז 2: תמר מעל דני. עכשיו: תמר, דני, נועה.','רמז 3: מיכל מתחת לנועה. עכשיו: תמר, דני, נועה, מיכל.','הכי נמוכה היא האחרונה בשורה.'],a:'מיכל'}]},
 gLogicGrid:{
   what:'שלושה ילדים ושלוש חיות (או דברים), ורמזים שעוזרים לגלות למי יש מה.',
-  think:['בונים טבלה: שורה לכל ילד ועמודה לכל חיה.','בכל רמז מסמנים ✓ (כן) או ✗ (לא).','כששורה או עמודה נשארת עם אפשרות אחת, זו התשובה. מוחקים אותה משאר השורות.','אם אחרי כל הרמזים נשארות שתי אפשרויות, התשובה היא "אי אפשר לדעת".'],
-  ex:[{q:'דני, נועה ותמר: לכל אחד חיה אחרת (כלב, חתול, דג).<br>הדג אצל תמר.<br>לדני אין כלב.<br>למי יש חתול?',
-    steps:['הדג אצל תמר. אז תמר לא יכולה להיות עם החיות האחרות.','נשארו כלב וחתול לדני ולנועה.','לדני אין כלב ← לדני יש חתול. אז לנועה יש כלב.',()=>'<table class="helptbl"><tr><th></th><th>כלב</th><th>חתול</th><th>דג</th></tr><tr><th>דני</th><td>✗</td><td>✓</td><td>✗</td></tr><tr><th>נועה</th><td>✓</td><td>✗</td><td>✗</td></tr><tr><th>תמר</th><td>✗</td><td>✗</td><td>✓</td></tr></table>'],a:'דני'}]},
+  think:['בונים טבלה: שורה לכל ילד ועמודה לכל חיה.','רוב הרמזים אומרים "אין": מסמנים ✗ (לא) לכל רמז.','כששורה או עמודה נשארת עם אפשרות אחת, זו התשובה. מוחקים אותה משאר השורות.','אם אחרי כל הרמזים נשארות שתי אפשרויות, התשובה היא "אי אפשר לדעת".'],
+  ex:[{q:'דני, נועה ותמר: לכל אחד חיה אחרת (כלב, חתול, דג).<br>לנועה אין כלב.<br>לנועה אין חתול.<br>לתמר אין חתול.<br>למי יש כלב?',
+    steps:['לנועה אין כלב ואין חתול. נשאר לה רק דג ← לנועה יש דג.','הדג אצל נועה, אז הוא לא אצל אף אחד אחר. מוחקים אותו אצל דני ואצל תמר.','לתמר אין חתול ואין דג ← לתמר יש כלב. לדני נשאר חתול.',()=>'<table class="helptbl"><tr><th></th><th>כלב</th><th>חתול</th><th>דג</th></tr><tr><th>דני</th><td>✗</td><td>✓</td><td>✗</td></tr><tr><th>נועה</th><td>✗</td><td>✗</td><td>✓</td></tr><tr><th>תמר</th><td>✓</td><td>✗</td><td>✗</td></tr></table>'],a:'תמר'}]},
 // ---------- bonus ----------
 bL1_CombineThenDivide:{
   what:'בונוס: שני משלוחים מאחדים וארוזים בשקיות כך שבכל שקית אותה כמות. שואלים כמה שקיות יתמלאו.',
@@ -2666,7 +2666,7 @@ function cloudProfileFromDoc(C, helpers){
 // ===== CLOUD (Google sign-in, cloud progress, problem reports) =====
 // Local-first: the game always works from this device's storage. The cloud is a mirror, so no internet / no account / no quota never blocks play.
 // Everything here is off while CLOUD_CONFIG is null. See firebase/SETUP.md for how to create the (free) Firebase project and paste its settings below.
-const APP_VERSION = '2026.11.17d';       // keep equal to VERSION in sw.js (a test checks it)
+const APP_VERSION = '2026.11.18a';       // keep equal to VERSION in sw.js (a test checks it)
 const BUILD_COMMIT = '';                 // the full id of the commit this page was built from: the deploy workflow (.github/workflows/tests.yml) fills it in; empty in a plain checkout
 const REPO_URL = 'https://github.com/matan-gk/matan-gk.github.io';
 const CLOUD_CONFIG = {apiKey:"AIzaSyAlq_TJNGvWPJpUrpbdq_hkAoURydqMzm0", authDomain:"learning-quest-1.firebaseapp.com", projectId:"learning-quest-1", appId:"1:98931179722:web:78fb00084ccba3efb53433"};   // e.g. {apiKey:'...', authDomain:'xxx.firebaseapp.com', projectId:'xxx', appId:'...'}

@@ -26,6 +26,11 @@ await p.click('#helpBtn');await p.click('#helpBody summary');await p.click('[dat
 await p.keyboard.press('Escape');ok(!(await p.locator('#helpOverlay').isVisible()),'escape closes');
 // bonus question
 await p.evaluate(()=>{renderBonus();});await p.click('#helpBtn');ok((await p.textContent('#helpTitle')).includes('בונוס'),'bonus help');await p.click('#helpClose');
+// the clue-table help teaches with the kind of clue the generator really makes (only "אין": no positive clue), and its example is solved correctly
+const lg=await p.evaluate(()=>{const q=HELP.gLogicGrid.ex[0].q.split('<br>');return {clues:q.slice(1,-1),real:Array.from({length:200},()=>logicGrid(false).text.split('<br>').slice(1,-1)).every(c=>c.every(x=>/אין/.test(x)))};});
+ok(lg.real&&lg.clues.length===3&&lg.clues.every(x=>/אין/.test(x)),'logic-grid help example: three "אין" clues, like the real questions: '+lg.clues.join(' | '));
+const lgSolve=await p.evaluate(()=>{const kids=['דני','נועה','תמר'],pets=['כלב','חתול','דג'];const no=HELP.gLogicGrid.ex[0].q.split('<br>').slice(1,-1).map(x=>{const k=kids.find(n=>x.includes('ל'+n));const a=pets.find(n=>x.includes(n));return [k,a];});const perms=[[0,1,2],[0,2,1],[1,0,2],[1,2,0],[2,0,1],[2,1,0]];const ok=perms.filter(pm=>no.every(([k,a])=>pm[kids.indexOf(k)]!==pets.indexOf(a)));return {n:ok.length,dog:ok.length?kids[ok[0].indexOf(0)]:null,a:HELP.gLogicGrid.ex[0].a};});
+ok(lgSolve.n===1&&lgSolve.dog===lgSolve.a,'the example has exactly one solution and the stated answer matches it: '+JSON.stringify(lgSolve));
 // screenshots
 for(const id of ['gFillNumber','gOddGrid','gMovingSquare','bLogicMatrix','gLogicGrid','gGrowingSteps']){
   await p.evaluate(i=>{helpSkill=i;document.getElementById('helpOverlay').hidden=false;renderHelp();},id);await p.screenshot({path:'h_'+id+'.png'});
