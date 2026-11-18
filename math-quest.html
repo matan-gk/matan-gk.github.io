@@ -480,6 +480,11 @@ body[data-view="home"] .wrap > .sub{margin-bottom:12px}
 .qlabel{font-size:.78rem; color:var(--purple); font-weight:700; margin-bottom:6px}
 .qtext{font-size:1.12rem; line-height:1.6; margin-bottom:16px; font-weight:600}
 .qtext .hl{color:var(--pink)}
+.qtool{margin:0 0 14px; background:var(--card2); border-radius:14px; padding:8px 10px}
+.qtoolh{display:flex; align-items:center; justify-content:space-between; gap:8px; min-height:36px}
+.qtoolt{font-weight:700; font-size:.95rem}
+.qtoolb{min-height:36px; padding:4px 12px; border-radius:10px; border:1px solid var(--line, rgba(0,0,0,.15)); background:transparent; color:inherit; font:inherit; font-size:.9rem; cursor:pointer}
+.qtoolbody{margin-top:8px}
 .mono{font-family:'Baloo 2',sans-serif; font-size:1.35rem; letter-spacing:1px; direction:ltr; display:inline-block}
 .eq{font-family:'Baloo 2',sans-serif; font-size:1.9rem; line-height:1.7; direction:ltr; unicode-bidi:isolate; display:inline-block}
 .eq.shapes{font-size:2.4rem; line-height:1.45}
@@ -1022,6 +1027,7 @@ body[data-view="space"] #spaceView{box-sizing:border-box; display:flex; flex-dir
   <div class="card" id="card">
     <div class="qhead"><div class="qlabel" id="qlabel">שאלה</div><div class="qbtns"><button type="button" class="helpbtn" id="reportBtn">דיווח</button><button type="button" class="helpbtn" id="helpBtn">עזרה</button></div></div>
     <div class="qtext" id="qtext">טוען...</div>
+    <div class="qtool" id="qTool" hidden></div>
     <div id="answerArea"></div>
     <button class="btn secondary" id="nextBtn">🍭 לשאלה הבאה</button>
     <div class="feedback" id="feedback"></div>
@@ -1827,9 +1833,10 @@ function applyTheme(){
   const rd = document.querySelector('#roomOverlay .room'); if(rd) rd.setAttribute('aria-label', TX('roomName','חדר המתנות'));
   const nb = document.getElementById('nextBtn'); if(nb) nb.textContent = TX('nextBtn','🍭 לשאלה הבאה');
 }
+let toolsOn = true;   // tools under the question (parent switch, on by default, kept with the profile like warmOn)
 let warmOn = false, sessionDraws = 0;   // warm-up first (parent switch) and how many questions this session has drawn (resets when the game opens or the profile changes)
 let diffOn = [1,2,3];     // enabled difficulty levels for the active profile (see the Settings tab)
-function captureProgress(){ return {score,streak,collection,lollipops,level,golden,legacyLooks,space:spaceSnap(),rd:rdSnap(),rv:LAYER_V,diff:diffIdsClean(diffOn),mx:mxClean(mxState),focus:focusOn,warm:warmOn,theme:themeId}; }
+function captureProgress(){ return {score,streak,collection,lollipops,level,golden,legacyLooks,space:spaceSnap(),rd:rdSnap(),rv:LAYER_V,diff:diffIdsClean(diffOn),mx:mxClean(mxState),focus:focusOn,warm:warmOn,tools:toolsOn,theme:themeId}; }
 function cleanProgress(d){
   d = (d && typeof d==='object') ? d : {};
   let col = Array.isArray(d.collection) ? d.collection.filter(x=>typeof x==='string') : [];
@@ -1864,12 +1871,13 @@ function cleanProgress(d){
     mx: mxClean(d.mx),
     focus: d.focus===true,
     warm: d.warm===true,
+    tools: d.tools!==false,
     theme: themeClean(d.theme)
   };
 }
 function applyProgress(d){
   const c = cleanProgress(d);
-  score=c.score; streak=c.streak; collection=c.collection; lollipops=c.lollipops; golden=c.golden; legacyLooks=c.legacyLooks; space=c.space; rd=c.rd; rdExpire(); level=c.level; diffOn=c.diff; mxState=c.mx; focusOn=c.focus; warmOn=c.warm; themeId=c.theme; applyTheme();
+  score=c.score; streak=c.streak; collection=c.collection; lollipops=c.lollipops; golden=c.golden; legacyLooks=c.legacyLooks; space=c.space; rd=c.rd; rdExpire(); level=c.level; diffOn=c.diff; mxState=c.mx; focusOn=c.focus; warmOn=c.warm; toolsOn=c.tools; themeId=c.theme; applyTheme();
 }
 function persist(){ try{ localStorage.setItem(SAVE_KEY, JSON.stringify(store)); }catch(e){} }
 function saveState(){
@@ -2666,7 +2674,7 @@ function cloudProfileFromDoc(C, helpers){
 // ===== CLOUD (Google sign-in, cloud progress, problem reports) =====
 // Local-first: the game always works from this device's storage. The cloud is a mirror, so no internet / no account / no quota never blocks play.
 // Everything here is off while CLOUD_CONFIG is null. See firebase/SETUP.md for how to create the (free) Firebase project and paste its settings below.
-const APP_VERSION = '2026.11.18a';       // keep equal to VERSION in sw.js (a test checks it)
+const APP_VERSION = '2026.11.19a';       // keep equal to VERSION in sw.js (a test checks it)
 const BUILD_COMMIT = '';                 // the full id of the commit this page was built from: the deploy workflow (.github/workflows/tests.yml) fills it in; empty in a plain checkout
 const REPO_URL = 'https://github.com/matan-gk/matan-gk.github.io';
 const CLOUD_CONFIG = {apiKey:"AIzaSyAlq_TJNGvWPJpUrpbdq_hkAoURydqMzm0", authDomain:"learning-quest-1.firebaseapp.com", projectId:"learning-quest-1", appId:"1:98931179722:web:78fb00084ccba3efb53433"};   // e.g. {apiKey:'...', authDomain:'xxx.firebaseapp.com', projectId:'xxx', appId:'...'}
@@ -3679,6 +3687,7 @@ function statsSanitize(s, cfg){
   if(Array.isArray(s.log)){
     out.log = s.log.filter(r=>r && typeof r.s==='string' && Number.isFinite(r.t) && (r.c===0||r.c===1)).map(r=>{
       const o = {t:r.t, s:skillAlias(r.s), l:Number.isInteger(r.l)?r.l:0, b:r.b?1:0, c:r.c, d:Number.isFinite(r.d)?Math.max(0,r.d):0};
+      if(Number.isInteger(r.h) && r.h>0 && r.h<8) o.h = r.h;
       if(r.c===0){ if(r.x!==undefined) o.x=String(r.x).slice(0,24); if(r.a!==undefined) o.a=String(r.a).slice(0,24); }
       return o;
     }).sort((a,b)=>a.t-b.t);
@@ -3715,6 +3724,7 @@ function statsRecord(stats, rec, cfg){
   cfg = cfg||STATS_CONFIG;
   const r = {t:Number.isFinite(rec.t)?rec.t:Date.now(), s:rec.skill, l:rec.level|0, b:rec.bonus?1:0, c:rec.ok?1:0,
              d:Math.round(Math.min(cfg.maxSeconds, Math.max(0, rec.seconds||0))*10)/10};
+  if(rec.h&7) r.h = rec.h&7;   // help flags: 1 = used a tool under the question (later: 2 = guided, 4 = tried again after a guide)
   if(!rec.ok){ if(rec.chosen!==undefined) r.x=String(rec.chosen).slice(0,24); if(rec.correct!==undefined) r.a=String(rec.correct).slice(0,24); }
   const L = stats.log;
   if(L.length && r.t < L[L.length-1].t) r.t = L[L.length-1].t;   // keep the log ordered even if the clock moved back
@@ -4742,6 +4752,13 @@ function gHeightOrder(){
 // 9) Mini logic grid (regular: one attribute; bonus: two attributes, four clues)
 const MG_PETS = ["כלב","חתול","ארנב","דג","תוכי","אוגר"];
 const MG_FRUITS = ["תפוח","בננה","ענבים","תות","אבטיח"];
+// A clue is data ({k:'pet'|'fruit'|'rel', kid, pet, fr, yes}); this writes its text. The tool under the question (clueGrid) and, later, the guide read the data, so text and tool cannot disagree.
+function clueText(c, M){
+  const P = M.kids, pets = M.pets, fruits = M.fruits, likes = p=>v(p,'אוהב','אוהבת');
+  if(c.k==='pet')   return c.yes ? `ה${pets[c.pet]} אצל ${P[c.kid].n}.` : `ל${P[c.kid].n} אין ${pets[c.pet]}.`;
+  if(c.k==='fruit') return c.yes ? `${P[c.kid].n} ${likes(P[c.kid])} ${fruits[c.fr]}.` : `${P[c.kid].n} לא ${likes(P[c.kid])} ${fruits[c.fr]}.`;
+  return c.yes ? `מי שיש לו ${pets[c.pet]} אוהב ${fruits[c.fr]}.` : `מי שיש לו ${pets[c.pet]} לא אוהב ${fruits[c.fr]}.`;
+}
 function logicGrid(twoAttr){
   const P = pickPeople(3);
   const pets = shuffle(MG_PETS.slice()).slice(0,3), fruits = shuffle(MG_FRUITS.slice()).slice(0,3);
@@ -4754,20 +4771,20 @@ function logicGrid(twoAttr){
     for(let i=0;i<3;i++){
       for(let k=0;k<3;k++){
         const hasP = truth.pet[i]===k;
-        cands.push(hasP ? {t:`ה${pets[k]} אצל ${P[i].n}.`, f:s=>s.pet[i]===k}
-                        : {t:`ל${P[i].n} אין ${pets[k]}.`, f:s=>s.pet[i]!==k});
+        cands.push(hasP ? {c:{k:'pet',kid:i,pet:k,yes:true}, f:s=>s.pet[i]===k}
+                        : {c:{k:'pet',kid:i,pet:k,yes:false}, f:s=>s.pet[i]!==k});
         if(twoAttr){
           const hasF = truth.fr[i]===k;
-          cands.push(hasF ? {t:`${P[i].n} ${likes(P[i])} ${fruits[k]}.`, f:s=>s.fr[i]===k}
-                          : {t:`${P[i].n} לא ${likes(P[i])} ${fruits[k]}.`, f:s=>s.fr[i]!==k});
+          cands.push(hasF ? {c:{k:'fruit',kid:i,fr:k,yes:true}, f:s=>s.fr[i]===k}
+                          : {c:{k:'fruit',kid:i,fr:k,yes:false}, f:s=>s.fr[i]!==k});
         }
       }
     }
     if(twoAttr){
       for(let a=0;a<3;a++) for(let b=0;b<3;b++){
         const pi = truth.pet.indexOf(a); const same = truth.fr[pi]===b;
-        cands.push(same ? {t:`מי שיש לו ${pets[a]} אוהב ${fruits[b]}.`, f:s=>s.fr[s.pet.indexOf(a)]===b}
-                        : {t:`מי שיש לו ${pets[a]} לא אוהב ${fruits[b]}.`, f:s=>s.fr[s.pet.indexOf(a)]!==b});
+        cands.push(same ? {c:{k:'rel',pet:a,fr:b,yes:true}, f:s=>s.fr[s.pet.indexOf(a)]===b}
+                        : {c:{k:'rel',pet:a,fr:b,yes:false}, f:s=>s.fr[s.pet.indexOf(a)]!==b});
       }
     }
     const asked = ri(0,2);
@@ -4787,8 +4804,10 @@ function logicGrid(twoAttr){
         ? `${P[0].n}, ${P[1].n} ו${P[2].n}: לכל אחד מהשלושה יש חיה אחרת (${pets.join(', ')}) ופרי אהוב אחר (${fruits.join(', ')}).`
         : `${P[0].n}, ${P[1].n} ו${P[2].n}: לכל אחד מהשלושה יש חיה אחרת (${pets.join(', ')}).`;
       const q = twoAttr ? `איזה פרי ${likes(P[asked])} ${P[asked].n}?` : `למי יש ${pets[0]}?`;
-      return {text:`${intro}<br>${cl.map(c=>c.t).join('<br>')}<br>${q}`,
-        answer:names[ansIdx], choices:shuffle([...names, "אי אפשר לדעת"])};
+      const M = {kids:P, pets, fruits:twoAttr?fruits:null};
+      return {text:`${intro}<br>${cl.map(c=>clueText(c.c, M)).join('<br>')}<br>${q}`,
+        answer:names[ansIdx], choices:shuffle([...names, "אי אפשר לדעת"]),
+        model:{two:!!twoAttr, kids:P.map(p=>p.n), pets, fruits:twoAttr?fruits:null, clues:cl.map(c=>c.c), asked:twoAttr?asked:null}};
     }
   }
   return null;
@@ -4796,12 +4815,12 @@ function logicGrid(twoAttr){
 function gLogicGrid(){
   const r = logicGrid(false) || logicGrid(false);
   if(!r) return gHeightOrder();
-  return {label:"היגיון: טבלת רמזים", type:'mcq', text:r.text, answer:r.answer, choices:r.choices};
+  return {label:"היגיון: טבלת רמזים", type:'mcq', text:r.text, answer:r.answer, choices:r.choices, tool:{kind:'clueGrid', model:r.model}};
 }
 function bLogicGrid2(){
   const r = logicGrid(true) || logicGrid(true);
   if(!r) return gHeightOrder();
-  return {label:"בונוס היגיון: טבלת רמזים", type:'mcq', text:r.text, answer:r.answer, choices:r.choices};
+  return {label:"בונוס היגיון: טבלת רמזים", type:'mcq', text:r.text, answer:r.answer, choices:r.choices, tool:{kind:'clueGrid', model:r.model}};
 }
 
 // Bonus A: 3x3 matrix completion (two attributes: colour and shape)
@@ -6930,11 +6949,35 @@ function logAnswer(ok, chosen){
     if(!p.stats) p.stats = statsNew();
     const hidden = qTimer.hidden + (qTimer.hideAt ? Date.now()-qTimer.hideAt : 0);
     statsRecord(p.stats, {skill:current.skill, level, bonus:current.isBonus, ok, seconds:(Date.now()-qTimer.start-hidden)/1000,
-                          chosen, correct:current.answer});
+                          chosen, correct:current.answer, h:(current._tool?1:0)});
   }catch(e){}   // stats must never break the game
 }
 // from the browser console: cqStats() = report for the active profile; STATS_CONFIG can be edited live to try other thresholds
 window.cqStats = ()=>{ const p=activeProfile(); return p ? statsReport(p.stats||statsNew()) : null; };
+
+// ---- tools under the question: a question can carry q.tool = {kind, model}; QTOOLS[kind] = {title, mount(el, model, ctx), unmount(el)}.
+// The slot mounts the tool when the question is shown and removes it on the next one; the tool's state (ctx.state) belongs to the question. ctx.used() says she used it (kept in the stats flag h).
+const QTOOLS = {};
+let qToolCur = null;
+function qToolClose(){
+  const slot = document.getElementById('qTool');
+  if(qToolCur){ try{ QTOOLS[qToolCur.kind].unmount(qToolCur.body); }catch(e){} }
+  qToolCur = null;
+  if(slot){ slot.innerHTML = ''; slot.hidden = true; }
+}
+function qToolOpen(q){
+  qToolClose();
+  const slot = document.getElementById('qTool');
+  if(!slot || !q || !q.tool || !toolsOn) return;
+  const def = QTOOLS[q.tool.kind]; if(!def) return;
+  slot.innerHTML = `<div class="qtoolh"><span class="qtoolt">${esc(def.title||'')}</span><button type="button" class="qtoolb" aria-expanded="true">הסתר</button></div><div class="qtoolbody"></div>`;
+  const body = slot.querySelector('.qtoolbody'), btn = slot.querySelector('.qtoolb');
+  btn.onclick = ()=>{ const hide = !body.hidden; body.hidden = hide; btn.textContent = hide ? 'הצג' : 'הסתר'; btn.setAttribute('aria-expanded', String(!hide)); };
+  const ctx = {state:{}, q, used(){ q._tool = 1; }};
+  qToolCur = {kind:q.tool.kind, body, ctx};
+  slot.hidden = false;
+  try{ def.mount(body, q.tool.model, ctx); }catch(e){ qToolClose(); }   // a broken tool must never break the question
+}
 
 function nextQuestion(){
   peekClear();
@@ -6955,6 +6998,7 @@ function nextQuestion(){
   current = themeStory(gen()); current.skill = current.rdSkill || gen.name; current.d = questionDifficulty({d:current.d, skill:current.skill}); current.isBonus = false; startQTimer();
   document.getElementById('qlabel').textContent = current.label;
   document.getElementById('qtext').innerHTML = grpShapes(current.text);
+  qToolOpen(current);
   const area0 = renderAnswerArea(current, checkAnswer);
   if(current.rd) rdQuestionUI(area0);
   if(wasBonus) afterPrize(flushCelebs, 350);
@@ -6971,6 +7015,7 @@ function renderBonus(){
   current = themeStory(gen()); current.skill = gen.name; current.d = questionDifficulty({d:current.d, skill:gen.name}); current.isBonus = true; startQTimer();
   document.getElementById('qlabel').innerHTML = `<span class="bonustag">${TX('bonusTag','🍭 שאלת בונוס')}</span> — אפשר גם לדלג!`;
   document.getElementById('qtext').innerHTML = grpShapes(current.text);
+  qToolOpen(current);
   const area = renderAnswerArea(current, checkAnswer);
   const skipBtn = document.createElement('button');
   skipBtn.type='button';
@@ -7062,6 +7107,7 @@ function applyGenderStatic(){
   document.getElementById('rewardsStrip').setAttribute('aria-label', G('פתחי','פתח','פתחו')+' את '+TX('roomName','חדר המתנות'));
 }
 function refreshAll(){
+  qToolClose();
   applyGenderStatic();
   document.querySelectorAll('.milestone').forEach(e=>e.remove()); prizeReset();
   celebQueue = []; celebOpen = false; document.getElementById('celebOverlay').hidden = true;
@@ -7231,6 +7277,19 @@ function renderFocusHTML(prof, on, m){
     <p class="pa-sub" style="margin-top:6px">${now}</p>
     <p class="pa-sub">פועל רק בתוך מה שהרמות וההתאמה המדויקת מאפשרות. לא משפיע על שאלות בונוס. אין שום סימן שהילדה רואה. סוג שהיא משפרת יוצא מהתרגול מעצמו, כשהסימון שלו משתנה. כבוי כברירת מחדל, ואפשר לכבות בכל רגע (חל מהשאלה הבאה).</p></section>`;
 }
+function profileTools(p){ return p && p.id===store.activeId ? toolsOn : cleanProgress(p && p.progress).tools; }
+function setProfileTools(p, on){
+  on = !!on;
+  if(p.id===store.activeId){ toolsOn = on; saveState(); if(!on) qToolClose(); else qToolOpen(current); }
+  else { p.progress = Object.assign({}, cleanProgress(p.progress), {tools:on}); p.u = Date.now(); persist(); cloudChanged(); }
+}
+function renderToolsHTML(prof){
+  const w = profileTools(prof), nm = esc(profileName(prof, store.profiles.indexOf(prof)));
+  return `<section class="pa-card"><h2 class="pa-h">🧰 כלי עזר מתחת לשאלה</h2>
+    <p class="pa-sub"><b>מה זה עושה:</b> בשאלות מסוימות מופיע מתחת לשאלה כלי שעוזר לחשוב, למשל טבלה למילוי בשאלות הרמזים (חיות, פירות וילדים). ${nm} ממלאת בעצמה; הכלי לא פותר ולא בודק כלום, ואין לו שום השפעה על ניקוד, רצף, פרסים או רמת הקושי. הילדה יכולה להסתיר אותו בכל שאלה.</p>
+    <div class="pa-rows"><div class="pa-row"><div class="pa-main-txt"><b>כלי עזר מתחת לשאלה ל${nm}</b></div><div class="pa-ctl"><label class="tglw pa-switch"><input type="checkbox" data-tools="1" ${w?'checked':''} aria-label="כלי עזר מתחת לשאלה"><span class="tgl" aria-hidden="true"></span></label></div></div></div>
+    <p class="pa-sub" style="margin-top:6px">פעיל כברירת מחדל. אפשר לכבות בכל רגע (חל מיד על השאלה שעל המסך).</p></section>`;
+}
 function profileWarm(p){ return p && p.id===store.activeId ? warmOn : cleanProgress(p && p.progress).warm; }
 function setProfileWarm(p, on){
   on = !!on;
@@ -7342,7 +7401,7 @@ function renderSettingsHTML(){
     <p class="pa-sub">בוחרים אילו רמות יופיעו ב${esc(profileName(prof, store.profiles.indexOf(prof)))}. אפשר להפעיל רמה אחת, שתיים או שלוש. ברירת המחדל: כל הרמות.</p>
     <div class="pa-rows">${rows}</div>
     <div class="perr" id="dswErr">${setMsg?esc(setMsg):''}</div>
-    <p class="pa-sub" style="margin-top:10px">שאלות בונוס הן תמיד ברמה קשה, ולכן ההגדרה הזאת לא משפיעה עליהן.</p></section>` + renderFocusHTML(prof, on, profileMx(prof)) + renderWarmHTML(prof, on, profileMx(prof)) + renderMatrixHTML(prof, on, profileMx(prof)) + renderReadingHTML(prof) + renderThemeHTML(prof);
+    <p class="pa-sub" style="margin-top:10px">שאלות בונוס הן תמיד ברמה קשה, ולכן ההגדרה הזאת לא משפיעה עליהן.</p></section>` + renderFocusHTML(prof, on, profileMx(prof)) + renderWarmHTML(prof, on, profileMx(prof)) + renderToolsHTML(prof) + renderMatrixHTML(prof, on, profileMx(prof)) + renderReadingHTML(prof) + renderThemeHTML(prof);
 }
 let setMsg = '';
 // ---- sample questions for a difficulty level (modal) ----
@@ -8094,6 +8153,10 @@ document.getElementById('profOverlay').addEventListener('change', e=>{
     const r = mxSetLevel(cur, profileMx(prof), id, e.target.checked);
     if(!r.diff.length){ setMsg = 'חייבת להיות לפחות רמה אחת פעילה.'; return renderProfiles(); }
     return mxCommit(prof, r.diff, r.mx);
+  }
+  if(e.target.dataset && e.target.dataset.tools){
+    const prof = store.profiles.find(x=>x.id===setViewId) || activeProfile(); if(!prof) return;
+    setProfileTools(prof, e.target.checked); return renderProfiles();
   }
   if(e.target.dataset && e.target.dataset.warm){
     const prof = store.profiles.find(x=>x.id===setViewId) || activeProfile(); if(!prof) return;

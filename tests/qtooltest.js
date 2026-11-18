@@ -1,0 +1,64 @@
+// the tool slot under the question: mounts with the question, goes with it, the parent switch, the help flag h in the stats log (saved, cleaned, backed up)
+const T=require('./lib.js');
+const {chromium}=require('playwright'); let f=0; const ok=(c,m)=>{console.log((c?'ok   ':'FAIL ')+m);if(!c)f++;};
+(async()=>{
+const b=await chromium.launch(T.launchOpts); const p=await (await b.newContext({viewport:{width:390,height:844}})).newPage(); const errs=[]; p.on('pageerror',e=>errs.push(e.message));
+await p.goto(T.URL); await p.evaluate(()=>localStorage.clear()); await p.reload();
+await p.fill('#pfName','נועה'); await p.click('.gopt:has(input[value=f])'); await p.click('[data-pact=save]'); await p.waitForTimeout(300);
+const E=(fn,...a)=>p.evaluate(fn,...a);
+const REG=()=>E(()=>{ window.LOG=[]; QTOOLS.test={title:'כלי בדיקה', mount(el,m,ctx){ LOG.push('mount:'+JSON.stringify(m)); el.innerHTML='<button id="tb">x</button>'; el.querySelector('#tb').onclick=()=>ctx.used(); window.TCTX=ctx; }, unmount(el){ LOG.push('unmount'); }};
+  QTOOLS.bad={title:'שבור', mount(){ throw new Error('boom'); }, unmount(){}};
+  window.showQ=(tool)=>{ current={label:'שאלה',text:'כמה זה 2 + 2?',type:'mcq',answer:4,choices:[3,4,5,6],skill:'gMulFact',tool}; qToolOpen(current); renderAnswerArea(current,checkAnswer); startQTimer(); }; });
+await REG();
+// ---- the slot ----
+ok(await E(()=>document.getElementById('qTool').hidden===true&&document.getElementById('qTool').nextElementSibling.id==='answerArea'),'the slot is between the question and the answers, hidden when empty');
+await E(()=>nextQuestion());
+ok(await E(()=>document.getElementById('qTool').hidden===true&&LOG.length===0),'a normal question has no tool');
+await E(()=>showQ({kind:'test',model:{a:1}}));
+ok(await E(()=>!document.getElementById('qTool').hidden&&LOG[0]==='mount:{"a":1}'&&document.querySelector('.qtoolt').textContent==='כלי בדיקה'&&!!document.getElementById('tb')),'a question with a tool mounts it with its model, under a titled header');
+await E(()=>document.querySelector('.qtoolb').click());
+ok(await E(()=>document.querySelector('.qtoolbody').hidden===true&&document.querySelector('.qtoolb').textContent==='הצג'&&document.querySelector('.qtoolb').getAttribute('aria-expanded')==='false'),'the hide button hides the tool');
+await E(()=>document.querySelector('.qtoolb').click());
+ok(await E(()=>document.querySelector('.qtoolbody').hidden===false&&document.querySelector('.qtoolb').textContent==='הסתר'),'and shows it again');
+await E(()=>nextQuestion());
+ok(await E(()=>LOG.filter(x=>x==='unmount').length===1&&document.getElementById('qTool').hidden&&document.getElementById('qTool').innerHTML===''),'the next question unmounts it and empties the slot');
+await E(()=>{ LOG.length=0; showQ({kind:'bad',model:{}}); });
+ok(await E(()=>document.getElementById('qTool').hidden&&!!document.getElementById('answerArea').querySelector('.choice, .choices, button')),'a tool that throws is dropped and the question still works');
+await E(()=>{ LOG.length=0; showQ({kind:'nosuch',model:{}}); });
+ok(await E(()=>document.getElementById('qTool').hidden&&LOG.length===0),'an unknown tool kind is ignored');
+await E(()=>{ renderBonus(); });
+ok(await E(()=>document.getElementById('qTool').hidden),'a bonus question without a tool leaves the slot empty');
+// ---- the parent switch ----
+ok(await E(()=>toolsOn===true&&cleanProgress({}).tools===true&&cleanProgress({tools:false}).tools===false&&cleanProgress({tools:'x'}).tools===true&&captureProgress().tools===true),'on by default; old saves and junk values mean on; carried in saved progress');
+await E(()=>{ LOG.length=0; showQ({kind:'test',model:{}}); setProfileTools(activeProfile(),false); });
+ok(await E(()=>document.getElementById('qTool').hidden&&LOG.includes('unmount')),'switching off removes the tool from the question on screen');
+await E(()=>{ LOG.length=0; showQ({kind:'test',model:{}}); });
+ok(await E(()=>document.getElementById('qTool').hidden&&LOG.length===0),'with the switch off, tools do not appear');
+await E(()=>{ setProfileTools(activeProfile(),true); });
+ok(await E(()=>!document.getElementById('qTool').hidden&&LOG.includes('mount:{}')),'switching on shows it for the current question');
+await E(()=>{ openPanel('settings'); }); await p.waitForTimeout(200);
+const txt=await p.textContent('#profBody');
+ok(txt.includes('כלי עזר מתחת לשאלה')&&txt.includes('מה זה עושה')&&await p.locator('input[data-tools]').isChecked(),'settings card explains it and the switch is on');
+await p.locator('input[data-tools]').evaluate(el=>el.click()); await p.waitForTimeout(150);
+ok(await E(()=>toolsOn===false),'the switch in the settings turns it off');
+await p.reload(); await p.waitForTimeout(300); await REG();
+ok(await E(()=>toolsOn===false),'and it is kept across a reload');
+await E(()=>{ store.profiles.push({id:'zz',name:'דני',gender:'m',progress:cleanProgress({}),stats:statsNew(),u:Date.now()}); persist(); setViewId='zz'; openPanel('settings'); });
+ok(await p.locator('input[data-tools]').isChecked()===true,'another profile has its own switch (on)');
+await E(()=>{ setViewId=activeProfile().id; setProfileTools(activeProfile(),true); });
+// ---- the help flag h ----
+await E(()=>{ window.TS=()=>activeProfile().stats.log; activeProfile().stats=statsNew(); level=1; });
+await E(()=>{ showQ({kind:'test',model:{}}); });
+await E(()=>checkAnswer(4,null,null));
+const noUse=await E(()=>TS().slice(-1)[0]);
+ok(noUse&&noUse.h===undefined,'answering without using the tool writes no h: '+JSON.stringify(noUse));
+await E(()=>{ current._logged=false; showQ({kind:'test',model:{}}); document.getElementById('tb').click(); checkAnswer(4,null,null); });
+const used=await E(()=>TS().slice(-1)[0]);
+ok(used&&used.h===1&&used.c===1,'using the tool before answering writes h = 1: '+JSON.stringify(used));
+await E(()=>{ showQ({kind:'test',model:{}}); checkAnswer(4,null,null); document.getElementById('tb').click(); });
+ok(await E(()=>TS().slice(-1)[0].h===undefined),'using it after the answer does not count');
+ok(await E(()=>{ const s=statsSanitize({v:1,log:[{t:1,s:'gMulFact',l:1,b:0,c:1,d:3,h:1},{t:2,s:'gMulFact',l:1,b:0,c:1,d:3,h:7},{t:3,s:'gMulFact',l:1,b:0,c:1,d:3,h:0},{t:4,s:'gMulFact',l:1,b:0,c:1,d:3,h:8},{t:5,s:'gMulFact',l:1,b:0,c:1,d:3,h:'x'},{t:6,s:'gMulFact',l:1,b:0,c:1,d:3,h:1.5},{t:7,s:'gMulFact',l:1,b:0,c:1,d:3}],daily:{}}); return JSON.stringify(s.log.map(r=>r.h))==='[1,7,null,null,null,null,null]'.replace(/null/g,'undefined')||s.log.map(r=>r.h===undefined?0:r.h).join()==='1,7,0,0,0,0,0'; }),'the clean-up keeps h only when it is a whole number from 1 to 7');
+ok(await E(()=>{ const pr=activeProfile(); pr.stats=statsNew(); statsRecord(pr.stats,{skill:'gMulFact',level:1,ok:true,seconds:2,h:1}); const code=saveCodePayload([pr],true); const back=codeProfiles(JSON.parse(JSON.stringify(code)))[0]; return back.stats.log[0].h===1; }),'h survives a save code (backup) round trip with the statistics');
+ok(await E(()=>{ const pr=activeProfile(); pr.stats=statsNew(); statsRecord(pr.stats,{skill:'gMulFact',level:1,ok:true,seconds:2}); return !('h' in pr.stats.log[0]); }),'records without a tool have no h at all (the log does not grow)');
+ok(errs.length===0,'no page errors '+errs);
+console.log(f?'FAILURES '+f:'ALL PASS'); await b.close(); process.exit(f?1:0);})();
