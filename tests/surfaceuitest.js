@@ -28,10 +28,10 @@ ok(hits.indexOf('thing:5')===hits.indexOf('item:bed')+1,'what lies on the bed is
 ok(hits.indexOf('thing:4')===hits.indexOf('thing:3')+1&&hits.indexOf('thing:1')===hits.indexOf('thing:0')+1&&hits.indexOf('thing:2')>hits.indexOf('thing:1'),'each host and its sitters stay together, the chair in front comes after');
 
 // the lit tops while placing
-for(const [k,n] of [['teddy',17*S*S],['pl00',17*S*S],['rug_sq',0],['chair',0],['telescope',0]]){
+for(const [k,n] of [['teddy',21*S*S],['pl00',21*S*S],['rug_sq',0],['chair',0],['telescope',0]]){
   await ev(([k])=>{space.things=[{k:'table',x:6,y:6,u:'tab1'},{k:'toybox1',x:2,y:6,u:'box1'}];space.lv.bed=1;RM.pl={k,i:-1,x:8,y:2};rmRedraw();renderDrawer();},[k]);
   const cnt=await ev(()=>document.querySelectorAll('#rmR .rmtop').length);
-  ok(cnt===n,`placing a ${k}: ${n} lit top cells (table 4 + toy box 4 + bed 9 cells (each GU x GU units) for small things, none for ${'rugs and big things'}) - got ${cnt}`);
+  ok(cnt===n,`placing a ${k}: ${n} lit top cells (table 4 + toy box 4 + bed 9 + window sill 4 cells (each GU x GU units) for small things, none for ${'rugs and big things'}) - got ${cnt}`);
 }
 await ev(()=>{RM.pl={k:'teddy',i:-1,x:8,y:2};rmRedraw();renderDrawer();});
 ok(await ev(()=>/משטח מואר/.test(document.getElementById('rmDrawer').textContent)),'the placing drawer tells you a small thing can also go on a lit top');
