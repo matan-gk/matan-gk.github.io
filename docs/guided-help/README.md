@@ -11,3 +11,4 @@ Files:
 Status of decisions: see the log. Agreed items are listed as decided; anything labelled proposed or open is not approved.
 
 - `INVENTORY.md` (added 18 Nov): all 127 question types tagged by board family and by how cheaply the generator can return a worked solution. Kept in sync with the game by `tests/guideinventorytest.js`. Proposed classification, not built.
+- `CONTRACT.md` (added 18 Nov): the proposed contract between generators, boards and the engine, tested on paper against five types; work packages; research notes; decisions still needed. Not built.

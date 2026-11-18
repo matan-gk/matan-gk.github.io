@@ -29,7 +29,7 @@ Matan answered the review point by point. Decided unless marked otherwise.
 Matan's second set of comments, with my answers. Decided unless marked.
 - SPOKEN PROMPTS must work on other children's devices too (it is being shared soon), not only on her device. Consequence (my analysis, PROPOSED): the browser's built-in speech is not reliable enough for that; see the research note in the architecture section. Recommended approach: a closed, fixed script of spoken lines (recorded or generated once, shipped as audio files), with every variable thing (numbers, names, items) shown and highlighted on screen, not spoken. No audio is built yet.
 - ENGINE RESEARCH FIRST: yes. Step 1 (type inventory, `INVENTORY.md`) and step 2 (the contract, `CONTRACT.md`) are done on stacked branches before any code, and the choice of what to build first follows from them.
-- WORDING: not "perfect/wrong child" for the automated tests; use "correct-answer run" and "incorrect-answer run".
+- WORDING: the automated tests are described as a "correct-answer run" and an "incorrect-answer run".
 - STREAK RULES (decided, replaces my earlier reading):
   1. Wrong answer, then guide, then another try with the correct answer: the streak continues.
   2. Wrong answer without a guide, or without another try: the streak resets.
