@@ -144,9 +144,9 @@ Summary of what the paper tests changed: `show` steps, `all` / `oneOf` / `check`
 - **Browser speech** ([Readium: SpeechSynthesis in browsers and OSes](https://readium.org/speech/docs/WebSpeech.html)): which voices exist depends on the device and the browser: Chrome desktop has a small set of online-only voices; Chrome on Android returns an unfiltered list and falls back to an English voice if the language pack is not installed; Safari does not list downloaded voices; on Windows the natural voices are not listed in Chrome or Firefox; Firefox ships no voices of its own. The page does not mention Hebrew at all. So whether a Hebrew voice is present cannot be assumed on another child's device, which is why the plan is shipped audio for a fixed script. I did not test any device, and I did not evaluate Hebrew speech services (several exist; quality and licence terms for shipping the audio need checking).
 - What I did not research: published findings on how effective step-by-step guidance is for children of this age, and the design of existing children's maths tutors. The contract is built from the game's own constraints and from the paper tests, not from that literature. If Matan wants the design checked against it, that is a separate piece of reading.
 
-## 15. Decisions still needed
-1. The reading of "another try" in section 6 (the follow-up question, with normal reward and streak rules on it). Confirm or correct.
-2. After a guide opened before answering: is her answer to the original question accepted as correct without a reward and without a streak change (my reading), or should she skip the original and go straight to the follow-up?
-3. Whether the first code is P0 and P1 (plumbing and harness) before any board, as I recommend, or a board first to see it on screen.
-4. The data: where the per-type counters live, and whether they are synced (check `docs/PRIVACY.md`).
-5. Spoken audio: who produces the audio files (a Hebrew voice service, a recording), and the licence terms. Not needed before P5.
+## 15. Decisions (Matan, 19 Nov) and what is still open
+1. Streak reset rules in section 6: confirmed.
+2. A guide opened before answering: her answer to the original question is accepted as correct, with no reward and no streak change. (Decided.)
+3. Sequencing: replaced by `PLAN.md` (the grid tool first, then its guide, then the next type). Section 13 is kept as the list of work packages; the order in `PLAN.md` wins.
+4. Data and backup: everything is backed up with the profile. The "per-type counters (replaced by the `h` flag, see section 15)" in section 9 are replaced by one optional field `h` on the existing stats log records (see `PLAN.md` 1.C), so nothing new is stored outside the profile's stats.
+5. Audio: another agent will produce the files; the spoken sentences are written when we get there.
