@@ -25,6 +25,28 @@ Matan answered the review point by point. Decided unless marked otherwise.
 - ART: Matan notes that art from Gemini is cheap. Agreed; the review overstated it. See the correction in the review section.
 - STILL OPEN: spoken prompts approach, the engine architecture below, streak behaviour if she quits half way.
 
+# Update 18 Nov, second round: decisions and answers (read after the first "Update 18 Nov")
+Matan's second set of comments, with my answers. Decided unless marked.
+- SPOKEN PROMPTS must work on other children's devices too (it is being shared soon), not only on her device. Consequence (my analysis, PROPOSED): the browser's built-in speech is not reliable enough for that; see the research note in the architecture section. Recommended approach: a closed, fixed script of spoken lines (recorded or generated once, shipped as audio files), with every variable thing (numbers, names, items) shown and highlighted on screen, not spoken. No audio is built yet.
+- ENGINE RESEARCH FIRST: yes. Step 1 (type inventory, `INVENTORY.md`) and step 2 (the contract, `CONTRACT.md`) are done on stacked branches before any code, and the choice of what to build first follows from them.
+- WORDING: not "perfect/wrong child" for the automated tests; use "correct-answer run" and "incorrect-answer run".
+- STREAK RULES (decided, replaces my earlier reading):
+  1. Wrong answer, then guide, then another try with the correct answer: the streak continues.
+  2. Wrong answer without a guide, or without another try: the streak resets.
+  3. Guide opened before answering: the streak continues.
+  Still no reward for a guided solve. Implementation note (mine): on a wrong answer for a type that has a guide, the reset is held (not applied) until she either skips the guide (then it resets) or tries again; the wrong answer is still logged as a mistake. "Another try" means she must answer the same question again after the guide, and the answer must be correct for the streak to continue; a second wrong answer then resets it.
+- ART: Gemini work is cheap; the integration is routine. Individual images or sheets: see the answer in the chat and the note in the review section: roughly equal for me; sheets are cheaper for Matan (fewer prompts) and keep a style together, single images are better for redoing one picture. No change to the plan.
+- HELP-PAGE BUG: fixed in branch `logic-help-example` off main (Step 59): the clue-table help now teaches with "isn't" clues only, like the real questions.
+- "CHANGE WHAT SHE SEES" after a wrong tap: defined below, "Hint ladder, concretely".
+
+## Hint ladder, concretely (18 Nov, PROPOSED; answers Matan's question on how to "change what she sees")
+A wrong tap does not just say "try again". The ladder per step:
+1. First miss: show the CONSEQUENCE of her choice, briefly, then rewind. Example (shop, choosing the operator for "6 were sold"): she taps "+"; the shelf shows 6 more yo-yos arriving and the covered "?" box grows, then everything rewinds. She can see that "sold" cannot make more. No words about the answer.
+2. Second miss (a different wrong choice; the same wrong choice twice does not count): ask a SMALLER, more concrete question about the same step instead of the original one. Example: "After the sale, are there more or fewer yo-yos on the shelf?" with two picture buttons (more / fewer). Her answer maps to the operator for her, which she then places herself.
+3. Third miss: demonstrate once (the correct move plays on screen), rewind, and she does it herself.
+Other steps follow the same pattern: a wrong timeline point: the tapped event pulses and the order numbers appear on the timeline; a wrong "is/isn't" mark in the clue cards: the clue that rules it out lights up next to the chip she marked. A typed number cannot be brute-forced, so it gets a hint (the two numbers to combine are highlighted, then a number-line hop) but no consequence animation unless the operation itself is the mistake.
+Needs per-board work: each board must supply, for each of its steps, a consequence view and a smaller question. That is part of the recipe (see CONTRACT.md).
+
 # What's decided (Matan's choices, from voice notes)
 - Direction: explore animated, interactive, child-guided step-by-step solutions for hard questions, instead of static instructions. Discussion stage, no implementation yet. (17 Nov)
 - Entry points: BOTH of these. (17 Nov)
@@ -272,7 +294,7 @@ Triggered by Matan's critique: a "step engine" alone is only a helper and does n
 A generic step engine (retries, hints, exit, analytics) is plumbing and is worth maybe 15 to 20 percent of the work per guide. It does not cut the cost. What can cut it is reuse at three other levels, and only if they are designed on purpose:
 1. BOARDS (the visual model of a problem). The 127 types are not 127 different kinds of thinking. By area in SKILL_META: stories 26, numbers 22, patterns 18, reading 16, logic 13, symbols 12, shapes 11, clock 9. My guess (not verified, needs the inventory below) is that 8 to 10 boards cover most of them: a quantity timeline (the shop and most stories), a number line / ten frame (arithmetic steps), a place-value chart (numbers, rounding), a sequence strip (patterns), a card grid (logic), a "highlight it in the text" board (reading), a clock face, a shape/measure board, an expression builder (symbols). A board owns the drawing and the kinds of child action (tap, type, drag, mark). Writing a board is the expensive part, once.
 2. A SOLUTION TRACE FROM THE GENERATOR. Each generator already knows the answer; it should also return the worked solution as data (the model, and the ordered steps with their results). The guide is then a function of the trace, not hand-written text per type. This is the single biggest saving, and it is also what keeps the guide and the question from disagreeing (see the shop point about the structured payload).
-3. A FREE TEST HARNESS. With a trace, a test can automatically play every guide as a perfect child, and as a random wrong child, for hundreds of generated questions. Each new guide then comes with its main test for almost nothing, and any change to a generator that breaks its guide is caught.
+3. A FREE TEST HARNESS. With a trace, a test can automatically play every guide with correct answers, and as random incorrect answers, for hundreds of generated questions. Each new guide then comes with its main test for almost nothing, and any change to a generator that breaks its guide is caught.
 ## Proposed layers (what is generic and what is per type)
 - Engine (generic, once): entry points (idle button, after a mistake), holding the answer reveal, no streak reset, flag and settings, exit, tries and time per step, the hint ladder, the final "try one yourself" step, analytics. Small to medium.
 - Boards (generic, about 8 to 10 over time): rendering and child actions. Each is a medium to large piece of work, written when the first type that needs it is built.
