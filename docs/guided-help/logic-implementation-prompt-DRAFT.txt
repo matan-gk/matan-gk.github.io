@@ -1,0 +1,50 @@
+DRAFT for discussion only. This is not authority to implement. Nothing here is approved to build yet. Items marked OPEN need Matan's decision before or during the work.
+
+TASK
+In the Cupcake Quest repo (matan-gk/matan-gk.github.io, file math-quest.html), design and then build a guided-help mode for the logic-grid question types:
+- gLogicGrid ("היגיון: טבלת רמזים"): 3 kids, 3 pets, 3 clues, "who has pet X".
+- bLogicGrid2 (bonus): 3 kids, 3 pets, 3 fruits, 4 clues, "which fruit does kid X like". Source: function logicGrid(twoAttr) near line 4728.
+Scope is these two types only. Do not touch the shop "work backwards" type yet.
+
+FIRST STEP (before writing code)
+Read logicGrid(), the question card and checkAnswer flow, the help button and HELP entries (gLogicGrid, bLogicGrid2), and how icons are loaded (ICON_IMG, EMOJI_ICON). Then report back a short plan and any conflicts with the settled choices below. Do not start implementing until I confirm the plan.
+
+SETTLED (from Matan, 17 Nov)
+- The child does the thinking. The game never reveals the answer and never does her inference steps or removals for her.
+- Slower and more deliberate than today's help: more explanation and more child input. Low text, visual links between clue and grid.
+- Entry: a quiet button at the edge of the question card, and a stronger "solve together" offer after a mistake. (Both entry points were chosen for guided help in general; the idle timing is not settled, see PROPOSED/OPEN.)
+- Validation of marks (Matan said yes, 17 Nov ~15:54, to the proposal described to him as per-step validation supported by the clues): each mark she confirms is checked at that step against what the clues support, not only against the final answer. The exact wording of what was put to him was given by voice; the details below are not settled.
+- Interface: one card per kid. Each candidate (pet, fruit) is a picture, not a word. A candidate can be marked "is" or "isn't".
+- The guide shows how each clue maps to a mark and guides the next inference.
+- After she confirms an ownership or preference, the guide prompts her to remove the same option from the OTHER kids (each option belongs to one kid). She makes those removals herself.
+- Hebrew, right to left, same visual style as the rest of the game.
+
+PROPOSED, NOT DECIDED (treat as suggestions to react to)
+- Idle timing for the quiet button: roughly 5-10 seconds was floated and is provisional only.
+- Retries: the shop design says she may retry a step a couple of times before more help. Matan has not said this for the logic type. Proposed to carry over, to be confirmed.
+- Emoji as a temporary fallback until picture art exists (as the game does elsewhere). Not chosen.
+- A third neutral "unknown" state as the starting state, so untouched options do not look eliminated.
+- A visibly different tentative mark that never triggers the removal prompt and is never treated as true.
+- Mark single candidates only; never remove a whole kid card.
+- Keep three rules separate in the guidance: across kids (uniqueness), within a kid (one pet per kid), and category (an apple is not a pet; separate icon rows make this unnecessary).
+
+OPEN: DECISIONS NEEDED
+1. Relational clues ("whoever has the cat does not like apple", present in every valid bonus question). How are they shown? One option: an anonymous "?" owner card for that pet, left unmatched until she can say who it is, and the removal prompt for it waits until she knows the kids are different. This is NOT chosen. Do not pick one silently; propose options and ask.
+2. Validation is adopted per step, supported by the clues. STILL OPEN: what feedback she gets when a mark is not supported (immediate or when she confirms), what happens to a mark that is true but not yet supported by the clues she has used, how tentative marks are treated, and how a wrong mark is undone without making her feel failed.
+3. Does she choose which clue to apply first, or does the guide order them?
+4. Is "unknown" shown as a visible question mark? (He said yes/no are adopted; the question mark is possible, not settled.)
+5. Faces for the kid cards. Matan conditionally wants one dedicated, consistent face per name for familiarity across questions, if the amount is reasonable. The name pool is exactly 16 (see ART AND ASSETS). Not decided: whether 16 is accepted, and the face style.
+6. How the mode ends and what happens to streak and reward when she solves with the guide.
+
+ART AND ASSETS
+- Name pool (verified in the generator, const PEOPLE near line 3865 of math-quest.html, main 50a3ed1): 16 distinct names. Boys (8): דני, תום, איתי, יובל, עומר, גיא, ארי, נדב. Girls (8): דנה, נועה, ליה, מאיה, רוני, שירה, יעל, אלה. The logic types draw 3 at random with pickPeople(3); any gender mix is possible. The same shared list is used by about 17 pickPeople calls across other question types, so one face per name could be reused beyond the logic type. If faces are tied to names, the face must match the gender the name is given (the generator uses the g field).
+- Candidate pools in the generator: pets = dog, cat, rabbit, fish, parrot, hamster; fruits = apple, banana, grapes, strawberry, watermelon. Today the question shows these as Hebrew words only.
+- Confirmed mapped assets (named entries in ICON_IMG, 50 images): strawberry, question_mark, avatar_boy, avatar_girl, avatar_neutral can be reused. Check and cross marks are drawn in code (docs/ICONS.md).
+- Unreviewed: assets/ holds about 1,200 hash-named files that are not all mapped to names. Nobody has checked them for pet, fruit or face art, so do not assume none exists. Review before commissioning new art.
+- No confirmed mapped (named) image found for: dog, cat, rabbit, fish, parrot, hamster, apple, banana, grapes, watermelon (docs/ICONS.md lists planned filenames). What to show until art exists is OPEN (an emoji fallback is only a proposal).
+- Do not generate artwork or add images in this task.
+
+CONSTRAINTS
+- No push to main, no PR, and no edits outside this scope without my approval.
+- Keep existing tests passing and add tests for the new mode in the same style as the existing tests/ files.
+- Ask when a choice is listed as OPEN; do not guess.
