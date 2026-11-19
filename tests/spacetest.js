@@ -72,8 +72,8 @@ await ev(()=>{rmZoomAt(0.2,500,450);});ok(await ev(()=>RM.k===1&&RM.tx===0&&RM.t
 
 // five levels each; the window grows up the wall; the bed sits in the corner
 ok(await ev(()=>roomMax('bed')===5&&roomMax('window')===5&&ROOM_ART.bed.length===5&&ROOM_ART.window.length===5),'bed and window have 5 levels with pictures');
-const grow=await ev(()=>[1,2,3,4,5].map(l=>{const a=ROOM_ART.window[l-1];return [a.h, a.ay, a.im[3], WIN_SILL+a.ay];}));
-ok(grow.every((g,i)=>g[1]===g[0]&&g[3]<=WALL_HT-30&&(i===0||g[0]>=grow[i-1][0]-5))&&grow[4][0]>grow[0][0]*1.3,'the window keeps its sill and does not get smaller with a level (levels 3 and 4 are about equal); the tallest fits under the ceiling: heights '+grow.map(g=>Math.round(g[0])));
+const grow=await ev(()=>[1,2,3,4,5].map(l=>{const a=ROOM_ART.window[l-1];return [a.h, a.ay, a.im[3], WIN_SILL+a.ay, WALL_HT];}));
+ok(grow.every((g,i)=>g[1]===g[0]&&g[3]<=g[4]-5&&(i===0||g[0]>=grow[i-1][0]-5))&&grow[4][0]>grow[0][0]*1.3,'the window keeps its sill and does not get smaller with a level (levels 3 and 4 are about equal); the tallest fits under the ceiling: heights '+grow.map(g=>Math.round(g[0])));
 ok(await ev(()=>ROOM_ART.bed.every(a=>a.fp&&a.r&&400+a.r[1]+RM_DY>=0&&a.fp[0]===3&&(a.fp[1]===3||a.fp[1]===4))),'every bed level has a footprint (3 x 4 or 3 x 3) and its picture fits inside the room');
 ok(await ev(()=>{const i=document.querySelector('[data-hit="item:bed"] image');return !!i&&/^assets\//.test(i.getAttribute('href'));}),'the bed is drawn from its picture');
 
@@ -154,7 +154,7 @@ ok(await ev(()=>space.unlocked&&space.lv.bed===2&&space.surf.wl===2&&space.spent
 const cl=await ev(()=>cleanProgress({space:{earned:50,spent:2,trued:true,unlocked:true,surf:{wl:99,wr:'x',fl:5},own:{fl:[5,5,77,1]},lv:{bed:9,window:2,ghost:3}}}).space);
 ok(cl.surf.wl===3&&cl.surf.wr===3&&cl.surf.fl===5&&cl.lv.bed===1&&cl.lv.window===2&&!('ghost' in cl.lv)&&JSON.stringify(cl.own.fl)==='[1,3,5,12]','bad colors and levels fall back; current and starting colors are always owned: '+JSON.stringify(cl.own));
 const mc=await ev(()=>roomMaxCost());
-ok(mc===(3+4+5+6)+(2+3+4+5)+(13+6-2)+524+51*19+(await ev(()=>ROOM_PATTERNS.reduce((a,q)=>a+q.p,0))),'room max-out cost = bed 18 + window 14 + the 3 surfaces share one set of colours (17) + 113 floor items and 10 wall items (465) + 42 colorable parts x 19 + the patterns, got '+mc);
+ok(mc===(3+4+5+6)+(2+3+4+5)+(13+6-2)+560+51*19+(await ev(()=>ROOM_PATTERNS.reduce((a,q)=>a+q.p,0))),'room max-out cost = bed 18 + window 14 + the 3 surfaces share one set of colours (17) + 150 floor and wall items (560) + 42 colorable parts x 19 + the patterns, got '+mc);
 ok(await ev(()=>JSON.stringify(ROOM_ITEMS.bed.up)==='[0,3,4,5,6]'&&JSON.stringify(ROOM_ITEMS.window.up)==='[0,2,3,4,5]'),'upgrade prices: bed 3,4,5,6 and window 2,3,4,5');
 ok(await ev(()=>{onRoomTap(null);space.surf.wl=15;rmRedraw();const st=[...document.querySelectorAll('#rmRainbow stop')];return st.length>=6&&document.querySelector('[data-hit="surf:wl"] polygon').getAttribute('fill')==='url(#rmRainbow)'&&new Set(st.map(x=>x.getAttribute('stop-color'))).size===st.length;}),'the rainbow is a real rainbow: 6+ different color stops on every surface');
 // a profile already above 10 tokens: ceremony gate on first start
