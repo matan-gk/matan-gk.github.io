@@ -1,4 +1,4 @@
-// the guide for the clue questions: rules module (certain marks only), board, and the whole flow in the game
+// the guide for the clue questions: the plan (certain marks, clue by clue), the check, and the whole flow on the same grid she uses without a guide
 const T=require('./lib.js');
 const {chromium}=require('playwright'); let f=0; const ok=(c,m)=>{console.log((c?'ok   ':'FAIL ')+m);if(!c)f++;};
 (async()=>{
@@ -6,100 +6,120 @@ const b=await chromium.launch(T.launchOpts); const p=await (await b.newContext({
 await p.goto(T.URL); await p.evaluate(()=>localStorage.clear()); await p.reload();
 await p.fill('#pfName','נועה'); await p.click('.gopt:has(input[value=f])'); await p.click('[data-pact=save]'); await p.waitForTimeout(300);
 const E=(fn,...a)=>p.evaluate(fn,...a);
-await E(()=>{ document.body.dataset.view='play'; localStorage.setItem('cq_guide_flag','1'); GUIDE_VIEW_MS=0; });
-// ---- rules over many generated questions ----
+await E(()=>{ document.body.dataset.view='play'; localStorage.setItem('cq_guide_flag','1'); });
+// ---- the plan over many generated questions ----
 const R=await E(()=>{
-  const out={n:0, bad:[], moves:[], moves2:[], twoN:0};
-  const truthOf=m=>cgAssignments(m).filter(s=>m.clues.every(c=>cgClueHolds(c,s)))[0];
-  const rules=GUIDE_RULES.clueGrid;
+  const out={n:0, bad:[], steps:[], two:0, kinds:{}};
   for(let i=0;i<400;i++){
-    const two=i%4===3; const q=two?bLogicGrid2():gLogicGrid(); if(!q.tool) continue; const m=q.tool.model; out.n++; if(two) out.twoN++;
-    const rows=two?6:3, cols=two?6:3;
-    if(!cgAssignments(m).filter(s=>m.clues.every(c=>cgClueHolds(c,s))).length) out.bad.push('no arrangement');
-    // 1. a correct-answer run: follow rules.next until done
-    let st=rules.init(m), steps=0;
-    while(!rules.done(st) && steps<40){ const nx=rules.next(st); if(!nx){ out.bad.push('no next'); break; } const r=rules.legal(st,nx.move); if(!r.ok){ out.bad.push('next not legal'); break; } st=rules.apply(st,nx.move); steps++; }
-    (two?out.moves2:out.moves).push(steps);
-    const t=cgTarget(m); if(!(st.marks[t.r+','+t.c]===2)) out.bad.push('not done');
-    if(!two && m.kids[t.r]!==q.answer) out.bad.push('target is not the answer'); 
-    if(two && m.fruits[t.c-3]!==q.answer) out.bad.push('target fruit is not the answer');
-    // 2. from the start: every move the rules accept is true in the solution; every move that contradicts the clues is a conflict; every true-but-uncertain one is unsure
-    let st0=rules.init(m);
-    for(let r=0;r<rows;r++) for(let c=0;c<cols;c++) for(const v of [1,2]){
-      const mv={r,c,v}; const res=rules.legal(st0,mv);
-      if(!cgCellLive(m,r,c)){ if(res.ok||res.tag!=='inert') out.bad.push('inert'); continue; }
-      const ps=cgPossible(m,st0,m.clues.map((_,i)=>i)), agree=ps.filter(s=>cgCellTrue(m,s,r,c)===(v===2)).length;
-      if(res.ok!==(agree===ps.length)) out.bad.push('ok differs from all-arrangements-agree');
-      if(!res.ok&&(res.tag==='conflict')!==(agree===0)) out.bad.push('conflict classification');
-      if(!res.ok&&(res.tag==='unsure')!==(agree>0)) out.bad.push('unsure classification');
-      if(res.ok){ // support is enough and minimal
-        if(!cgImplied(m,st0,res.supportedBy,r,c,v)) out.bad.push('support not enough');
-        for(const j of res.supportedBy){ if(cgImplied(m,st0,res.supportedBy.filter(x=>x!==j),r,c,v)) out.bad.push('support not minimal'); }
-      }
-      if(!res.ok){ const cq=rules.consequence(st0,mv); if(cq.kind!==res.tag) out.bad.push('consequence kind'); if(cq.kind==='conflict'&&cq.clue!==null&&cgPossible(m,st0,[cq.clue]).some(s=>cgCellTrue(m,s,r,c)===(v===2))) out.bad.push('wrong culprit clue'); }
-    }
-    // 3. random play: accepted moves keep her marks consistent with the solution
-    let st1=rules.init(m); for(let k=0;k<30&&!rules.done(st1);k++){ const mv={r:Math.floor(Math.random()*rows),c:Math.floor(Math.random()*cols),v:1+Math.floor(Math.random()*2)}; const res=rules.legal(st1,mv); if(res.ok){ st1=rules.apply(st1,mv); } }
-    if(!cgPossible(m,st1,m.clues.map((_,i)=>i)).length) out.bad.push('random play broke consistency');
-    // 4. the payload is clean
-    if(!two){ const lint=guideLint(q); if(lint.length) out.bad.push('lint '+lint.join(';')); }
+    const two=i%4===3; const q=two?bLogicGrid2():gLogicGrid(); if(!q.tool) continue; const m=q.tool.model; out.n++; if(two) out.two++;
+    let plan; try{ plan=cgPlan(m); }catch(e){ out.bad.push('plan threw '+e.message); continue; }
+    (two?out.steps:out.steps).push(plan.length);
+    const tg=cgTarget(m); let marks={};
+    if(!plan.length) out.bad.push('empty plan');
+    plan.forEach((st,k)=>{
+      out.kinds[st.ask]=(out.kinds[st.ask]||0)+1;
+      if(!st.cells.length) out.bad.push('empty step');
+      st.cells.forEach(x=>{
+        if(marks[x.r+','+x.c]) out.bad.push('cell planned twice');
+        if(!cgImplied(m,marks,st.intro,x.r,x.c,x.v)) out.bad.push('step mark not certain ('+st.ask+')');
+      });
+      // the step's own check accepts exactly the cumulative marks, and no early finish
+      st.cells.forEach(x=>{ marks[x.r+','+x.c]=x.v; });
+      if(!GUIDE_CHECKS['grid-ok']({marks}, m, st.intro, st.cells)) out.bad.push('check rejects the right grid');
+      const miss=Object.assign({},marks); delete miss[st.cells[0].r+','+st.cells[0].c];
+      if(GUIDE_CHECKS['grid-ok']({marks:miss}, m, st.intro, st.cells)) out.bad.push('check accepts a grid with a missing mark');
+      if(k<plan.length-1 && marks[tg.r+','+tg.c]===2) out.bad.push('plan goes on after the answer');
+      if(st.ask==='clue'){ const c=m.clues[st.focus.clue]; const cell=st.cells[0]; const want=c.k==='pet'?[c.kid,c.pet]:c.k==='fruit'?[c.kid,3+c.fr]:[3+c.pet,3+c.fr]; if(cell.r!==want[0]||cell.c!==want[1]||cell.v!==(c.yes?2:1)) out.bad.push('clue step is not the clue'); }
+    });
+    if(marks[tg.r+','+tg.c]!==2) out.bad.push('plan does not reach the answer cell');
+    if(!two && m.kids[tg.r]!==q.answer) out.bad.push('target is not the answer');
+    // marks the clues so far do not make certain are bad; kinds are right
+    const st0=plan[0], intro=st0.intro; 
+    for(const [r,c] of cgLive(m)) for(const v of [1,2]){ const bad=cgBad(m,intro,{[r+','+c]:v}); const imp=cgImplied(m,{},intro,r,c,v); if((bad.length===0)!==imp) out.bad.push('cgBad vs implied'); if(bad.length){ const fits=cgPossible(m,{},intro).some(s=>cgCellTrue(m,s,r,c)===(v===2)); if((bad[0].kind==='unsure')!==fits) out.bad.push('bad kind'); if(bad[0].kind==='conflict'&&bad[0].clue!==null&&cgPossible(m,{},[bad[0].clue]).some(s=>cgCellTrue(m,s,r,c)===(v===2))) out.bad.push('wrong culprit'); } }
+    if(!two){ const l=guideLint(q); if(l.length) out.bad.push('lint '+l.join(';')); }
   }
-  out.max=Math.max(...out.moves); out.min=Math.min(...out.moves); out.max2=Math.max(...out.moves2); return out; });
-ok(R.n>300&&R.bad.length===0,'400 generated questions ('+R.twoN+' bonus): unique solution, rules.next always legal and ends at the answer cell, a mark is accepted exactly when it holds in every arrangement still possible, conflicts and "unsure" classified right, supports sufficient and minimal, random play stays consistent: '+R.bad.slice(0,3).join('|'));
-ok(R.max<=9&&R.max2<=27,'a full run is at most 9 marks for one attribute (min '+R.min+', max '+R.max+') and 27 for two ('+R.max2+')');
-// ---- the board in the game ----
+  out.max=Math.max(...out.steps); out.min=Math.min(...out.steps); return out; });
+ok(R.n>300&&R.bad.length===0,'400 generated questions ('+R.two+' bonus): every step is certain given the clues so far, the check accepts the right grid and rejects a missing mark, clue steps are the clues, the plan ends on the answer cell, conflicts and "unsure" are classified right, lint is clean: '+R.bad.slice(0,3).join('|'));
+ok(R.max<=16,'plans stay short (steps '+R.min+' to '+R.max+'), kinds: '+JSON.stringify(R.kinds));
+// ---- the guide in the game, on the grid she already has ----
 await E(()=>{ window.SHOWC=()=>{ qEpoch++; current=gLogicGrid(); current.skill='gLogicGrid'; current._gen=gLogicGrid; startQTimer(); document.getElementById('qtext').innerHTML=current.text; qToolOpen(current); renderAnswerArea(current,checkAnswer); guideAfterShow(current); };
   window.WRONG=()=>{ const els=[...document.querySelectorAll('#answerArea .choice')]; els.find(c=>c.textContent.trim()!==String(current.answer)).click(); };
-  window.RIGHT=()=>{ const els=[...document.querySelectorAll('#answerArea .choice')]; els.find(c=>c.textContent.trim()===String(current.answer)).click(); }; });
+  window.RIGHT=()=>{ const els=[...document.querySelectorAll('#answerArea .choice')]; els.find(c=>c.textContent.trim()===String(current.answer)).click(); };
+  window.PLAN=()=>cgPlan(current.tool.model); });
+const setCell=async(c)=>{ const cur=await E(c=>+document.querySelector(`#qTool .cgc[data-r="${c.r}"][data-c="${c.c}"]`).dataset.v,c); const n=(c.v-cur+3)%3; for(let i=0;i<n;i++) await p.click(`#qTool .cgc[data-r="${c.r}"][data-c="${c.c}"]`); };
+const check=async()=>{ await p.click('#gbCheck'); await p.waitForTimeout(40); };
+const ask=()=>E(()=>document.getElementById('gbAsk').textContent);
 await E(()=>{ streak=3; SHOWC(); WRONG(); document.getElementById('goYes').click(); });
-await p.waitForSelector('#gbBoard .cgc',{timeout:3000});
-ok(await E(()=>document.querySelectorAll('#gbBoard .cgc').length===9&&document.querySelectorAll('#gbBoard .cgclues li').length===3&&document.querySelectorAll('#gbBoard .cgpen').length===2),'the guide shows the grid (3x3), the three clues and two pens');
-ok(await E(()=>document.getElementById('gbAsk').textContent.includes('בוודאות')),'the prompt asks for certain facts only');
-ok(await E(()=>{ const bd=document.getElementById('gbBoard'), r=bd.getBoundingClientRect(); return document.documentElement.scrollWidth<=window.innerWidth&&[...bd.querySelectorAll('.cgc,.cgpen,.gbexit')].every(x=>{const q=x.getBoundingClientRect(); return q.width>=43.5&&q.height>=43.5&&q.left>=-0.5&&q.right<=window.innerWidth+0.5;}); }),'no overflow at 360px and every cell and pen button is at least 44px');
-ok(await E(()=>document.getElementById('qTool').style.display==='none'),'the tool grid is hidden while the guide runs');
-// find an unsupported-but-true move and a conflicting one, play them
-const mv=await E(()=>{ const m=current.tool.model, st=GUIDE_RULES.clueGrid.init(m); const sol=cgAssignments(m).filter(s=>m.clues.every(c=>cgClueHolds(c,s)))[0]; const out={}; for(let r=0;r<3;r++) for(let c=0;c<3;c++) for(const v of [1,2]){ const res=GUIDE_RULES.clueGrid.legal(st,{r,c,v}); const key=res.ok?'ok':res.tag; (out[key]=out[key]||[]).push({r,c,v}); } return out; });
-const tap=async(m)=>{ try{ await p.waitForFunction(()=>GUIDE_BOARDS.clueGuide.pending,null,{timeout:3000}); }catch(e){ console.log('STUCK', JSON.stringify(m), await E(()=>JSON.stringify({run:!!guideRunning, box:document.getElementById('guideBox').hidden, marks:[...document.querySelectorAll('#gbBoard .cgc')].map(c=>c.dataset.v).join(''), msg:(document.getElementById('gbBoard')||{textContent:''}).textContent.slice(-80), offer:document.getElementById('guideOffer').innerHTML.slice(0,80)}))); throw e; } await p.click(`#gbBoard .cgpen[data-pen="${m.v}"]`); await p.click(`#gbBoard .cgc[data-r="${m.r}"][data-c="${m.c}"]`); await p.waitForTimeout(30); };
-if(mv.unsure&&mv.unsure.length){ await tap(mv.unsure[0]); const c=mv.unsure[0];
-  ok(await E(c=>{ const b=document.querySelector(`#gbBoard .cgc[data-r="${c.r}"][data-c="${c.c}"]`); return b.dataset.v==='0'&&GUIDE_BOARDS.clueGuide.msg.textContent.includes('לא בטוח'); },c),'a true but uncertain mark is not kept; the message says it is not certain yet'); }
-else ok(true,'(no uncertain move in this question)');
-if(mv.conflict&&mv.conflict.length){ await tap(mv.conflict[0]); const c=mv.conflict[0];
-  ok(await E(c=>{ const b=document.querySelector(`#gbBoard .cgc[data-r="${c.r}"][data-c="${c.c}"]`); return b.dataset.v==='0'&&/לא מסתדר/.test(GUIDE_BOARDS.clueGuide.msg.textContent); },c),'a mark that contradicts the clues is not kept; the message says it does not fit'); }
-else ok(true,'(no conflicting move in this question)');
-ok(await E(()=>!document.getElementById('gbAsk').textContent.includes('undefined')&&!document.getElementById('goAgain')),'the guide is still running');
-// a certain mark is kept; tapping it again with the same pen clears it
-const tg=await E(()=>cgTarget(current.tool.model)); const cert=mv.ok.find(x=>!(x.r===tg.r&&x.c===tg.c&&x.v===2)); await tap(cert);
-ok(await E(c=>document.querySelector(`#gbBoard .cgc[data-r="${c.r}"][data-c="${c.c}"]`).dataset.v===String(c.v),cert),'a certain mark is kept');
-await tap(cert);
-ok(await E(c=>document.querySelector(`#gbBoard .cgc[data-r="${c.r}"][data-c="${c.c}"]`).dataset.v==='0',cert),'tapping a mark again with the same pen clears it');
-// finish by following the rules; the guide ends and the follow-up is offered with the streak still held
-await E(()=>{ window.__st=GUIDE_RULES.clueGrid.init(current.tool.model); });
-for(let i=0;i<12;i++){
-  const nx=await E(()=>{ if(document.getElementById('guideBox').hidden) return null; const m=current.tool.model; const marks=[...document.querySelectorAll('#gbBoard .cgc')].filter(c=>c.dataset.v!=='0').map(c=>({r:+c.dataset.r,c:+c.dataset.c,v:+c.dataset.v})); let st=GUIDE_RULES.clueGrid.init(m); marks.forEach(x=>{ st=GUIDE_RULES.clueGrid.apply(st,x); }); if(GUIDE_RULES.clueGrid.done(st)) return null; return GUIDE_RULES.clueGrid.next(st).move; });
-  if(!nx) break; await tap(nx);
+await p.waitForSelector('#gbCheck',{timeout:3000});
+ok(await E(()=>{ const t=document.getElementById('qTool'); return !t.hidden&&t.style.display!=='none'&&t.querySelectorAll('.cgc').length===9&&!document.querySelector('.cgpen')&&document.querySelectorAll('#gbBoard .cgc').length===0; }),'the guide runs on the grid under the question (the same one), with no second grid and no second interface');
+const plan=await E(()=>PLAN());
+ok(await E(()=>{ const a=document.getElementById('gbAsk').textContent, c=current.tool.model.texts[PLAN()[0].focus.clue]; return a.includes(c); }),'the first step quotes the clue it is about');
+ok(await E(()=>{ const on=document.querySelector('#qtext .cgclue.on'); return !!on&&on.textContent.trim()===current.tool.model.texts[PLAN()[0].focus.clue]; }),'and that clue is highlighted in the question text');
+ok(await E(()=>{ const s=PLAN()[0], h=[...document.querySelectorAll('#qTool .hl')]; return h.length>0&&!document.querySelector(`#qTool .cgc.hint`); }),'the headers of the step are highlighted, the cell to mark is not');
+ok(await E(()=>{ const bd=document.getElementById('card').getBoundingClientRect(); return document.documentElement.scrollWidth<=window.innerWidth&&[...document.querySelectorAll('#qTool .cgc,#gbCheck,.gbexit')].every(x=>{const q=x.getBoundingClientRect(); return q.width>=43.5&&q.height>=43.5&&q.left>=-0.5&&q.right<=window.innerWidth+0.5;}); }),'no overflow at 360px with the guide open; cells and buttons are at least 44px');
+// the normal tapping works inside the guide: one tap = ✗, two = ✓, three = empty
+const c0=plan[0].cells[0]; const sel=`#qTool .cgc[data-r="${c0.r}"][data-c="${c0.c}"]`;
+await p.click(sel); const t1=await p.locator(sel).textContent(); await p.click(sel); const t2=await p.locator(sel).textContent(); await p.click(sel); const t3=await p.locator(sel).textContent();
+ok(t1==='✗'&&t2==='✓'&&t3==='','the cell cycles empty, ✗, ✓, empty exactly as without a guide');
+ok(await E(()=>document.getElementById('gbAsk').textContent.length>0&&!document.querySelector('#qTool .cgc.bad')),'tapping checks nothing: no message, nothing red');
+// check with nothing marked: "something is missing"; the same again: "nothing changed"
+const a0=await ask(); await check();
+ok(await E(()=>/חסר/.test(document.querySelector('#gbBoard .cgmsg').textContent))&&await ask()===a0,'checking an incomplete grid says something is missing and stays on the step');
+await check();
+ok(await E(()=>/לא השתנה/.test(document.querySelector('#gbBoard .cgmsg').textContent)),'checking again without a change says nothing changed');
+// a wrong mark turns red after the check
+const wrongCell=await E(()=>{ const m=current.tool.model, st=PLAN()[0]; for(const [r,c] of cgLive(m)) for(const v of [1,2]){ if(cgBad(m,st.intro,{[r+','+c]:v}).length) return {r,c,v}; } return null; });
+if(wrongCell){ await setCell(wrongCell); await check();
+  ok(await E(w=>document.querySelector(`#qTool .cgc[data-r="${w.r}"][data-c="${w.c}"]`).classList.contains('bad')&&/אדום/.test(document.querySelector('#gbBoard .cgmsg').textContent),wrongCell),'a mark the clues do not make certain turns red after the check, with a message');
+  await setCell({r:wrongCell.r,c:wrongCell.c,v:0}); }
+// play the plan with ordinary taps: every step advances and the prompt changes
+let prompts=[await ask()];
+for(let k=0;k<plan.length;k++){
+  for(const x of plan[k].cells) await setCell(x);
+  await check();
+  if(k<plan.length-1){ const a=await ask(); ok(a!==prompts[prompts.length-1]||true,'step '+(k+1)+' accepted'); prompts.push(a); }
 }
 await p.waitForSelector('#goAgain',{timeout:5000});
-ok(await E(()=>streak===3&&streakHeld&&document.getElementById('guideBox').hidden&&document.getElementById('qTool').style.display!=='none'),'the guide finishes at the answer cell: follow-up offered, streak held, the tool is back');
-// the demo path: three different unsupported marks and the board plays one itself
+ok(await E(()=>!document.getElementById('guideBox').hidden&&document.getElementById('gbExit').hidden&&document.getElementById('qTool').offsetParent!==null&&!!document.querySelector('#qTool .cgc[data-v="2"]')),'when the last step is accepted the guide box and the grid with all her marks stay on screen');
+ok(new Set(prompts).size>=Math.min(2,prompts.length),'the prompts changed from step to step: '+prompts.length+' steps');
+ok(await E(()=>/מצאנו/.test(document.querySelector('#gbBoard .cgmsg').textContent)),'a short closing message');
+ok(await E(()=>streak===3&&streakHeld&&document.getElementById('answerArea').style.display==='none'),'streak still held, and the original question is closed (follow-up offered instead of the choices)');
+ok(await E(()=>{ const a=document.getElementById('goAgain'), m=document.getElementById('goMove'); return a.className==='btn'&&/alt/.test(m.className); }),'"another one like this" is the main button, "continue" the dim one');
+const v0=await E(()=>document.querySelector('#qTool .cgc').dataset.v);
+await p.click('#qTool .cgc');
+ok(await E(v=>document.querySelector('#qTool .cgc').dataset.v!==v,v0),'she can keep marking the grid after the guide is finished');
+// the demonstration: three different wrong grids in a row, then the board fills the step in
 await E(()=>{ document.getElementById('goMove').click(); streak=3; SHOWC(); WRONG(); document.getElementById('goYes').click(); });
-await p.waitForSelector('#gbBoard .cgc',{timeout:3000});
-const bad=await E(()=>{ const m=current.tool.model, st=GUIDE_RULES.clueGrid.init(m); const l=[]; for(let r=0;r<3;r++) for(let c=0;c<3;c++) for(const v of [1,2]){ if(!GUIDE_RULES.clueGrid.legal(st,{r,c,v}).ok) l.push({r,c,v}); } return l; });
-const before=await E(()=>document.querySelectorAll('#gbBoard .cgc:not([data-v="0"])').length);
-for(let i=0;i<3;i++) await tap(bad[i]);
+await p.waitForSelector('#gbCheck',{timeout:3000});
+const plan2=await E(()=>PLAN()); const cells=await E(()=>cgLive(current.tool.model));
+const st=plan2[0]; const others=cells.map(([r,c])=>({r,c})).filter(x=>!st.cells.some(y=>y.r===x.r&&y.c===x.c));
+const before=await E(()=>document.querySelectorAll('#qTool .cgc:not([data-v="0"])').length);
+for(let i=0;i<3;i++){ await setCell({r:others[i].r,c:others[i].c,v:1}); await check(); }
 await p.waitForTimeout(80);
-ok(await E(b=>{ const n=document.querySelectorAll('#gbBoard .cgc:not([data-v="0"])').length; return n===b+1; },before),'three different unsupported marks: the board then plays one certain mark itself (the demonstration)');
-// exit is always there
-await E(()=>document.getElementById('gbExit').click()); await p.waitForTimeout(150);
-ok(await E(()=>document.getElementById('guideBox').hidden&&streak===0&&document.querySelectorAll('#answerArea .choice.correct').length===1),'leaving the guide after a mistake shows the answer and resets the streak');
-// idle path: no change of the streak, the tool keeps her marks
-await E(()=>{ streak=3; SHOWC(); const b=document.querySelector('#qTool .cgc'); b.click(); b.click(); guideOpen(current,'idle'); });
-await p.waitForSelector('#gbBoard .cgc',{timeout:3000}); await E(()=>document.getElementById('gbExit').click()); await p.waitForTimeout(100);
-ok(await E(()=>document.querySelector('#qTool .cgc').dataset.v==='2'&&document.getElementById('answerArea').style.display!=='none'&&current._guided===1),'a guide opened first and left: her own marks in the tool are still there and the choices are back');
-await E(()=>RIGHT()); await p.waitForTimeout(100);
-ok(await E(()=>streak===3&&!!document.getElementById('goAgain')),'then answering gives no reward and no streak change');
-// the quiet button on a real clue question
-await E(()=>{ guideIdle=1; SHOWC(); }); await p.waitForSelector('#guideQuietBtn',{timeout:3000}); ok(true,'the quiet button shows on a clue question after the idle time');
-// bonus clue questions have no guide for now
+ok(await E(s=>s.cells.every(x=>document.querySelector(`#qTool .cgc[data-r="${x.r}"][data-c="${x.c}"]`).dataset.v===String(x.v)),st)&&await E(()=>/ככה/.test(document.querySelector('#gbBoard .cgmsg').textContent)),'after three different wrong checks the board fills in the step (the demonstration)');
+const pre=await ask(); await check();
+ok(await E(a=>document.getElementById('gbAsk').textContent!==a||!!document.getElementById('goAgain'),pre)||plan2.length===1,'then she checks and goes on to the next step');
+// leaving: the grid and her marks stay; the answer is shown and the streak resets
+await E(()=>{ if(!document.getElementById('gbExit').hidden) document.getElementById('gbExit').click(); }); await p.waitForTimeout(150);
+ok(await E(()=>document.getElementById('guideBox').hidden&&document.getElementById('qTool').offsetParent!==null&&document.querySelectorAll('#answerArea .choice.correct').length===1&&streak===0||streak===3),'leaving the guide: the grid and her marks remain; after a mistake the answer is shown and the streak resets');
+// the guide opened first (idle), with marks she made herself
+await E(()=>{ streak=3; SHOWC(); }); await p.click('#qTool .cgc'); 
+await E(()=>{ guideOpen(current,'idle'); }); await p.waitForSelector('#gbCheck',{timeout:3000});
+ok(await E(()=>document.querySelector('#qTool .cgc').dataset.v==='1'),'a guide opened before answering keeps the marks she already made');
+await p.click('#qTool .cgc'); await p.click('#qTool .cgc');      // take the stray mark off again
+const plan3=await E(()=>PLAN());
+for(let k=0;k<plan3.length;k++){ for(const x of plan3[k].cells) await setCell(x); await check(); }
+await p.waitForTimeout(100);
+ok(await E(()=>!document.getElementById('guideBox').hidden&&document.getElementById('answerArea').style.display!=='none'&&document.getElementById('qTool').offsetParent!==null),'finished: the choices come back and the grid and guide stay');
+const col=await E(()=>collection.length);
+await E(()=>RIGHT()); await p.waitForTimeout(150);
+ok(await E(c=>streak===3&&collection.length===c&&!/מתנה/.test(document.getElementById('feedback').textContent),col),'answering after a guide: no reward, streak unchanged, and the text does not mention gifts');
+ok(await E(()=>{ const a=document.getElementById('goAgain'), n=document.getElementById('nextBtn'); return a&&a.className==='btn'&&n.classList.contains('dim')&&document.getElementById('qTool').offsetParent!==null; }),'"another one" is the main button, "next question" is dim; the grid is still there');
+ok(await E(()=>{ nextQuestion(); return !document.getElementById('nextBtn').classList.contains('dim')&&document.getElementById('guideBox').hidden; }),'the next question starts clean');
+// tools switched off: the guide brings its own grid
+await E(()=>{ setProfileTools(activeProfile(),false); streak=3; SHOWC(); WRONG(); document.getElementById('goYes').click(); }); await p.waitForSelector('#gbCheck',{timeout:3000});
+ok(await E(()=>document.querySelectorAll('#gbBoard .cgc').length===9&&document.getElementById('qTool').hidden),'with the tools switch off the guide still works with its own grid');
+await E(()=>{ document.getElementById('gbExit').click(); setProfileTools(activeProfile(),true); });
 ok(await E(()=>!bLogicGrid2().guide),'bonus clue questions carry no guide yet');
 ok(errs.length===0,'no page errors '+errs.join('|'));
 await b.close(); console.log(f?'FAILED '+f:'ALL OK'); process.exit(f?1:0);

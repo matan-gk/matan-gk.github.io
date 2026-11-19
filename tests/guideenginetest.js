@@ -129,7 +129,7 @@ await p.waitForSelector('#guideQuietBtn',{timeout:3000});
 ok(true,'the quiet button appears after the idle time');
 const col1=await E(()=>collection.length);
 await E(()=>document.getElementById('guideQuietBtn').click()); await p.waitForTimeout(400);
-ok(await E(()=>document.getElementById('guideBox').hidden&&document.getElementById('answerArea').style.display!=='none'&&current._guided===1),'after the guide the answer choices come back');
+ok(await E(()=>!document.getElementById('guideBox').hidden&&document.getElementById('gbExit').hidden&&document.getElementById('answerArea').style.display!=='none'&&current._guided===1),'after a finished guide the answer choices come back and the guide box stays (without the exit button)');
 await E(()=>CLICK(false)); await p.waitForTimeout(200);
 ok(await E(c=>streak===3&&collection.length===c&&!streakHeld,col1),'answering after a guide opened first: no reward and the streak does not change (even for a wrong pick)');
 ok(await E(()=>{ const r=activeProfile().stats.log.slice(-1)[0]; return (r.h&2)===2; })&&await E(()=>!!document.getElementById('goAgain')),'logged with the guided bit, and "another one" is offered');
