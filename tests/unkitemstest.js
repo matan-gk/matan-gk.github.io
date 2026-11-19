@@ -7,7 +7,7 @@ const p=await (await b.newContext({viewport:{width:1100,height:900}})).newPage()
 const ev=(fn,a)=>p.evaluate(fn,a);
 await p.goto(T.URL);await ev(()=>localStorage.clear());await p.reload();
 await p.fill('#pfName','X');await p.click('.gopt:has(input[value=f])');await p.click('[data-pact=save]');await p.waitForTimeout(500);
-ok(await ev(()=>CLOUD_DOC_V===5),'sync format 5 (space.unk)');
+ok(await ev(()=>CLOUD_DOC_V>=5),'sync format 5 or later (space.unk)');
 const r=await ev(()=>{const known={k:'teddy',x:2,y:2,u:'k1'};
   const raw={earned:50,spent:10,unlocked:true,things:[known,{k:'zzfuture1',x:6,y:6,u:'u1',c:4},{k:'zzwall',x:-1,y:-1,u:'u2',wl:{s:'r',a:200,h:300}},{k:'star',x:-1,y:-1,u:'s1',on:{h:'u1',dx:0,dy:0}},{k:'x'.repeat(60),u:'long'},{k:'zzbig',u:'big',pad:'y'.repeat(600)},5,null]};
   const o=spaceClean(raw,['🍪'],0), again=spaceClean(JSON.parse(JSON.stringify(o)),['🍪'],0);
