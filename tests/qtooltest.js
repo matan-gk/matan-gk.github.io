@@ -11,7 +11,7 @@ const REG=()=>E(()=>{ window.LOG=[]; QTOOLS.test={title:'כלי בדיקה', mou
   window.showQ=(tool)=>{ current={label:'שאלה',text:'כמה זה 2 + 2?',type:'mcq',answer:4,choices:[3,4,5,6],skill:'gMulFact',tool}; qToolOpen(current); renderAnswerArea(current,checkAnswer); startQTimer(); }; });
 await REG();
 // ---- the slot ----
-ok(await E(()=>document.getElementById('qTool').hidden===true&&document.getElementById('qTool').nextElementSibling.id==='answerArea'),'the slot is between the question and the answers, hidden when empty');
+ok(await E(()=>document.getElementById('qTool').hidden===true&&document.getElementById('qTool').nextElementSibling.id==='guideBox'&&document.getElementById('guideBox').nextElementSibling.id==='answerArea'),'the slot is between the question and the answers, hidden when empty');
 await E(()=>nextQuestion());
 ok(await E(()=>document.getElementById('qTool').hidden===true&&LOG.length===0),'a normal question has no tool');
 await E(()=>showQ({kind:'test',model:{a:1}}));
