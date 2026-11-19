@@ -9,3 +9,7 @@ Files:
 - `logic-cards-discussion-sketch.png`: adult-facing layout sketch of the card idea with an anonymous owner card. Tentative, not child UI, not approved, not tested with a child.
 
 Status of decisions: see the log. Agreed items are listed as decided; anything labelled proposed or open is not approved.
+
+- `INVENTORY.md` (added 18 Nov): all 127 question types tagged by board family and by how cheaply the generator can return a worked solution. Kept in sync with the game by `tests/guideinventorytest.js`. Proposed classification, not built.
+- `CONTRACT.md` (added 18 Nov): the proposed contract between generators, boards and the engine, tested on paper against five types; work packages; research notes; decisions still needed. Not built.
+- `PLAN.md` (added 19 Nov): the build order Matan chose (grid tool first, then its guide, then the next type) with the plumbing for each phase. Proposed, awaiting approval.
