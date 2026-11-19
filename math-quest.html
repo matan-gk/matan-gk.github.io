@@ -485,6 +485,15 @@ body[data-view="home"] .wrap > .sub{margin-bottom:12px}
 .qtoolt{font-weight:700; font-size:.95rem}
 .qtoolb{min-height:36px; padding:4px 12px; border-radius:10px; border:1px solid var(--line, rgba(0,0,0,.15)); background:transparent; color:inherit; font:inherit; font-size:.9rem; cursor:pointer}
 .qtoolbody{margin-top:8px}
+.guidebox{margin:0 0 14px; background:var(--card2); border:2px solid var(--purple, #8e44ad); border-radius:14px; padding:10px 8px}
+.gbhead{display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:8px}
+.gbexit{min-height:44px; padding:0 14px; border-radius:12px; border:1px solid var(--line, rgba(0,0,0,.2)); background:transparent; color:inherit; font:inherit; cursor:pointer}
+.gbask{font-size:1.1rem; font-weight:700; margin-bottom:8px; min-height:1.4em}
+.guidequiet{display:block; margin:10px auto 0; min-height:44px; padding:0 16px; border-radius:22px; border:1px dashed var(--line, rgba(0,0,0,.3)); background:transparent; color:inherit; font:inherit; font-size:.95rem; opacity:.85; cursor:pointer}
+.guideoffer{display:flex; flex-direction:column; gap:8px; margin-top:8px}
+.guideoffer:empty{display:none}
+.guideoffer .btn{width:100%; margin-top:0}
+.btn.alt{background:var(--card2); color:var(--text)}
 .cg{display:grid; gap:2px; justify-content:center; direction:rtl}
 .cgh{display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:.7rem; line-height:1.1; min-height:44px; min-width:0; overflow:hidden; text-align:center}
 .cgh b{font-size:1.25rem; font-weight:400}
@@ -1038,9 +1047,11 @@ body[data-view="space"] #spaceView{box-sizing:border-box; display:flex; flex-dir
     <div class="qhead"><div class="qlabel" id="qlabel">שאלה</div><div class="qbtns"><button type="button" class="helpbtn" id="reportBtn">דיווח</button><button type="button" class="helpbtn" id="helpBtn">עזרה</button></div></div>
     <div class="qtext" id="qtext">טוען...</div>
     <div class="qtool" id="qTool" hidden></div>
+    <div class="guidebox" id="guideBox" hidden></div>
     <div id="answerArea"></div>
     <button class="btn secondary" id="nextBtn">🍭 לשאלה הבאה</button>
     <div class="feedback" id="feedback"></div>
+    <div class="guideoffer" id="guideOffer"></div>
   </div>
 
 </div>
@@ -1843,10 +1854,11 @@ function applyTheme(){
   const rd = document.querySelector('#roomOverlay .room'); if(rd) rd.setAttribute('aria-label', TX('roomName','חדר המתנות'));
   const nb = document.getElementById('nextBtn'); if(nb) nb.textContent = TX('nextBtn','🍭 לשאלה הבאה');
 }
+let guideOn = true, guideIdle = 30;   // step-by-step guide (parents switch, per profile; used only while the device flag is on) and the idle seconds before the quiet button shows (0 = never)
 let toolsOn = true;   // tools under the question (parent switch, on by default, kept with the profile like warmOn)
 let warmOn = false, sessionDraws = 0;   // warm-up first (parent switch) and how many questions this session has drawn (resets when the game opens or the profile changes)
 let diffOn = [1,2,3];     // enabled difficulty levels for the active profile (see the Settings tab)
-function captureProgress(){ return {score,streak,collection,lollipops,level,golden,legacyLooks,space:spaceSnap(),rd:rdSnap(),rv:LAYER_V,diff:diffIdsClean(diffOn),mx:mxClean(mxState),focus:focusOn,warm:warmOn,tools:toolsOn,theme:themeId}; }
+function captureProgress(){ return {score,streak,collection,lollipops,level,golden,legacyLooks,space:spaceSnap(),rd:rdSnap(),rv:LAYER_V,diff:diffIdsClean(diffOn),mx:mxClean(mxState),focus:focusOn,warm:warmOn,tools:toolsOn,guide:guideSnap(),theme:themeId}; }
 function cleanProgress(d){
   d = (d && typeof d==='object') ? d : {};
   let col = Array.isArray(d.collection) ? d.collection.filter(x=>typeof x==='string') : [];
@@ -1882,12 +1894,13 @@ function cleanProgress(d){
     focus: d.focus===true,
     warm: d.warm===true,
     tools: d.tools!==false,
+    guide: guideClean(d.guide),
     theme: themeClean(d.theme)
   };
 }
 function applyProgress(d){
   const c = cleanProgress(d);
-  score=c.score; streak=c.streak; collection=c.collection; lollipops=c.lollipops; golden=c.golden; legacyLooks=c.legacyLooks; space=c.space; rd=c.rd; rdExpire(); level=c.level; diffOn=c.diff; mxState=c.mx; focusOn=c.focus; warmOn=c.warm; toolsOn=c.tools; themeId=c.theme; applyTheme();
+  score=c.score; streak=c.streak; collection=c.collection; lollipops=c.lollipops; golden=c.golden; legacyLooks=c.legacyLooks; space=c.space; rd=c.rd; rdExpire(); level=c.level; diffOn=c.diff; mxState=c.mx; focusOn=c.focus; warmOn=c.warm; toolsOn=c.tools; guideOn=c.guide.on; guideIdle=c.guide.idle; themeId=c.theme; applyTheme();
 }
 function persist(){ try{ localStorage.setItem(SAVE_KEY, JSON.stringify(store)); }catch(e){} }
 function saveState(){
@@ -2667,7 +2680,7 @@ function cloudPlan(local, gone, docs, maxProfiles){
   return out;
 }
 // Version of the cloud document format. The security rules refuse any write below this number (and any write that would lower the stored one), so an older build can never overwrite a profile written by a newer one. Raise it only together with firebase/firestore.rules.
-const CLOUD_DOC_V = 6;   // 6: progress.tools (the switch for tools under the question) and the help flag h in the statistics log; 5: space.unk (things of items this build does not know are kept untouched); 4: pictures on the walls (things have wl); 3: progress.rd (reading passages done) was added; builds that do not know it must not write
+const CLOUD_DOC_V = 7;   // 7: progress.guide (the step-by-step guide switch and idle time) and the guided bits of h in the statistics log; 6: progress.tools (the switch for tools under the question) and the help flag h in the statistics log; 5: space.unk (things of items this build does not know are kept untouched); 4: pictures on the walls (things have wl); 3: progress.rd (reading passages done) was added; builds that do not know it must not write
 // Profile <-> cloud document. Progress and stats are stored as JSON text: one field each, no per-field indexing, no nesting limits.
 function cloudDocFromProfile(p, maxStatsChars, base){
   let stats = p.stats ? JSON.parse(JSON.stringify(p.stats)) : null, s = stats ? JSON.stringify(stats) : '';
@@ -2684,7 +2697,7 @@ function cloudProfileFromDoc(C, helpers){
 // ===== CLOUD (Google sign-in, cloud progress, problem reports) =====
 // Local-first: the game always works from this device's storage. The cloud is a mirror, so no internet / no account / no quota never blocks play.
 // Everything here is off while CLOUD_CONFIG is null. See firebase/SETUP.md for how to create the (free) Firebase project and paste its settings below.
-const APP_VERSION = '2026.11.19c';       // keep equal to VERSION in sw.js (a test checks it)
+const APP_VERSION = '2026.11.19d';       // keep equal to VERSION in sw.js (a test checks it)
 const BUILD_COMMIT = '';                 // the full id of the commit this page was built from: the deploy workflow (.github/workflows/tests.yml) fills it in; empty in a plain checkout
 const REPO_URL = 'https://github.com/matan-gk/matan-gk.github.io';
 const CLOUD_CONFIG = {apiKey:"AIzaSyAlq_TJNGvWPJpUrpbdq_hkAoURydqMzm0", authDomain:"learning-quest-1.firebaseapp.com", projectId:"learning-quest-1", appId:"1:98931179722:web:78fb00084ccba3efb53433"};   // e.g. {apiKey:'...', authDomain:'xxx.firebaseapp.com', projectId:'xxx', appId:'...'}
@@ -3753,7 +3766,7 @@ function statsSummarize(recs){
 function statsRecent(stats, skill, size, skip){
   const out=[]; let skipped=0; skip=skip||0;
   for(let i=stats.log.length-1; i>=0 && out.length<size; i--){
-    const r=stats.log[i]; if(r.s!==skill) continue;
+    const r=stats.log[i]; if(r.s!==skill || (r.h&6)) continue;     // answers given with a guide (h bits 2 and 4) do not count for difficulty or mastery
     if(skipped<skip){ skipped++; continue; }
     out.push(r);
   }
@@ -6966,7 +6979,7 @@ function logAnswer(ok, chosen){
     if(!p.stats) p.stats = statsNew();
     const hidden = qTimer.hidden + (qTimer.hideAt ? Date.now()-qTimer.hideAt : 0);
     statsRecord(p.stats, {skill:current.skill, level, bonus:current.isBonus, ok, seconds:(Date.now()-qTimer.start-hidden)/1000,
-                          chosen, correct:current.answer, h:(current._tool?1:0)});
+                          chosen, correct:current.answer, h:(current._tool?1:0)|(current._guided?2:0)|(current._again?4:0)});
   }catch(e){}   // stats must never break the game
 }
 // from the browser console: cqStats() = report for the active profile; STATS_CONFIG can be edited live to try other thresholds
@@ -7030,9 +7043,202 @@ QTOOLS.clueGrid = {
   unmount(el){ el.onclick = null; }
 };
 
+// ================= step-by-step guide: the engine (inner loop of one question) =================
+// A generator may return q.guide = {v:1, mode:'script'|'state', board, model, steps|rules, answer}. A recipe (GUIDE_RECIPES[skill]) holds the prompts {key:{text, say}} and, for script mode, steps(model).
+// The engine knows no type and no board: it asks the board to run a step, judges the input, climbs the hint ladder, and reports. Boards only draw and report what she did.
+// Board = {mount(el, model, guide), run(step, vars) -> Promise<input>, show(view, vars) -> Promise, unmount()}. Rules module (state mode) = {init, legal, apply, next, done, consequence}.
+const GUIDE_RECIPES = {}, GUIDE_BOARDS = {}, GUIDE_RULES = {}, GUIDE_LOG = [];
+const GUIDE_CHECKS = {
+  'sum-to': (inp, total, part)=>Number(inp)+Number(part)===Number(total),     // any number that completes the sum
+  'in-range': (inp, lo, hi)=>{ const n=Number(inp); return Number.isFinite(n) && n>=lo && n<=hi; }
+};
+const GUIDE_QUIT = {quit:true};
+function guideEq(a, b){
+  if((a && typeof a==='object') || (b && typeof b==='object')) return JSON.stringify(a)===JSON.stringify(b);
+  const na = Number(a), nb = Number(b);
+  if(a!=='' && b!=='' && a!==null && b!==null && a!==undefined && b!==undefined && Number.isFinite(na) && Number.isFinite(nb)) return na===nb;
+  return String(a).trim()===String(b).trim();
+}
+// Expect is data: {value} | {oneOf:[..]} | {all:[{field, ...Expect}, ..]} for a step with two fields | {check:'name', args:[..]}
+function guideJudge(ex, inp){
+  if(ex===null || ex===undefined) return true;
+  if('value' in ex) return guideEq(inp, ex.value);
+  if(ex.oneOf) return ex.oneOf.some(v=>guideEq(inp, v));
+  if(ex.all) return !!inp && typeof inp==='object' && ex.all.every(e=>guideJudge(e, inp[e.field]));
+  if(ex.check){ const fn = GUIDE_CHECKS[ex.check]; return !!fn && !!fn(inp, ...(ex.args||[])); }
+  return false;
+}
+function guideText(rec, key, vars){
+  const e = rec && rec.prompts && rec.prompts[key]; if(!e) return '';
+  const t = typeof e.text==='function' ? e.text(vars||{}) : String(e.text||'');
+  return t.replace(/\{(\w+)\}/g, (m,k)=>vars && vars[k]!==undefined ? vars[k] : m);
+}
+// o: {board, el, source, quit:Promise, ask(text, step, vars), onEvent(e), recipe}. Resolves {outcome:'done'|'quit'|'error', steps, tries, rungs, log}.
+async function guideRun(q, o){
+  o = o || {};
+  const g = q.guide, rec = o.recipe || GUIDE_RECIPES[q.skill] || {}, board = o.board || GUIDE_BOARDS[g.board];
+  const rep = {outcome:'done', steps:0, tries:0, rungs:{conseq:0, smaller:0, demo:0}, log:[]};
+  const ev = (type, d)=>{ const e = Object.assign({type, skill:q.skill, t:Date.now()}, d||{}); GUIDE_LOG.push(e); if(GUIDE_LOG.length>300) GUIDE_LOG.shift(); if(o.onEvent){ try{ o.onEvent(e); }catch(_){} } };
+  const quitP = o.quit || new Promise(()=>{});
+  const race = pr=>Promise.race([Promise.resolve(pr), quitP.then(()=>GUIDE_QUIT)]);
+  const view = async (v, vars)=>(await race(board.show(v, vars)))===GUIDE_QUIT;     // true = she quit
+  const ask = (step, vars)=>{ if(o.ask){ try{ o.ask(step && step.ask ? guideText(rec, step.ask, vars) : '', step, vars); }catch(_){} } };
+  // one step of a script: ask, wait for her action, judge, climb the ladder on a wrong input
+  const doStep = async (step, vars)=>{
+    const L = {id:step.id, tries:0, rung:0, tags:[], t0:Date.now()}; rep.steps++;
+    const seen = new Set(); let rung = 0;
+    ask(step, vars);
+    for(;;){
+      const inp = await race(board.run(step, vars));
+      if(inp===GUIDE_QUIT){ L.ms = Date.now()-L.t0; rep.log.push(L); return 'quit'; }
+      L.tries++; rep.tries++;
+      if(step.act==='show' || guideJudge(step.expect, inp)){
+        if(step.then) Object.assign(vars, step.then(inp, vars));
+        L.ms = Date.now()-L.t0; rep.log.push(L); ev('guide_step', {id:step.id, tries:L.tries, rung:L.rung, ms:L.ms}); return 'ok';
+      }
+      const key = JSON.stringify(inp);
+      if(seen.has(key)){ if(await view({kind:'again', step:step.id}, vars)) return 'quit'; continue; }   // the same wrong input again does not climb the ladder
+      seen.add(key);
+      const mistake = (step.mistakes||[]).find(m=>guideJudge(m.when, inp));
+      if(mistake && mistake.tag) L.tags.push(mistake.tag);
+      let next = rung+1;
+      if(next===1 && step.act==='type' && !mistake) next = 2;                // a typed number cannot be reasoned from a consequence unless the mistake is a known one
+      if(next===2 && !(step.hints && step.hints.smaller)) next = 3;
+      rung = Math.min(next, 3); L.rung = Math.max(L.rung, rung);
+      if(rung===1){ rep.rungs.conseq++; if(await view(mistake && mistake.conseq ? mistake.conseq : {kind:'look', target:step.target}, vars)) return 'quit'; }
+      else if(rung===2){ rep.rungs.smaller++; if((await doStep(step.hints.smaller, vars))==='quit') return 'quit'; ask(step, vars); }
+      else { rep.rungs.demo++; if(await view(step.hints && step.hints.demo ? step.hints.demo : {kind:'demo', target:step.target, expect:step.expect}, vars)) return 'quit'; }
+    }
+  };
+  // state mode: any order; a move is judged by the rules module
+  const doState = async ()=>{
+    const rules = GUIDE_RULES[g.rules]; let st = rules.init(g.model);
+    const seen = new Set(); let rung = 0; const L = {id:'state', tries:0, rung:0, tags:[], t0:Date.now()}; rep.steps++;
+    ask({ask:'start'}, g.model);
+    while(!rules.done(st)){
+      const inp = await race(board.run({state:true, id:'state'}, st));
+      if(inp===GUIDE_QUIT) return 'quit';
+      if(!inp || !inp.move){ if(await view({kind:'not-yet'}, st)) return 'quit'; continue; }   // "I am finished" before the clues are all used
+      L.tries++; rep.tries++;
+      const r = rules.legal(st, inp.move);
+      if(r.ok){ st = rules.apply(st, inp.move); seen.clear(); rung = 0; if(await view({kind:'applied', move:inp.move, supportedBy:r.supportedBy||[]}, st)) return 'quit'; continue; }
+      const key = JSON.stringify(inp.move);
+      if(seen.has(key)){ if(await view({kind:'again'}, st)) return 'quit'; continue; }
+      seen.add(key); if(r.tag) L.tags.push(r.tag);
+      rung = Math.min(rung+1, 3); L.rung = Math.max(L.rung, rung);
+      const nx = rules.next(st);
+      if(rung===1){ rep.rungs.conseq++; if(await view(rules.consequence(st, inp.move), st)) return 'quit'; }
+      else if(rung===2){ rep.rungs.smaller++; if(await view({kind:'point', clue:nx && nx.supportedBy, move:nx && nx.move}, st)) return 'quit'; }
+      else {
+        rep.rungs.demo++; if(!nx) throw new Error('no supported move');
+        if(await view({kind:'demo', move:nx.move, supportedBy:nx.supportedBy}, st)) return 'quit';
+        st = rules.apply(st, nx.move); seen.clear(); rung = 0;
+      }
+    }
+    L.ms = Date.now()-L.t0; rep.log.push(L); ev('guide_step', {id:'state', tries:L.tries, rung:L.rung, ms:L.ms});
+    return 'ok';
+  };
+  ev('guide_started', {source:o.source});
+  try{
+    await board.mount(o.el, g.model, g);
+    let r = 'ok';
+    if(g.mode==='state') r = await doState();
+    else {
+      const vars = Object.assign({}, g.model), steps = g.steps || (rec.steps ? rec.steps(g.model) : []);
+      for(const st of steps){ r = await doStep(st, vars); if(r==='quit') break; }
+    }
+    if(r==='ok') await race(board.show({kind:'solved'}, g.model));
+    if(r==='quit' ) rep.outcome = 'quit';
+  }catch(err){ rep.outcome = 'error'; rep.error = String(err && err.message || err); }
+  finally{ try{ if(board.unmount) board.unmount(); }catch(_){} }
+  ev(rep.outcome==='done' ? 'guide_done' : 'guide_quit', {steps:rep.steps, tries:rep.tries, rungs:rep.rungs, error:rep.error});
+  return rep;
+}
+// checks a guide payload and its recipe for the mistakes that would only show up in front of her (used by the harness)
+function guideLint(q){
+  const out = [], g = q.guide || {}, rec = GUIDE_RECIPES[q.skill] || {}, board = GUIDE_BOARDS[g.board];
+  if(!g || g.v!==1) out.push('version'); if(!board) out.push('no board '+(g&&g.board));
+  if(g.answer!==q.answer) out.push('guide answer differs from the question answer');
+  const keys = new Set(Object.keys(rec.prompts||{}));
+  const steps = g.mode==='state' ? [] : (g.steps || (rec.steps ? rec.steps(g.model) : []));
+  const walk = (s)=>{ if(s.ask && !keys.has(s.ask)) out.push('missing prompt '+s.ask); if(s.hints && s.hints.smaller) walk(s.hints.smaller); };
+  steps.forEach(walk);
+  if(g.mode==='state' && !GUIDE_RULES[g.rules]) out.push('no rules '+g.rules);
+  for(const k of keys){ const e = rec.prompts[k]; if(!e || !(typeof e.text==='function' || e.text)) out.push('empty prompt '+k); if(e && e.say!==undefined && /\{/.test(e.say)) out.push('say has a slot '+k); }
+  return out;
+}
+
+// ================= step-by-step guide: how the game uses it =================
+// Rules (Matan, 18-19 Nov): a wrong answer on a question with a guide first offers the guide and does not show the answer; a guide, then another try (a fresh question of the same type) that is right keeps the streak;
+// no guide, or no other try, resets it. A guide opened before answering: no reward, and no change to the streak. A guided solve gives no reward.
+let streakHeld = false, guideRunning = null, guideIdleT = 0;
+function guideOfferable(q){ return !!(q && q.guide && guideEnabled() && GUIDE_BOARDS[q.guide.board]); }
+function guideIdleClear(){ clearTimeout(guideIdleT); guideIdleT = 0; const b = document.getElementById('guideQuietBtn'); if(b) b.remove(); }
+function guideOfferClear(){ const o = document.getElementById('guideOffer'); if(o) o.innerHTML = ''; }
+function guideCancel(){ if(guideRunning){ const r = guideRunning; guideRunning = null; try{ r.quit(); }catch(_){} } const b = document.getElementById('guideBox'); if(b){ b.hidden = true; b.innerHTML = ''; } const a = document.getElementById('answerArea'); if(a) a.style.display = ''; const sl = document.getElementById('qTool'); if(sl) sl.style.display = ''; }
+function guideAfterShow(q){      // the quiet button: shows only after the idle time, only on a question that is still unanswered
+  guideIdleClear();
+  if(!guideOfferable(q) || q.isBonus || !guideIdle) return;
+  guideIdleT = setTimeout(()=>{
+    if(q!==current || q._logged || guideRunning) return;
+    const a = document.getElementById('answerArea'); if(!a || document.getElementById('guideQuietBtn')) return;
+    const b = document.createElement('button'); b.type='button'; b.id='guideQuietBtn'; b.className='guidequiet';
+    b.textContent = '🪜 ' + G('רוצה עזרה צעד אחר צעד?','רוצה עזרה צעד אחר צעד?','רוצים עזרה צעד אחר צעד?');
+    b.onclick = ()=>{ b.remove(); guideOpen(q, 'idle'); };
+    a.after(b);
+  }, guideIdle*1000);
+}
+// runs the guide for q inside the card; resolves with the engine's report (or null when the question changed under it)
+async function guideOpen(q, source){
+  const box = document.getElementById('guideBox'), area = document.getElementById('answerArea'); if(!box || !guideOfferable(q)) return null;
+  guideIdleClear(); guideOfferClear();
+  if(source==='idle') q._guided = 1;     // opened before answering: no reward and no streak change for this question
+  box.hidden = false;
+  box.innerHTML = `<div class="gbhead"><b>🪜 עזרה צעד אחר צעד</b><button type="button" class="gbexit" id="gbExit">יציאה</button></div><div class="gbask" id="gbAsk" role="status" aria-live="polite"></div><div class="gbboard" id="gbBoard"></div>`;
+  if(area) area.style.display = 'none'; document.getElementById('nextBtn').style.display = 'none'; document.getElementById('feedback').textContent = '';
+  const slot = document.getElementById('qTool'); if(slot) slot.style.display = 'none';   // the tool stays as it is (with her marks) and is hidden while the guide runs
+  let quitFn; const quit = new Promise(r=>{ quitFn = r; });
+  const me = {q, quit:()=>quitFn(true)}; guideRunning = me;
+  document.getElementById('gbExit').onclick = ()=>quitFn(true);
+  const rep = await guideRun(q, {el:document.getElementById('gbBoard'), source, quit, ask:text=>{ const e = document.getElementById('gbAsk'); if(e) e.textContent = text; }});
+  if(guideRunning!==me || q!==current) return null;       // the question changed (next, level, profile) while she was in the guide
+  guideRunning = null; box.hidden = true; box.innerHTML = ''; if(area) area.style.display = ''; if(slot) slot.style.display = '';
+  return rep;
+}
+// after a wrong answer on a question with a guide: offer it; the answer stays hidden and the streak reset is held
+function guideOfferShow(q){
+  streakHeld = true;
+  const fb = document.getElementById('feedback'), of = document.getElementById('guideOffer');
+  fb.textContent = 'כמעט' + (childName()?', '+childName():'') + '! ' + G('רוצה','רוצה','רוצים') + ' שנפתור את זה יחד, צעד אחר צעד?';
+  fb.className = 'feedback bad';
+  document.getElementById('nextBtn').style.display = 'none';
+  of.innerHTML = '<button type="button" class="btn" id="goYes">🪜 כן, בואו נפתור יחד</button><button type="button" class="btn alt" id="goNo">להראות את התשובה</button>';
+  document.getElementById('goYes').onclick = async ()=>{
+    const rep = await guideOpen(q, 'mistake'); if(!rep) return;
+    if(rep.outcome!=='done') return guideReveal(q);
+    fb.textContent = 'כל הכבוד! פתרנו את זה יחד. ' + G('רוצה','רוצה','רוצים') + ' לנסות עוד אחת כזאת בעצמך?';
+    fb.className = 'feedback good';
+    of.innerHTML = '<button type="button" class="btn" id="goAgain">כן, בואו ננסה</button><button type="button" class="btn alt" id="goMove">להמשיך</button>';
+    document.getElementById('goAgain').onclick = ()=>{ guideOfferClear(); nextQuestion({followup:true, gen:q._gen}); };
+    document.getElementById('goMove').onclick = ()=>nextQuestion();     // no other try: the held reset is applied
+  };
+  document.getElementById('goNo').onclick = ()=>guideReveal(q);
+}
+function guideReveal(q){        // she chose not to do the guide, or left it: the answer is shown as before and the streak resets
+  guideOfferClear(); streakHeld = false; streak = 0; document.getElementById('streak').textContent = streak;
+  document.querySelectorAll('#answerArea .choice').forEach(c=>{ if(c.dataset.key!==undefined ? c.dataset.key===String(q.answer) : c.textContent==String(q.answer)) c.classList.add('correct'); });
+  const fb = document.getElementById('feedback');
+  fb.textContent = `כמעט${childName()?', '+childName():''}! התשובה הנכונה היא ${q.answerText||q.answer}.${q.explain?' '+q.explain:''} ${TX('tryAgain','ננסה עוד אחת קסומה!')}`;
+  fb.className = 'feedback bad';
+  document.getElementById('nextBtn').style.display = 'block'; saveState();
+}
+
 let qEpoch = 0;   // counts the questions put on screen: a late celebration or bonus checks it so it never lands on a question she has already moved past
-function nextQuestion(){
+function nextQuestion(opts){
+  const fu = opts && opts.followup ? opts : null;     // the follow-up after a guide: a fresh question of the same type (the held streak reset waits for its answer)
   qEpoch++; milestoneDue = false;
+  guideCancel(); guideIdleClear(); guideOfferClear();
+  if(streakHeld && !fu){ streakHeld = false; streak = 0; document.getElementById('streak').textContent = streak; saveState(); }   // no other try after the guide: the reset applies
   peekClear();
   if(lastMood==='puzzled') setMood('happy');          // the wrong-answer reaction lasts until the next question
   const wasBonus = bonusActive;
@@ -7048,17 +7254,19 @@ function nextQuestion(){
   const warming = warmOn && sessionDraws < WARMUP.count; sessionDraws++;
   let gen = pickGenerator(pool, pr && pr.stats, focusOn, current && current.skill, undefined, warming);
   if(level===9) gen = rdPick(pool, gen);
-  current = themeStory(gen()); current.skill = current.rdSkill || gen.name; current.d = questionDifficulty({d:current.d, skill:current.skill}); current.isBonus = false; startQTimer();
+  if(fu && typeof fu.gen==='function') gen = fu.gen;
+  current = themeStory(gen()); current._gen = gen; if(fu) current._again = 1; current.skill = current.rdSkill || gen.name; current.d = questionDifficulty({d:current.d, skill:current.skill}); current.isBonus = false; startQTimer();
   document.getElementById('qlabel').textContent = current.label;
   document.getElementById('qtext').innerHTML = grpShapes(current.text);
   qToolOpen(current);
   const area0 = renderAnswerArea(current, checkAnswer);
   if(current.rd) rdQuestionUI(area0);
+  guideAfterShow(current);
   if(wasBonus) afterPrize(flushCelebs, 350);
 }
 
 function renderBonus(){
-  qEpoch++;
+  qEpoch++; guideCancel(); guideIdleClear(); guideOfferClear();
   bonusActive = true;
   document.getElementById('nextBtn').style.display='none';
   document.getElementById('feedback').textContent='';
@@ -7083,15 +7291,25 @@ function renderBonus(){
 
 function checkAnswer(val, btnEl, grid){
   const ok = val === current.answer;
+  streakHeld = false; guideIdleClear();      // answering the follow-up ends the hold: its own result decides
+  const offer = !ok && !bonusActive && !current._guided && !current._again && guideOfferable(current);   // a wrong answer on a question with a guide: offer it before showing the answer
   logAnswer(ok, val);
   if(current.rd && !current._rdDone){ current._rdDone = true; rdAnswered(current.rd); }
   const fb = document.getElementById('feedback');
   if(grid){
     [...grid.children].forEach(c=>{
       c.style.pointerEvents='none';
-      if((c.dataset.key!==undefined? c.dataset.key===String(current.answer) : c.textContent == String(current.answer))) c.classList.add('correct');
+      if((c.dataset.key!==undefined? c.dataset.key===String(current.answer) : c.textContent == String(current.answer))){ if(!offer) c.classList.add('correct'); }
       else if(c===btnEl) c.classList.add('wrong');
     });
+  }
+  if(current._guided && !bonusActive){      // a guide was opened before answering: no reward, and the streak stays as it was
+    fb.textContent = (ok ? 'נכון! ' : '') + `התשובה היא ${current.answerText||current.answer}. פתרנו את זה יחד, בלי מתנה הפעם.${current.explain?' '+current.explain:''}`;
+    fb.className = 'feedback good';
+    const of = document.getElementById('guideOffer');
+    if(of && current._gen){ of.innerHTML = '<button type="button" class="btn alt" id="goAgain">עוד אחת כזאת, ' + G('בעצמי','בעצמי','בעצמנו') + '</button>'; document.getElementById('goAgain').onclick = ()=>{ guideOfferClear(); nextQuestion({followup:true, gen:current._gen}); }; }
+    document.getElementById('nextBtn').style.display = 'block'; saveState();
+    return;
   }
   if(bonusActive){
     const skipBtn = document.getElementById('bonusSkipBtn');
@@ -7131,6 +7349,7 @@ function checkAnswer(val, btnEl, grid){
     if(streak>0 && streak%5===0){ const ep = qEpoch; afterPrize(()=>showMilestone(ep), 350); milestoneDue = true; }   // the prize lands first, then the party and bonus question; merge celebrations wait until the bonus is done
     else afterPrize(flushCelebs, 450);
   } else {
+    if(offer){ guideOfferShow(current); return; }
     streak = 0;
     fb.textContent = `כמעט${childName()?', '+childName():''}! התשובה הנכונה היא ${current.answerText||current.answer}.${current.explain?' '+current.explain:''} ${TX('tryAgain','ננסה עוד אחת קסומה!')}`;
     fb.className='feedback bad';
@@ -7161,7 +7380,7 @@ function applyGenderStatic(){
   document.getElementById('rewardsStrip').setAttribute('aria-label', G('פתחי','פתח','פתחו')+' את '+TX('roomName','חדר המתנות'));
 }
 function refreshAll(){
-  qToolClose();
+  qToolClose(); guideCancel(); guideIdleClear(); guideOfferClear(); streakHeld = false;
   applyGenderStatic();
   document.querySelectorAll('.milestone').forEach(e=>e.remove()); prizeReset();
   celebQueue = []; celebOpen = false; document.getElementById('celebOverlay').hidden = true;
@@ -7344,6 +7563,27 @@ function renderToolsHTML(prof){
     <div class="pa-rows"><div class="pa-row"><div class="pa-main-txt"><b>כלי עזר מתחת לשאלה ל${nm}</b></div><div class="pa-ctl"><label class="tglw pa-switch"><input type="checkbox" data-tools="1" ${w?'checked':''} aria-label="כלי עזר מתחת לשאלה"><span class="tgl" aria-hidden="true"></span></label></div></div></div>
     <p class="pa-sub" style="margin-top:6px">פעיל כברירת מחדל. אפשר לכבות בכל רגע (חל מיד על השאלה שעל המסך).</p></section>`;
 }
+const GUIDE_IDLES = [15,30,45,60,0];
+function guideClean(g){ g = g && typeof g==='object' ? g : {}; return {on: g.on!==false, idle: GUIDE_IDLES.includes(g.idle) ? g.idle : 30}; }
+function guideSnap(){ return {on:guideOn, idle:guideIdle}; }
+function guideFlag(){ try{ return localStorage.getItem('cq_guide_flag')==='1'; }catch(e){ return false; } }   // the debug-panel flag: the feature is off everywhere until it is switched on in the debug panel of this device
+function guideEnabled(){ return guideFlag() && guideOn; }
+function profileGuide(p){ return p && p.id===store.activeId ? {on:guideOn, idle:guideIdle} : cleanProgress(p && p.progress).guide; }
+function setProfileGuide(p, patch){
+  const g = guideClean(Object.assign({}, profileGuide(p), patch));
+  if(p.id===store.activeId){ guideOn = g.on; guideIdle = g.idle; saveState(); }
+  else { p.progress = Object.assign({}, cleanProgress(p.progress), {guide:g}); p.u = Date.now(); persist(); cloudChanged(); }
+}
+function renderGuideSettingsHTML(prof){
+  if(!guideFlag()) return '';   // until release the card is shown only on a device where the debug-panel flag is on
+  const g = profileGuide(prof), nm = esc(profileName(prof, store.profiles.indexOf(prof)));
+  const opts = GUIDE_IDLES.map(v=>`<option value="${v}" ${g.idle===v?'selected':''}>${v?v+' שניות':'לא להציע'}</option>`).join('');
+  return `<section class="pa-card"><h2 class="pa-h">🪜 עזרה צעד אחר צעד</h2>
+    <p class="pa-sub"><b>מה זה עושה:</b> בשאלות שיש להן מדריך, ${nm} יכולה לבקש שנפתור יחד צעד אחר צעד, ואחרי תשובה שגויה המשחק מציע את המדריך לפני שהוא מראה את התשובה. פתרון עם מדריך לא נותן מתנה, אבל גם לא מאפס את רצף התשובות הנכונות. אחרי המדריך אפשר לנסות שאלה חדשה מאותו סוג.</p>
+    <div class="pa-rows"><div class="pa-row"><div class="pa-main-txt"><b>עזרה צעד אחר צעד ל${nm}</b></div><div class="pa-ctl"><label class="tglw pa-switch"><input type="checkbox" data-guide="1" ${g.on?'checked':''} aria-label="עזרה צעד אחר צעד"><span class="tgl" aria-hidden="true"></span></label></div></div>
+    <div class="pa-row"><div class="pa-main-txt"><b>כפתור עזרה שקט אחרי</b></div><div class="pa-ctl"><select data-guideidle="1" aria-label="זמן עד כפתור העזרה" style="min-height:44px;font:inherit;padding:0 10px;border-radius:12px">${opts}</select></div></div></div>
+    <p class="pa-sub" style="margin-top:6px">הכפתור מופיע בשקט מתחת לשאלה אם עבר הזמן הזה בלי תשובה. אפשר לצאת מהמדריך בכל רגע.</p></section>`;
+}
 function profileWarm(p){ return p && p.id===store.activeId ? warmOn : cleanProgress(p && p.progress).warm; }
 function setProfileWarm(p, on){
   on = !!on;
@@ -7455,7 +7695,7 @@ function renderSettingsHTML(){
     <p class="pa-sub">בוחרים אילו רמות יופיעו ב${esc(profileName(prof, store.profiles.indexOf(prof)))}. אפשר להפעיל רמה אחת, שתיים או שלוש. ברירת המחדל: כל הרמות.</p>
     <div class="pa-rows">${rows}</div>
     <div class="perr" id="dswErr">${setMsg?esc(setMsg):''}</div>
-    <p class="pa-sub" style="margin-top:10px">שאלות בונוס הן תמיד ברמה קשה, ולכן ההגדרה הזאת לא משפיעה עליהן.</p></section>` + renderFocusHTML(prof, on, profileMx(prof)) + renderWarmHTML(prof, on, profileMx(prof)) + renderToolsHTML(prof) + renderMatrixHTML(prof, on, profileMx(prof)) + renderReadingHTML(prof) + renderThemeHTML(prof);
+    <p class="pa-sub" style="margin-top:10px">שאלות בונוס הן תמיד ברמה קשה, ולכן ההגדרה הזאת לא משפיעה עליהן.</p></section>` + renderFocusHTML(prof, on, profileMx(prof)) + renderWarmHTML(prof, on, profileMx(prof)) + renderToolsHTML(prof) + renderGuideSettingsHTML(prof) + renderMatrixHTML(prof, on, profileMx(prof)) + renderReadingHTML(prof) + renderThemeHTML(prof);
 }
 let setMsg = '';
 // ---- sample questions for a difficulty level (modal) ----
@@ -7821,6 +8061,8 @@ function renderDebugHTML(){
   const tokEarnedVal = dbg.tokEarned !== '' ? dbg.tokEarned : earned;
   const tokSpentVal = dbg.tokSpent !== '' ? dbg.tokSpent : spent;
   return `<section class="pa-card"><div class="pa-row" style="align-items:center"><h2 class="pa-h" style="flex:1;margin:0">דיבאג</h2><button type="button" class="pa-btn sm sec" data-pact="dbglock" style="margin-left:8px">נעילה</button></div><p class="pa-sub">הדיבאג פתוח עד סוף המושב. אפשר לנעול אותו מחדש כאן.</p></section>
+    <section class="pa-card"><h2 class="pa-h">🪜 עזרה צעד אחר צעד (ניסוי)</h2><p class="pa-sub">הדגל פועל במכשיר הזה בלבד. כשהוא כבוי, העזרה צעד אחר צעד לא מופיעה בשום מקום. כשהוא דלוק, מופיע בהגדרות כרטיס עם מתג וזמן ההמתנה, והעזרה מופיעה בשאלות שיש להן מדריך.</p>
+    <div class="pa-actions"><button type="button" class="pa-btn ${guideFlag()?'':'sec'}" data-pact="dbgguide" aria-pressed="${guideFlag()}">${guideFlag()?'דלוק: לחצו לכיבוי':'כבוי: לחצו להדלקה'}</button></div></section>
     <section class="pa-card"><h2 class="pa-h">הוספת מתנות לבדיקה</h2><p class="pa-sub">מוסיף כמות נבחרת של מתנה נבחרת (או של כולן) לפרופיל. כל מתנה מקבלת מראה אקראי, כמו מתנה רגילה.</p>
     ${paScope('dbgprof', dbg.pid, 'פרופיל')}
     <div class="pa-scope"><span class="pa-scope-l">מתנה</span><div class="pa-seg">${kinds}</div></div>
@@ -7986,6 +8228,7 @@ function profileAction(act, id){
   if(act==='dbglock'){ dbgSetOk(false); dbg.msg = 'הדיבאג ננעל. אפשר לפתוח אותו שוב עם הסיסמה.'; return renderProfiles(); }
   if(act==='dbgprof'){ dbgSync(); dbg.pid = id; dbg.msg=''; dbg.seq=0; dbg.tokEarned=''; dbg.tokSpent=''; return renderProfiles(); }
   if(act==='dbgkind'){ dbgSync(); dbg.kind = id; dbg.msg=''; dbg.seq=0; return renderProfiles(); }
+  if(act==='dbgguide'){ try{ localStorage.setItem('cq_guide_flag', guideFlag()?'0':'1'); }catch(e){} return renderProfiles(); }
   if(act==='dbgadd') return dbgAdd();
   if(act==='dbgactivity') return dbgGenerateActivity();
   if(act==='dbgtokens') return dbgSaveTokens();
@@ -8211,6 +8454,14 @@ document.getElementById('profOverlay').addEventListener('change', e=>{
   if(e.target.dataset && e.target.dataset.tools){
     const prof = store.profiles.find(x=>x.id===setViewId) || activeProfile(); if(!prof) return;
     setProfileTools(prof, e.target.checked); return renderProfiles();
+  }
+  if(e.target.dataset && e.target.dataset.guide){
+    const prof = store.profiles.find(x=>x.id===setViewId) || activeProfile(); if(!prof) return;
+    setProfileGuide(prof, {on:e.target.checked}); return renderProfiles();
+  }
+  if(e.target.dataset && e.target.dataset.guideidle){
+    const prof = store.profiles.find(x=>x.id===setViewId) || activeProfile(); if(!prof) return;
+    setProfileGuide(prof, {idle:Number(e.target.value)}); return renderProfiles();
   }
   if(e.target.dataset && e.target.dataset.warm){
     const prof = store.profiles.find(x=>x.id===setViewId) || activeProfile(); if(!prof) return;

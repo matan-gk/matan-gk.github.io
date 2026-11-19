@@ -4,7 +4,7 @@ const { initializeTestEnvironment, assertFails, assertSucceeds } = require('@fir
 
 const FID = 'ABCDEFGHJKLMNPQRSTUVWXYZ23';       // a valid family code: 26 characters of A-Z 2-9
 const P = `families/${FID}/profiles/p1`;
-const doc = (o) => Object.assign({ n: 'x', g: 'f', p: '{}', s: '', u: 100, b: 0, d: false, v: 6 }, o);
+const doc = (o) => Object.assign({ n: 'x', g: 'f', p: '{}', s: '', u: 100, b: 0, d: false, v: 7 }, o);
 let failed = 0;
 const t = async (name, fn) => { try { await fn(); console.log('ok   ' + name); } catch (e) { failed++; console.log('FAIL ' + name + ' :: ' + (e && e.message || e)); } };
 
@@ -20,21 +20,21 @@ const t = async (name, fn) => { try { await fn(); console.log('ok   ' + name); }
     await assertFails(db.doc(P).get()); await assertFails(db.doc(P).set(doc({ u: 200, b: 100 })));
   });
   await t('a current build (format 5) can create a profile', async () => { await reset(); await assertSucceeds(user().doc(P).set(doc({ b: 0 }))); });
-  await t('an old build (format 5) cannot create a profile', async () => { await reset(); await assertFails(user().doc(P).set(doc({ v: 5 }))); });
+  await t('an old build (format 6) cannot create a profile', async () => { await reset(); await assertFails(user().doc(P).set(doc({ v: 6 }))); });
   await t('an old build cannot overwrite a profile of format 2 either (hard cut-off)', async () => {
     await reset(); await seed(P, doc({ v: 2 })); await assertFails(user().doc(P).set(doc({ v: 2, u: 200, b: 100 })));
   });
   await t('an old build cannot overwrite a profile of format 5', async () => {
-    await reset(); await seed(P, doc({ v: 6 })); await assertFails(user().doc(P).set(doc({ v: 5, u: 200, b: 100 })));
+    await reset(); await seed(P, doc({ v: 7 })); await assertFails(user().doc(P).set(doc({ v: 6, u: 200, b: 100 })));
   });
   await t('a current build upgrades a profile stored in format 4', async () => {
-    await reset(); await seed(P, doc({ v: 5 })); await assertSucceeds(user().doc(P).set(doc({ v: 6, u: 200, b: 100 })));
+    await reset(); await seed(P, doc({ v: 6 })); await assertSucceeds(user().doc(P).set(doc({ v: 7, u: 200, b: 100 })));
   });
   await t('a current build updates a profile of format 5', async () => {
     await reset(); await seed(P, doc()); await assertSucceeds(user().doc(P).set(doc({ u: 200, b: 100 })));
   });
   await t('a current build cannot overwrite a profile of a newer format', async () => {
-    await reset(); await seed(P, doc({ v: 7 })); await assertFails(user().doc(P).set(doc({ v: 6, u: 200, b: 100 })));
+    await reset(); await seed(P, doc({ v: 8 })); await assertFails(user().doc(P).set(doc({ v: 7, u: 200, b: 100 })));
   });
   await t('a stale device (wrong base version) is refused', async () => {
     await reset(); await seed(P, doc({ u: 300 })); await assertFails(user().doc(P).set(doc({ u: 400, b: 100 })));
@@ -59,7 +59,7 @@ const t = async (name, fn) => { try { await fn(); console.log('ok   ' + name); }
 
   // ---- daily safety copies ----
   const SP = `families/${FID}/snaps/2026-11-13_p1`;
-  const snap = (o) => Object.assign({ day: '2026-11-13', pid: 'p1', n: 'x', g: 'f', p: '{}', s: '', u: 100, t: Date.now(), v: 6 }, o);
+  const snap = (o) => Object.assign({ day: '2026-11-13', pid: 'p1', n: 'x', g: 'f', p: '{}', s: '', u: 100, t: Date.now(), v: 7 }, o);
   await t('a safety copy can be created', async () => { await reset(); await assertSucceeds(user().doc(SP).set(snap())); });
   await t('a safety copy cannot be replaced', async () => { await reset(); await seed(SP, snap()); await assertFails(user().doc(SP).set(snap({ n: 'y' }))); });
   await t('a safety copy stamped in the future is refused', async () => { await reset(); await assertFails(user().doc(SP).set(snap({ t: Date.now() + 86400000 }))); });
