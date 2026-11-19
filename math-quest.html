@@ -2684,7 +2684,7 @@ function cloudProfileFromDoc(C, helpers){
 // ===== CLOUD (Google sign-in, cloud progress, problem reports) =====
 // Local-first: the game always works from this device's storage. The cloud is a mirror, so no internet / no account / no quota never blocks play.
 // Everything here is off while CLOUD_CONFIG is null. See firebase/SETUP.md for how to create the (free) Firebase project and paste its settings below.
-const APP_VERSION = '2026.11.19b';       // keep equal to VERSION in sw.js (a test checks it)
+const APP_VERSION = '2026.11.19c';       // keep equal to VERSION in sw.js (a test checks it)
 const BUILD_COMMIT = '';                 // the full id of the commit this page was built from: the deploy workflow (.github/workflows/tests.yml) fills it in; empty in a plain checkout
 const REPO_URL = 'https://github.com/matan-gk/matan-gk.github.io';
 const CLOUD_CONFIG = {apiKey:"AIzaSyAlq_TJNGvWPJpUrpbdq_hkAoURydqMzm0", authDomain:"learning-quest-1.firebaseapp.com", projectId:"learning-quest-1", appId:"1:98931179722:web:78fb00084ccba3efb53433"};   // e.g. {apiKey:'...', authDomain:'xxx.firebaseapp.com', projectId:'xxx', appId:'...'}
@@ -6868,7 +6868,10 @@ function partyTheme(){
   }
   return PARTY_THEMES[ri(0,PARTY_THEMES.length-1)];
 }
-function showMilestone(){
+function showMilestone(ep){
+  if(ep!==undefined && ep!==qEpoch){ milestoneDue = false; flushCelebs(); return; }   // she has already moved on to another question: no party and no bonus now
+  milestoneDue = false;
+  const ep0 = qEpoch;
   const overlay = document.createElement('div');
   overlay.className='milestone';
   const emoji = TX('partyEmoji',["🦄🎉","🌈✨","🍰🎊","🧁💖"])[ri(0,3)];
@@ -6882,9 +6885,13 @@ function showMilestone(){
     f = (f+1) % theme.seq.length;
     partyImg.src = theme.frames[theme.seq[f]];
   }, 260);
-  const cleanup = ()=>{ clearInterval(timer); overlay.remove(); if(level!==9) renderBonus(); };   // the reading section has no bonus question
+  let done = false, to = 0;
+  const cleanup = ()=>{   // runs once: a tap and the 5-second timer used to both run it, and the second one swapped the bonus question for a new one
+    if(done) return; done = true; clearInterval(timer); clearTimeout(to); overlay.remove();
+    if(level!==9 && ep0===qEpoch) renderBonus();   // the reading section has no bonus question
+  };
   overlay.onclick = cleanup;
-  setTimeout(cleanup, 5000);
+  to = setTimeout(cleanup, 5000);
 }
 
 // A group of identical-looking shapes (e.g. 4 circles) is one item: it must never be split across two lines.
@@ -7023,7 +7030,9 @@ QTOOLS.clueGrid = {
   unmount(el){ el.onclick = null; }
 };
 
+let qEpoch = 0;   // counts the questions put on screen: a late celebration or bonus checks it so it never lands on a question she has already moved past
 function nextQuestion(){
+  qEpoch++; milestoneDue = false;
   peekClear();
   if(lastMood==='puzzled') setMood('happy');          // the wrong-answer reaction lasts until the next question
   const wasBonus = bonusActive;
@@ -7049,6 +7058,7 @@ function nextQuestion(){
 }
 
 function renderBonus(){
+  qEpoch++;
   bonusActive = true;
   document.getElementById('nextBtn').style.display='none';
   document.getElementById('feedback').textContent='';
@@ -7118,7 +7128,7 @@ function checkAnswer(val, btnEl, grid){
     fb.className='feedback good';
     let pool = moodPool().filter(m=>m!==lastMood);
     setMood(pool[ri(0,pool.length-1)]);
-    if(streak>0 && streak%5===0) afterPrize(showMilestone, 350);   // the prize lands first, then the party and bonus question; merge celebrations wait until the bonus is done
+    if(streak>0 && streak%5===0){ const ep = qEpoch; afterPrize(()=>showMilestone(ep), 350); milestoneDue = true; }   // the prize lands first, then the party and bonus question; merge celebrations wait until the bonus is done
     else afterPrize(flushCelebs, 450);
   } else {
     streak = 0;
@@ -7131,7 +7141,7 @@ function checkAnswer(val, btnEl, grid){
   }
   document.getElementById('score').textContent = score;
   document.getElementById('streak').textContent = streak;
-  document.getElementById('nextBtn').style.display='block';
+  document.getElementById('nextBtn').style.display = milestoneDue ? 'none' : 'block';   // a party and a bonus question are about to appear: nothing to press until then
   saveState();
 }
 
@@ -8108,10 +8118,10 @@ Object.assign(THEME_ASSETS.space.upgraded, {"🦄": "assets/cebc1c8259bc.webp", 
 Object.assign(THEME_ASSETS.space.currency, {"base": "assets/c62fb1bb5479.webp", "upgraded": "assets/4286a2b5654d.webp"});
 THEME_ASSETS.space.sticker["☁️"] = THEME_ASSETS.space.currency.base; THEME_ASSETS.space.upgraded["☁️"] = THEME_ASSETS.space.currency.upgraded;   // the space theme has no separate art for the modular cotton candy: it uses the bonus-reward pictures
 // ---- The prize of a question: pops up in the middle of the screen, then flies to the gift box in the corner. A party or a merge celebration waits until it has landed. ----
-let prizeBusy = 0, prizeWaiters = [];
+let prizeBusy = 0, prizeWaiters = [], milestoneDue = false;   // milestoneDue: a party and bonus question are on their way, so the Next button waits
 function afterPrize(fn, gap){ if(!prizeBusy) fn(); else prizeWaiters.push({fn, gap: gap===undefined ? 250 : gap}); }
 function prizeDone(){ prizeBusy = Math.max(0, prizeBusy-1); if(!prizeBusy){ const w = prizeWaiters.splice(0); w.forEach(x=>setTimeout(x.fn, x.gap)); } }
-function prizeReset(){ document.querySelectorAll('.pfly').forEach(e=>e.remove()); prizeBusy = 0; prizeWaiters = []; }
+function prizeReset(){ milestoneDue = false; document.querySelectorAll('.pfly').forEach(e=>e.remove()); prizeBusy = 0; prizeWaiters = []; }
 function prizeFly(list){
   const strip = document.getElementById('rewardsStrip');
   const el = document.createElement('div'); el.className = 'pfly'; el.setAttribute('aria-hidden','true');
