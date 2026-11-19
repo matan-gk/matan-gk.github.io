@@ -489,6 +489,16 @@ body[data-view="home"] .wrap > .sub{margin-bottom:12px}
 .gbhead{display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:8px}
 .gbexit{min-height:44px; padding:0 14px; border-radius:12px; border:1px solid var(--line, rgba(0,0,0,.2)); background:transparent; color:inherit; font:inherit; cursor:pointer}
 .gbask{font-size:1.1rem; font-weight:700; margin-bottom:8px; min-height:1.4em}
+.cgpens{display:flex; gap:8px; justify-content:center; margin-bottom:8px}
+.cgpen{min-height:44px; min-width:96px; padding:0 14px; border-radius:22px; border:2px solid var(--line, rgba(0,0,0,.25)); background:transparent; color:inherit; font:inherit; font-weight:700; cursor:pointer}
+.cgpen.on{background:var(--teal); color:#083330; border-color:var(--teal)}
+.cgclues{margin:10px 0 0; padding:0 22px 0 0; font-size:.95rem; line-height:1.5}
+.cgclues li{padding:2px 6px; border-radius:8px}
+.cgclues li.on{background:rgba(255,200,0,.35); font-weight:700}
+.cgmsg{min-height:2.6em; margin-top:8px; font-weight:700; text-align:center}
+.cgc.cgf-u{background:rgba(255,170,0,.35)}
+.cgc.cgf-x{background:rgba(192,57,43,.3)}
+.cgc.cgf-ok{background:rgba(30,142,62,.3)}
 .guidequiet{display:block; margin:10px auto 0; min-height:44px; padding:0 16px; border-radius:22px; border:1px dashed var(--line, rgba(0,0,0,.3)); background:transparent; color:inherit; font:inherit; font-size:.95rem; opacity:.85; cursor:pointer}
 .guideoffer{display:flex; flex-direction:column; gap:8px; margin-top:8px}
 .guideoffer:empty{display:none}
@@ -2697,7 +2707,7 @@ function cloudProfileFromDoc(C, helpers){
 // ===== CLOUD (Google sign-in, cloud progress, problem reports) =====
 // Local-first: the game always works from this device's storage. The cloud is a mirror, so no internet / no account / no quota never blocks play.
 // Everything here is off while CLOUD_CONFIG is null. See firebase/SETUP.md for how to create the (free) Firebase project and paste its settings below.
-const APP_VERSION = '2026.11.19d';       // keep equal to VERSION in sw.js (a test checks it)
+const APP_VERSION = '2026.11.19e';       // keep equal to VERSION in sw.js (a test checks it)
 const BUILD_COMMIT = '';                 // the full id of the commit this page was built from: the deploy workflow (.github/workflows/tests.yml) fills it in; empty in a plain checkout
 const REPO_URL = 'https://github.com/matan-gk/matan-gk.github.io';
 const CLOUD_CONFIG = {apiKey:"AIzaSyAlq_TJNGvWPJpUrpbdq_hkAoURydqMzm0", authDomain:"learning-quest-1.firebaseapp.com", projectId:"learning-quest-1", appId:"1:98931179722:web:78fb00084ccba3efb53433"};   // e.g. {apiKey:'...', authDomain:'xxx.firebaseapp.com', projectId:'xxx', appId:'...'}
@@ -4830,7 +4840,7 @@ function logicGrid(twoAttr){
       const M = {kids:P, pets, fruits:twoAttr?fruits:null};
       return {text:`${intro}<br>${cl.map(c=>clueText(c.c, M)).join('<br>')}<br>${q}`,
         answer:names[ansIdx], choices:shuffle([...names, "אי אפשר לדעת"]),
-        model:{two:!!twoAttr, kids:P.map(p=>p.n), pets, fruits:twoAttr?fruits:null, clues:cl.map(c=>c.c), asked:twoAttr?asked:null}};
+        model:{two:!!twoAttr, kids:P.map(p=>p.n), pets, fruits:twoAttr?fruits:null, clues:cl.map(c=>c.c), texts:cl.map(c=>clueText(c.c, M)), asked:twoAttr?asked:null}};
     }
   }
   return null;
@@ -4838,7 +4848,7 @@ function logicGrid(twoAttr){
 function gLogicGrid(){
   const r = logicGrid(false) || logicGrid(false);
   if(!r) return gHeightOrder();
-  return {label:"היגיון: טבלת רמזים", type:'mcq', text:r.text, answer:r.answer, choices:r.choices, tool:{kind:'clueGrid', model:r.model}};
+  return {label:"היגיון: טבלת רמזים", type:'mcq', text:r.text, answer:r.answer, choices:r.choices, tool:{kind:'clueGrid', model:r.model}, guide:{v:1, mode:'state', board:'clueGuide', rules:'clueGrid', model:r.model, answer:r.answer}};
 }
 function bLogicGrid2(){
   const r = logicGrid(true) || logicGrid(true);
@@ -7232,6 +7242,108 @@ function guideReveal(q){        // she chose not to do the guide, or left it: th
   fb.className = 'feedback bad';
   document.getElementById('nextBtn').style.display = 'block'; saveState();
 }
+
+// ================= step-by-step guide for the clue questions: the rules module and the board =================
+// Rules: a mark is allowed only when the clues and her earlier marks make it certain (true in every arrangement that is still possible), not when it merely happens to be true.
+// Cells use the same coordinates as the grid tool: rows = kids (then animals in the two-attribute grid), columns = animals (then fruits).
+const CG_PERMS = [[0,1,2],[0,2,1],[1,0,2],[1,2,0],[2,0,1],[2,1,0]];
+function cgAssignments(m){ return m.two ? CG_PERMS.flatMap(a=>CG_PERMS.map(b=>({pet:a, fr:b}))) : CG_PERMS.map(a=>({pet:a, fr:[0,1,2]})); }
+function cgClueHolds(c, s){
+  const t = c.k==='pet' ? s.pet[c.kid]===c.pet : c.k==='fruit' ? s.fr[c.kid]===c.fr : s.fr[s.pet.indexOf(c.pet)]===c.fr;
+  return t===c.yes;
+}
+function cgCellLive(m, r, c){ return !(m.two && r>=3 && c<3); }
+function cgCellTrue(m, s, r, c){
+  if(c<3) return r<3 ? s.pet[r]===c : null;                       // animals x animals is not a cell
+  return r<3 ? s.fr[r]===c-3 : s.fr[s.pet.indexOf(r-3)]===c-3;
+}
+function cgPossible(m, st, clueIdx){      // arrangements that fit the chosen clues and all marks made so far
+  return cgAssignments(m).filter(s=>clueIdx.every(i=>cgClueHolds(m.clues[i], s)) && Object.keys(st.marks).every(k=>{ const [r,c] = k.split(',').map(Number); return cgCellTrue(m, s, r, c)===(st.marks[k]===2); }));
+}
+function cgImplied(m, st, clueIdx, r, c, v){   // v: 2 = yes, 1 = no
+  const ps = cgPossible(m, st, clueIdx); if(!ps.length) return false;
+  return ps.every(s=>cgCellTrue(m, s, r, c)===(v===2));
+}
+function cgSupport(m, st, r, c, v){            // a small set of clues that is enough for the mark
+  let set = m.clues.map((_,i)=>i);
+  for(let j=m.clues.length-1; j>=0; j--){ const t = set.filter(x=>x!==j); if(cgImplied(m, st, t, r, c, v)) set = t; }
+  return set;
+}
+function cgTarget(m){      // the cell whose yes-mark answers the question
+  const ps = cgAssignments(m).filter(s=>m.clues.every(c=>cgClueHolds(c, s))); const s = ps[0];
+  return m.two ? {r:m.asked, c:3+s.fr[m.asked]} : {r:s.pet.indexOf(0), c:0};
+}
+GUIDE_RULES.clueGrid = {
+  init:m=>({m, marks:{}}),
+  legal(st, mv){
+    const m = st.m; if(!cgCellLive(m, mv.r, mv.c)) return {ok:false, tag:'inert'};
+    if(!mv.v) return {ok:true, supportedBy:[]};
+    const all = m.clues.map((_,i)=>i);
+    if(cgImplied(m, st, all, mv.r, mv.c, mv.v)) return {ok:true, supportedBy:cgSupport(m, st, mv.r, mv.c, mv.v)};
+    const fits = cgPossible(m, st, all).some(s=>cgCellTrue(m, s, mv.r, mv.c)===(mv.v===2));
+    return {ok:false, tag: fits ? 'unsure' : 'conflict'};
+  },
+  apply(st, mv){ const marks = Object.assign({}, st.marks), k = mv.r+','+mv.c; if(mv.v) marks[k] = mv.v; else delete marks[k]; return {m:st.m, marks}; },
+  next(st){
+    const m = st.m, rows = m.two ? 6 : 3, cols = m.two ? 6 : 3; let best = null;
+    for(let r=0; r<rows; r++) for(let c=0; c<cols; c++){
+      if(!cgCellLive(m, r, c) || st.marks[r+','+c]) continue;
+      for(const v of [2,1]){ if(cgImplied(m, st, m.clues.map((_,i)=>i), r, c, v)){ const sb = cgSupport(m, st, r, c, v); if(!best || sb.length<best.supportedBy.length || (sb.length===best.supportedBy.length && v>best.move.v)) best = {move:{r,c,v}, supportedBy:sb}; } }
+    }
+    return best;
+  },
+  done(st){ const t = cgTarget(st.m); return st.marks[t.r+','+t.c]===2; },
+  consequence(st, mv){
+    const m = st.m, r = GUIDE_RULES.clueGrid.legal(st, mv);
+    if(r.tag!=='conflict') return {kind:'unsure', move:mv};
+    for(let i=0; i<m.clues.length; i++){ if(!cgPossible(m, st, [i]).some(s=>cgCellTrue(m, s, mv.r, mv.c)===(mv.v===2))) return {kind:'conflict', move:mv, clue:i}; }
+    return {kind:'conflict', move:mv, clue:null};
+  }
+};
+let GUIDE_VIEW_MS = 1500;      // how long a board message stays before the next move (the harness sets 0)
+GUIDE_BOARDS.clueGuide = {
+  mount(el, m, g){
+    this.m = m; this.el = el; this.pen = 2; this.pending = null; this.locked = false;
+    const clues = (m.texts||[]).map((t,i)=>`<li data-i="${i}">${esc(t)}</li>`).join('');
+    el.innerHTML = `<div class="cgpens" role="group" aria-label="סוג הסימון"><button type="button" class="cgpen on" data-pen="2" aria-pressed="true">✓ כן</button><button type="button" class="cgpen" data-pen="1" aria-pressed="false">✗ לא</button></div><div class="cgwrap"></div><ol class="cgclues" aria-label="הרמזים">${clues}</ol><div class="cgmsg" role="status" aria-live="polite"></div>`;
+    this.wrap = el.querySelector('.cgwrap'); this.msg = el.querySelector('.cgmsg');
+    QTOOLS.clueGrid.mount(this.wrap, m, {state:{}, used(){}});
+    this.wrap.querySelector('.cgnote').remove(); this.wrap.querySelector('.cgclr').remove();
+    this.wrap.onclick = null;
+    el.onclick = e=>{
+      const pen = e.target.closest('.cgpen');
+      if(pen){ this.pen = Number(pen.dataset.pen); el.querySelectorAll('.cgpen').forEach(b=>{ const on = b===pen; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); }); return; }
+      const cell = e.target.closest('.cgc'); if(!cell || !this.pending || this.locked) return;
+      const r = Number(cell.dataset.r), c = Number(cell.dataset.c), cur = this.valueAt(cell);
+      const resolve = this.pending; this.pending = null;
+      resolve({move:{r, c, v: cur===this.pen ? 0 : this.pen}});
+    };
+  },
+  valueAt(cell){ return Number(cell.dataset.v)||0; },
+  cell(r, c){ return this.wrap.querySelector(`.cgc[data-r="${r}"][data-c="${c}"]`); },
+  paint(r, c, v){ const b = this.cell(r, c); if(!b) return; b.dataset.v = v; b.textContent = ['','✗','✓'][v]; b.setAttribute('aria-label', b.dataset.n+': '+['ריק','לא','כן'][v]); },
+  light(ids, on){ (ids||[]).forEach(i=>{ const li = this.el.querySelector(`.cgclues li[data-i="${i}"]`); if(li) li.classList.toggle('on', on); }); },
+  run(){ return new Promise(res=>{ this.pending = res; }); },
+  show(v){
+    const M = {
+      applied:()=>{ if(v.move.v){ this.paint(v.move.r, v.move.c, v.move.v); return 'נכון, זה בטוח!'; } this.paint(v.move.r, v.move.c, 0); return ''; },
+      unsure:()=>{ this.flash(v.move, 'cgf-u'); return 'זה יכול להיות נכון, אבל עוד לא בטוח. מה הרמזים אומרים על זה?'; },
+      conflict:()=>{ this.flash(v.move, 'cgf-x'); this.light(v.clue!==null&&v.clue!==undefined?[v.clue]:[], true); return 'זה לא מסתדר עם הרמזים. הסתכלו שוב על הרמז המסומן.'; },
+      again:()=>'את זה כבר ניסיתם. נסו משהו אחר.',
+      'not-yet':()=>'עוד לא סיימנו. מה עוד אפשר לדעת?',
+      point:()=>{ this.light(v.clue, true); return 'הסתכלו על הרמז המסומן. מה אפשר לדעת ממנו?'; },
+      demo:()=>{ this.light(v.supportedBy, true); this.paint(v.move.r, v.move.c, v.move.v); this.flash(v.move, 'cgf-ok'); return 'ככה: הרמז המסומן אומר לנו את זה. נמשיך.'; },
+      solved:()=>'מצאנו את התשובה בטבלה!'
+    };
+    const text = (M[v.kind] || (()=>''))();
+    if(v.kind==='applied') this.light(v.supportedBy, true);
+    this.msg.textContent = text; this.locked = true;
+    return new Promise(res=>setTimeout(()=>{ this.locked = false; this.light([...Array(this.m.clues.length).keys()], false); this.el.querySelectorAll('.cgf-u,.cgf-x,.cgf-ok').forEach(b=>b.classList.remove('cgf-u','cgf-x','cgf-ok')); res(); }, text ? GUIDE_VIEW_MS : 0));
+  },
+  flash(mv, cls){ const b = this.cell(mv.r, mv.c); if(b) b.classList.add(cls); },
+  unmount(){ this.pending = null; if(this.el) this.el.onclick = null; }
+};
+GUIDE_RECIPES.gLogicGrid = { prompts:{ start:{ text:'קראו את הרמזים וסמנו בטבלה רק מה שאפשר לדעת בוודאות: ✓ למה שכן, ✗ למה שלא.', say:'קראו את הרמזים וסמנו בטבלה רק מה שאפשר לדעת בוודאות.' } } };
 
 let qEpoch = 0;   // counts the questions put on screen: a late celebration or bonus checks it so it never lands on a question she has already moved past
 function nextQuestion(opts){
