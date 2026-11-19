@@ -2657,7 +2657,7 @@ function cloudPlan(local, gone, docs, maxProfiles){
   return out;
 }
 // Version of the cloud document format. The security rules refuse any write below this number (and any write that would lower the stored one), so an older build can never overwrite a profile written by a newer one. Raise it only together with firebase/firestore.rules.
-const CLOUD_DOC_V = 5;   // 5: space.unk (things of items this build does not know are kept untouched); 4: pictures on the walls (things have wl); 3: progress.rd (reading passages done) was added; builds that do not know it must not write
+const CLOUD_DOC_V = 6;   // 6: progress.tools (the switch for tools under the question) and the help flag h in the statistics log; 5: space.unk (things of items this build does not know are kept untouched); 4: pictures on the walls (things have wl); 3: progress.rd (reading passages done) was added; builds that do not know it must not write
 // Profile <-> cloud document. Progress and stats are stored as JSON text: one field each, no per-field indexing, no nesting limits.
 function cloudDocFromProfile(p, maxStatsChars, base){
   let stats = p.stats ? JSON.parse(JSON.stringify(p.stats)) : null, s = stats ? JSON.stringify(stats) : '';
