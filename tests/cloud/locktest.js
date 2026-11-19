@@ -36,6 +36,6 @@ ok(/t >= request\.time\.toMillis\(\) - 600000/.test(rules)&&/t <= request\.time\
 // so CLOUD_DOC_V and minDocVersion() must be raised together with the change (and this list updated).
 const cap=/function captureProgress\(\)\{ return \{([^}]*(?:\([^)]*\)[^}]*)*)\}; \}/.exec(html);
 const got=cap?cap[1].replace(/\([^)]*\)/g,'').split(',').map(x=>x.split(':')[0].trim()).filter(Boolean).sort().join(','):'?';
-const known='collection,diff,focus,golden,legacyLooks,level,lollipops,mx,rd,rv,score,space,streak,theme,warm';
+const known='collection,diff,focus,golden,legacyLooks,level,lollipops,mx,rd,rv,score,space,streak,theme,tools,warm';
 ok(got===known,'progress keys unchanged ('+got+'): if this fails, raise CLOUD_DOC_V and minDocVersion() together and update this list');
 console.log(f?'FAILURES '+f:'ALL PASS');process.exit(f?1:0);

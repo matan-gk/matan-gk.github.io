@@ -33,6 +33,8 @@ const TESTS = [
   ['tokentest','tokentest.js','personal-space tokens: one per upgrade, stored counter, one-time true-up, balance pictures by tier (1/10/50/100/300)'],
   ['catalogtest','catalogtest.js','personal space step 3: catalog, buy-and-place preview, floor cells, move, put away, stock, brown pots and the magenta recolor'],
   ['flattest','flattest.js','personal space: rugs and other flat floor things (stand-on rule, draw order, no shadow, shared rug colour)'],
+  ['logicmodeltest','logicmodeltest.js','clue question: text unchanged and a model that agrees with it'],
+  ['qtooltest','qtooltest.js','tools under the question: the slot, the parent switch, the help flag in the stats log'],
   ['guideinventorytest','guideinventorytest.js','guided help: the type inventory lists exactly the game\'s question types'],
   ['sillstest','sillstest.js','personal space: the window sill holds small things (rules, follows the window, level changes, save, art on the walls)'],
   ['surfacetest','surfacetest.js','personal space: things on furniture, phase 1 (rules, data, save cleaning, carry and put away)'],
