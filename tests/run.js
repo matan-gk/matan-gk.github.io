@@ -36,6 +36,7 @@ const TESTS = [
   ['logicmodeltest','logicmodeltest.js','clue question: text unchanged and a model that agrees with it'],
   ['qtooltest','qtooltest.js','tools under the question: the slot, the parent switch, the help flag in the stats log'],
   ['cluegridtest','cluegridtest.js','clue grid under the logic questions: tap cycle, inert block, clear, no effect on scoring, help flag, fits 360px'],
+  ['guideinventorytest','guideinventorytest.js','guided help: the type inventory lists exactly the game\'s question types'],
   ['sillstest','sillstest.js','personal space: the window sill holds small things (rules, follows the window, level changes, save, art on the walls)'],
   ['surfacetest','surfacetest.js','personal space: things on furniture, phase 1 (rules, data, save cleaning, carry and put away)'],
   ['surfaceuitest','surfaceuitest.js','personal space: things on furniture, phase 2 (drawing, lit tops, placing, tapping, moving)'],
