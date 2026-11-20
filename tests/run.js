@@ -39,6 +39,7 @@ const TESTS = [
   ['bonusrace','bonusracetest.js','party and bonus question after the 5th correct answer: appears once, never swapped, never after she moved on'],
   ['guideengine','guideenginetest.js','guide engine, toy-type harness, streak rules, offer after a mistake, idle button, settings and debug flag'],
   ['guidegrid','guidegridtest.js','guide for the clue questions: certain-marks-only rules over 400 questions, board, demo, leaving, idle path'],
+  ['mascotlayer','mascotlayertest.js','the unicorn is painted behind the question card on big screens and when peeking in on phones'],
   ['guideinventorytest','guideinventorytest.js','guided help: the type inventory lists exactly the game\'s question types'],
   ['sillstest','sillstest.js','personal space: the window sill holds small things (rules, follows the window, level changes, save, art on the walls)'],
   ['surfacetest','surfacetest.js','personal space: things on furniture, phase 1 (rules, data, save cleaning, carry and put away)'],

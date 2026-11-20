@@ -480,7 +480,7 @@ body[data-view="home"] .wrap > .sub{margin-bottom:12px}
 .qlabel{font-size:.78rem; color:var(--purple); font-weight:700; margin-bottom:6px}
 .qtext{font-size:1.12rem; line-height:1.6; margin-bottom:16px; font-weight:600}
 .qtext .hl{color:var(--pink)}
-.qtool{margin:0 -16px 14px; background:var(--card2); border-radius:14px; padding:8px 6px}
+.qtool{margin:0 -20px 14px; background:var(--card2); border-radius:14px; padding:8px 6px}
 .qtoolh{display:flex; align-items:center; justify-content:space-between; gap:8px; min-height:36px}
 .qtoolt{font-weight:700; font-size:.95rem}
 .qtoolb{min-height:36px; padding:4px 12px; border-radius:10px; border:1px solid var(--line, rgba(0,0,0,.15)); background:transparent; color:inherit; font:inherit; font-size:.9rem; cursor:pointer}
@@ -489,24 +489,24 @@ body[data-view="home"] .wrap > .sub{margin-bottom:12px}
 .gbhead{display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:8px}
 .gbexit{min-height:44px; padding:0 14px; border-radius:12px; border:1px solid var(--line, rgba(0,0,0,.2)); background:transparent; color:inherit; font:inherit; cursor:pointer}
 .gbask{font-size:1.1rem; font-weight:700; margin-bottom:8px; min-height:1.4em}
-.cgpens{display:flex; gap:8px; justify-content:center; margin-bottom:8px}
-.cgpen{min-height:44px; min-width:96px; padding:0 14px; border-radius:22px; border:2px solid var(--line, rgba(0,0,0,.25)); background:transparent; color:inherit; font:inherit; font-weight:700; cursor:pointer}
-.cgpen.on{background:var(--teal); color:#083330; border-color:var(--teal)}
-.cgclues{margin:10px 0 0; padding:0 22px 0 0; font-size:.95rem; line-height:1.5}
-.cgclues li{padding:2px 6px; border-radius:8px}
-.cgclues li.on{background:rgba(255,200,0,.35); font-weight:700}
+.cgclue.on{background:rgba(255,200,0,.4); border-radius:6px; padding:0 4px; font-weight:700}
+.gbfoot{margin-top:10px; display:flex; justify-content:center}
+.gbfoot .btn{width:100%}
+#nextBtn.dim{background:var(--card2); color:var(--text); box-shadow:none}
 .cgmsg{min-height:2.6em; margin-top:8px; font-weight:700; text-align:center}
-.cgc.cgf-u{background:rgba(255,170,0,.35)}
-.cgc.cgf-x{background:rgba(192,57,43,.3)}
-.cgc.cgf-ok{background:rgba(30,142,62,.3)}
 .guidequiet{display:block; margin:10px auto 0; min-height:44px; padding:0 16px; border-radius:22px; border:1px dashed var(--line, rgba(0,0,0,.3)); background:transparent; color:inherit; font:inherit; font-size:.95rem; opacity:.85; cursor:pointer}
 .guideoffer{display:flex; flex-direction:column; gap:8px; margin-top:8px}
 .guideoffer:empty{display:none}
 .guideoffer .btn{width:100%; margin-top:0}
 .btn.alt{background:var(--card2); color:var(--text)}
-.cg{display:grid; gap:2px; justify-content:center; direction:rtl}
+.cg{--cgcell:44px; --cghead:62px; display:grid; gap:2px; justify-content:center; direction:rtl}
+.cg.two{--cghead:38px}
+.cg.two .cgr{font-size:.7rem}
+.cgh.hl{background:rgba(255,200,0,.4); border-radius:10px}
+.cgc.hint, .cgc.src{outline:3px solid #f4b400; outline-offset:-2px}
+.cgc.bad{background:rgba(192,57,43,.3)}
 .cgh{display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:.7rem; line-height:1.1; min-height:44px; min-width:0; overflow:hidden; text-align:center}
-.cgh b{font-size:1.25rem; font-weight:400}
+.cgh b{font-size:1.6rem; font-weight:400; line-height:1.1}
 .cgr{justify-content:center; font-weight:700; font-size:.8rem; padding:0 2px}
 .cgc{min-width:44px; min-height:44px; padding:0; border-radius:8px; border:1px solid var(--line, rgba(0,0,0,.2)); background:var(--card, #fff); color:inherit; font:inherit; font-size:1.2rem; cursor:pointer; touch-action:manipulation}
 .cgc[data-v="1"]{color:#c0392b; background:rgba(192,57,43,.08)}
@@ -514,6 +514,7 @@ body[data-view="home"] .wrap > .sub{margin-bottom:12px}
 .cgx{min-height:44px; border-radius:8px; background:repeating-linear-gradient(45deg, rgba(128,128,128,.15) 0 4px, transparent 4px 8px)}
 .cgclr{margin-top:8px; min-height:36px; padding:4px 12px; border-radius:10px; border:1px solid var(--line, rgba(0,0,0,.15)); background:transparent; color:inherit; font:inherit; font-size:.9rem; cursor:pointer}
 .cgnote{font-size:.8rem; opacity:.75; margin-bottom:6px}
+@media (min-width:768px){ .cg, .cg.two{--cgcell:52px; --cghead:96px; gap:4px} .cg.two .cgr{font-size:1.1rem} .cgh b{font-size:2.6rem} .cgh{font-size:.95rem} .cgr{font-size:1.1rem} .cgc{font-size:1.5rem} }
 .mono{font-family:'Baloo 2',sans-serif; font-size:1.35rem; letter-spacing:1px; direction:ltr; display:inline-block}
 .eq{font-family:'Baloo 2',sans-serif; font-size:1.9rem; line-height:1.7; direction:ltr; unicode-bidi:isolate; display:inline-block}
 .eq.shapes{font-size:2.4rem; line-height:1.45}
@@ -642,7 +643,7 @@ body[data-view="play"] .card{background:color-mix(in srgb, var(--card) 76%, tran
 /* small screens (phones): the mascot is not on screen all the time; she peeks in after an answer, with the new reward, then leaves */
 @media (max-width:767px), (max-height:599px){
   .charwrap{display:none}
-  .charwrap.peek{display:flex; position:fixed; left:0; right:0; bottom:calc(12px + env(safe-area-inset-bottom)); margin:0; z-index:45; pointer-events:none; animation:peekin .35s ease-out}
+  .charwrap.peek{display:flex; position:fixed; left:0; right:0; bottom:calc(12px + env(safe-area-inset-bottom)); margin:0; z-index:-1; pointer-events:none; animation:peekin .35s ease-out}   /* behind the question card: the mascot sits inside .wrap, so only a negative z-index puts her under the card */
   .charwrap.peek .charimg, :root[data-skin="space"] .charwrap.peek .charimg, body[data-view] .charwrap.peek .charimg{width:auto; height:150px; max-width:70vw; object-fit:contain}
   .charwrap.peek .charimg{filter:drop-shadow(0 6px 14px rgba(0,0,0,.35))}
   .charwrap.peek .charreward.on{left:calc(50% + 62px); bottom:26px}
@@ -655,7 +656,7 @@ body[data-view="play"] .card{background:color-mix(in srgb, var(--card) 76%, tran
   .topbar .rs-count{font-size:.72rem}
   .topbar .chip{font-size:.95rem; padding:5px 16px}
   body[data-view="play"] .wrap{padding-bottom:calc(min(26vh,240px) + 7vh + 8px)}
-  body[data-view="play"] .charwrap{position:fixed; left:0; right:0; bottom:7vh; margin:0; z-index:1; pointer-events:none}
+  body[data-view="play"] .charwrap{position:fixed; left:0; right:0; bottom:7vh; margin:0; z-index:-1; pointer-events:none}
   body[data-view="play"] .charimg, :root[data-skin="space"] body[data-view="play"] .charimg{width:auto; height:min(26vh,240px); max-width:340px; object-fit:contain}
   .charreward{font-size:52px}
   .charreward.on{left:calc(50% + 100px); bottom:20%}
@@ -2707,7 +2708,7 @@ function cloudProfileFromDoc(C, helpers){
 // ===== CLOUD (Google sign-in, cloud progress, problem reports) =====
 // Local-first: the game always works from this device's storage. The cloud is a mirror, so no internet / no account / no quota never blocks play.
 // Everything here is off while CLOUD_CONFIG is null. See firebase/SETUP.md for how to create the (free) Firebase project and paste its settings below.
-const APP_VERSION = '2026.11.19e';       // keep equal to VERSION in sw.js (a test checks it)
+const APP_VERSION = '2026.11.19f';       // keep equal to VERSION in sw.js (a test checks it)
 const BUILD_COMMIT = '';                 // the full id of the commit this page was built from: the deploy workflow (.github/workflows/tests.yml) fills it in; empty in a plain checkout
 const REPO_URL = 'https://github.com/matan-gk/matan-gk.github.io';
 const CLOUD_CONFIG = {apiKey:"AIzaSyAlq_TJNGvWPJpUrpbdq_hkAoURydqMzm0", authDomain:"learning-quest-1.firebaseapp.com", projectId:"learning-quest-1", appId:"1:98931179722:web:78fb00084ccba3efb53433"};   // e.g. {apiKey:'...', authDomain:'xxx.firebaseapp.com', projectId:'xxx', appId:'...'}
@@ -4848,7 +4849,7 @@ function logicGrid(twoAttr){
 function gLogicGrid(){
   const r = logicGrid(false) || logicGrid(false);
   if(!r) return gHeightOrder();
-  return {label:"היגיון: טבלת רמזים", type:'mcq', text:r.text, answer:r.answer, choices:r.choices, tool:{kind:'clueGrid', model:r.model}, guide:{v:1, mode:'state', board:'clueGuide', rules:'clueGrid', model:r.model, answer:r.answer}};
+  return {label:"היגיון: טבלת רמזים", type:'mcq', text:r.text, answer:r.answer, choices:r.choices, tool:{kind:'clueGrid', model:r.model}, guide:{v:1, mode:'script', board:'clueGuide', model:r.model, answer:r.answer}};
 }
 function bLogicGrid2(){
   const r = logicGrid(true) || logicGrid(true);
@@ -7030,11 +7031,11 @@ QTOOLS.clueGrid = {
     const cols = pets.map(x=>({t:'pet', name:x, emoji:PET_EMOJI[x]||'', word:x})).concat(fruits ? fruits.map(x=>({t:'fruit', name:x, emoji:FRUIT_EMOJI[x]||'', word:x})) : []);
     const marks = ctx.state.marks = ctx.state.marks || {};
     const VAL = ['ריק','לא','כן'], SYM = ['','✗','✓'];
-    const head = c=>`<div class="cgh"><b>${c.emoji}</b><span>${esc(c.word)}</span></div>`;
-    let h = `<div class="cgnote">לחצו על משבצת: ✗ = לא, ✓ = כן. הטבלה רק לעזרה, היא לא בודקת.</div><div class="cg" style="grid-template-columns:minmax(34px,auto) repeat(${cols.length},minmax(44px,1fr))"><div></div>`;
-    cols.forEach(c=>{ h += head(c); });
+    const head = (c, att)=>`<div class="cgh" ${att||''}><b>${c.emoji}</b><span>${esc(c.word)}</span></div>`;
+    let h = `<div class="cgnote">לחצו על משבצת: ✗ = לא, ✓ = כן. הטבלה רק לעזרה, היא לא בודקת.</div><div class="cg${fruits?' two':''}" style="grid-template-columns:var(--cghead) repeat(${cols.length},var(--cgcell))"><div></div>`;
+    cols.forEach((c,ci)=>{ h += head(c, `data-hc="${ci}"`); });
     rows.forEach((r,ri)=>{
-      h += r.t==='kid' ? `<div class="cgh cgr">${esc(r.name)}</div>` : `<div class="cgh cgr">${head(r)}</div>`;
+      h += r.t==='kid' ? `<div class="cgh cgr" data-hr="${ri}">${esc(r.name)}</div>` : `<div class="cgh cgr" data-hr="${ri}"><b>${r.emoji}</b><span>${esc(r.word)}</span></div>`;
       cols.forEach((c,ci)=>{
         if(r.t==='pet' && c.t==='pet'){ h += '<div class="cgx" aria-hidden="true"></div>'; return; }
         const nm = (r.t==='kid' ? r.name : r.label) + ' ' + (c.t==='pet' ? 'ו'+c.word : 'ו'+c.word);
@@ -7092,7 +7093,7 @@ async function guideRun(q, o){
   const quitP = o.quit || new Promise(()=>{});
   const race = pr=>Promise.race([Promise.resolve(pr), quitP.then(()=>GUIDE_QUIT)]);
   const view = async (v, vars)=>(await race(board.show(v, vars)))===GUIDE_QUIT;     // true = she quit
-  const ask = (step, vars)=>{ if(o.ask){ try{ o.ask(step && step.ask ? guideText(rec, step.ask, vars) : '', step, vars); }catch(_){} } };
+  const ask = (step, vars)=>{ if(o.ask){ try{ o.ask(step && step.ask ? guideText(rec, step.ask, Object.assign({}, vars, step.pv||{})) : '', step, vars); }catch(_){} } };
   // one step of a script: ask, wait for her action, judge, climb the ladder on a wrong input
   const doStep = async (step, vars)=>{
     const L = {id:step.id, tries:0, rung:0, tags:[], t0:Date.now()}; rep.steps++;
@@ -7113,11 +7114,15 @@ async function guideRun(q, o){
       if(mistake && mistake.tag) L.tags.push(mistake.tag);
       let next = rung+1;
       if(next===1 && step.act==='type' && !mistake) next = 2;                // a typed number cannot be reasoned from a consequence unless the mistake is a known one
-      if(next===2 && !(step.hints && step.hints.smaller)) next = 3;
+      if(next===2 && !(step.hints && (step.hints.smaller || step.hints.narrow))) next = 3;
       rung = Math.min(next, 3); L.rung = Math.max(L.rung, rung);
-      if(rung===1){ rep.rungs.conseq++; if(await view(mistake && mistake.conseq ? mistake.conseq : {kind:'look', target:step.target}, vars)) return 'quit'; }
-      else if(rung===2){ rep.rungs.smaller++; if((await doStep(step.hints.smaller, vars))==='quit') return 'quit'; ask(step, vars); }
-      else { rep.rungs.demo++; if(await view(step.hints && step.hints.demo ? step.hints.demo : {kind:'demo', target:step.target, expect:step.expect}, vars)) return 'quit'; }
+      if(rung===1){ rep.rungs.conseq++; if(await view(mistake && mistake.conseq ? mistake.conseq : {kind:'look', target:step.target, step, input:inp}, vars)) return 'quit'; }
+      else if(rung===2){
+        rep.rungs.smaller++;
+        if(step.hints.smaller){ if((await doStep(step.hints.smaller, vars))==='quit') return 'quit'; ask(step, vars); }
+        else if(await view({kind:'narrow', step, input:inp}, vars)) return 'quit';     // hints.narrow: the board narrows down where to look instead of asking a smaller question
+      }
+      else { rep.rungs.demo++; if(await view(step.hints && step.hints.demo ? step.hints.demo : {kind:'demo', target:step.target, expect:step.expect, step, input:inp}, vars)) return 'quit'; }
     }
   };
   // state mode: any order; a move is judged by the rules module
@@ -7206,13 +7211,17 @@ async function guideOpen(q, source){
   box.hidden = false;
   box.innerHTML = `<div class="gbhead"><b>🪜 עזרה צעד אחר צעד</b><button type="button" class="gbexit" id="gbExit">יציאה</button></div><div class="gbask" id="gbAsk" role="status" aria-live="polite"></div><div class="gbboard" id="gbBoard"></div>`;
   if(area) area.style.display = 'none'; document.getElementById('nextBtn').style.display = 'none'; document.getElementById('feedback').textContent = '';
-  const slot = document.getElementById('qTool'); if(slot) slot.style.display = 'none';   // the tool stays as it is (with her marks) and is hidden while the guide runs
   let quitFn; const quit = new Promise(r=>{ quitFn = r; });
   const me = {q, quit:()=>quitFn(true)}; guideRunning = me;
   document.getElementById('gbExit').onclick = ()=>quitFn(true);
   const rep = await guideRun(q, {el:document.getElementById('gbBoard'), source, quit, ask:text=>{ const e = document.getElementById('gbAsk'); if(e) e.textContent = text; }});
   if(guideRunning!==me || q!==current) return null;       // the question changed (next, level, profile) while she was in the guide
-  guideRunning = null; box.hidden = true; box.innerHTML = ''; if(area) area.style.display = ''; if(slot) slot.style.display = '';
+  guideRunning = null;
+  if(rep.outcome==='done'){     // the grid, the marks and the last message stay until the next question, so she can look back and keep marking
+    const ex = document.getElementById('gbExit'); if(ex) ex.hidden = true;
+    const ask = document.getElementById('gbAsk'); if(ask) ask.textContent = '';
+    if(area && !(source==='mistake')) area.style.display = '';
+  } else { box.hidden = true; box.innerHTML = ''; if(area) area.style.display = ''; }
   return rep;
 }
 // after a wrong answer on a question with a guide: offer it; the answer stays hidden and the streak reset is held
@@ -7243,9 +7252,9 @@ function guideReveal(q){        // she chose not to do the guide, or left it: th
   document.getElementById('nextBtn').style.display = 'block'; saveState();
 }
 
-// ================= step-by-step guide for the clue questions: the rules module and the board =================
-// Rules: a mark is allowed only when the clues and her earlier marks make it certain (true in every arrangement that is still possible), not when it merely happens to be true.
-// Cells use the same coordinates as the grid tool: rows = kids (then animals in the two-attribute grid), columns = animals (then fruits).
+// ================= step-by-step guide for the clue questions: the plan, the check and the board =================
+// The guide walks the clues one at a time on the SAME grid she uses without a guide (the tool in the slot), with the same tapping. Nothing is checked while she taps; only when she
+// presses "בדקנו" is the grid compared with the step: every mark the step needs must be there, and no mark may be one that the clues so far do not make certain.
 const CG_PERMS = [[0,1,2],[0,2,1],[1,0,2],[1,2,0],[2,0,1],[2,1,0]];
 function cgAssignments(m){ return m.two ? CG_PERMS.flatMap(a=>CG_PERMS.map(b=>({pet:a, fr:b}))) : CG_PERMS.map(a=>({pet:a, fr:[0,1,2]})); }
 function cgClueHolds(c, s){
@@ -7257,99 +7266,167 @@ function cgCellTrue(m, s, r, c){
   if(c<3) return r<3 ? s.pet[r]===c : null;                       // animals x animals is not a cell
   return r<3 ? s.fr[r]===c-3 : s.fr[s.pet.indexOf(r-3)]===c-3;
 }
-function cgPossible(m, st, clueIdx){      // arrangements that fit the chosen clues and all marks made so far
-  return cgAssignments(m).filter(s=>clueIdx.every(i=>cgClueHolds(m.clues[i], s)) && Object.keys(st.marks).every(k=>{ const [r,c] = k.split(',').map(Number); return cgCellTrue(m, s, r, c)===(st.marks[k]===2); }));
+function cgPossible(m, marks, clueIdx){      // arrangements that fit the chosen clues and the given marks
+  return cgAssignments(m).filter(s=>clueIdx.every(i=>cgClueHolds(m.clues[i], s)) && Object.keys(marks).every(k=>{ const [r,c] = k.split(',').map(Number); return cgCellTrue(m, s, r, c)===(marks[k]===2); }));
 }
-function cgImplied(m, st, clueIdx, r, c, v){   // v: 2 = yes, 1 = no
-  const ps = cgPossible(m, st, clueIdx); if(!ps.length) return false;
+function cgImplied(m, marks, clueIdx, r, c, v){   // v: 2 = yes, 1 = no: true in every arrangement that is still possible
+  const ps = cgPossible(m, marks, clueIdx); if(!ps.length) return false;
   return ps.every(s=>cgCellTrue(m, s, r, c)===(v===2));
 }
-function cgSupport(m, st, r, c, v){            // a small set of clues that is enough for the mark
-  let set = m.clues.map((_,i)=>i);
-  for(let j=m.clues.length-1; j>=0; j--){ const t = set.filter(x=>x!==j); if(cgImplied(m, st, t, r, c, v)) set = t; }
-  return set;
-}
 function cgTarget(m){      // the cell whose yes-mark answers the question
-  const ps = cgAssignments(m).filter(s=>m.clues.every(c=>cgClueHolds(c, s))); const s = ps[0];
+  const s = cgAssignments(m).filter(s=>m.clues.every(c=>cgClueHolds(c, s)))[0];
   return m.two ? {r:m.asked, c:3+s.fr[m.asked]} : {r:s.pet.indexOf(0), c:0};
 }
-GUIDE_RULES.clueGrid = {
-  init:m=>({m, marks:{}}),
-  legal(st, mv){
-    const m = st.m; if(!cgCellLive(m, mv.r, mv.c)) return {ok:false, tag:'inert'};
-    if(!mv.v) return {ok:true, supportedBy:[]};
-    const all = m.clues.map((_,i)=>i);
-    if(cgImplied(m, st, all, mv.r, mv.c, mv.v)) return {ok:true, supportedBy:cgSupport(m, st, mv.r, mv.c, mv.v)};
-    const fits = cgPossible(m, st, all).some(s=>cgCellTrue(m, s, mv.r, mv.c)===(mv.v===2));
-    return {ok:false, tag: fits ? 'unsure' : 'conflict'};
-  },
-  apply(st, mv){ const marks = Object.assign({}, st.marks), k = mv.r+','+mv.c; if(mv.v) marks[k] = mv.v; else delete marks[k]; return {m:st.m, marks}; },
-  next(st){
-    const m = st.m, rows = m.two ? 6 : 3, cols = m.two ? 6 : 3; let best = null;
-    for(let r=0; r<rows; r++) for(let c=0; c<cols; c++){
-      if(!cgCellLive(m, r, c) || st.marks[r+','+c]) continue;
-      for(const v of [2,1]){ if(cgImplied(m, st, m.clues.map((_,i)=>i), r, c, v)){ const sb = cgSupport(m, st, r, c, v); if(!best || sb.length<best.supportedBy.length || (sb.length===best.supportedBy.length && v>best.move.v)) best = {move:{r,c,v}, supportedBy:sb}; } }
+function cgLive(m){ const o = [], n = m.two ? 6 : 3; for(let r=0; r<n; r++) for(let c=0; c<n; c++) if(cgCellLive(m, r, c)) o.push([r, c]); return o; }
+function cgLine(m, r, c, dir){      // the other cells of the same row (or column) inside the same block
+  const o = [];
+  if(dir==='row'){ const lo = c<3 ? 0 : 3; for(let x=lo; x<lo+3; x++) if(x!==c && cgCellLive(m, r, x)) o.push([r, x]); }
+  else { const lo = r<3 ? 0 : 3; for(let y=lo; y<lo+3; y++) if(y!==r && cgCellLive(m, y, c)) o.push([y, c]); }
+  return o;
+}
+function cgName(m, r, c){ return {kid: r<3 ? m.kids[r] : '', pet: c<3 ? m.pets[c] : (r>=3 ? m.pets[r-3] : '')}; }
+// the marks that a step needs, in the order the clues give them; every step lists the clues introduced so far
+function cgPlan(m){
+  const all = m.clues.map((_,i)=>i), live = cgLive(m), marks = {}, steps = [], tg = cgTarget(m), tk = tg.r+','+tg.c;
+  const done = ()=>marks[tk]===2;
+  const push = (kind, cells, intro, extra)=>{
+    cells.forEach(x=>{ marks[x.r+','+x.c] = x.v; });
+    const rows = [...new Set(cells.map(x=>x.r))], cols = [...new Set(cells.map(x=>x.c))];
+    steps.push(Object.assign({id:'s'+steps.length, act:'grid', ask:kind, cells, intro:intro.slice(), focus:{rows, cols, cells:[], clue:null}, hints:{narrow:true},
+      expect:{check:'grid-ok', args:[m, intro.slice(), cells]}}, extra||{}));
+  };
+  for(let i=0; i<m.clues.length && !done(); i++){
+    const intro = all.slice(0, i+1), c = m.clues[i];
+    const cell = c.k==='pet' ? {r:c.kid, c:c.pet} : c.k==='fruit' ? {r:c.kid, c:3+c.fr} : {r:3+c.pet, c:3+c.fr};
+    if(!marks[cell.r+','+cell.c]){
+      const st = {r:cell.r, c:cell.c, v:c.yes?2:1}; push('clue', [st], intro, {pv:{clue:m.texts[i]}});
+      steps[steps.length-1].focus.clue = i;
     }
-    return best;
-  },
-  done(st){ const t = cgTarget(st.m); return st.marks[t.r+','+t.c]===2; },
-  consequence(st, mv){
-    const m = st.m, r = GUIDE_RULES.clueGrid.legal(st, mv);
-    if(r.tag!=='conflict') return {kind:'unsure', move:mv};
-    for(let i=0; i<m.clues.length; i++){ if(!cgPossible(m, st, [i]).some(s=>cgCellTrue(m, s, mv.r, mv.c)===(mv.v===2))) return {kind:'conflict', move:mv, clue:i}; }
-    return {kind:'conflict', move:mv, clue:null};
+    for(let k=0; k<14 && !done(); k++){
+      const cand = [];
+      for(const [r,c2] of live){ if(marks[r+','+c2]) continue; const v = cgImplied(m, marks, intro, r, c2, 2) ? 2 : cgImplied(m, marks, intro, r, c2, 1) ? 1 : 0; if(v) cand.push({r, c:c2, v}); }
+      if(!cand.length) break;
+      for(const x of cand){ // why is this mark certain? (a plain rule of the table, or the clues together)
+        const row = cgLine(m, x.r, x.c, 'row'), col = cgLine(m, x.r, x.c, 'col');
+        const yesAt = a=>a.find(([r,c2])=>marks[r+','+c2]===2), noCount = a=>a.filter(([r,c2])=>marks[r+','+c2]===1).length;
+        if(x.v===1 && yesAt(row)){ x.why = 'ex'; x.src = yesAt(row); }
+        else if(x.v===1 && yesAt(col)){ x.why = 'ex'; x.src = yesAt(col); }
+        else if(x.v===2 && noCount(row)===row.length){ x.why = 'left-row'; x.src = [x.r, x.c]; }
+        else if(x.v===2 && noCount(col)===col.length){ x.why = 'left-col'; x.src = [x.r, x.c]; }
+        else x.why = 'combo';
+      }
+      const first = cand.find(x=>x.why==='ex') || cand.find(x=>x.why!=='combo') || cand[0];
+      let grp;
+      if(first.why==='ex') grp = cand.filter(x=>x.why==='ex' && x.src[0]===first.src[0] && x.src[1]===first.src[1]);
+      else if(first.why==='combo') grp = cand.filter(x=>x.why==='combo');
+      else grp = [first];
+      const nm = first.src ? cgName(m, first.src[0], first.src[1]) : cgName(m, first.r, first.c);
+      push(first.why, grp.map(x=>({r:x.r, c:x.c, v:x.v})), intro, {pv:nm});
+      const st = steps[steps.length-1];
+      if(first.why==='ex') st.focus = {rows:[first.src[0]], cols:[first.src[1]], cells:[first.src], clue:null};
+      else if(first.why==='left-row') st.focus = {rows:[first.r], cols:[], cells:[], clue:null};
+      else if(first.why==='left-col') st.focus = {rows:[], cols:[first.c], cells:[], clue:null};
+    }
   }
+  if(!done()) throw new Error('the clues do not reach the answer');
+  return steps;
+}
+function cgBad(m, intro, marks){      // marks that the clues so far do not make certain: 'conflict' (no arrangement allows it) or 'unsure' (allowed, but not certain)
+  const out = [];
+  for(const k of Object.keys(marks)){
+    const [r, c] = k.split(',').map(Number), v = marks[k];
+    if(cgImplied(m, {}, intro, r, c, v)) continue;
+    const fits = cgPossible(m, {}, intro).some(s=>cgCellTrue(m, s, r, c)===(v===2));
+    let clue = null;
+    if(!fits){ for(const i of intro){ if(!cgPossible(m, {}, [i]).some(s=>cgCellTrue(m, s, r, c)===(v===2))){ clue = i; break; } } }
+    out.push({r, c, v, kind: fits ? 'unsure' : 'conflict', clue});
+  }
+  return out;
+}
+GUIDE_CHECKS['grid-ok'] = (inp, m, intro, cells)=>{
+  const mk = inp && inp.marks || {};
+  return cells.every(x=>mk[x.r+','+x.c]===x.v) && cgBad(m, intro, mk).length===0;
 };
-let GUIDE_VIEW_MS = 1500;      // how long a board message stays before the next move (the harness sets 0)
 GUIDE_BOARDS.clueGuide = {
   mount(el, m, g){
-    this.m = m; this.el = el; this.pen = 2; this.pending = null; this.locked = false;
-    const clues = (m.texts||[]).map((t,i)=>`<li data-i="${i}">${esc(t)}</li>`).join('');
-    el.innerHTML = `<div class="cgpens" role="group" aria-label="סוג הסימון"><button type="button" class="cgpen on" data-pen="2" aria-pressed="true">✓ כן</button><button type="button" class="cgpen" data-pen="1" aria-pressed="false">✗ לא</button></div><div class="cgwrap"></div><ol class="cgclues" aria-label="הרמזים">${clues}</ol><div class="cgmsg" role="status" aria-live="polite"></div>`;
-    this.wrap = el.querySelector('.cgwrap'); this.msg = el.querySelector('.cgmsg');
-    QTOOLS.clueGrid.mount(this.wrap, m, {state:{}, used(){}});
-    this.wrap.querySelector('.cgnote').remove(); this.wrap.querySelector('.cgclr').remove();
-    this.wrap.onclick = null;
-    el.onclick = e=>{
-      const pen = e.target.closest('.cgpen');
-      if(pen){ this.pen = Number(pen.dataset.pen); el.querySelectorAll('.cgpen').forEach(b=>{ const on = b===pen; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); }); return; }
-      const cell = e.target.closest('.cgc'); if(!cell || !this.pending || this.locked) return;
-      const r = Number(cell.dataset.r), c = Number(cell.dataset.c), cur = this.valueAt(cell);
-      const resolve = this.pending; this.pending = null;
-      resolve({move:{r, c, v: cur===this.pen ? 0 : this.pen}});
-    };
+    this.m = m; this.g = g; this.el = el; this.pending = null; this.step = null;
+    el.innerHTML = '<div class="cgmsg" role="status" aria-live="polite"></div><div class="cgown"></div><div class="gbfoot"><button type="button" class="btn" id="gbCheck">בדקנו, לשלב הבא</button></div>';
+    this.msg = el.querySelector('.cgmsg'); this.check = el.querySelector('#gbCheck');
+    const slot = document.getElementById('qTool');
+    if(qToolCur && qToolCur.kind==='clueGrid'){      // the grid she already has under the question, with her own marks
+      this.root = qToolCur.body; this.ctx = qToolCur.ctx;
+      if(this.root.hidden){ const hb = slot && slot.querySelector('.qtoolb'); if(hb) hb.click(); }
+    } else {                                        // tools are switched off for this profile: the guide brings its own copy
+      this.root = el.querySelector('.cgown'); this.ctx = {state:{}, used(){}}; QTOOLS.clueGrid.mount(this.root, m, this.ctx);
+    }
+    this.marks = this.ctx.state.marks = this.ctx.state.marks || {};
+    this.onTap = e=>{ const b = e.target.closest('.cgc'); if(b) b.classList.remove('bad', 'hint'); };
+    this.root.addEventListener('click', this.onTap, true);
+    this.wrapClues();
+    this.check.onclick = ()=>{ if(!this.pending) return; const r = this.pending; this.pending = null; r({marks:this.snapshot()}); };
   },
-  valueAt(cell){ return Number(cell.dataset.v)||0; },
-  cell(r, c){ return this.wrap.querySelector(`.cgc[data-r="${r}"][data-c="${c}"]`); },
-  paint(r, c, v){ const b = this.cell(r, c); if(!b) return; b.dataset.v = v; b.textContent = ['','✗','✓'][v]; b.setAttribute('aria-label', b.dataset.n+': '+['ריק','לא','כן'][v]); },
-  light(ids, on){ (ids||[]).forEach(i=>{ const li = this.el.querySelector(`.cgclues li[data-i="${i}"]`); if(li) li.classList.toggle('on', on); }); },
-  run(){ return new Promise(res=>{ this.pending = res; }); },
+  snapshot(){ const o = {}; Object.keys(this.marks).sort().forEach(k=>{ if(this.marks[k]) o[k] = this.marks[k]; }); return o; },
+  wrapClues(){      // the clue lines of the question text, so that one can be lit
+    const q = document.getElementById('qtext'); if(!q) return;
+    [...q.childNodes].forEach(n=>{ if(n.nodeType!==3) return; const i = (this.m.texts||[]).indexOf(n.textContent.trim()); if(i<0) return; const sp = document.createElement('span'); sp.className = 'cgclue'; sp.dataset.i = i; n.replaceWith(sp); sp.appendChild(n); });
+  },
+  light(i){ document.querySelectorAll('#qtext .cgclue').forEach(s=>s.classList.toggle('on', i!==null && i!==undefined && Number(s.dataset.i)===i)); },
+  cell(r, c){ return this.root.querySelector(`.cgc[data-r="${r}"][data-c="${c}"]`); },
+  paint(r, c, v){ const k = r+','+c; if(v) this.marks[k] = v; else delete this.marks[k]; const b = this.cell(r, c); if(!b) return; b.dataset.v = v; b.textContent = ['','✗','✓'][v]; b.setAttribute('aria-label', b.dataset.n+': '+['ריק','לא','כן'][v]); },
+  clearHl(){ this.root.querySelectorAll('.hl,.src').forEach(x=>x.classList.remove('hl','src')); },     // the step's own lights; marks in red and narrowing outlines stay until she taps that cell or the next message
+  clearView(){ this.root.querySelectorAll('.hint,.bad').forEach(x=>x.classList.remove('hint','bad')); },
+  focus(step){      // lights the clue and the headers of the step; it never lights the cell to mark
+    this.clearHl(); const f = step.focus || {};
+    (f.rows||[]).forEach(r=>{ const h = this.root.querySelector(`[data-hr="${r}"]`); if(h) h.classList.add('hl'); });
+    (f.cols||[]).forEach(c=>{ const h = this.root.querySelector(`[data-hc="${c}"]`); if(h) h.classList.add('hl'); });
+    (f.cells||[]).forEach(([r,c])=>{ const b = this.cell(r, c); if(b) b.classList.add('src'); });
+    this.light(f.clue===undefined ? null : f.clue);
+  },
+  run(step){ this.step = step; this.focus(step); this.check.hidden = false; return new Promise(res=>{ this.pending = res; }); },
+  missing(step, marks){ return step.cells.filter(x=>marks[x.r+','+x.c]!==x.v); },
   show(v){
-    const M = {
-      applied:()=>{ if(v.move.v){ this.paint(v.move.r, v.move.c, v.move.v); return 'נכון, זה בטוח!'; } this.paint(v.move.r, v.move.c, 0); return ''; },
-      unsure:()=>{ this.flash(v.move, 'cgf-u'); return 'זה יכול להיות נכון, אבל עוד לא בטוח. מה הרמזים אומרים על זה?'; },
-      conflict:()=>{ this.flash(v.move, 'cgf-x'); this.light(v.clue!==null&&v.clue!==undefined?[v.clue]:[], true); return 'זה לא מסתדר עם הרמזים. הסתכלו שוב על הרמז המסומן.'; },
-      again:()=>'את זה כבר ניסיתם. נסו משהו אחר.',
-      'not-yet':()=>'עוד לא סיימנו. מה עוד אפשר לדעת?',
-      point:()=>{ this.light(v.clue, true); return 'הסתכלו על הרמז המסומן. מה אפשר לדעת ממנו?'; },
-      demo:()=>{ this.light(v.supportedBy, true); this.paint(v.move.r, v.move.c, v.move.v); this.flash(v.move, 'cgf-ok'); return 'ככה: הרמז המסומן אומר לנו את זה. נמשיך.'; },
-      solved:()=>'מצאנו את התשובה בטבלה!'
-    };
-    const text = (M[v.kind] || (()=>''))();
-    if(v.kind==='applied') this.light(v.supportedBy, true);
-    this.msg.textContent = text; this.locked = true;
-    return new Promise(res=>setTimeout(()=>{ this.locked = false; this.light([...Array(this.m.clues.length).keys()], false); this.el.querySelectorAll('.cgf-u,.cgf-x,.cgf-ok').forEach(b=>b.classList.remove('cgf-u','cgf-x','cgf-ok')); res(); }, text ? GUIDE_VIEW_MS : 0));
+    const st = v.step || this.step, mk = (v.input && v.input.marks) || this.snapshot();
+    let text = ''; this.clearView();
+    if(v.kind==='look'){
+      const bad = cgBad(this.m, st.intro, mk);
+      if(bad.length){
+        bad.forEach(b=>{ const c = this.cell(b.r, b.c); if(c) c.classList.add('bad'); });
+        const b0 = bad[0]; if(b0.kind==='conflict' && b0.clue!==null) this.light(b0.clue);
+        text = b0.kind==='conflict' ? 'יש סימון שלא מסתדר עם הרמזים. הוא מסומן באדום. אפשר לשנות אותו ולבדוק שוב.' : 'יש סימון שעוד לא בטוח לפי הרמזים. הוא מסומן באדום. סמנו רק מה שבטוח.';
+      } else { this.light(st.focus.clue); text = 'עוד חסר סימון בשלב הזה. הסתכלו שוב על ההדגשה, ואז לחצו ״בדקנו״.'; }
+    } else if(v.kind==='narrow' && cgBad(this.m, st.intro, mk).length){ return this.show(Object.assign({}, v, {kind:'look'})); }     // a mark that is not certain is shown in red at every check
+    else if(v.kind==='narrow'){
+      const x = this.missing(st, mk)[0];
+      if(x){ [...cgLine(this.m, x.r, x.c, 'row'), ...cgLine(this.m, x.r, x.c, 'col'), [x.r, x.c]].forEach(([r,c])=>{ const b = this.cell(r, c); if(b) b.classList.add('hint'); }); }
+      text = 'הסימון שחסר נמצא באחת המשבצות המסומנות. מה אפשר לדעת מהרמז?';
+    } else if(v.kind==='demo'){
+      Object.keys(mk).forEach(k=>{ const [r, c] = k.split(',').map(Number); if(!st.cells.some(x=>x.r===r&&x.c===c) && cgBad(this.m, st.intro, {[k]:mk[k]}).length){ this.paint(r, c, 0); } });
+      st.cells.forEach(x=>{ this.paint(x.r, x.c, x.v); const b = this.cell(x.r, x.c); if(b) b.classList.add('hint'); });
+      this.light(st.focus.clue);
+      text = 'ככה: הנה הסימון לשלב הזה. הסתכלו עליו, ואז לחצו ״בדקנו״ להמשיך.';
+    } else if(v.kind==='again'){ text = 'לא השתנה כלום מאז הבדיקה הקודמת. אפשר לשנות סימון ולבדוק שוב.'; }
+    else if(v.kind==='solved'){ this.clearHl(); this.light(null); this.check.hidden = true; text = 'מצאנו! התשובה מסומנת בטבלה, ואפשר להמשיך לסמן ולהסתכל בה.'; }
+    this.msg.textContent = text;
+    return Promise.resolve();
   },
-  flash(mv, cls){ const b = this.cell(mv.r, mv.c); if(b) b.classList.add(cls); },
-  unmount(){ this.pending = null; if(this.el) this.el.onclick = null; }
+  unmount(){ this.pending = null; if(this.root && this.onTap) this.root.removeEventListener('click', this.onTap, true); if(this.root) this.root.querySelectorAll('.hl,.src,.hint,.bad').forEach(x=>x.classList.remove('hl','src','hint','bad')); this.light(null); }
 };
-GUIDE_RECIPES.gLogicGrid = { prompts:{ start:{ text:'קראו את הרמזים וסמנו בטבלה רק מה שאפשר לדעת בוודאות: ✓ למה שכן, ✗ למה שלא.', say:'קראו את הרמזים וסמנו בטבלה רק מה שאפשר לדעת בוודאות.' } } };
+GUIDE_RECIPES.gLogicGrid = {
+  steps:m=>cgPlan(m),
+  prompts:{
+    clue:{ text:'הרמז: ״{clue}״. מה אפשר לסמן בטבלה בשבילו? סמנו, ואז לחצו ״בדקנו״.', say:'מה אפשר לסמן בטבלה לפי הרמז?' },
+    ex:{ text:'ידענו כבר ש{kid} ו{pet} שייכים יחד. מה זה אומר על שאר השורה ושאר העמודה שלהם? סמנו ✗, ואז לחצו ״בדקנו״.', say:'מה זה אומר על שאר השורה ושאר העמודה?' },
+    'left-row':{ text:'בשורה של {kid} כבר יש שני סימני ✗. מה נשאר? סמנו, ואז לחצו ״בדקנו״.', say:'בשורה כבר יש שני סימני איקס. מה נשאר?' },
+    'left-col':{ text:'בעמודה של ה{pet} כבר יש שני סימני ✗. מה נשאר? סמנו, ואז לחצו ״בדקנו״.', say:'בעמודה כבר יש שני סימני איקס. מה נשאר?' },
+    combo:{ text:'מה עוד אפשר לדעת מהרמזים ומהסימנים שכבר יש בטבלה? סמנו, ואז לחצו ״בדקנו״.', say:'מה עוד אפשר לדעת מהרמזים ומהסימנים?' }
+  }
+};
 
 let qEpoch = 0;   // counts the questions put on screen: a late celebration or bonus checks it so it never lands on a question she has already moved past
 function nextQuestion(opts){
   const fu = opts && opts.followup ? opts : null;     // the follow-up after a guide: a fresh question of the same type (the held streak reset waits for its answer)
   qEpoch++; milestoneDue = false;
-  guideCancel(); guideIdleClear(); guideOfferClear();
+  guideCancel(); guideIdleClear(); guideOfferClear(); document.getElementById('nextBtn').classList.remove('dim');
   if(streakHeld && !fu){ streakHeld = false; streak = 0; document.getElementById('streak').textContent = streak; saveState(); }   // no other try after the guide: the reset applies
   peekClear();
   if(lastMood==='puzzled') setMood('happy');          // the wrong-answer reaction lasts until the next question
@@ -7416,10 +7493,10 @@ function checkAnswer(val, btnEl, grid){
     });
   }
   if(current._guided && !bonusActive){      // a guide was opened before answering: no reward, and the streak stays as it was
-    fb.textContent = (ok ? 'נכון! ' : '') + `התשובה היא ${current.answerText||current.answer}. פתרנו את זה יחד, בלי מתנה הפעם.${current.explain?' '+current.explain:''}`;
+    fb.textContent = (ok ? 'נכון! ' : '') + `התשובה היא ${current.answerText||current.answer}. פתרנו את זה יחד.${current.explain?' '+current.explain:''}`;
     fb.className = 'feedback good';
     const of = document.getElementById('guideOffer');
-    if(of && current._gen){ of.innerHTML = '<button type="button" class="btn alt" id="goAgain">עוד אחת כזאת, ' + G('בעצמי','בעצמי','בעצמנו') + '</button>'; document.getElementById('goAgain').onclick = ()=>{ guideOfferClear(); nextQuestion({followup:true, gen:current._gen}); }; }
+    if(of && current._gen){ of.innerHTML = '<button type="button" class="btn" id="goAgain">עוד אחת כזאת, ' + G('בעצמי','בעצמי','בעצמנו') + '</button>'; document.getElementById('goAgain').onclick = ()=>{ guideOfferClear(); nextQuestion({followup:true, gen:current._gen}); }; document.getElementById('nextBtn').classList.add('dim'); }
     document.getElementById('nextBtn').style.display = 'block'; saveState();
     return;
   }
