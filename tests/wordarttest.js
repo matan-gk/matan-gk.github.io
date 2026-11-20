@@ -38,6 +38,13 @@ ok(shown.cap===shown.kidsN&&shown.inCard&&shown.before,'each portrait has its na
 const none=await p.evaluate(()=>{ for(let i=0;i<200;i++){ nextQuestion(); if(!(current.art||[]).length) break; } return document.getElementById('qart').hidden; });
 ok(none,'a question without illustrations leaves no gap (strip hidden)');
 ok(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'no sideways scroll at 360px');
+// 4. big screen: the pictures sit beside the text, so the card does not grow into the mascot below it
+{ const q=await (await b.newContext({viewport:{width:1440,height:900}})).newPage(); await q.goto(T.URL); await q.evaluate(()=>localStorage.clear()); await q.reload();
+  await q.fill('#pfName','X'); await q.click('.gopt:has(input[value=f])'); await q.click('[data-pact=save]'); await q.waitForTimeout(300);
+  await q.evaluate(()=>{ document.querySelectorAll('.milestone').forEach(e=>e.remove()); openGame(1); }); await q.waitForTimeout(300);
+  const r=await q.evaluate(()=>{ const out={}; for(const w of [false,true]){ for(let i=0;i<500;i++){ nextQuestion(); if(((current.art||[]).length>1)===w) break; } const c=document.getElementById('card').getBoundingClientRect(), m=document.getElementById('charImg').getBoundingClientRect(), a=document.getElementById('qart').getBoundingClientRect(), t=document.getElementById('qtext').getBoundingClientRect(); out[w?'art':'none']={cardBottom:Math.round(c.bottom), mascotTop:Math.round(m.top), beside:!document.getElementById('qart').hidden? (a.right<=t.left+2||a.left>=t.right-2):true, imgs:[...document.querySelectorAll('#qart img,#qart .cup')].filter(e=>e.offsetParent).length}; } return out; });
+  ok(r.art.cardBottom<=r.art.mascotTop,'1440px: a question with pictures keeps the card above the mascot ('+r.art.cardBottom+' vs '+r.art.mascotTop+')');
+  ok(r.art.beside,'1440px: the strip is beside the text, not over it'); await q.context().close(); }
 ok(errs.length===0,'no page errors '+errs.join('|'));
 await b.close(); process.exit(f?1:0);
 })();

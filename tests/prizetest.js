@@ -39,7 +39,7 @@ await right(p); await p.waitForTimeout(300);
 ok(await p.locator('.pfly').count()===1&&await p.locator('.milestone').count()===0,'5th in a row: the prize shows and the party is not on top of it');
 let overlap=false; for(let i=0;i<30;i++){ await p.waitForTimeout(100); if(await p.locator('.pfly').count()&&await p.locator('.milestone').count()) overlap=true; }
 ok(!overlap,'the prize and the party are never on the screen together');
-await p.waitForTimeout(1500);
+for(let i=0;i<40&&!(await p.locator('.milestone').count());i++) await p.waitForTimeout(250);   // the prize may first wait up to 1.5 s for its pictures on a loaded machine
 ok(await p.locator('.milestone').count()===1,'the party starts after the prize has landed');
 ok(await p.evaluate(()=>!!document.querySelector('.milestone')),'(party is open)');
 await p.evaluate(()=>{ document.querySelectorAll('.milestone').forEach(e=>e.click()); }); await p.waitForTimeout(300);

@@ -484,7 +484,13 @@ body[data-view="home"] .wrap > .sub{margin-bottom:12px}
 .qa img{display:block; height:64px; width:64px; object-fit:contain}
 .qa figcaption{font-size:.72rem; font-weight:700; color:var(--muted,#7a6a7a); line-height:1.2}
 .qa .cup{display:block}
-@media (min-width:768px){ .qa img{height:96px; width:96px} .qa figcaption{font-size:.85rem} }
+@media (min-width:768px){   /* big screens: the pictures sit beside the text (the card must not grow into the mascot below it) */
+  .qrow{display:flex; flex-direction:row-reverse; align-items:center; gap:18px}
+  .qrow .qtext{flex:1; min-width:0}
+  .qart{margin:0; flex:none}
+  .qa img{height:72px; width:72px} .qa figcaption{font-size:.8rem}
+  .qa:nth-child(n+4){display:none}
+}
 .qtext{font-size:1.12rem; line-height:1.6; margin-bottom:16px; font-weight:600}
 .qtext .hl{color:var(--pink)}
 .qtool{margin:0 -20px 14px; background:var(--card2); border-radius:14px; padding:8px 6px}
@@ -1064,8 +1070,8 @@ body[data-view="space"] #spaceView{box-sizing:border-box; display:flex; flex-dir
 
   <div class="card" id="card">
     <div class="qhead"><div class="qlabel" id="qlabel">שאלה</div><div class="qbtns"><button type="button" class="helpbtn" id="reportBtn">דיווח</button><button type="button" class="helpbtn" id="helpBtn">עזרה</button></div></div>
-    <div class="qart" id="qart" hidden aria-hidden="true"></div>
-    <div class="qtext" id="qtext">טוען...</div>
+    <div class="qrow"><div class="qart" id="qart" hidden aria-hidden="true"></div>
+    <div class="qtext" id="qtext">טוען...</div></div>
     <div class="qtool" id="qTool" hidden></div>
     <div class="guidebox" id="guideBox" hidden></div>
     <div id="answerArea"></div>
