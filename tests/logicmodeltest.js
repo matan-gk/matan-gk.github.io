@@ -1,4 +1,4 @@
-// logicGrid: the question text is unchanged (seeded, against output captured from the code before the refactor), and the model it returns agrees with the text
+// logicGrid: the question text is unchanged (seeded; golden/logicgrid.json was regenerated in Step 66 when the names and fruits changed, and by then matched the refactor-time output apart from those), and the model it returns agrees with the text
 const fs=require('fs'),T=require('./lib.js');const {chromium}=require('playwright');
 let f=0;const ok=(c,m)=>{console.log((c?'ok   ':'FAIL ')+m);if(!c)f++;};
 (async()=>{const b=await chromium.launch({...T.launchOpts});const p=await (await b.newContext()).newPage();await p.goto(T.URL);

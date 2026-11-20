@@ -859,3 +859,14 @@ Matan's comments after trying Step 64. The pens board and the "certain marks onl
 - **Grid look.** Mark cells are a fixed, compact 44px (52px on big screens) and no longer stretch; the header pictures are larger (2.6rem on big screens), the row names too. The tool box reaches 20px into the card margin so the two-attribute grid fits at 360px.
 - **Unicorn behind the question.** The mascot sits inside the page container, so a positive z-index put her above the card (big screens, and the phone peek after an answer). Now `z-index:-1`. Test: `mascotlayertest` (an opaque card must hide her completely, on a big screen and on a phone).
 - Engine: a step may carry its own prompt values (`pv`), `hints.narrow` (a narrowing view instead of a smaller question), and the look/narrow/demo views carry the step and the input. Tests: `guidegridtest` rewritten, `guideenginetest` adjusted, `mascotlayertest` new.
+
+## Step 66: artwork for the clue grid (branch `grid-artwork`, stacked on `guide-grid-v2`; version 2026.11.19g)
+
+Matan's generated art goes into the clue grid (the one grid used by the tool and by the guide).
+- **Pictures.** Three sheets (16 kid portraits, 6 fruits, 6 pets) are kept as originals in `art/sheet-kids-portraits.jpg`, `art/sheet-fruits.jpg`, `art/sheet-pets.jpg`, and cut into 256px transparent webp files (`tools/slice_sheet.py`: each sprite is found as a blob, the white background is removed from the outside in so eyes and teeth stay, soft edge, centred square). The files live in `assets/` under their hash names (listed in `assets.json`, so the service worker caches them).
+- **Wiring.** `PET_ART`, `FRUIT_ART`, `KID_ART` replace the emoji maps. Every header of the grid (kid rows, animal rows and columns, fruit columns) is a picture over its written name; pictures have empty `alt` because the name is written next to each one.
+- **Kids.** `PEOPLE` has 8 girls and 8 boys, one portrait each (`a` = index in `KID_ART`, sheet order row by row). Names changed to suit the faces: תהילה, פריה, יעל, אלה, מיקו, נועה, דנה, אמל; הירו, תום, ישי, עומר, איתי, נדב, רוהן, גיא (dropped: דני, יובל, ארי, ליה, מאיה, רוני, שירה). The names are used by all word problems, not only the grid; the portrait is shown only in the grid for now.
+- **Pineapple (אננס)** added to the fruits (the sheet has six).
+- **Size.** Pictures 40px on a phone (34px in the two-attribute grid, which still fits 360px), 68px on big screens, where the mark cells are 72px so a column's picture is not cut off.
+- **Golden file.** `tests/golden/logicgrid.json` regenerated (new names and a sixth fruit change the seeded wording).
+- Tests: `cluegridtest` (16 unique kids, gender pairing, every animal and fruit has a picture, all pictures cached, every header shows a loaded picture and a name, a kid's row shows that kid's portrait).

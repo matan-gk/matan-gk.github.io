@@ -499,22 +499,23 @@ body[data-view="home"] .wrap > .sub{margin-bottom:12px}
 .guideoffer:empty{display:none}
 .guideoffer .btn{width:100%; margin-top:0}
 .btn.alt{background:var(--card2); color:var(--text)}
-.cg{--cgcell:44px; --cghead:62px; display:grid; gap:2px; justify-content:center; direction:rtl}
-.cg.two{--cghead:38px}
+.cg{--cgcell:44px; --cghead:62px; --cgart:40px; display:grid; gap:2px; justify-content:center; direction:rtl}
+.cg.two{--cghead:40px; --cgart:34px}
 .cg.two .cgr{font-size:.7rem}
 .cgh.hl{background:rgba(255,200,0,.4); border-radius:10px}
 .cgc.hint, .cgc.src{outline:3px solid #f4b400; outline-offset:-2px}
 .cgc.bad{background:rgba(192,57,43,.3)}
 .cgh{display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:.7rem; line-height:1.1; min-height:44px; min-width:0; overflow:hidden; text-align:center}
-.cgh b{font-size:1.6rem; font-weight:400; line-height:1.1}
+.cgh img{width:var(--cgart); height:var(--cgart); max-width:100%; object-fit:contain; display:block; margin:0 auto 1px; pointer-events:none}
 .cgr{justify-content:center; font-weight:700; font-size:.8rem; padding:0 2px}
-.cgc{min-width:44px; min-height:44px; padding:0; border-radius:8px; border:1px solid var(--line, rgba(0,0,0,.2)); background:var(--card, #fff); color:inherit; font:inherit; font-size:1.2rem; cursor:pointer; touch-action:manipulation}
+.cgc{width:var(--cgcell); height:var(--cgcell); min-width:44px; min-height:44px; padding:0; border-radius:8px; border:1px solid var(--line, rgba(0,0,0,.2)); background:var(--card, #fff); color:inherit; font:inherit; font-size:1.2rem; cursor:pointer; touch-action:manipulation}
 .cgc[data-v="1"]{color:#c0392b; background:rgba(192,57,43,.08)}
 .cgc[data-v="2"]{color:#1e8e3e; background:rgba(30,142,62,.12); font-weight:700}
-.cgx{min-height:44px; border-radius:8px; background:repeating-linear-gradient(45deg, rgba(128,128,128,.15) 0 4px, transparent 4px 8px)}
+.cgc, .cgx{align-self:center; justify-self:center}
+.cgx{width:var(--cgcell); height:var(--cgcell); min-height:44px; border-radius:8px; background:repeating-linear-gradient(45deg, rgba(128,128,128,.15) 0 4px, transparent 4px 8px)}
 .cgclr{margin-top:8px; min-height:36px; padding:4px 12px; border-radius:10px; border:1px solid var(--line, rgba(0,0,0,.15)); background:transparent; color:inherit; font:inherit; font-size:.9rem; cursor:pointer}
 .cgnote{font-size:.8rem; opacity:.75; margin-bottom:6px}
-@media (min-width:768px){ .cg, .cg.two{--cgcell:52px; --cghead:96px; gap:4px} .cg.two .cgr{font-size:1.1rem} .cgh b{font-size:2.6rem} .cgh{font-size:.95rem} .cgr{font-size:1.1rem} .cgc{font-size:1.5rem} }
+@media (min-width:768px){ .cg, .cg.two{--cgcell:72px; --cghead:104px; --cgart:68px; gap:6px} .cg.two .cgr{font-size:1.1rem}  .cgh{font-size:.95rem} .cgr{font-size:1.1rem} .cgc{font-size:1.5rem} }
 .mono{font-family:'Baloo 2',sans-serif; font-size:1.35rem; letter-spacing:1px; direction:ltr; display:inline-block}
 .eq{font-family:'Baloo 2',sans-serif; font-size:1.9rem; line-height:1.7; direction:ltr; unicode-bidi:isolate; display:inline-block}
 .eq.shapes{font-size:2.4rem; line-height:1.45}
@@ -2708,7 +2709,7 @@ function cloudProfileFromDoc(C, helpers){
 // ===== CLOUD (Google sign-in, cloud progress, problem reports) =====
 // Local-first: the game always works from this device's storage. The cloud is a mirror, so no internet / no account / no quota never blocks play.
 // Everything here is off while CLOUD_CONFIG is null. See firebase/SETUP.md for how to create the (free) Firebase project and paste its settings below.
-const APP_VERSION = '2026.11.19f';       // keep equal to VERSION in sw.js (a test checks it)
+const APP_VERSION = '2026.11.19g';       // keep equal to VERSION in sw.js (a test checks it)
 const BUILD_COMMIT = '';                 // the full id of the commit this page was built from: the deploy workflow (.github/workflows/tests.yml) fills it in; empty in a plain checkout
 const REPO_URL = 'https://github.com/matan-gk/matan-gk.github.io';
 const CLOUD_CONFIG = {apiKey:"AIzaSyAlq_TJNGvWPJpUrpbdq_hkAoURydqMzm0", authDomain:"learning-quest-1.firebaseapp.com", projectId:"learning-quest-1", appId:"1:98931179722:web:78fb00084ccba3efb53433"};   // e.g. {apiKey:'...', authDomain:'xxx.firebaseapp.com', projectId:'xxx', appId:'...'}
@@ -3923,11 +3924,11 @@ function mcqFrom(answer, spread){
 }
 
 // ---- SHARED POOLS FOR VARIETY ----
-const PEOPLE = [
-  {n:"דני",g:"m"},{n:"תום",g:"m"},{n:"איתי",g:"m"},{n:"יובל",g:"m"},{n:"עומר",g:"m"},
-  {n:"גיא",g:"m"},{n:"ארי",g:"m"},{n:"נדב",g:"m"},
-  {n:"דנה",g:"f"},{n:"נועה",g:"f"},{n:"ליה",g:"f"},{n:"מאיה",g:"f"},{n:"רוני",g:"f"},
-  {n:"שירה",g:"f"},{n:"יעל",g:"f"},{n:"אלה",g:"f"}
+const PEOPLE = [   // a = index of the kid's portrait in KID_ART (the sheet in art/sheet-kids-portraits.jpg); the names suit the faces
+  {n:"הירו",g:"m",a:1},{n:"תום",g:"m",a:3},{n:"ישי",g:"m",a:5},{n:"עומר",g:"m",a:7},
+  {n:"איתי",g:"m",a:9},{n:"נדב",g:"m",a:11},{n:"רוהן",g:"m",a:13},{n:"גיא",g:"m",a:15},
+  {n:"תהילה",g:"f",a:0},{n:"פריה",g:"f",a:2},{n:"יעל",g:"f",a:4},{n:"אלה",g:"f",a:6},
+  {n:"מיקו",g:"f",a:8},{n:"נועה",g:"f",a:10},{n:"דנה",g:"f",a:12},{n:"אמל",g:"f",a:14}
 ];
 function pickPeople(k){ return shuffle(PEOPLE.slice()).slice(0,k); }
 function v(person, m, f){ return person.g==='m'? m : f; }
@@ -4785,7 +4786,7 @@ function gHeightOrder(){
 
 // 9) Mini logic grid (regular: one attribute; bonus: two attributes, four clues)
 const MG_PETS = ["כלב","חתול","ארנב","דג","תוכי","אוגר"];
-const MG_FRUITS = ["תפוח","בננה","ענבים","תות","אבטיח"];
+const MG_FRUITS = ["תפוח","בננה","ענבים","תות","אבטיח","אננס"];
 // A clue is data ({k:'pet'|'fruit'|'rel', kid, pet, fr, yes}); this writes its text. The tool under the question (clueGrid) and, later, the guide read the data, so text and tool cannot disagree.
 function clueText(c, M){
   const P = M.kids, pets = M.pets, fruits = M.fruits, likes = p=>v(p,'אוהב','אוהבת');
@@ -7021,21 +7022,24 @@ function qToolOpen(q){
 }
 
 // ---- the clue grid: a scratch table for the clue questions. She marks cells (empty -> ✗ -> ✓ -> empty); it never checks, fills or scores anything.
-const PET_EMOJI = {"כלב":"🐶","חתול":"🐱","ארנב":"🐰","דג":"🐟","תוכי":"🦜","אוגר":"🐹"};
-const FRUIT_EMOJI = {"תפוח":"🍎","בננה":"🍌","ענבים":"🍇","תות":"🍓","אבטיח":"🍉"};
+const PET_ART = {"כלב":"assets/09f8e0668bd5.webp","חתול":"assets/e2c3883d1c5c.webp","ארנב":"assets/750c227ab3c5.webp","דג":"assets/ba5408ace5f4.webp","תוכי":"assets/14d6dbbe5dd3.webp","אוגר":"assets/35d9c5d9667b.webp"};
+const FRUIT_ART = {"תפוח":"assets/63a6b2b4867c.webp","בננה":"assets/389c64338531.webp","ענבים":"assets/49c8d8a0a2c6.webp","תות":"assets/140cc3d6c7aa.webp","אבטיח":"assets/189f6bccafa3.webp","אננס":"assets/89744f4b19d3.webp"};
+const KID_ART = ["assets/45eb4ec64653.webp","assets/e6b3bc504bfb.webp","assets/7e170682c05f.webp","assets/c60e16a62e45.webp","assets/e69543480dc7.webp","assets/8de604dd927e.webp","assets/2719807484ec.webp","assets/070b00916565.webp","assets/8a2c74a80fe2.webp","assets/619b1d47ad1e.webp","assets/8522fa2431b7.webp","assets/8e442ee12834.webp","assets/1c950c7c0331.webp","assets/c52c7ccb0dc0.webp","assets/898db530fe10.webp","assets/5c24e308fcd7.webp"];   // portraits, in the order of the sheet (art/sheet-kids-portraits.jpg, row by row); PEOPLE[].a is the index
+const kidArt = n=>{ const x = PEOPLE.find(q=>q.n===n); return x ? KID_ART[x.a] : ""; };
 QTOOLS.clueGrid = {
   title: 'טבלה לעזרה',
   mount(el, m, ctx){
     const kids = m.kids, pets = m.pets, fruits = m.fruits;
-    const rows = kids.map(n=>({t:'kid', name:n, label:n})).concat(fruits ? pets.map(x=>({t:'pet', name:x, label:'ה'+x, emoji:PET_EMOJI[x]||'', word:x})) : []);
-    const cols = pets.map(x=>({t:'pet', name:x, emoji:PET_EMOJI[x]||'', word:x})).concat(fruits ? fruits.map(x=>({t:'fruit', name:x, emoji:FRUIT_EMOJI[x]||'', word:x})) : []);
+    const rows = kids.map(n=>({t:'kid', name:n, label:n, img:kidArt(n)})).concat(fruits ? pets.map(x=>({t:'pet', name:x, label:'ה'+x, img:PET_ART[x]||'', word:x})) : []);
+    const cols = pets.map(x=>({t:'pet', name:x, img:PET_ART[x]||'', word:x})).concat(fruits ? fruits.map(x=>({t:'fruit', name:x, img:FRUIT_ART[x]||'', word:x})) : []);
     const marks = ctx.state.marks = ctx.state.marks || {};
     const VAL = ['ריק','לא','כן'], SYM = ['','✗','✓'];
-    const head = (c, att)=>`<div class="cgh" ${att||''}><b>${c.emoji}</b><span>${esc(c.word)}</span></div>`;
+    const pic = c=>c.img ? `<img src="${c.img}" alt="" draggable="false">` : '';
+    const head = (c, att)=>`<div class="cgh" ${att||''}>${pic(c)}<span>${esc(c.word)}</span></div>`;
     let h = `<div class="cgnote">לחצו על משבצת: ✗ = לא, ✓ = כן. הטבלה רק לעזרה, היא לא בודקת.</div><div class="cg${fruits?' two':''}" style="grid-template-columns:var(--cghead) repeat(${cols.length},var(--cgcell))"><div></div>`;
     cols.forEach((c,ci)=>{ h += head(c, `data-hc="${ci}"`); });
     rows.forEach((r,ri)=>{
-      h += r.t==='kid' ? `<div class="cgh cgr" data-hr="${ri}">${esc(r.name)}</div>` : `<div class="cgh cgr" data-hr="${ri}"><b>${r.emoji}</b><span>${esc(r.word)}</span></div>`;
+      h += `<div class="cgh cgr" data-hr="${ri}">${pic(r)}<span>${esc(r.t==='kid' ? r.name : r.word)}</span></div>`;
       cols.forEach((c,ci)=>{
         if(r.t==='pet' && c.t==='pet'){ h += '<div class="cgx" aria-hidden="true"></div>'; return; }
         const nm = (r.t==='kid' ? r.name : r.label) + ' ' + (c.t==='pet' ? 'ו'+c.word : 'ו'+c.word);

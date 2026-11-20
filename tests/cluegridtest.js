@@ -72,6 +72,18 @@ ok(await E(()=>cells().length===27&&!document.getElementById('qTool').hidden),'w
 await E(()=>{ themeId='default'; });
 // 500 generated questions: every cell label names a kid/animal/fruit present in the model
 ok(await E(()=>{ for(let i=0;i<200;i++){ const q=i%2?bLogicGrid2():gLogicGrid(); if(!q.tool) continue; const m=q.tool.model; const d=document.createElement('div'); const ctx={state:{},q,used(){}}; QTOOLS.clueGrid.mount(d,m,ctx); const n=d.querySelectorAll('.cgc').length; if(n!==(m.two?27:9)) return false; if([...d.querySelectorAll('.cgc')].some(c=>!c.dataset.n||/undefined/.test(c.dataset.n+d.textContent))) return false; } return true; }),'200 generated questions mount cleanly with the right cell count');
+// ---- artwork (Step 66): a portrait per kid, an icon per animal and fruit
+ok(await E(()=>{ const a=PEOPLE.map(x=>x.a); return PEOPLE.length===16&&new Set(a).size===16&&a.every(i=>i>=0&&i<KID_ART.length)&&PEOPLE.filter(x=>x.g==='f').length===8&&new Set(PEOPLE.map(x=>x.n)).size===16; }),'16 kids (8 girls, 8 boys), each with a unique name and a unique portrait');
+ok(await E(()=>PEOPLE.every(x=>(x.a%4)<4&&(x.g==='f')===[0,2,4,6,8,10,12,14].includes(x.a))),'every portrait is paired with a name of the right gender (the sheet alternates girl, boy)');
+ok(await E(()=>MG_PETS.every(x=>PET_ART[x])&&MG_FRUITS.every(x=>FRUIT_ART[x])&&MG_FRUITS.includes('אננס')),'every animal and every fruit (pineapple included) has an icon');
+const assets=JSON.parse(require('fs').readFileSync(__dirname+'/../assets.json','utf8'));
+ok((await E(()=>[...Object.values(PET_ART),...Object.values(FRUIT_ART),...KID_ART])).every(u=>assets.includes(u.replace('assets/',''))),'every picture is in assets.json (so it is cached for offline play)');
+for(const two of [false,true]){
+  await SHOW(two);
+  const r=await E(()=>{ const imgs=[...document.querySelectorAll('#qTool .cgh img')]; return {n:imgs.length, ok:imgs.every(i=>i.complete&&i.naturalWidth>0), alt:imgs.every(i=>i.getAttribute('alt')===''), hdr:document.querySelectorAll('#qTool .cgh').length}; });
+  ok(r.n===r.hdr&&r.ok&&r.alt,(two?'two attributes':'one attribute')+': every header shows its picture ('+r.n+') and each still has its written name');
+  ok(await E(()=>{ const m=current.tool.model; return m.kids.every(n=>document.querySelector('#qTool .cgr img[src="'+kidArt(n)+'"]'))&&document.querySelectorAll('#qTool .cgh span').length===document.querySelectorAll('#qTool .cgh').length; }),'each kid row shows that kid\'s own portrait');
+}
 ok(errs.length===0,'no page errors '+errs.join('|'));
 await b.close(); console.log(f?'FAILED '+f:'ALL OK'); process.exit(f?1:0);
 })();
