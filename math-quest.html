@@ -478,6 +478,13 @@ body[data-view="home"] .wrap > .sub{margin-bottom:12px}
 .hidx .harea{font-size:.78rem; font-weight:800; color:var(--muted); margin:10px 0 2px}
 .hback{width:100%; margin-top:14px}
 .qlabel{font-size:.78rem; color:var(--purple); font-weight:700; margin-bottom:6px}
+.qart{display:flex; gap:10px; align-items:flex-end; margin:6px 0 8px}
+.qart[hidden]{display:none}
+.qa{margin:0; text-align:center; flex:none}
+.qa img{display:block; height:64px; width:64px; object-fit:contain}
+.qa figcaption{font-size:.72rem; font-weight:700; color:var(--muted,#7a6a7a); line-height:1.2}
+.qa .cup{display:block}
+@media (min-width:768px){ .qa img{height:96px; width:96px} .qa figcaption{font-size:.85rem} }
 .qtext{font-size:1.12rem; line-height:1.6; margin-bottom:16px; font-weight:600}
 .qtext .hl{color:var(--pink)}
 .qtool{margin:0 -20px 14px; background:var(--card2); border-radius:14px; padding:8px 6px}
@@ -1057,6 +1064,7 @@ body[data-view="space"] #spaceView{box-sizing:border-box; display:flex; flex-dir
 
   <div class="card" id="card">
     <div class="qhead"><div class="qlabel" id="qlabel">שאלה</div><div class="qbtns"><button type="button" class="helpbtn" id="reportBtn">דיווח</button><button type="button" class="helpbtn" id="helpBtn">עזרה</button></div></div>
+    <div class="qart" id="qart" hidden aria-hidden="true"></div>
     <div class="qtext" id="qtext">טוען...</div>
     <div class="qtool" id="qTool" hidden></div>
     <div class="guidebox" id="guideBox" hidden></div>
@@ -1872,7 +1880,7 @@ function whenImgs(root, ms, fn){
 // everything a reward can show (all the cupcake, donut ... parts, the upgraded pictures, the active theme's stickers) is loaded quietly in the background, a few at a time
 let warmQ = null;
 function rewardArtList(){
-  const t = THEME_ASSETS[themeId], parts = [LAYERS, LAYERS_DONUT, UPGRADE_IMG, COTTON_CANDY_IMG, t ? [t.sticker, t.upgraded, t.currency] : null];
+  const t = THEME_ASSETS[themeId], parts = [PET_ART, FRUIT_ART, KID_ART, LAYERS, LAYERS_DONUT, UPGRADE_IMG, COTTON_CANDY_IMG, t ? [t.sticker, t.upgraded, t.currency] : null];
   const out = new Set(); (JSON.stringify(parts).match(/assets\/[0-9a-f]{12}\.[a-z0-9]+/g) || []).forEach(s=>out.add(s)); return [...out];
 }
 function warmRewardArt(){
@@ -2742,7 +2750,7 @@ function cloudProfileFromDoc(C, helpers){
 // ===== CLOUD (Google sign-in, cloud progress, problem reports) =====
 // Local-first: the game always works from this device's storage. The cloud is a mirror, so no internet / no account / no quota never blocks play.
 // Everything here is off while CLOUD_CONFIG is null. See firebase/SETUP.md for how to create the (free) Firebase project and paste its settings below.
-const APP_VERSION = '2026.11.19h';       // keep equal to VERSION in sw.js (a test checks it)
+const APP_VERSION = '2026.11.19i';       // keep equal to VERSION in sw.js (a test checks it)
 const BUILD_COMMIT = '';                 // the full id of the commit this page was built from: the deploy workflow (.github/workflows/tests.yml) fills it in; empty in a plain checkout
 const REPO_URL = 'https://github.com/matan-gk/matan-gk.github.io';
 const CLOUD_CONFIG = {apiKey:"AIzaSyAlq_TJNGvWPJpUrpbdq_hkAoURydqMzm0", authDomain:"learning-quest-1.firebaseapp.com", projectId:"learning-quest-1", appId:"1:98931179722:web:78fb00084ccba3efb53433"};   // e.g. {apiKey:'...', authDomain:'xxx.firebaseapp.com', projectId:'xxx', appId:'...'}
@@ -3963,7 +3971,8 @@ const PEOPLE = [   // a = index of the kid's portrait in KID_ART (the sheet in a
   {n:"תהילה",g:"f",a:0},{n:"פריה",g:"f",a:2},{n:"יעל",g:"f",a:4},{n:"אלה",g:"f",a:6},
   {n:"מיקו",g:"f",a:8},{n:"נועה",g:"f",a:10},{n:"דנה",g:"f",a:12},{n:"אמל",g:"f",a:14}
 ];
-function pickPeople(k){ return shuffle(PEOPLE.slice()).slice(0,k); }
+let PICKED = [];   // who pickPeople chose while the current question was being made (for its illustrations)
+function pickPeople(k){ const r = shuffle(PEOPLE.slice()).slice(0,k); PICKED.push(...r); return r; }
 function v(person, m, f){ return person.g==='m'? m : f; }
 const ITEMS = ["סוכריות צבעוניות","מדבקות נוצצות","קלפים מצוירים","בלוני יום הולדת","חרוזים לשרשרת","מגנטים למקרר","קאפקייקס מיניאטוריים","פרחי נייר"];
 function pickItem(){ return spool('ITEMS',ITEMS)[ri(0,spool('ITEMS',ITEMS).length-1)]; }
@@ -4054,6 +4063,37 @@ const SPACE_STORY_MAP = [
 ];
 function storyText(t){ if(typeof t!=='string' || themeId!=='space') return t; let r = t; SPACE_STORY_MAP.forEach(([a,b])=>{ if(r.indexOf(a)>=0) r = r.split(a).join(b); }); return r; }
 // applied to every question made while the space theme is on (text, explanation, label); the answer values are never touched
+// ---- illustrations for word questions: the portraits of the kids in the story, and a picture of a fruit, pet or treat it mentions. They sit above the question, as pictures only: the words say everything
+const ART_WORDS = {   // [kind, name, pattern of the word with its endings]
+  pet:[['כלב','כלב(ים)?'],['חתול','חתול(ים|ות)?'],['ארנב','ארנב(ים|ות)?'],['דג','דג(ים|ות)?'],['תוכי','תוכ(י|ים)'],['אוגר','אוגר(ים|ות)?']],
+  fruit:[['תפוח','תפוח(ים)?'],['בננה','בננ(ה|ות)'],['ענבים','ענב(ים)?'],['תות','תות(ים)?'],['אבטיח','אבטיח(ים)?'],['אננס','אננס(ים)?']],
+  treat:[['🧁','קאפקייק(ס|ים)?'],['🍨','גלידה|גלידות'],['🍩','סופגני(ה|ות|יה)|דונאט(ס)?']]
+};
+const ART_RE = {}; for(const k in ART_WORDS) ART_RE[k] = ART_WORDS[k].map(([n,pt])=>[n, new RegExp('(^|[^א-ת])[ובכלמש]{0,2}ה?(?:'+pt+')(?![א-ת])')]);
+function artFor(q, people){
+  if(!q || typeof q.text!=='string' || q.tool || q.noArt) return [];
+  const t = q.text.replace(/<[^>]*>/g,' '), out = [];
+  const kids = (people||[]).filter((x,i,a)=>a.indexOf(x)===i && t.indexOf(x.n)>=0).sort((a,b)=>t.indexOf(a.n)-t.indexOf(b.n)).slice(0,3);
+  kids.forEach(x=>out.push({k:'kid', n:x.n, s:KID_ART[x.a]}));
+  const things = [];
+  for(const k of ['pet','fruit','treat']) for(const [n,re] of ART_RE[k]){
+    const m = re.exec(t); if(!m) continue;
+    const s = k==='pet' ? PET_ART[n] : k==='fruit' ? FRUIT_ART[n] : null;
+    if(k==='treat'){ if(themeId===THEME_DEFAULT && LAYERS[n]) things.push({k, n, at:m.index, cup:n+':0.0.0'}); }
+    else if(s) things.push({k, n, s, at:m.index});
+  }
+  things.sort((a,b)=>a.at-b.at).slice(0, Math.max(0, 4-out.length)).forEach(x=>out.push(x));
+  return out;
+}
+function genQ(gen){ PICKED = []; const q = gen(); if(q && typeof q==='object') q.art = artFor(q, PICKED); PICKED = []; return q; }
+function renderQArt(){
+  const d = document.getElementById('qart'); if(!d) return;
+  const a = (current && current.art) || [];
+  d.hidden = !a.length;
+  d.innerHTML = a.map(x=> x.k==='kid' ? `<figure class="qa kid"><img src="${x.s}" alt="" draggable="false"><figcaption>${esc(x.n)}</figcaption></figure>`
+    : x.cup ? `<figure class="qa thing">${cupHTML(x.cup, 64)}</figure>` : `<figure class="qa thing"><img src="${x.s}" alt="" draggable="false"></figure>`).join('');
+  if(a.length) whenImgs(d, 1200, ()=>{});
+}
 function themeStory(q){ if(q && themeId==='space'){ q.text = storyText(q.text); if(q.explain) q.explain = storyText(q.explain); if(q.label) q.label = storyText(q.label); } return q; }
 
 const SHOP_THINGS = ['יו-יו מנצנץ','סרט מתנה','בקבוקון בועות','קלף קסמים','גולה קסומה','מדבקה זוהרת','מחזיק מפתחות','כובע קוסם קטן'];
@@ -7481,9 +7521,9 @@ function nextQuestion(opts){
   let gen = pickGenerator(pool, pr && pr.stats, focusOn, current && current.skill, undefined, warming);
   if(level===9) gen = rdPick(pool, gen);
   if(fu && typeof fu.gen==='function') gen = fu.gen;
-  current = themeStory(gen()); current._gen = gen; if(fu) current._again = 1; current.skill = current.rdSkill || gen.name; current.d = questionDifficulty({d:current.d, skill:current.skill}); current.isBonus = false; startQTimer();
+  current = themeStory(genQ(gen)); current._gen = gen; if(fu) current._again = 1; current.skill = current.rdSkill || gen.name; current.d = questionDifficulty({d:current.d, skill:current.skill}); current.isBonus = false; startQTimer();
   document.getElementById('qlabel').textContent = current.label;
-  document.getElementById('qtext').innerHTML = grpShapes(current.text);
+  document.getElementById('qtext').innerHTML = grpShapes(current.text); renderQArt();
   qToolOpen(current);
   const area0 = renderAnswerArea(current, checkAnswer);
   if(current.rd) rdQuestionUI(area0);
@@ -7500,9 +7540,9 @@ function renderBonus(){
   document.getElementById('card').classList.add('bonus-mode');
   const pool = BONUS_POOLS[level] || BONUS_POOLS[5];   // bonus questions are always hard: the difficulty setting does not apply
   const gen = pool[ri(0,pool.length-1)];
-  current = themeStory(gen()); current.skill = gen.name; current.d = questionDifficulty({d:current.d, skill:gen.name}); current.isBonus = true; startQTimer();
+  current = themeStory(genQ(gen)); current.skill = gen.name; current.d = questionDifficulty({d:current.d, skill:gen.name}); current.isBonus = true; startQTimer();
   document.getElementById('qlabel').innerHTML = `<span class="bonustag">${TX('bonusTag','🍭 שאלת בונוס')}</span> — אפשר גם לדלג!`;
-  document.getElementById('qtext').innerHTML = grpShapes(current.text);
+  document.getElementById('qtext').innerHTML = grpShapes(current.text); renderQArt();
   qToolOpen(current);
   const area = renderAnswerArea(current, checkAnswer);
   const skipBtn = document.createElement('button');

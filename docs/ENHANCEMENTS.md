@@ -878,3 +878,12 @@ Cause: a reward is 3 stacked pictures (base, filling, topping) that only started
 - **Preload.** `warmRewardArt` loads every picture a reward can use (about 650: the cupcake, donut and other parts, the upgraded pictures, the active theme's stickers), 3 at a time, 1.5 s after the page loads and again after a theme change, and keeps them referenced (`IMG_HOLD`). It stops while a new version is waiting (`PWA.waiting`); with it running, "reload" for an update did not take effect in `pwatest`.
 - Not changed: the service worker still caches all pictures at install, all at once (a limited pool made `pwatest` fail the update flow).
 - Test: `rewardloadtest` (slow, failing and cached pictures, the preload, the update pause).
+
+## Step 68: illustrations in word questions (branch `art-1-word-illustrations`, stacked on `grid-artwork`; version 2026.11.19i)
+
+Pictures only, never instead of words: a strip above the question text (`#qart`, `aria-hidden`; the words already say everything).
+- **Kids.** `pickPeople` records who it chose while a question is made (`PICKED`); `genQ(gen)` (used by `nextQuestion` and `renderBonus`) keeps those whose name is in the text, in order of appearance, at most 3, each with its portrait and the name under it.
+- **Things.** Fruit (6), pets (6), and in the default theme a cupcake / ice cream / doughnut (the game's own reward pictures), found by word with Hebrew prefixes and plurals (`ART_WORDS`); "תפוחי אדמה" (potatoes) and "דגל" (flag) do not match. At most 4 pictures in all.
+- Not on clue-grid questions (the grid shows the same pictures). A question with nothing to show leaves no gap. 64px (96px on big screens). The art is part of the background preload.
+- Only about 1 question in 10 has any picture, because most generators are pure numbers or use made-up objects with no art; more pictures later would widen it (stickers, sweets).
+- Test: `wordarttest`.

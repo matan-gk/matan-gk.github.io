@@ -80,6 +80,7 @@ const TESTS = [
   ['welcometest','welcometest.js','first-run welcome: short accurate explanation, opens on tap, title fits, no leftovers'],
   ['prizetest','prizetest.js','prize pop-up: appears mid-screen, flies to the gift box, never overlaps a party, reduced motion'],
   ['rewardloadtest','rewardloadtest.js','rewards never pop up empty: the prize waits for its pictures, failing pictures block nothing, background preload, paused by a waiting update'],
+  ['wordarttest','wordarttest.js','word questions: portraits of the kids named and pictures of the fruit, pets and treats mentioned; none on clue grids; nothing when there is nothing to show'],
   ['items3','items3test.js','batch 3 items (kids furniture and play): catalog, back pictures, hosts, recolouring, transparent gaps'],
   ['tokbadge','tokbadgetest.js','coin balance next to the gift square once the room is unlocked'],
   ['bedmask','bedmasktest.js','bed part masks: fold band is blanket, bit left of the pillow is sheet'],
