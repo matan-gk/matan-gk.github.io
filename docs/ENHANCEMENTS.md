@@ -870,3 +870,11 @@ Matan's generated art goes into the clue grid (the one grid used by the tool and
 - **Size.** Pictures 40px on a phone (34px in the two-attribute grid, which still fits 360px), 68px on big screens, where the mark cells are 72px so a column's picture is not cut off.
 - **Golden file.** `tests/golden/logicgrid.json` regenerated (new names and a sixth fruit change the seeded wording).
 - Tests: `cluegridtest` (16 unique kids, gender pairing, every animal and fruit has a picture, all pictures cached, every header shows a loaded picture and a name, a kid's row shows that kid's portrait).
+
+## Step 67: rewards no longer appear invisible (branch `grid-artwork`; version 2026.11.19h)
+
+Cause: a reward is 3 stacked pictures (base, filling, topping) that only started loading when the prize popped up, so on a first visit or a slow connection it flew in empty or half drawn (and the mascot's small copy, the same).
+- **Wait for the pictures.** `whenImgs(root, ms, fn)` runs `fn` when every picture inside is loaded and decoded, or after `ms` at the latest; instantly when they already are. `prizeFly` stays hidden until then (up to 1.5 s, the safety removal is 6 s) and `peekMascot` waits up to 0.9 s. A picture that fails to load never blocks.
+- **Preload.** `warmRewardArt` loads every picture a reward can use (about 650: the cupcake, donut and other parts, the upgraded pictures, the active theme's stickers), 3 at a time, 1.5 s after the page loads and again after a theme change, and keeps them referenced (`IMG_HOLD`). It stops while a new version is waiting (`PWA.waiting`); with it running, "reload" for an update did not take effect in `pwatest`.
+- Not changed: the service worker still caches all pictures at install, all at once (a limited pool made `pwatest` fail the update flow).
+- Test: `rewardloadtest` (slow, failing and cached pictures, the preload, the update pause).
