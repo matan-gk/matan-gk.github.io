@@ -887,3 +887,11 @@ Pictures only, never instead of words: a strip above the question text (`#qart`,
 - Not on clue-grid questions (the grid shows the same pictures). A question with nothing to show leaves no gap. 64px above the text on phones; on big screens 72px, beside the text (at most 3), so the card does not grow into the mascot below it. The art is part of the background preload.
 - Only about 1 question in 10 has any picture, because most generators are pure numbers or use made-up objects with no art; more pictures later would widen it (stickers, sweets).
 - Test: `wordarttest`.
+
+## Step 69: "saved on this device" note and install guidance (branch `art-2-save-and-install`, stacked on `art-1-word-illustrations`; version 2026.11.19j)
+
+For the parent, on the home screen under the game buttons (`#saveNote`, hidden inside a game):
+- **Save note.** "ההתקדמות נשמרת במכשיר הזה" with the warning that it is lost when browser data is deleted and a button "איך שומרים?" that opens the Backup tab. With cloud backup on and synced: "…במכשיר הזה ובענן". If the browser refuses to save (private mode, full storage; `persist()` now notices) a red alert replaces it: progress disappears when the page closes, make a save code.
+- **Install nudge.** After the first reward, once, and only where the service worker is available (not from a file, not already installed): "להוסיף את המשחק למסך הבית?" with "התקנה" (runs the browser's install prompt when it offered one) or "איך?" (opens the Backup tab at the home-screen card, which has the iPhone and Chrome steps); ✕ dismisses it for good (`cq_install_nudge_dismissed` in localStorage; nothing synced).
+- The home-screen card now also appears in the Google-account and anonymous-backup views of the Backup tab (it was only in the local view), and has an anchor.
+- Buttons 44px high. Test: `savenotetest`.
