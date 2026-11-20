@@ -1852,11 +1852,44 @@ function rewardImg(k, isGold){
 }
 // small inline glyph for a plain-text spot (feedback line, confetti): the themed picture or the emoji
 function rewardGlyph(k, px){ if(themeId===THEME_DEFAULT){ const cup=cupHTML(k,px); if(cup) return cup; } k = kOf(k); const im = rewardImg(k,false); return (themeId!==THEME_DEFAULT && k!=='cotton' && im) ? `<img class="rg" src="${im}" alt="" style="height:${px}px;width:${px}px;vertical-align:middle">` : esc(k); }
+// ---- pictures ready before they are shown: a reward is several stacked images, and each used to start loading only when the prize popped up (so it could appear empty or half drawn)
+const IMG_HOLD = new Map(), IMG_DONE = new Set();   // src -> {img, p}; kept so the browser keeps the decoded picture
+function imgWarm(src){
+  if(!src) return Promise.resolve();
+  let h = IMG_HOLD.get(src); if(h) return h.p;
+  const img = new Image(); img.decoding = 'async'; img.src = src;
+  const fin = ()=>{ IMG_DONE.add(src); };
+  const p = (img.decode ? img.decode() : new Promise((r,j)=>{ img.onload = r; img.onerror = j; })).then(fin, fin);   // a missing picture must not block anything
+  IMG_HOLD.set(src, {img, p}); return p;
+}
+// run fn once every picture inside root is loaded and decoded (at most ms later); straight away when they all already are
+function whenImgs(root, ms, fn){
+  const srcs = root ? [...root.querySelectorAll('img[src]')].map(i=>i.getAttribute('src')).filter(s=>s && !IMG_DONE.has(s)) : [];
+  if(!srcs.length){ fn(); return; }
+  let ran = false; const go = ()=>{ if(!ran){ ran = true; fn(); } };
+  Promise.all(srcs.map(imgWarm)).then(go); setTimeout(go, ms);
+}
+// everything a reward can show (all the cupcake, donut ... parts, the upgraded pictures, the active theme's stickers) is loaded quietly in the background, a few at a time
+let warmQ = null;
+function rewardArtList(){
+  const t = THEME_ASSETS[themeId], parts = [LAYERS, LAYERS_DONUT, UPGRADE_IMG, COTTON_CANDY_IMG, t ? [t.sticker, t.upgraded, t.currency] : null];
+  const out = new Set(); (JSON.stringify(parts).match(/assets\/[0-9a-f]{12}\.[a-z0-9]+/g) || []).forEach(s=>out.add(s)); return [...out];
+}
+function warmRewardArt(){
+  const list = rewardArtList().filter(s=>!IMG_HOLD.has(s)); if(!list.length) return;
+  if(warmQ){ warmQ.push(...list); return; }
+  warmQ = list; let n = 0;
+  const next = ()=>{ if(typeof PWA!=='undefined' && PWA.waiting){ warmQ = null; return; }   // a new version is waiting: stay out of its way
+    const s = warmQ && warmQ.shift(); if(!s){ if(--n<=0) warmQ = null; return; } imgWarm(s).then(()=>setTimeout(next, 30)); };
+  for(let i=0;i<3;i++){ n++; next(); }
+}
+window.addEventListener('load', ()=>setTimeout(warmRewardArt, 1500));
 function applyTheme(){
   const T = THEMES[themeId] || THEMES[THEME_DEFAULT];
   document.documentElement.setAttribute('data-skin', T.id);
   document.title = T.docTitle;
   if(typeof applyView==='function') applyView();
+  if(typeof warmRewardArt==='function') setTimeout(warmRewardArt, 800);
   const sub = document.querySelector('.wrap > .sub'); if(sub) sub.textContent = T.sub;
   const ci = document.getElementById('charImg'); if(ci) ci.alt = T.mascot;
   const tc = document.querySelector('meta[name="theme-color"]'); if(tc) tc.setAttribute('content', T.color);
@@ -2709,7 +2742,7 @@ function cloudProfileFromDoc(C, helpers){
 // ===== CLOUD (Google sign-in, cloud progress, problem reports) =====
 // Local-first: the game always works from this device's storage. The cloud is a mirror, so no internet / no account / no quota never blocks play.
 // Everything here is off while CLOUD_CONFIG is null. See firebase/SETUP.md for how to create the (free) Firebase project and paste its settings below.
-const APP_VERSION = '2026.11.19g';       // keep equal to VERSION in sw.js (a test checks it)
+const APP_VERSION = '2026.11.19h';       // keep equal to VERSION in sw.js (a test checks it)
 const BUILD_COMMIT = '';                 // the full id of the commit this page was built from: the deploy workflow (.github/workflows/tests.yml) fills it in; empty in a plain checkout
 const REPO_URL = 'https://github.com/matan-gk/matan-gk.github.io';
 const CLOUD_CONFIG = {apiKey:"AIzaSyAlq_TJNGvWPJpUrpbdq_hkAoURydqMzm0", authDomain:"learning-quest-1.firebaseapp.com", projectId:"learning-quest-1", appId:"1:98931179722:web:78fb00084ccba3efb53433"};   // e.g. {apiKey:'...', authDomain:'xxx.firebaseapp.com', projectId:'xxx', appId:'...'}
@@ -8575,7 +8608,11 @@ function prizeFly(list){
     prizeDone();
   };
   const still = window.matchMedia && window.matchMedia('(prefers-reduced-motion:reduce)').matches;
-  if(still || !el.animate){ setTimeout(finish, still ? 1000 : 400); return; }
+  if(still || !el.animate){ whenImgs(el, 1500, ()=>setTimeout(finish, still ? 1000 : 400)); return; }
+  el.style.visibility = 'hidden';   // shown only when its pictures are ready
+  whenImgs(el, 1500, ()=>{ if(ended) return; el.style.visibility = ''; prizeAnim(); });
+  setTimeout(finish, 6000);   // safety: whatever happens, the prize never gets stuck on the screen
+  function prizeAnim(){
   const C = 'translate(-50%,-50%)';
   const pop = el.animate([{transform:C+' scale(.1) rotate(-12deg)', opacity:0},{transform:C+' scale(1.3) rotate(6deg)', opacity:1, offset:.6},{transform:C+' scale(1) rotate(0deg)', opacity:1}], {duration:650, easing:'cubic-bezier(.2,.9,.3,1.2)', fill:'forwards'});
   pop.onfinish = ()=>{
@@ -8588,15 +8625,15 @@ function prizeFly(list){
       fly.onfinish = finish;
     }, 550);
   };
-  setTimeout(finish, 3500);   // safety: whatever happens, the prize never gets stuck on the screen
+  }
 }
-let peekTimer = null;
+let peekTimer = null, peekSeq = 0;
 function peekMascot(rewardHTML){
   const w = document.querySelector('.charwrap'), r = document.getElementById('charReward');
   if(!w || !r) return;
   r.innerHTML = rewardHTML || ''; r.classList.toggle('on', !!rewardHTML);
-  w.classList.remove('peek'); void w.offsetWidth; w.classList.add('peek');
-  clearTimeout(peekTimer); peekTimer = setTimeout(peekClear, 2800);
+  const show = ()=>{ w.classList.remove('peek'); void w.offsetWidth; w.classList.add('peek'); clearTimeout(peekTimer); peekTimer = setTimeout(peekClear, 2800); };
+  const tk = ++peekSeq; whenImgs(r, 900, ()=>{ if(tk===peekSeq) show(); });
 }
 function peekClear(){
   clearTimeout(peekTimer);
