@@ -31,7 +31,7 @@ let bad=0;const ok=(c,m)=>{console.log((c?'ok   ':'FAIL ')+m);if(!c)bad++;};
  ok((await A.locator('#profBody').innerText()).includes('ההתחברות לא הצליחה'),'failed popup keeps its error message');
  await A.click('[data-pact=cloudin]');await A.waitForFunction(()=>cloud.status==='ok');
  ok(await success(A).count()===1&&(await success(A).innerText()).includes('ההתחברות ל-Google הצליחה'),'new account sees an explicit Google sign-in confirmation');
- ok((await success(A).innerText()).includes('שמירה')&&(await success(A).innerText()).includes('השם לא חובה'),'confirmation explains profile creation, Save, and optional name');
+ ok((await success(A).innerText()).includes('התחלת משחק')&&(await success(A).innerText()).includes('השם לא חובה'),'confirmation explains profile creation, Begin playing, and optional name');
  ok(await A.locator('[data-pact=cloudin]').count()===0,'successful empty account no longer invites another Google login');
  ok(await A.evaluate(()=>!!cloud.user&&!cloud.user.anon&&store.profiles.length===0),'no child profile is created automatically');
  for(const width of [320,390,768,1280]){

@@ -937,3 +937,13 @@ Read samples of every question type (about 26,000 generated questions plus one o
 
 The new-profile form (the first-run welcome and "➕ פרופיל חדש") has a "כמה קשה?" choice: ⭐ קל, ⭐⭐ בינוני, ⭐⭐⭐ קשה, 🎲 הכול (default). Easy, medium and hard mean that single rating level (the same levels as the switches in the parent area's settings); "everything" is all three, as before. The choice is stored as the profile's `diff`, so it is the same setting the parent area shows and changes. A note under it says it can be changed at any time and that the parent area (settings) is much more specific: several levels together, switching magic places off, hiding question types. The edit form does not show it (changing it later is the parent area's job). Bonus questions are not affected (always hard).
 - Test: `profilediffTest`.
+
+## Step 74: a clear way to start on the welcome page (branch `welcome-start-paths`, off main; version 2026.11.22c)
+
+The first-run welcome had "שמירה" followed by three similar buttons (save code, family code, Google), which did not say what is required. Now:
+- The only filled button is **"▶ התחלת משחק"**, under the name, how-to-address and difficulty fields, with the line "זה כל מה שצריך כדי להתחיל. כל השאר לא חובה, ואפשר גם אחר כך."
+- Below a divider ("או, אם יש לכם משהו מוכן") two boxes of optional alternatives: **"חוזרים ממכשיר אחר?"** (save code; family code when the cloud is on) and **"חשבון Google (לא חובה)"**, which explains both uses: new players get cloud backup without a code, and people with an account get their progress back. It can be done now or after starting.
+- The paths: a new player fills the form and begins, or signs in with Google first (the form then shows the success message, which now says to press "התחלת משחק") and then fills the form; someone restoring uses a save code, a family code or Google.
+- Google buttons (welcome and the Backup tab) show the Google "G" on a white button.
+- Later profiles (not the first run) keep "שמירה" and have no restore options, as before.
+- Test: `welcomestarttest`.

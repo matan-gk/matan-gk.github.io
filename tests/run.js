@@ -87,6 +87,7 @@ const TESTS = [
   ['guidefixestest','guidefixestest.js','guide fixes: intro, kudos for what is already marked, messages that follow the grid, strong highlights, clue shown in the guide box, clear-the-table restarts; even-share wording'],
   ['hebrew','hebrewtest.js','Hebrew proofread: no "ב-1 סבבים", word analogy as pairs, no hyphen before a Hebrew word'],
   ['profilediff','profilediffTest.js','difficulty choice on the new-profile form: four options, "everything" default, saved with the profile, note about the parent area'],
+  ['welcomestart','welcomestarttest.js','first-run welcome: one clear start button, restore and Google are optional alternatives, Google logo on the button'],
   ['items3','items3test.js','batch 3 items (kids furniture and play): catalog, back pictures, hosts, recolouring, transparent gaps'],
   ['tokbadge','tokbadgetest.js','coin balance next to the gift square once the room is unlocked'],
   ['bedmask','bedmasktest.js','bed part masks: fold band is blanket, bit left of the pillow is sheet'],
