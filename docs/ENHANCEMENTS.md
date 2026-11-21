@@ -895,3 +895,19 @@ For the parent, on the home screen under the game buttons (`#saveNote`, hidden i
 - **Install nudge.** After the first reward, once, and only where the service worker is available (not from a file, not already installed): "להוסיף את המשחק למסך הבית?" with "התקנה" (runs the browser's install prompt when it offered one) or "איך?" (opens the Backup tab at the home-screen card, which has the iPhone and Chrome steps); ✕ dismisses it for good (`cq_install_nudge_dismissed` in localStorage; nothing synced).
 - The home-screen card now also appears in the Google-account and anonymous-backup views of the Backup tab (it was only in the local view), and has an anchor.
 - Buttons 44px high. Test: `savenotetest`.
+
+## Step 70: accessibility (branch `art-3-accessibility`, stacked on `art-2-save-and-install`; version 2026.11.19k)
+
+Audited with axe-core (WCAG 2.1 AA + best practice, on the home screen, a game, the gift room, every parent-area tab, light / dark / space skin) and by hand (keyboard, focus, zoom, reduced motion).
+Found and fixed:
+- **Keyboard and screen readers (the big one).** The level buttons and the answer choices were plain `div`s: unreachable by Tab, not buttons to a screen reader. `a11yEnhance` (run once and on every DOM change) gives `.levelbtn`, `.choice` and the gift-room tiles `role="button"`, `tabindex="0"` and a name (picture-only answers get "אפשרות N", gifts their name); Enter and Space activate any such element.
+- **Dialogs.** All overlays are `aria-modal`; opening moves the focus inside, Tab and Shift+Tab stay inside, closing returns the focus to what opened it (Escape already closed them). The celebration dialog got a name.
+- **Announcements.** The answer feedback is a polite status region; the question text is a polite live region, so a screen-reader user hears the new question.
+- **Landmarks and headings.** The game is a single `<main>` (the parent area's `<main>` became a labelled, focusable region so the page has one); parent-guide headings no longer skip a level.
+- **Tap targets.** Menu, back, report and help buttons are at least 44px high.
+- **Contrast** (AA 4.5:1): muted grey text, pink counters, purple buttons and links, the green "in use" badge now have text variants (`--muted`, `--pink-text`, `--purple-text`, `--good-text`) per palette (light, dark, space light/dark); the dark palettes use a lighter purple.
+- **Focus.** One visible focus ring for everything (`:focus-visible`), a stronger one on levels, answers, gifts and grid cells, and the answer input gets a glow.
+- **Reduced motion.** A global `prefers-reduced-motion` rule cuts every CSS animation and transition (before only a few were covered; the prize flight already respected it).
+- Checked and fine: 320px width (no sideways scroll), `lang="he"`/`dir="rtl"`, zoom is not blocked, clue-grid cells are buttons with names ("נדב וארנב: ריק").
+Known limits (not fixed): picture-only puzzles (patterns, boards, shapes) have no text description beyond "אפשרות N", so a blind child cannot solve them; the guided solutions and the stickers book were checked only by axe; the game has no sound and no timers, so nothing time-limited. A real screen-reader pass (VoiceOver / TalkBack) is still worth doing.
+- Test: `a11ytest` (adds `axe-core` to `tests/package.json`; skipped if it is not installed).
