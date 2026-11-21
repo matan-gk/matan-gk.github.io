@@ -924,3 +924,11 @@ Known limits (not fixed): picture-only puzzles (patterns, boards, shapes) have n
 7. **Already done = kudos.** If the marks the next step asks for are already on the grid, the step says "👏 כל הכבוד, כבר סימנתם את זה! … אפשר להמשיך." and the button reads "המשך לשלב הבא". (Marks ahead of the clues are still red: a mark is only accepted when the clues so far make it certain, so "ahead" means steps that follow from the same clues.)
 - Test: `guidefixestest`; `savenotetest` now checks the parent check.
 - The page grew past the 900 KB size check in `splittest` (now 881 KB gzip-free source, 902,000 bytes); the limit is now 950,000 bytes. Most of the growth is the accessibility code, the word-art, the save note and the guide.
+
+## Step 72: Hebrew proofread (branch `proofread-1-hebrew`, off main; version 2026.11.19m)
+
+Read samples of every question type (about 26,000 generated questions plus one of each template) for missing verbs, gender and number slips, spacing and awkward phrasing. Names and verbs agree, nouns and numbers agree, no missing spaces after punctuation (the earlier hits were only the line breaks of the question layout). Fixed:
+1. **Rounds game**: "ב-1 סבבים" is now "בסבב אחד" (`gRoundsTransfer`).
+2. **Word analogy** (`gAnalogyWord`): was "מחט שייך ל-תופרת, בדיוק כמו ש-סכין שייך ל-?" (wrong gender, hyphen before a Hebrew word, "belongs to" did not fit the pairs). Now two pairs, "מחט : תופרת" / "סכין : ?", and "הזוג השני קשור זה לזה באותה דרך כמו הזוג הראשון. מה חסר?".
+3. **Synonyms reading question**: "באיזה זוג המילים המילים נרדפות?" had a doubled word; now "באיזה זוג המילים נרדפות?".
+- Test: `hebrewtest` (also scans every generator for a prefix hyphen before a Hebrew word).
