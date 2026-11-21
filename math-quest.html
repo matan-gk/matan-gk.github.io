@@ -358,6 +358,16 @@ h1{
 .bkrow .pinfo{min-width:120px}
 .bkrow select{font-family:'Rubik',sans-serif; font-size:.82rem; padding:6px 8px; border-radius:10px; border:2px solid var(--card); background:var(--card); color:var(--text); margin-inline-start:auto; max-width:100%}
 .menuwrap{position:relative}
+.savenote{margin:4px 0 14px; display:flex; flex-direction:column; gap:8px}
+.savenote[hidden]{display:none}
+.sn-row{display:flex; align-items:center; gap:10px; background:var(--card); border-radius:14px; padding:8px 12px; box-shadow:0 2px 8px var(--shadow,rgba(0,0,0,.08)); font-size:.9rem; line-height:1.35; color:var(--text)}
+.sn-row .sn-t{flex:1; min-width:0}
+.sn-row small{display:block; color:var(--muted); font-size:.8rem}
+.sn-row.warn{border:2px solid var(--bad)}
+.sn-row .sn-ic{font-size:1.2rem; flex:none}
+.sn-btn{min-height:44px; padding:0 14px; border-radius:12px; border:2px solid var(--purple,#9b6bd6); background:transparent; color:var(--purple,#7b4bb6); font:800 .85rem 'Rubik',sans-serif; cursor:pointer; flex:none}
+.sn-btn.fill{background:var(--purple,#9b6bd6); color:#fff}
+.sn-x{min-width:44px; min-height:44px; border:0; background:transparent; color:var(--muted); font-size:1.1rem; cursor:pointer; flex:none}
 .menubtn{display:flex; align-items:center; gap:7px; border:0; background:var(--card); color:var(--text); font-family:'Rubik',sans-serif; font-weight:800; font-size:.88rem; border-radius:999px; padding:6px 12px 6px 10px; cursor:pointer; box-shadow:0 2px 8px var(--shadow); max-width:70vw}
 .menubtn:active{transform:scale(.97)}
 .menubtn .mname{overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:42vw}
@@ -432,7 +442,7 @@ body[data-bd="1"][data-view="home"] h1{background:var(--card); color:var(--text)
 body[data-bd="1"][data-view="home"] .wrap > .sub{background:var(--card); border-radius:12px; padding:4px 12px; width:max-content; max-width:100%; margin:0 auto 12px; box-shadow:0 4px 12px var(--shadow)}
 body[data-bd="1"][data-view="home"] .levelbtn{background:color-mix(in srgb, var(--card) 92%, transparent)}
 .levelbtn .lvimg.cut, .roombtn .lvimg.cut{border-radius:0; box-shadow:none; object-fit:contain; background:none; filter:drop-shadow(0 3px 5px var(--shadow))}
-body[data-view="play"] #levels, body[data-view="play"] .wrap > .sub{display:none}
+body[data-view="play"] #levels, body[data-view="play"] .wrap > .sub, body[data-view="play"] #saveNote{display:none}
 body[data-view="play"] h1{background:var(--card); color:var(--text); -webkit-background-clip:border-box; background-clip:border-box; border-radius:16px; padding:6px 14px; margin:0 auto 8px; width:max-content; max-width:100%; box-shadow:0 4px 12px var(--shadow)}
 body[data-view="play"] .charimg{width:104px}
 :root[data-skin="space"] body[data-view="play"] .charimg{width:auto; height:120px}
@@ -1067,6 +1077,7 @@ body[data-view="space"] #spaceView{box-sizing:border-box; display:flex; flex-dir
   </div>
 
   <div class="levels" id="levels"></div>
+  <div class="savenote" id="saveNote" hidden></div>
 
   <div class="card" id="card">
     <div class="qhead"><div class="qlabel" id="qlabel">שאלה</div><div class="qbtns"><button type="button" class="helpbtn" id="reportBtn">דיווח</button><button type="button" class="helpbtn" id="helpBtn">עזרה</button></div></div>
@@ -1961,7 +1972,8 @@ function applyProgress(d){
   const c = cleanProgress(d);
   score=c.score; streak=c.streak; collection=c.collection; lollipops=c.lollipops; golden=c.golden; legacyLooks=c.legacyLooks; space=c.space; rd=c.rd; rdExpire(); level=c.level; diffOn=c.diff; mxState=c.mx; focusOn=c.focus; warmOn=c.warm; toolsOn=c.tools; guideOn=c.guide.on; guideIdle=c.guide.idle; themeId=c.theme; applyTheme();
 }
-function persist(){ try{ localStorage.setItem(SAVE_KEY, JSON.stringify(store)); }catch(e){} }
+let saveFailed = false, saveNoteReady = false;   // the note needs PWA, which is defined near the end of the script
+function persist(){ let bad = false; try{ localStorage.setItem(SAVE_KEY, JSON.stringify(store)); }catch(e){ bad = true; } if(bad!==saveFailed){ saveFailed = bad; if(saveNoteReady) renderSaveNote(); } }
 function saveState(){
   const p = activeProfile();
   if(p){ p.progress = captureProgress(); const ch = touchIfChanged(p); persist(); if(ch) cloudChanged(); }
@@ -2756,7 +2768,7 @@ function cloudProfileFromDoc(C, helpers){
 // ===== CLOUD (Google sign-in, cloud progress, problem reports) =====
 // Local-first: the game always works from this device's storage. The cloud is a mirror, so no internet / no account / no quota never blocks play.
 // Everything here is off while CLOUD_CONFIG is null. See firebase/SETUP.md for how to create the (free) Firebase project and paste its settings below.
-const APP_VERSION = '2026.11.19i';       // keep equal to VERSION in sw.js (a test checks it)
+const APP_VERSION = '2026.11.19j';       // keep equal to VERSION in sw.js (a test checks it)
 const BUILD_COMMIT = '';                 // the full id of the commit this page was built from: the deploy workflow (.github/workflows/tests.yml) fills it in; empty in a plain checkout
 const REPO_URL = 'https://github.com/matan-gk/matan-gk.github.io';
 const CLOUD_CONFIG = {apiKey:"AIzaSyAlq_TJNGvWPJpUrpbdq_hkAoURydqMzm0", authDomain:"learning-quest-1.firebaseapp.com", projectId:"learning-quest-1", appId:"1:98931179722:web:78fb00084ccba3efb53433"};   // e.g. {apiKey:'...', authDomain:'xxx.firebaseapp.com', projectId:'xxx', appId:'...'}
@@ -3146,6 +3158,7 @@ async function submitReport(){
 function cloudRefreshUI(){
   if(!document.getElementById('profOverlay').hidden && (profTab==='backup' || profMode.first)) renderProfiles();
   if(typeof renderProfileChip==='function') renderProfileChip();
+  if(saveNoteReady) renderSaveNote();
 }
 const CLOUD_STATUS_TEXT = {
   syncing:'מסנכרנים...', ok:'מסונכרן', offline:'אין חיבור כרגע. ההתקדמות נשמרת במכשיר ותסונכרן כשיהיה חיבור.',
@@ -6027,7 +6040,7 @@ function backdropPFor(id){
 }
 let gameView = 'home';   // 'home' = the game selection screen, 'play' = inside one location
 function applyView(){
-  document.body.setAttribute('data-view', gameView);
+  document.body.setAttribute('data-view', gameView); if(saveNoteReady) renderSaveNote();
   const bd = document.getElementById('backdrop');
   const l = LEVELS.find(x=>x.id===level);
   const img = gameView==='play' ? backdropFor(level) : homeBackdrop();
@@ -6103,7 +6116,7 @@ function renderTokBadge(){   // the coins next to the gift square, once the room
   el.innerHTML = `${tokenHTML(n,32)||'<span class="tokzero">🪙</span>'}<b>${n}</b>`;
 }
 function renderRewards(){
-  renderTokBadge();
+  renderTokBadge(); if(saveNoteReady) renderSaveNote();
   const total = collection.length + golden.length;
   document.getElementById('rsTotal').textContent = total;
   const recent = document.getElementById('rsRecent');
@@ -8166,13 +8179,13 @@ function bkSubCur(){
 }
 function renderBackupHTML(){
   const cur = bkSubCur();
-  let h = '';
+  let h = '<span id="bkTop"></span>';
   if(cloudOn()){
     const chip = (id, label, active) => `<button type="button" class="pa-chip ${cur===id?'on':''}" aria-pressed="${cur===id}" data-pact="bksub" data-id="${id}">${label}${active?' ✓':''}</button>`;
     h += `<div class="pa-scope stack"><span class="pa-scope-l">סוג הגיבוי:</span><div class="pa-seg">${chip('local','גיבוי מקומי',false)}${chip('account','חשבון בענן',cloud.mode==='google')}${chip('anon','גיבוי אנונימי',cloud.mode==='code')}</div></div>`;
   }
-  if(cur==='account') return h + renderCloudAccountHTML();
-  if(cur==='anon') return h + renderCloudAnonHTML();
+  if(cur==='account') return h + renderCloudAccountHTML() + renderPwaCard();
+  if(cur==='anon') return h + renderCloudAnonHTML() + renderPwaCard();
   return h + renderLocalBackupHTML() + renderPwaCard();
 }
 function renderLocalBackupHTML(){
@@ -8798,11 +8811,11 @@ function pwaToast(){
 function pwaInit(){
   try{
     if(!('serviceWorker' in navigator) || !/^https?:$/.test(location.protocol)) return;
-    window.addEventListener('beforeinstallprompt', e=>{ e.preventDefault(); PWA.deferred = e; if(profTabIsBackup()) renderProfiles(); });
-    window.addEventListener('appinstalled', ()=>{ PWA.deferred = null; if(profTabIsBackup()) renderProfiles(); });
+    window.addEventListener('beforeinstallprompt', e=>{ e.preventDefault(); PWA.deferred = e; if(profTabIsBackup()) renderProfiles(); if(saveNoteReady) renderSaveNote(); });
+    window.addEventListener('appinstalled', ()=>{ PWA.deferred = null; if(profTabIsBackup()) renderProfiles(); renderSaveNote(); });
     let reloading = false; navigator.serviceWorker.addEventListener('controllerchange', ()=>{ if(!reloading && PWA.waiting){ reloading = true; location.reload(); } });
     navigator.serviceWorker.register('sw.js').then(reg=>{
-      PWA.supported = true; PWA.ready = !!navigator.serviceWorker.controller;
+      PWA.supported = true; PWA.ready = !!navigator.serviceWorker.controller; renderSaveNote();
       const watch = w=>w.addEventListener('statechange', ()=>{ if(w.state==='installed' && navigator.serviceWorker.controller){ PWA.waiting = w; pwaToast(); } if(w.state==='activated') PWA.ready = true; });
       if(reg.waiting && navigator.serviceWorker.controller){ PWA.waiting = reg.waiting; pwaToast(); }
       if(reg.installing) watch(reg.installing);
@@ -8822,7 +8835,7 @@ async function pwaInstall(){
 function renderPwaCard(){
   if(!PWA.supported && !pwaStandalone()) return '';
   const on = pwaStandalone();
-  let h = `<section class="pa-card"><h2 class="pa-h">מסך הבית וגישה בלי אינטרנט</h2>`;
+  let h = `<section class="pa-card" id="pwaCard"><h2 class="pa-h">מסך הבית וגישה בלי אינטרנט</h2>`;
   h += on ? `<p class="pa-sub"><b>המשחק מותקן ופועל במסך מלא.</b></p>` : `<p class="pa-sub">הוספת המשחק למסך הבית נותנת לו סמל משלו, פותחת אותו במסך מלא בלי סרגל הדפדפן, ושומרת את ההתקדמות בצורה אמינה יותר, במיוחד באייפון ובאייפד.</p>`;
   if(!on){
     if(PWA.deferred) h += `<div class="pa-actions"><button type="button" class="pa-btn" data-pact="pwainstall">התקנה במסך הבית</button></div>`;
@@ -8832,7 +8845,38 @@ function renderPwaCard(){
   h += `<p class="pa-sub" style="margin-bottom:0">${PWA.ready ? 'המשחק שמור במכשיר ויעבוד גם בלי אינטרנט. הגיבוי בענן יתעדכן כשהחיבור יחזור.' : 'אחרי הכניסה הבאה למשחק, הוא יישמר במכשיר ויעבוד גם בלי אינטרנט.'}${PWA.persisted===true ? ' שמירת הנתונים בדפדפן מוגנת.' : ''}</p></section>`;
   return h;
 }
+// ---- "saved on this device" note and the one-time "add to home screen" nudge, on the home screen (for the parent: the child does not need either)
+const SN_DISMISS_KEY = 'cq_install_nudge_dismissed';
+function snDismissed(){ try{ return localStorage.getItem(SN_DISMISS_KEY)==='1'; }catch(e){ return false; } }
+function renderSaveNote(){
+  const d = document.getElementById('saveNote'); if(!d) return;
+  if(!store || !store.profiles || !store.profiles.length){ d.hidden = true; return; }
+  const cloudOk = cloudOn() && cloud.mode && cloud.mode!=='off' && cloud.status==='ok';
+  let h = '';
+  if(saveFailed){
+    h += `<div class="sn-row warn" role="alert"><span class="sn-ic" aria-hidden="true">⚠️</span><span class="sn-t"><b>אי אפשר לשמור במכשיר הזה</b><small>אולי זו גלישה פרטית, או שהאחסון מלא. ההתקדמות תיעלם כשסוגרים את הדף. כדאי ליצור קוד שמירה.</small></span><button type="button" class="sn-btn fill" data-sn="backup">גיבוי</button></div>`;
+  } else {
+    const where = cloudOk ? 'במכשיר הזה ובענן' : 'במכשיר הזה';
+    const more = cloudOk ? '' : '<small>היא תיעלם אם מוחקים את נתוני הדפדפן. אפשר להתקין את המשחק ולגבות.</small>';
+    h += `<div class="sn-row"><span class="sn-ic" aria-hidden="true">✓</span><span class="sn-t"><b>ההתקדמות נשמרת ${where}</b>${more}</span>${cloudOk?'':'<button type="button" class="sn-btn" data-sn="backup">איך שומרים?</button>'}</div>`;
+  }
+  const canNudge = PWA.supported && !pwaStandalone() && !snDismissed() && !saveFailed && collection.length>=1;
+  if(canNudge){
+    const act = PWA.deferred ? `<button type="button" class="sn-btn fill" data-sn="install">התקנה</button>` : `<button type="button" class="sn-btn fill" data-sn="howinstall">איך?</button>`;
+    h += `<div class="sn-row" id="snInstall"><span class="sn-ic" aria-hidden="true">📲</span><span class="sn-t"><b>להוסיף את המשחק למסך הבית?</b><small>סמל משלו, מסך מלא ופתיחה גם בלי אינטרנט.</small></span>${act}<button type="button" class="sn-x" data-sn="dismiss" aria-label="לא עכשיו">✕</button></div>`;
+  }
+  if(d.innerHTML !== h) d.innerHTML = h;
+  d.hidden = false;
+}
+document.addEventListener('click', e=>{
+  const b = e.target.closest && e.target.closest('[data-sn]'); if(!b) return;
+  const a = b.dataset.sn;
+  if(a==='backup' || a==='howinstall'){ openPanel('backup'); setTimeout(()=>{ const c = document.getElementById(a==='howinstall' ? 'pwaCard' : 'bkTop'); if(c && c.scrollIntoView) c.scrollIntoView({block:'start'}); }, 30); }
+  else if(a==='install'){ pwaInstall().then(renderSaveNote); }
+  else if(a==='dismiss'){ try{ localStorage.setItem(SN_DISMISS_KEY,'1'); }catch(e){} renderSaveNote(); }
+});
 pwaInit();
+saveNoteReady = true; renderSaveNote();
 cloudBoot();
 </script>
 </body>
