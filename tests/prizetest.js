@@ -21,6 +21,7 @@ ok(c&&Math.abs(c.cx-195)<60&&c.cy>200&&c.cy<500,'the prize is in the middle of t
 ok(c&&c.w>110&&c.h>90,'and big enough to see ('+(c&&Math.round(c.w)+'x'+Math.round(c.h))+')');
 ok(await p.evaluate(()=>{ const it=document.querySelector('#rsRecent .rs-item'); return !it||getComputedStyle(it).visibility==='hidden'||it.style.visibility==='hidden'; }),'the new item in the gift box waits for the prize to arrive');
 await p.waitForTimeout(1500);
+for(let i=0;i<20;i++){ const m=await box(p,'.pfly'); if(!m||Math.hypot(m.cx-c.cx,m.cy-c.cy)>60) break; await p.waitForTimeout(250); }   // the prize first waits for its pictures (up to 1.5 s on a slow machine), so wait for the flight to begin
 const mid=await box(p,'.pfly'); const strip=await box(p,'#rewardsStrip');
 const d0=Math.hypot(c.cx-strip.cx,c.cy-strip.cy), d1=mid&&Math.hypot(mid.cx-strip.cx,mid.cy-strip.cy);
 ok(mid&&d1<d0-40,'then it flies toward the gift box in the corner (distance '+Math.round(d0)+' -> '+(mid&&Math.round(d1))+')');
@@ -38,7 +39,7 @@ await right(p); await p.waitForTimeout(300);
 ok(await p.locator('.pfly').count()===1&&await p.locator('.milestone').count()===0,'5th in a row: the prize shows and the party is not on top of it');
 let overlap=false; for(let i=0;i<30;i++){ await p.waitForTimeout(100); if(await p.locator('.pfly').count()&&await p.locator('.milestone').count()) overlap=true; }
 ok(!overlap,'the prize and the party are never on the screen together');
-await p.waitForTimeout(1500);
+for(let i=0;i<40&&!(await p.locator('.milestone').count());i++) await p.waitForTimeout(250);   // the prize may first wait up to 1.5 s for its pictures on a loaded machine
 ok(await p.locator('.milestone').count()===1,'the party starts after the prize has landed');
 ok(await p.evaluate(()=>!!document.querySelector('.milestone')),'(party is open)');
 await p.evaluate(()=>{ document.querySelectorAll('.milestone').forEach(e=>e.click()); }); await p.waitForTimeout(300);
