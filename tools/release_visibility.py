@@ -5,6 +5,7 @@ No network writes happen unless invoked with `publish`. The workflow restricts
 that command to main, after deployment and both test jobs have succeeded.
 """
 import argparse
+from datetime import date, timezone, datetime
 import json
 import os
 from pathlib import Path
@@ -30,6 +31,21 @@ def read_version(root=ROOT):
     if values[0] != values[1]:
         raise ValueError('APP_VERSION and service worker VERSION differ')
     return values[0]
+
+
+def stale_note(version, today=None):
+    """A warning when the proposed version is dated before today (UTC). Never a failure:
+    a branch started yesterday may merge today; run tools/bump_version.py to re-date it."""
+    match = re.match(r'(\d{4})\.(\d{2})\.(\d{2})[a-z]+$', version)
+    if not match:
+        return ''
+    version_date = date(int(match.group(1)), int(match.group(2)), int(match.group(3)))
+    today = today or datetime.now(timezone.utc).date()
+    if version_date >= today:
+        return ''
+    return (f'Proposed version {version} is dated {version_date.isoformat()}, before today '
+            f'({today.isoformat()}, UTC). If this branch is about to be released, run '
+            'tools/bump_version.py so the release gets today\'s date.')
 
 
 def check_title(title, version):
@@ -159,6 +175,9 @@ def main():
             event = json.loads(Path(os.environ['GITHUB_EVENT_PATH']).read_text())
             check_title(event['pull_request']['title'], version)
         summary(f'### Proposed version: {version}\nThis is the version in this checkout, not confirmation it is live.')
+        stale = stale_note(version)
+        if stale:
+            summary('> **Warning:** ' + stale)
         return
     if os.environ.get('GITHUB_REF') != 'refs/heads/main' or event_name not in ('push', 'workflow_dispatch'):
         raise ValueError('Release publication is allowed only on main push/manual runs')

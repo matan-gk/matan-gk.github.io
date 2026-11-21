@@ -177,3 +177,54 @@ class ReleaseTests(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+BUMP = Path(__file__).resolve().parents[1] / 'tools' / 'bump_version.py'
+bump_spec = importlib.util.spec_from_file_location('bump_version', BUMP)
+b = importlib.util.module_from_spec(bump_spec)
+bump_spec.loader.exec_module(b)
+
+
+class BumpVersionTests(unittest.TestCase):
+    def test_new_day_starts_at_a(self):
+        self.assertEqual(b.next_version('2026.11.19n', '2026.11.21'), '2026.11.21a')
+
+    def test_same_day_bumps_the_letter(self):
+        self.assertEqual(b.next_version('2026.11.21a', '2026.11.21'), '2026.11.21b')
+
+    def test_released_letters_are_skipped(self):
+        self.assertEqual(b.next_version('2026.11.19n', '2026.11.21', ['a', 'b']), '2026.11.21c')
+        self.assertEqual(b.next_version('2026.11.21a', '2026.11.21', ['b']), '2026.11.21c')
+
+    def test_z_is_an_error_not_a_wrap(self):
+        with self.assertRaises(ValueError):
+            b.next_version('2026.11.21z', '2026.11.21')
+
+    def test_stamp_updates_both_files(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as d:
+            p = Path(d)
+            (p / 'math-quest.html').write_text("const APP_VERSION = '2026.11.19n'; // note\n")
+            (p / 'sw.js').write_text("const VERSION = '2026.11.19n';\n")
+            b.stamp('2026.11.21a', p)
+            self.assertIn("const APP_VERSION = '2026.11.21a'; // note", (p / 'math-quest.html').read_text())
+            self.assertIn("const VERSION = '2026.11.21a';", (p / 'sw.js').read_text())
+
+    def test_tag_listing_failure_means_no_letters(self):
+        class Failed:
+            returncode = 1
+            stdout = ''
+        self.assertEqual(b.released_letters('2026.11.21', git_run=lambda *a: Failed()), [])
+
+
+class StaleNoteTests(unittest.TestCase):
+    def test_older_date_warns(self):
+        from datetime import date as d
+        note = r.stale_note('2026.11.19n', d(2026, 11, 21))
+        self.assertIn('2026-11-19', note)
+        self.assertIn('bump_version.py', note)
+
+    def test_today_and_future_are_quiet(self):
+        from datetime import date as d
+        self.assertEqual(r.stale_note('2026.11.21a', d(2026, 11, 21)), '')
+        self.assertEqual(r.stale_note('2026.11.22a', d(2026, 11, 21)), '')
