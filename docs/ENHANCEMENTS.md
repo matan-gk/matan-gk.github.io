@@ -911,3 +911,16 @@ Found and fixed:
 - Checked and fine: 320px width (no sideways scroll), `lang="he"`/`dir="rtl"`, zoom is not blocked, clue-grid cells are buttons with names ("נדב וארנב: ריק").
 Known limits (not fixed): picture-only puzzles (patterns, boards, shapes) have no text description beyond "אפשרות N", so a blind child cannot solve them; the guided solutions and the stickers book were checked only by axe; the game has no sound and no timers, so nothing time-limited. A real screen-reader pass (VoiceOver / TalkBack) is still worth doing.
 - Test: `a11ytest` (adds `axe-core` to `tests/package.json`; skipped if it is not installed).
+
+## Step 71: fixes after review (branch `fix-1-gate-and-guide`, stacked on `art-3-accessibility`; version 2026.11.19l)
+
+1. **Parent check could be skipped.** The home-screen note's "איך שומרים?" / "איך?" buttons opened the Backup tab directly. `openPanel` now asks the adult check for every tab (only the debug tab has its own password) and remembers the tab asked for (`adult.next`, and which card to scroll to), so after the check she lands there. Note: once passed, `adult.ok` stays true until the page is reloaded (unchanged; the comment in the code says closing the parent area resets it, but it never did).
+2. **Even-share wording**: "נדב רוצה לחלק 21 גולות קסומות בין הילדים, כך שכל ילד…" (was "נדב לחלק … בין ילדים").
+3. **Guide messages follow the grid.** The error ("יש סימון שלא מסתדר…") and the "a mark is missing" message are re-checked after every tap: red cells go as soon as they are fixed; when everything fits the message becomes "יופי, עכשיו הכול מסתדר. לחצו ״בדקנו״" (in green). Cause of "the message stays": it was only rewritten at the next check. Also fixed here: the engine asks again after each message and the board used to wipe the message when it did.
+   **Highlights are stronger**: a red cell has a 4px red outline and a pulse (it was a faint tint), outlined cells and the lit row/column headers are bright yellow with a gold ring, and the page scrolls to the red cell / the lit headers if they are off screen.
+4. **"Clear the table" restarts the guide** from the first step (the tool tells the board through `ctx.onClear`; `guideOpen` runs the guide again, same box, same flow). After the guide is finished it only clears.
+5. **The guide opens with** "בואו נעבור על הרמזים אחד אחד, ובכל רמז נסמן בטבלה מה הוא אומר." and then the first clue (first step only).
+6. **The clue (rule) of the step is shown inside the guide box**, lit in yellow with a pin, because the question text is far above where she is looking; the line in the question text is lit more strongly as well.
+7. **Already done = kudos.** If the marks the next step asks for are already on the grid, the step says "👏 כל הכבוד, כבר סימנתם את זה! … אפשר להמשיך." and the button reads "המשך לשלב הבא". (Marks ahead of the clues are still red: a mark is only accepted when the clues so far make it certain, so "ahead" means steps that follow from the same clues.)
+- Test: `guidefixestest`; `savenotetest` now checks the parent check.
+- The page grew past the 900 KB size check in `splittest` (now 881 KB gzip-free source, 902,000 bytes); the limit is now 950,000 bytes. Most of the growth is the accessibility code, the word-art, the save note and the guide.

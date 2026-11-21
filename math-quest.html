@@ -512,7 +512,11 @@ body[data-view="home"] .wrap > .sub{margin-bottom:12px}
 .gbhead{display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:8px}
 .gbexit{min-height:44px; padding:0 14px; border-radius:12px; border:1px solid var(--line, rgba(0,0,0,.2)); background:transparent; color:inherit; font:inherit; cursor:pointer}
 .gbask{font-size:1.1rem; font-weight:700; margin-bottom:8px; min-height:1.4em}
-.cgclue.on{background:rgba(255,200,0,.4); border-radius:6px; padding:0 4px; font-weight:700}
+.cgclue.on{background:#ffe14d; color:#3a2a4d; box-shadow:0 0 0 3px #ffb700; border-radius:6px; padding:1px 5px; font-weight:800}
+.cgrule{background:#ffe14d; color:#3a2a4d; font-weight:800; font-size:1.05rem; line-height:1.4; text-align:center; border-radius:10px; padding:8px 10px; margin-bottom:8px; box-shadow:0 0 0 3px #ffb700}
+.cgrule[hidden]{display:none}
+.cgmsg.ok{color:var(--good-text)}
+@keyframes cgpulse{50%{box-shadow:0 0 0 6px rgba(255,180,0,.6)}}
 .gbfoot{margin-top:10px; display:flex; justify-content:center}
 .gbfoot .btn{width:100%}
 #nextBtn.dim{background:var(--card2); color:var(--text); box-shadow:none}
@@ -525,9 +529,9 @@ body[data-view="home"] .wrap > .sub{margin-bottom:12px}
 .cg{--cgcell:44px; --cghead:62px; --cgart:40px; display:grid; gap:2px; justify-content:center; direction:rtl}
 .cg.two{--cghead:40px; --cgart:34px}
 .cg.two .cgr{font-size:.7rem}
-.cgh.hl{background:rgba(255,200,0,.4); border-radius:10px}
-.cgc.hint, .cgc.src{outline:3px solid #f4b400; outline-offset:-2px}
-.cgc.bad{background:rgba(192,57,43,.3)}
+.cgh.hl{background:#ffe14d; color:#3a2a4d; box-shadow:0 0 0 3px #ffb700; border-radius:10px}
+.cgc.hint, .cgc.src{outline:4px solid #f4a000; outline-offset:-2px; animation:cgpulse 1.2s ease-in-out 3}
+.cgc.bad{background:#ffd0d4; color:#a3111f; font-weight:800; outline:4px solid #d62839; outline-offset:-2px; animation:cgpulse 1.2s ease-in-out 3}
 .cgh{display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:.7rem; line-height:1.1; min-height:44px; min-width:0; overflow:hidden; text-align:center}
 .cgh img{width:var(--cgart); height:var(--cgart); max-width:100%; object-fit:contain; display:block; margin:0 auto 1px; pointer-events:none}
 .cgr{justify-content:center; font-weight:700; font-size:.8rem; padding:0 2px}
@@ -2778,7 +2782,7 @@ function cloudProfileFromDoc(C, helpers){
 // ===== CLOUD (Google sign-in, cloud progress, problem reports) =====
 // Local-first: the game always works from this device's storage. The cloud is a mirror, so no internet / no account / no quota never blocks play.
 // Everything here is off while CLOUD_CONFIG is null. See firebase/SETUP.md for how to create the (free) Firebase project and paste its settings below.
-const APP_VERSION = '2026.11.19k';       // keep equal to VERSION in sw.js (a test checks it)
+const APP_VERSION = '2026.11.19l';       // keep equal to VERSION in sw.js (a test checks it)
 const BUILD_COMMIT = '';                 // the full id of the commit this page was built from: the deploy workflow (.github/workflows/tests.yml) fills it in; empty in a plain checkout
 const REPO_URL = 'https://github.com/matan-gk/matan-gk.github.io';
 const CLOUD_CONFIG = {apiKey:"AIzaSyAlq_TJNGvWPJpUrpbdq_hkAoURydqMzm0", authDomain:"learning-quest-1.firebaseapp.com", projectId:"learning-quest-1", appId:"1:98931179722:web:78fb00084ccba3efb53433"};   // e.g. {apiKey:'...', authDomain:'xxx.firebaseapp.com', projectId:'xxx', appId:'...'}
@@ -3355,8 +3359,9 @@ const PANEL_NAV = {profiles:'פרופילים', progress:'התקדמות', setti
 const PANEL_SHORT = {profiles:'פרופילים', progress:'התקדמות', settings:'הגדרות', backup:'גיבוי', report:'דיווח', guide:'מדריך', debug:'דיבאג'};
 const PANEL_ICON = {profiles:'👥', progress:'📊', settings:'⚙️', backup:'💾', report:'🐞', guide:'📖', debug:'🛠️'};
 function openPanel(tab){
-  // Adult check gate for parent area (profiles tab)
-  if(tab === 'profiles' && !adult.ok){
+  // Adult check gate for the whole parent area: every way in (the menu, the "how do I save?" link on the home screen ...) asks first, and lands on the tab that was asked for
+  if(tab !== 'debug' && !adult.ok){
+    adult.next = tab;
     openAdultCheck();
     return;
   }
@@ -4495,7 +4500,7 @@ function gEvenShare(){
   for(let c=2;c<=10 && wrong.length<12;c++) if(c!==kids && total%c!==0) wrong.push(c);
   if(wrong.length<3) return gEvenShare();
   const opts = shuffle([kids, ...shuffle(wrong).slice(0,3)]);
-  return {label:"חלוקה שווה", d:2, text:`${p1.n} לחלק ${hl(total)} ${w} בין ילדים, כך שכל ילד יקבל אותה כמות ולא יישאר דבר. בין כמה ילדים אפשר לחלק?`,
+  return {label:"חלוקה שווה", d:2, text:`${p1.n} רוצה לחלק ${hl(total)} ${w} בין הילדים, כך שכל ילד יקבל אותה כמות ולא יישאר דבר. בין כמה ילדים אפשר לחלק?`,
     type:'mcq', answer:kids, choices:opts};
 }
 function gDaysMore(){
@@ -7154,7 +7159,7 @@ QTOOLS.clueGrid = {
     el.onclick = e=>{
       const b = e.target.closest('.cgc');
       if(b && el.contains(b)){ const k = b.dataset.r+','+b.dataset.c; marks[k] = ((marks[k]|0)+1)%3; paint(b); ctx.used(); return; }
-      if(e.target.closest('.cgclr')){ for(const k in marks) delete marks[k]; el.querySelectorAll('.cgc').forEach(paint); }
+      if(e.target.closest('.cgclr')){ for(const k in marks) delete marks[k]; el.querySelectorAll('.cgc').forEach(paint); if(ctx.onClear) ctx.onClear(); }
     };
   },
   unmount(el){ el.onclick = null; }
@@ -7296,6 +7301,7 @@ let streakHeld = false, guideRunning = null, guideIdleT = 0;
 function guideOfferable(q){ return !!(q && q.guide && guideEnabled() && GUIDE_BOARDS[q.guide.board]); }
 function guideIdleClear(){ clearTimeout(guideIdleT); guideIdleT = 0; const b = document.getElementById('guideQuietBtn'); if(b) b.remove(); }
 function guideOfferClear(){ const o = document.getElementById('guideOffer'); if(o) o.innerHTML = ''; }
+function guideRestart(){ if(guideRunning && guideRunning.restart) guideRunning.restart(); }
 function guideCancel(){ if(guideRunning){ const r = guideRunning; guideRunning = null; try{ r.quit(); }catch(_){} } const b = document.getElementById('guideBox'); if(b){ b.hidden = true; b.innerHTML = ''; } const a = document.getElementById('answerArea'); if(a) a.style.display = ''; const sl = document.getElementById('qTool'); if(sl) sl.style.display = ''; }
 function guideAfterShow(q){      // the quiet button: shows only after the idle time, only on a question that is still unanswered
   guideIdleClear();
@@ -7317,10 +7323,16 @@ async function guideOpen(q, source){
   box.hidden = false;
   box.innerHTML = `<div class="gbhead"><b>🪜 עזרה צעד אחר צעד</b><button type="button" class="gbexit" id="gbExit">יציאה</button></div><div class="gbask" id="gbAsk" role="status" aria-live="polite"></div><div class="gbboard" id="gbBoard"></div>`;
   if(area) area.style.display = 'none'; document.getElementById('nextBtn').style.display = 'none'; document.getElementById('feedback').textContent = '';
-  let quitFn; const quit = new Promise(r=>{ quitFn = r; });
-  const me = {q, quit:()=>quitFn(true)}; guideRunning = me;
-  document.getElementById('gbExit').onclick = ()=>quitFn(true);
-  const rep = await guideRun(q, {el:document.getElementById('gbBoard'), source, quit, ask:text=>{ const e = document.getElementById('gbAsk'); if(e) e.textContent = text; }});
+  const me = {q, quit:()=>{}, restart:()=>{}}; guideRunning = me;
+  let rep;
+  for(;;){      // "clear the table" starts the guide again from its first step
+    let quitFn, again = false; const quit = new Promise(r=>{ quitFn = r; });
+    me.quit = ()=>quitFn(true); me.restart = ()=>{ again = true; quitFn(true); };
+    document.getElementById('gbExit').onclick = ()=>quitFn(true);
+    rep = await guideRun(q, {el:document.getElementById('gbBoard'), source, quit, ask:text=>{ const e = document.getElementById('gbAsk'); if(e) e.textContent = text; }});
+    if(again && guideRunning===me && q===current) continue;
+    break;
+  }
   if(guideRunning!==me || q!==current) return null;       // the question changed (next, level, profile) while she was in the guide
   guideRunning = null;
   if(rep.outcome==='done'){     // the grid, the marks and the last message stay until the next question, so she can look back and keep marking
@@ -7435,6 +7447,7 @@ function cgPlan(m){
     }
   }
   if(!done()) throw new Error('the clues do not reach the answer');
+  if(steps[0]) steps[0].pv = Object.assign({}, steps[0].pv, {first:1});     // the guide opens with "let's go through the clues one by one"
   return steps;
 }
 function cgBad(m, intro, marks){      // marks that the clues so far do not make certain: 'conflict' (no arrangement allows it) or 'unsure' (allowed, but not certain)
@@ -7456,8 +7469,8 @@ GUIDE_CHECKS['grid-ok'] = (inp, m, intro, cells)=>{
 GUIDE_BOARDS.clueGuide = {
   mount(el, m, g){
     this.m = m; this.g = g; this.el = el; this.pending = null; this.step = null;
-    el.innerHTML = '<div class="cgmsg" role="status" aria-live="polite"></div><div class="cgown"></div><div class="gbfoot"><button type="button" class="btn" id="gbCheck">בדקנו, לשלב הבא</button></div>';
-    this.msg = el.querySelector('.cgmsg'); this.check = el.querySelector('#gbCheck');
+    el.innerHTML = '<div class="cgrule" id="gbRule" hidden></div><div class="cgmsg" role="status" aria-live="polite"></div><div class="cgown"></div><div class="gbfoot"><button type="button" class="btn" id="gbCheck">בדקנו, לשלב הבא</button></div>';
+    this.msg = el.querySelector('.cgmsg'); this.check = el.querySelector('#gbCheck'); this.rule = el.querySelector('#gbRule'); this.showing = null;
     const slot = document.getElementById('qTool');
     if(qToolCur && qToolCur.kind==='clueGrid'){      // the grid she already has under the question, with her own marks
       this.root = qToolCur.body; this.ctx = qToolCur.ctx;
@@ -7466,8 +7479,9 @@ GUIDE_BOARDS.clueGuide = {
       this.root = el.querySelector('.cgown'); this.ctx = {state:{}, used(){}}; QTOOLS.clueGrid.mount(this.root, m, this.ctx);
     }
     this.marks = this.ctx.state.marks = this.ctx.state.marks || {};
-    this.onTap = e=>{ const b = e.target.closest('.cgc'); if(b) b.classList.remove('bad', 'hint'); };
+    this.onTap = e=>{ const b = e.target.closest('.cgc'); if(b){ b.classList.remove('bad', 'hint'); setTimeout(()=>this.refresh(), 0); } };     // after the tap itself has changed the mark
     this.root.addEventListener('click', this.onTap, true);
+    this.ctx.onClear = ()=>guideRestart();      // "clear the table" starts the guide again
     this.wrapClues();
     this.check.onclick = ()=>{ if(!this.pending) return; const r = this.pending; this.pending = null; r({marks:this.snapshot()}); };
   },
@@ -7476,7 +7490,25 @@ GUIDE_BOARDS.clueGuide = {
     const q = document.getElementById('qtext'); if(!q) return;
     [...q.childNodes].forEach(n=>{ if(n.nodeType!==3) return; const i = (this.m.texts||[]).indexOf(n.textContent.trim()); if(i<0) return; const sp = document.createElement('span'); sp.className = 'cgclue'; sp.dataset.i = i; n.replaceWith(sp); sp.appendChild(n); });
   },
-  light(i){ document.querySelectorAll('#qtext .cgclue').forEach(s=>s.classList.toggle('on', i!==null && i!==undefined && Number(s.dataset.i)===i)); },
+  light(i){
+    const on = i!==null && i!==undefined;
+    document.querySelectorAll('#qtext .cgclue').forEach(s=>s.classList.toggle('on', on && Number(s.dataset.i)===i));
+    // the question text is far above the guide, where she is looking: the same clue is shown, lit, inside the guide box
+    if(this.rule){ const t = on && this.m.texts ? this.m.texts[i] : ''; this.rule.hidden = !t; this.rule.textContent = t ? '📌 ' + t : ''; }
+  },
+  seeIt(el){ if(!el || !el.getBoundingClientRect) return; const r = el.getBoundingClientRect(); if(r.top<70 || r.bottom>window.innerHeight-60) el.scrollIntoView({block:'center', behavior:'smooth'}); },
+  // what the grid says about the step right now: the message under the question is kept up to date as she taps, so it never stays after the mistake is fixed
+  refresh(){
+    const sh = this.showing; if(!sh || !this.step) return;
+    const st = this.step, mk = this.snapshot(), bad = cgBad(this.m, st.intro, mk);
+    this.root.querySelectorAll('.cgc.bad').forEach(b=>{ if(!bad.some(x=>x.r===+b.dataset.r && x.c===+b.dataset.c)) b.classList.remove('bad'); });
+    if(bad.length){ return; }                                  // still wrong: the message stays, the red cells that remain stay
+    const miss = this.missing(st, mk);
+    if(miss.length){ if(sh.kind==='bad'){ this.msg.textContent = 'עוד חסר סימון בשלב הזה. הסתכלו שוב על ההדגשה, ואז לחצו ״בדקנו״.'; sh.kind = 'miss'; } return; }
+    this.root.querySelectorAll('.hint').forEach(b=>b.classList.remove('hint'));
+    this.msg.textContent = 'יופי, עכשיו הכול מסתדר. לחצו ״בדקנו״.'; this.msg.classList.add('ok'); this.showing = null;
+  },
+  satisfied(step){ const mk = this.snapshot(); return !this.missing(step, mk).length && !cgBad(this.m, step.intro, mk).length; },
   cell(r, c){ return this.root.querySelector(`.cgc[data-r="${r}"][data-c="${c}"]`); },
   paint(r, c, v){ const k = r+','+c; if(v) this.marks[k] = v; else delete this.marks[k]; const b = this.cell(r, c); if(!b) return; b.dataset.v = v; b.textContent = ['','✗','✓'][v]; b.setAttribute('aria-label', b.dataset.n+': '+['ריק','לא','כן'][v]); },
   clearHl(){ this.root.querySelectorAll('.hl,.src').forEach(x=>x.classList.remove('hl','src')); },     // the step's own lights; marks in red and narrowing outlines stay until she taps that cell or the next message
@@ -7488,30 +7520,45 @@ GUIDE_BOARDS.clueGuide = {
     (f.cells||[]).forEach(([r,c])=>{ const b = this.cell(r, c); if(b) b.classList.add('src'); });
     this.light(f.clue===undefined ? null : f.clue);
   },
-  run(step){ this.step = step; this.focus(step); this.check.hidden = false; return new Promise(res=>{ this.pending = res; }); },
+  run(step){
+    const fresh = this.step!==step;      // the engine asks again after every message about the same step: the message stays
+    this.step = step; this.focus(step); this.check.hidden = false;
+    if(fresh){ this.showing = null; this.msg.classList.remove('ok'); this.msg.textContent = ''; }
+    const ask = document.getElementById('gbAsk');
+    if(fresh && this.satisfied(step)){      // she already marked what this step asks for: say so, and let her move on
+      const clue = step.ask==='clue' && this.m.texts ? ' ״' + this.m.texts[step.focus.clue] + '״' : '';
+      if(ask) ask.textContent = '👏 כל הכבוד, כבר סימנתם את זה!' + clue + ' אפשר להמשיך.';
+      this.check.textContent = 'המשך לשלב הבא';
+    } else if(fresh) this.check.textContent = 'בדקנו, לשלב הבא';
+    return new Promise(res=>{ this.pending = res; });
+  },
   missing(step, marks){ return step.cells.filter(x=>marks[x.r+','+x.c]!==x.v); },
   show(v){
     const st = v.step || this.step, mk = (v.input && v.input.marks) || this.snapshot();
-    let text = ''; this.clearView();
+    let text = ''; this.clearView(); this.msg.classList.remove('ok'); this.showing = null;
     if(v.kind==='look'){
       const bad = cgBad(this.m, st.intro, mk);
       if(bad.length){
         bad.forEach(b=>{ const c = this.cell(b.r, b.c); if(c) c.classList.add('bad'); });
         const b0 = bad[0]; if(b0.kind==='conflict' && b0.clue!==null) this.light(b0.clue);
+        this.showing = {kind:'bad'}; this.seeIt(this.cell(b0.r, b0.c));
         text = b0.kind==='conflict' ? 'יש סימון שלא מסתדר עם הרמזים. הוא מסומן באדום. אפשר לשנות אותו ולבדוק שוב.' : 'יש סימון שעוד לא בטוח לפי הרמזים. הוא מסומן באדום. סמנו רק מה שבטוח.';
-      } else { this.light(st.focus.clue); text = 'עוד חסר סימון בשלב הזה. הסתכלו שוב על ההדגשה, ואז לחצו ״בדקנו״.'; }
+      } else {
+        this.light(st.focus.clue); text = 'עוד חסר סימון בשלב הזה. הסתכלו שוב על ההדגשה, ואז לחצו ״בדקנו״.'; this.showing = {kind:'miss'};
+        const hl = this.root.querySelector('.cgh.hl'); this.seeIt(hl || this.root);
+      }
     } else if(v.kind==='narrow' && cgBad(this.m, st.intro, mk).length){ return this.show(Object.assign({}, v, {kind:'look'})); }     // a mark that is not certain is shown in red at every check
     else if(v.kind==='narrow'){
       const x = this.missing(st, mk)[0];
       if(x){ [...cgLine(this.m, x.r, x.c, 'row'), ...cgLine(this.m, x.r, x.c, 'col'), [x.r, x.c]].forEach(([r,c])=>{ const b = this.cell(r, c); if(b) b.classList.add('hint'); }); }
-      text = 'הסימון שחסר נמצא באחת המשבצות המסומנות. מה אפשר לדעת מהרמז?';
+      text = 'הסימון שחסר נמצא באחת המשבצות המסומנות. מה אפשר לדעת מהרמז?'; this.showing = {kind:'miss'}; const h0 = this.root.querySelector('.cgc.hint'); this.seeIt(h0);
     } else if(v.kind==='demo'){
       Object.keys(mk).forEach(k=>{ const [r, c] = k.split(',').map(Number); if(!st.cells.some(x=>x.r===r&&x.c===c) && cgBad(this.m, st.intro, {[k]:mk[k]}).length){ this.paint(r, c, 0); } });
       st.cells.forEach(x=>{ this.paint(x.r, x.c, x.v); const b = this.cell(x.r, x.c); if(b) b.classList.add('hint'); });
       this.light(st.focus.clue);
       text = 'ככה: הנה הסימון לשלב הזה. הסתכלו עליו, ואז לחצו ״בדקנו״ להמשיך.';
     } else if(v.kind==='again'){ text = 'לא השתנה כלום מאז הבדיקה הקודמת. אפשר לשנות סימון ולבדוק שוב.'; }
-    else if(v.kind==='solved'){ this.clearHl(); this.light(null); this.check.hidden = true; text = 'מצאנו! התשובה מסומנת בטבלה, ואפשר להמשיך לסמן ולהסתכל בה.'; }
+    else if(v.kind==='solved'){ this.clearHl(); this.light(null); this.check.hidden = true; this.check.textContent = 'בדקנו, לשלב הבא'; text = 'מצאנו! התשובה מסומנת בטבלה, ואפשר להמשיך לסמן ולהסתכל בה.'; }
     this.msg.textContent = text;
     return Promise.resolve();
   },
@@ -7520,7 +7567,7 @@ GUIDE_BOARDS.clueGuide = {
 GUIDE_RECIPES.gLogicGrid = {
   steps:m=>cgPlan(m),
   prompts:{
-    clue:{ text:'הרמז: ״{clue}״. מה אפשר לסמן בטבלה בשבילו? סמנו, ואז לחצו ״בדקנו״.', say:'מה אפשר לסמן בטבלה לפי הרמז?' },
+    clue:{ text:v=>(v.first ? 'בואו נעבור על הרמזים אחד אחד, ובכל רמז נסמן בטבלה מה הוא אומר. ' : '') + 'הרמז: ״{clue}״. מה אפשר לסמן בטבלה בשבילו? סמנו, ואז לחצו ״בדקנו״.', say:'בואו נעבור על הרמזים אחד אחד. מה אפשר לסמן בטבלה לפי הרמז?' },
     ex:{ text:'ידענו כבר ש{kid} ו{pet} שייכים יחד. מה זה אומר על שאר השורה ושאר העמודה שלהם? סמנו ✗, ואז לחצו ״בדקנו״.', say:'מה זה אומר על שאר השורה ושאר העמודה?' },
     'left-row':{ text:'בשורה של {kid} כבר יש שני סימני ✗. מה נשאר? סמנו, ואז לחצו ״בדקנו״.', say:'בשורה כבר יש שני סימני איקס. מה נשאר?' },
     'left-col':{ text:'בעמודה של ה{pet} כבר יש שני סימני ✗. מה נשאר? סמנו, ואז לחצו ״בדקנו״.', say:'בעמודה כבר יש שני סימני איקס. מה נשאר?' },
@@ -8298,7 +8345,7 @@ function dbgSync(){
 
 // ===== ADULT CHECK (parent area gate) =====
 // Ask for birth year, verify age >= 18. State is per-session (not saved), so closing the parent area resets it.
-let adult = {ok:false, bad:false};
+let adult = {ok:false, bad:false, next:'profiles'};
 function adultCheck(year){
   const currentYear = new Date().getFullYear();
   const age = currentYear - year;
@@ -8330,8 +8377,10 @@ function submitAdultCheck(){
     if(errEl) errEl.textContent = '';
     // Hide overlay but KEEP adult.ok=true (closeAdultCheck resets it)
     document.getElementById('adultOverlay').hidden = true;
-    // Open the parent area after successful verification
-    openPanel('profiles');
+    // Open the parent area (on the tab that was asked for) after successful verification
+    const nx = adult.next || 'profiles'; adult.next = 'profiles';
+    openPanel(nx);
+    if(nx==='backup' && adult.scroll){ const id = adult.scroll; adult.scroll = null; setTimeout(()=>{ const c = document.getElementById(id); if(c && c.scrollIntoView) c.scrollIntoView({block:'start'}); }, 30); }
   } else {
     adult.bad = true;
     if(errEl) errEl.textContent = 'הגישה לאזור הורים מותרת מגיל 18 ומעלה';
@@ -8881,7 +8930,7 @@ function renderSaveNote(){
 document.addEventListener('click', e=>{
   const b = e.target.closest && e.target.closest('[data-sn]'); if(!b) return;
   const a = b.dataset.sn;
-  if(a==='backup' || a==='howinstall'){ openPanel('backup'); setTimeout(()=>{ const c = document.getElementById(a==='howinstall' ? 'pwaCard' : 'bkTop'); if(c && c.scrollIntoView) c.scrollIntoView({block:'start'}); }, 30); }
+  if(a==='backup' || a==='howinstall'){ adult.scroll = adult.ok ? null : (a==='howinstall' ? 'pwaCard' : 'bkTop'); openPanel('backup'); setTimeout(()=>{ const c = document.getElementById(a==='howinstall' ? 'pwaCard' : 'bkTop'); if(c && c.scrollIntoView) c.scrollIntoView({block:'start'}); }, 30); }
   else if(a==='install'){ pwaInstall().then(renderSaveNote); }
   else if(a==='dismiss'){ try{ localStorage.setItem(SN_DISMISS_KEY,'1'); }catch(e){} renderSaveNote(); }
 });
