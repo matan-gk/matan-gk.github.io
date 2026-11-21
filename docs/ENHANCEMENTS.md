@@ -932,3 +932,8 @@ Read samples of every question type (about 26,000 generated questions plus one o
 2. **Word analogy** (`gAnalogyWord`): was "מחט שייך ל-תופרת, בדיוק כמו ש-סכין שייך ל-?" (wrong gender, hyphen before a Hebrew word, "belongs to" did not fit the pairs). Now two pairs, "מחט : תופרת" / "סכין : ?", and "הזוג השני קשור זה לזה באותה דרך כמו הזוג הראשון. מה חסר?".
 3. **Synonyms reading question**: "באיזה זוג המילים המילים נרדפות?" had a doubled word; now "באיזה זוג המילים נרדפות?".
 - Test: `hebrewtest` (also scans every generator for a prefix hyphen before a Hebrew word).
+
+## Step 73: difficulty choice when a profile is created (branch `profile-difficulty`, off main; version 2026.11.22b)
+
+The new-profile form (the first-run welcome and "➕ פרופיל חדש") has a "כמה קשה?" choice: ⭐ קל, ⭐⭐ בינוני, ⭐⭐⭐ קשה, 🎲 הכול (default). Easy, medium and hard mean that single rating level (the same levels as the switches in the parent area's settings); "everything" is all three, as before. The choice is stored as the profile's `diff`, so it is the same setting the parent area shows and changes. A note under it says it can be changed at any time and that the parent area (settings) is much more specific: several levels together, switching magic places off, hiding question types. The edit form does not show it (changing it later is the parent area's job). Bonus questions are not affected (always hard).
+- Test: `profilediffTest`.
