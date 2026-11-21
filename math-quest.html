@@ -2786,7 +2786,7 @@ function cloudProfileFromDoc(C, helpers){
 // ===== CLOUD (Google sign-in, cloud progress, problem reports) =====
 // Local-first: the game always works from this device's storage. The cloud is a mirror, so no internet / no account / no quota never blocks play.
 // Everything here is off while CLOUD_CONFIG is null. See firebase/SETUP.md for how to create the (free) Firebase project and paste its settings below.
-const APP_VERSION = '2026.11.19n';       // keep equal to VERSION in sw.js (a test checks it)
+const APP_VERSION = '2026.11.22b';       // keep equal to VERSION in sw.js (a test checks it)
 const BUILD_COMMIT = '';                 // the full id of the commit this page was built from: the deploy workflow (.github/workflows/tests.yml) fills it in; empty in a plain checkout
 const REPO_URL = 'https://github.com/matan-gk/matan-gk.github.io';
 const CLOUD_CONFIG = {apiKey:"AIzaSyAlq_TJNGvWPJpUrpbdq_hkAoURydqMzm0", authDomain:"learning-quest-1.firebaseapp.com", projectId:"learning-quest-1", appId:"1:98931179722:web:78fb00084ccba3efb53433"};   // e.g. {apiKey:'...', authDomain:'xxx.firebaseapp.com', projectId:'xxx', appId:'...'}
@@ -7808,6 +7808,7 @@ function renderProfilesInner(){
   if(profMode.view==='form'){
     const editing = profMode.editId ? store.profiles.find(x=>x.id===profMode.editId) : null;
     document.getElementById('profTitle').textContent = profMode.first ? '👋 ברוכים הבאים!' : (editing ? '✏️ עריכת פרופיל' : '➕ פרופיל חדש');
+    const googleFirstProfile = profMode.first && !store.profiles.length && cloud.user && !cloud.user.anon && cloud.status==='ok';
     const welcomeDetail = profMode.first ? `
       <details class="welcome-detail">
         <summary><span aria-hidden="true">📖</span> מה יש במשחק?</summary>
@@ -7825,6 +7826,7 @@ function renderProfilesInner(){
     body.innerHTML = `<div class="pform">
       ${profMode.first?'<p class="pa-sub" style="text-align:center">תרגילי חשבון וקריאה קצרים, משוב מיידי ומתנות קסומות על כל הצלחה.</p>':''}
       ${welcomeDetail}
+      ${googleFirstProfile?'<div class="bkmsg good" role="status">ההתחברות ל-Google הצליחה. עכשיו מוסיפים פרופיל לילד או לילדה: בוחרים איך לפנות אליהם ולוחצים על "שמירה". השם לא חובה.</div>':''}
       ${profMode.first?'<p class="pa-sub" style="text-align:center; margin:0 0 10px">מי משחק? אפשר להוסיף עוד פרופילים בהמשך.</p>':''}
       <div class="pa-field"><label for="pfName">שם (אפשר להשאיר ריק)</label>
       <input type="text" id="pfName" maxlength="20" autocomplete="off" value="${editing?esc(editing.name):''}"></div>
@@ -7836,7 +7838,7 @@ function renderProfilesInner(){
       <div class="perr" id="pfErr">${profMode.error||''}</div>
       <div class="pa-actions"><button type="button" class="pa-btn" data-pact="save">שמירה</button>${(profMode.first)?'':'<button type="button" class="pa-btn sec" data-pact="cancel">ביטול</button>'}</div>
       ${profMode.first?'<div class="pa-actions"><button type="button" class="pa-btn sec block" data-pact="restorefirst">יש לי קוד שמירה: שחזור</button></div>':''}
-      ${profMode.first&&cloudOn()?'<div class="pa-actions" style="margin-top:8px"><button type="button" class="pa-btn sec block" data-pact="joinfirst">יש לי קוד משפחה: הצטרפות</button></div><div class="pa-actions" style="margin-top:8px"><button type="button" class="pa-btn sec block" data-pact="cloudin">יש לי חשבון: התחברות עם Google</button></div>'+(cloud.msg?'<div class="bkmsg bad">'+esc(cloud.msg)+'</div>':''):''}
+      ${profMode.first&&cloudOn()?'<div class="pa-actions" style="margin-top:8px"><button type="button" class="pa-btn sec block" data-pact="joinfirst">יש לי קוד משפחה: הצטרפות</button></div>'+(googleFirstProfile?'':'<div class="pa-actions" style="margin-top:8px"><button type="button" class="pa-btn sec block" data-pact="cloudin">יש לי חשבון: התחברות עם Google</button></div>')+(cloud.msg?'<div class="bkmsg bad">'+esc(cloud.msg)+'</div>':''):''}
     </div>`;
     return;
   }
