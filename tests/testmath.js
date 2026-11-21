@@ -18,7 +18,8 @@ const r=await p.evaluate(()=>{
       if(n==='gCompareTotals'){ if(+q.answer!==4*nums[3]-2*nums[2]) sem.push(t+' '+q.answer); }
       if(n==='gRoundsTransfer'){
         const mixed=/וניצח/.test(t); const start=nums[0], R=nums[1], tt=nums[2]; // names have no digits
-        let lost,won; if(mixed){ lost=nums[3]; won=nums[4]; } else { lost=R; won=0; }
+        let lost,won; if(mixed){ const one=/בסבב אחד/g; const ones=(t.match(one)||[]).length; // "בסבב אחד" has no digit
+          const mm=t.match(/הפסיד\S* (בסבב אחד|ב-(\d+) סבבים) וניצח\S* (בסבב אחד|ב-(\d+) סבבים)/); lost=mm[2]?+mm[2]:1; won=mm[4]?+mm[4]:1; } else { lost=R; won=0; }
         if(lost+won!==R) sem.push('rounds '+t);
         const m=ans.match(/^(\d+) \S+ ל\S+, (\d+) \S+ ל\S+$/); const net=tt*(lost-won);
         if(!m||+m[1]!==start-net||+m[2]!==start+net||+m[1]+ +m[2]!==2*start) sem.push(ans+' vs '+start+' '+net);

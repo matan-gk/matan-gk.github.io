@@ -84,6 +84,7 @@ const TESTS = [
   ['savenotetest','savenotetest.js','home screen: "saved on this device" note (and cloud / failed-save variants) and the one-time add-to-home-screen nudge'],
   ['a11ytest','a11ytest.js','accessibility: keyboard use of levels and answers, dialog focus, announcements, landmarks, tap targets, contrast, reduced motion, axe-core on four screens'],
   ['guidefixestest','guidefixestest.js','guide fixes: intro, kudos for what is already marked, messages that follow the grid, strong highlights, clue shown in the guide box, clear-the-table restarts; even-share wording'],
+  ['hebrew','hebrewtest.js','Hebrew proofread: no "ב-1 סבבים", word analogy as pairs, no hyphen before a Hebrew word'],
   ['items3','items3test.js','batch 3 items (kids furniture and play): catalog, back pictures, hosts, recolouring, transparent gaps'],
   ['tokbadge','tokbadgetest.js','coin balance next to the gift square once the room is unlocked'],
   ['bedmask','bedmasktest.js','bed part masks: fold band is blanket, bit left of the pillow is sheet'],

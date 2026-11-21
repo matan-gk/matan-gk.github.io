@@ -2782,7 +2782,7 @@ function cloudProfileFromDoc(C, helpers){
 // ===== CLOUD (Google sign-in, cloud progress, problem reports) =====
 // Local-first: the game always works from this device's storage. The cloud is a mirror, so no internet / no account / no quota never blocks play.
 // Everything here is off while CLOUD_CONFIG is null. See firebase/SETUP.md for how to create the (free) Firebase project and paste its settings below.
-const APP_VERSION = '2026.11.19l';       // keep equal to VERSION in sw.js (a test checks it)
+const APP_VERSION = '2026.11.19m';       // keep equal to VERSION in sw.js (a test checks it)
 const BUILD_COMMIT = '';                 // the full id of the commit this page was built from: the deploy workflow (.github/workflows/tests.yml) fills it in; empty in a plain checkout
 const REPO_URL = 'https://github.com/matan-gk/matan-gk.github.io';
 const CLOUD_CONFIG = {apiKey:"AIzaSyAlq_TJNGvWPJpUrpbdq_hkAoURydqMzm0", authDomain:"learning-quest-1.firebaseapp.com", projectId:"learning-quest-1", appId:"1:98931179722:web:78fb00084ccba3efb53433"};   // e.g. {apiKey:'...', authDomain:'xxx.firebaseapp.com', projectId:'xxx', appId:'...'}
@@ -4450,7 +4450,8 @@ function gRoundsTransfer(){
   const net = t*(lost-(R-lost)), a = start-net, b = start+net;
   const both = (p1.g==='f' && p2.g==='f') ? 'לכל אחת מהן' : 'לכל אחד מהם';
   const who = v(p1,'הפסיד','הפסידה');
-  const story = mixed ? `${p1.n} ${who} ב-${hl(lost)} סבבים וניצח${v(p1,'','ה')} ב-${hl(R-lost)} סבבים.` : `${p1.n} ${who} בכל הסבבים.`;
+  const cnt = n => n===1 ? 'בסבב אחד' : `ב-${hl(n)} סבבים`;
+  const story = mixed ? `${p1.n} ${who} ${cnt(lost)} וניצח${v(p1,'','ה')} ${cnt(R-lost)}.` : `${p1.n} ${who} בכל הסבבים.`;
   const fmt = (x,y) => `${x} ${item} ל${p1.n}, ${y} ${item} ל${p2.n}`;
   const wrong = [[b,a],[start-t,start+t],[start-net-t,start+net+t],[start-net+t,start+net-t],[start-t*R,start+t*R],[a,b+t]]
     .filter(([x,y])=>x>0 && y>0 && !(x===a&&y===b));
@@ -4561,7 +4562,7 @@ function gAnalogyWord(){
     const otherSet = ANALOGY_SETS[otherIdx];
     distract.add(otherSet[ri(0,otherSet.length-1)][1]);
   }
-  return {label:"היגיון: אנלוגיה", text:`${pairA[0]} שייך ל-${pairA[1]}, בדיוק כמו ש-${pairB[0]} שייך ל-?`,
+  return {label:"היגיון: אנלוגיה", text:`<span class="hl">${pairA[0]} : ${pairA[1]}</span><br><span class="hl">${pairB[0]} : ?</span><br>הזוג השני קשור זה לזה באותה דרך כמו הזוג הראשון. מה חסר?`,
     type:'mcq', answer, choices: shuffle([...distract])};
 }
 function gOddOneOutCategory(){
@@ -5809,7 +5810,7 @@ function gShSynonyms(){
   }
   const answer = askSyn ? synOut[0] : notOut[0];
   const def = 'מִילִּים נִרְדָּפוֹת הֵן מִילִּים שֶׁיֵּשׁ לָהֶן אוֹתָהּ מַשְׁמָעוּת אוֹ מַשְׁמָעוּת דּוֹמָה מְאֹד.';
-  return {label:'📖 קְרִיאָה קְצָרָה', text:`${def}<br>${askSyn?'בְּאֵיזֶה זוּג הַמִּילִּים הַמִּילִּים נִרְדָּפוֹת?':'בְּאֵיזֶה זוּג הַמִּילִּים אֵינָן נִרְדָּפוֹת?'}`,
+  return {label:'📖 קְרִיאָה קְצָרָה', text:`${def}<br>${askSyn?'בְּאֵיזֶה זוּג הַמִּילִּים נִרְדָּפוֹת?':'בְּאֵיזֶה זוּג הַמִּילִּים אֵינָן נִרְדָּפוֹת?'}`,
     type:'mcq', wide:true, answer, choices:shuffle(pairs)};
 }
 // -- purpose of a short text: warn / invite / instruct / advertise / describe / tell --
