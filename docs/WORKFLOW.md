@@ -30,9 +30,13 @@ The art kits (the sheets from Gemini, the cut parts, the `cut.py` / `compose.py`
 ## Versions, PRs and releases
 
 Versions keep the existing date-and-letter format. For this branch the proposed
-version is `2026.11.19m`. Update `APP_VERSION` in `math-quest.html` and `VERSION`
-in `sw.js` together when starting a new version. A published version tag must
-never be reused for a different commit.
+version is `2026.11.19m`. Set or re-date a version with
+`python3 tools/bump_version.py`, which stamps the next date-and-letter version
+into `APP_VERSION` in `math-quest.html` and `VERSION` in `sw.js` together and
+skips letters already taken by release tags. Run it when starting a new version,
+and again before merging a branch whose version date has gone stale (the version
+check warns on the PR when that happens; it never fails the run). A published
+version tag must never be reused for a different commit.
 
 When opening a PR, start its title with the exact proposed version, for example:
 `[2026.11.19m] Show versions and releases on GitHub`.
