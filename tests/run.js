@@ -77,6 +77,7 @@ const TESTS = [
   ['leveltest','leveltest.js','space sections: 8 pictures and names, gendered first name, hidden sections, parent area keeps default names, coverage'],
   ['readingbank','readingbank.js','reading bank: every passage valid and playable, passages never pop up on the menu'],
   ['readshorttest','readshorttest.js','short reading questions: voweled, one right answer, varied, reading section only'],
+  ['welcomelogintest','cloud/welcomelogintest.js','Google from welcome: new-account confirmation, first profile, retry, reload, existing restore'],
   ['welcometest','welcometest.js','first-run welcome: short accurate explanation, opens on tap, title fits, no leftovers'],
   ['prizetest','prizetest.js','prize pop-up: appears mid-screen, flies to the gift box, never overlaps a party, reduced motion'],
   ['rewardloadtest','rewardloadtest.js','rewards never pop up empty: the prize waits for its pictures, failing pictures block nothing, background preload, paused by a waiting update'],
