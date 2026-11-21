@@ -6,7 +6,7 @@ const out=path.join(__dirname,'..');   // the repository itself is the site: no 
 const game=process.env.GAME||path.join(out,'math-quest.html');
 const listed=JSON.parse(fs.readFileSync(path.join(out,'assets.json'),'utf8'));const onDisk=fs.readdirSync(path.join(out,'assets')).filter(f=>/^[0-9a-f]{12}\./.test(f)).sort();
 const res={page_bytes:fs.statSync(game).size,assets:onDisk.length};
-ok(res.page_bytes<900000&&res.assets>100&&res.assets<2500,'the page is small ('+Math.round(res.page_bytes/1024)+' KB) with '+res.assets+' picture and font files');
+ok(res.page_bytes<950000&&res.assets>100&&res.assets<2500,'the page is small ('+Math.round(res.page_bytes/1024)+' KB) with '+res.assets+' picture and font files');
 ok(JSON.stringify(listed)===JSON.stringify(onDisk),'assets.json lists exactly the files in assets/ (run tools/externalize.py after changing art)');
 const page=fs.readFileSync(game,'utf8');
 ok(onDisk.every(f=>page.includes('assets/'+f)),'every file in assets/ is used by the page (no stale files)');

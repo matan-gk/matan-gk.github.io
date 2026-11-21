@@ -27,8 +27,19 @@ await p.evaluate(()=>openGame(1)); await p.waitForTimeout(200);
 ok(await txt(p,'#saveNote')===null,'hidden inside a game');
 await p.evaluate(()=>{ goHome&&goHome(); }).catch(()=>{});
 await p.evaluate(()=>{ gameView='home'; applyView(); }); await p.waitForTimeout(100);
+// the note is NOT a way around the parent check: it asks for the birth year first, and then lands on the tab
+await p.evaluate(()=>{ adult.ok=false; });
+await p.click('[data-sn=howinstall]'); await p.waitForTimeout(300);
+ok(await p.evaluate(()=>!document.getElementById('adultOverlay').hidden&&document.getElementById('profOverlay').hidden),'"how?" asks the parent check first and opens nothing else');
+await p.fill('#adultYear','2015'); await p.click('#adultOverlay .btn:not(.alt), #adultOverlay [data-adult=ok]').catch(()=>{}); await p.evaluate(()=>submitAdultCheck()); await p.waitForTimeout(300);
+ok(await p.evaluate(()=>!document.getElementById('adultOverlay').hidden&&document.getElementById('profOverlay').hidden),'a child\'s birth year does not open it');
+await p.evaluate(()=>closeAdultCheck()); await p.click('[data-sn=backup]'); await p.waitForTimeout(300);
+ok(await p.evaluate(()=>!document.getElementById('adultOverlay').hidden&&document.getElementById('profOverlay').hidden),'"how do I save?" asks too');
+await p.fill('#adultYear','1985'); await p.evaluate(()=>submitAdultCheck()); await p.waitForTimeout(500);
+ok(await p.evaluate(()=>document.getElementById('adultOverlay').hidden&&!document.getElementById('profOverlay').hidden&&profTab==='backup'),'after the adult check it opens the Backup tab (the one asked for)');
+await p.evaluate(()=>{ document.getElementById('profOverlay').hidden=true; adult.ok=false; });
 // "how" opens the backup tab at the home-screen card
-await p.click('[data-sn=howinstall]'); await p.waitForTimeout(400);
+await p.evaluate(()=>{ adult.ok=true; }); await p.click('[data-sn=howinstall]'); await p.waitForTimeout(400);
 ok(await p.evaluate(()=>!document.getElementById('profOverlay').hidden&&profTab==='backup'&&!!document.getElementById('pwaCard')),'"how?" opens the backup tab where the home-screen card is');
 await p.evaluate(()=>closeProfiles&&closeProfiles()).catch(()=>{}); await p.evaluate(()=>{ document.getElementById('profOverlay').hidden=true; });
 // dismissing is remembered
