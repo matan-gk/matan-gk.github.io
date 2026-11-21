@@ -1003,14 +1003,14 @@ body[data-view="space"] #spaceView{box-sizing:border-box; display:flex; flex-dir
     <div class="chip">🔥 רצף: <span id="streak">0</span></div>
   </div>
   <div class="topgifts"><div class="tokbadge" id="tokBadge" role="img" hidden></div>
-  <button type="button" class="rewardstrip" id="rewardsStrip" aria-label="פתחי את חדר המתנות">
+  <button type="button" class="rewardstrip" id="rewardsStrip" aria-label="סה&quot;כ 0 › עוד אין מתנות 🎀 - 🎁 חדר המתנות. פתחי את חדר המתנות">
     <span class="rs-top">
       <span class="rs-title">🎁 חדר המתנות</span>
-      <span class="rs-ready" id="rsReady" style="display:none"></span>
-      <span class="rs-gold" id="rsGold" style="display:none">⭐<b id="rsGoldN"></b></span>
-      <span class="rs-count">סה"כ <b id="rsTotal">0</b> ›</span>
+      <span class="rs-ready" id="rsReady" style="display:none" aria-hidden="true"></span>
+      <span class="rs-gold" id="rsGold" style="display:none" aria-hidden="true">⭐<b id="rsGoldN"></b></span>
+      <span class="rs-count" aria-hidden="true">סה"כ <b id="rsTotal">0</b> ›</span>
     </span>
-    <span class="rs-recent" id="rsRecent"><span class="rs-empty">עוד אין מתנות 🎀</span></span>
+    <span class="rs-recent" id="rsRecent" aria-hidden="true"><span class="rs-empty">עוד אין מתנות 🎀</span></span>
   </button></div>
   </div>
   <div class="locbar" id="locBar"><button type="button" class="backbtn" id="backBtn">→ חזרה לבחירת משחק</button></div>
@@ -6130,6 +6130,10 @@ function renderTokBadge(){   // the coins next to the gift square, once the room
   const n = tokenBalance(); el.hidden = false; el.setAttribute('aria-label', coinsTxt(n)); el.title = coinsTxt(n);
   el.innerHTML = `${tokenHTML(n,32)||'<span class="tokzero">🪙</span>'}<b>${n}</b>`;
 }
+function rsStripLabel(){   // the strip's accessible name must contain its visible text (axe label-content-name-mismatch); the visible text is the live counts, so mirror them and add the title and action
+  const s = document.getElementById('rewardsStrip'); const vis = ((s && s.innerText) || '').replace(/\s+/g,' ').trim();
+  return (vis ? vis + ' - ' : '') + TX('stripTitle','🎁 חדר המתנות') + '. ' + G('פתחי','פתח','פתחו') + ' את ' + TX('roomName','חדר המתנות');
+}
 function renderRewards(){
   renderTokBadge(); if(saveNoteReady) renderSaveNote();
   const total = collection.length + golden.length;
@@ -6145,6 +6149,7 @@ function renderRewards(){
   const ready = readyList().reduce((a,x)=>a+x.n,0);
   const rb = document.getElementById('rsReady');
   if(ready){ rb.style.display='inline-block'; rb.textContent = `✨ ${ready} לשדרוג`; } else rb.style.display='none';
+  document.getElementById('rewardsStrip').setAttribute('aria-label', rsStripLabel());
   if(!document.getElementById('roomOverlay').hidden) renderRoom();
 }
 // token pictures by how many you have: 1 coin, 10 stack, 50 pile, 100 bag, 300+ chest
@@ -7719,7 +7724,7 @@ function renderProfileChip(){
   document.getElementById('menuAv').textContent = p ? GENDER_INFO[p.gender].avatar : '👤';
 }
 function applyGenderStatic(){
-  document.getElementById('rewardsStrip').setAttribute('aria-label', G('פתחי','פתח','פתחו')+' את '+TX('roomName','חדר המתנות'));
+  document.getElementById('rewardsStrip').setAttribute('aria-label', rsStripLabel());
 }
 function refreshAll(){
   qToolClose(); guideCancel(); guideIdleClear(); guideOfferClear(); streakHeld = false;
