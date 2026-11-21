@@ -268,6 +268,10 @@ h1{
 .gopts{display:grid; grid-template-columns:repeat(3,1fr); gap:8px}
 .gopt{position:relative; display:flex; flex-direction:column; align-items:center; gap:2px; background:var(--card2); border:3px solid transparent; border-radius:14px; padding:10px 4px; cursor:pointer; text-align:center}
 .gopt input{position:absolute; opacity:0; pointer-events:none}
+.dopts{grid-template-columns:repeat(4,1fr)}
+.dopts .gopt{padding:8px 2px}
+.dopts .gopt b{font-size:.95rem}
+.dopts .gopt .gav{font-size:1rem; letter-spacing:-1px}
 .gopt .gav{font-size:1.8rem}
 .gopt small{color:var(--muted); font-weight:600; font-size:.72rem}
 .gopt.sel,.gopt:has(input:checked){border-color:var(--pink); background:var(--card)}
@@ -2782,7 +2786,7 @@ function cloudProfileFromDoc(C, helpers){
 // ===== CLOUD (Google sign-in, cloud progress, problem reports) =====
 // Local-first: the game always works from this device's storage. The cloud is a mirror, so no internet / no account / no quota never blocks play.
 // Everything here is off while CLOUD_CONFIG is null. See firebase/SETUP.md for how to create the (free) Firebase project and paste its settings below.
-const APP_VERSION = '2026.11.19m';       // keep equal to VERSION in sw.js (a test checks it)
+const APP_VERSION = '2026.11.19n';       // keep equal to VERSION in sw.js (a test checks it)
 const BUILD_COMMIT = '';                 // the full id of the commit this page was built from: the deploy workflow (.github/workflows/tests.yml) fills it in; empty in a plain checkout
 const REPO_URL = 'https://github.com/matan-gk/matan-gk.github.io';
 const CLOUD_CONFIG = {apiKey:"AIzaSyAlq_TJNGvWPJpUrpbdq_hkAoURydqMzm0", authDomain:"learning-quest-1.firebaseapp.com", projectId:"learning-quest-1", appId:"1:98931179722:web:78fb00084ccba3efb53433"};   // e.g. {apiKey:'...', authDomain:'xxx.firebaseapp.com', projectId:'xxx', appId:'...'}
@@ -3354,6 +3358,9 @@ function guideHTML(){
 function openGuide(){ openPanel('guide'); }
 
 // ===== TOP-RIGHT MENU =====
+// the difficulty choice on the new-profile form: one level, or everything (the default). Stored as the profile's `diff` (the parent area can refine it).
+const PROFILE_DIFF_CHOICES = [{id:'1', he:'קל', mark:'⭐'}, {id:'2', he:'בינוני', mark:'⭐⭐'}, {id:'3', he:'קשה', mark:'⭐⭐⭐'}, {id:'all', he:'הכול', mark:'🎲'}];
+const profileDiffIds = id => id==='all' ? difficultyIds() : diffIdsClean([+id]);
 const PANEL_TITLES = {debug:'דיבאג', profiles:'ניהול פרופילים', progress:'התקדמות', settings:'הגדרות', backup:'גיבוי ושחזור', report:'דיווח על בעיה', guide:'מדריך להורים'};
 const PANEL_NAV = {profiles:'פרופילים', progress:'התקדמות', settings:'הגדרות', backup:'גיבוי ושחזור', report:'דיווח על בעיה', guide:'מדריך להורים', debug:'דיבאג'};
 const PANEL_SHORT = {profiles:'פרופילים', progress:'התקדמות', settings:'הגדרות', backup:'גיבוי', report:'דיווח', guide:'מדריך', debug:'דיבאג'};
@@ -7823,6 +7830,9 @@ function renderProfilesInner(){
       <input type="text" id="pfName" maxlength="20" autocomplete="off" value="${editing?esc(editing.name):''}"></div>
       <div class="pa-field"><label>איך פונים אל השחקן?</label>
       <div class="gopts">` + ['f','m','n'].map(g=>`<label class="gopt"><input type="radio" name="pfG" value="${g}" ${editing&&editing.gender===g?'checked':''}><span class="gav">${GENDER_INFO[g].avatar}</span><b>${GENDER_INFO[g].label}</b><small>${GENDER_INFO[g].example}</small></label>`).join('') + `</div></div>
+      ${editing?'':`<div class="pa-field" id="pfDiffField" role="radiogroup" aria-labelledby="pfDiffLbl"><label id="pfDiffLbl">כמה קשה?</label>
+      <div class="gopts dopts">` + PROFILE_DIFF_CHOICES.map(c=>`<label class="gopt"><input type="radio" name="pfD" value="${c.id}" ${c.id==='all'?'checked':''}><span class="gav" aria-hidden="true">${c.mark}</span><b>${c.he}</b></label>`).join('') + `</div>
+      <p class="pa-sub" style="margin:6px 0 0">אפשר לשנות בכל רגע. באזור ההורים (הגדרות) אפשר לדייק הרבה יותר: לבחור כמה רמות יחד, לכבות מקומות קסומים ולהסתיר סוגי שאלות.</p></div>`}
       <div class="perr" id="pfErr">${profMode.error||''}</div>
       <div class="pa-actions"><button type="button" class="pa-btn" data-pact="save">שמירה</button>${(profMode.first)?'':'<button type="button" class="pa-btn sec" data-pact="cancel">ביטול</button>'}</div>
       ${profMode.first?'<div class="pa-actions"><button type="button" class="pa-btn sec block" data-pact="restorefirst">יש לי קוד שמירה: שחזור</button></div>':''}
@@ -8646,7 +8656,8 @@ function profileAction(act, id){
       profMode={view:'list',editId:null,first:false,confirmDel:null,error:''};
     } else {
       const first = !store.profiles.length;
-      const np = makeProfile(name, g, {space:{dw:1}});
+      const dv = (document.querySelector('input[name=pfD]:checked')||{}).value || 'all';
+      const np = makeProfile(name, g, {space:{dw:1}, diff:profileDiffIds(dv)});
       store.profiles.push(np);
       if(first){ store.activeId = np.id; enterProfile(); persist(); refreshAll(); document.getElementById('profOverlay').hidden = true; return; }
       switchProfile(np.id);
