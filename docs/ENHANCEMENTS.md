@@ -937,3 +937,12 @@ Read samples of every question type (about 26,000 generated questions plus one o
 
 The new-profile form (the first-run welcome and "➕ פרופיל חדש") has a "כמה קשה?" choice: ⭐ קל, ⭐⭐ בינוני, ⭐⭐⭐ קשה, 🎲 הכול (default). Easy, medium and hard mean that single rating level (the same levels as the switches in the parent area's settings); "everything" is all three, as before. The choice is stored as the profile's `diff`, so it is the same setting the parent area shows and changes. A note under it says it can be changed at any time and that the parent area (settings) is much more specific: several levels together, switching magic places off, hiding question types. The edit form does not show it (changing it later is the parent area's job). Bonus questions are not affected (always hard).
 - Test: `profilediffTest`.
+
+## Step 75: dreamland set, 55 new room items (branch `room-items-dreamland`, off main; version 2026.11.25a)
+
+New sheet `art/sheet-d1-dreamland.jpg` (81 pastel pixel-art items in a loose 9 x 9 grid, Gemini). `tools/items7.py` (idempotent; reuses the cutter, colour baking and fitting of `items4.py`/`items6.py`) cuts it: the pictures drift off their grid cells, so blobs are grouped by the cell their centre falls in (one override for the cloud bed, which touches a wooden bed); `-9` is a cutter for a white cloud with gaps in its outline; a rug or arch whose silhouette is not a diamond falls back to a bounding fit.
+- **55 items** (ids `dl_*`): 21 furniture (moon chair, cloud desk, vanity, bookshelf, dresser, nightstands, pouffes, benches, sofa, swing, moon bed, cloud bed, crib swing ...), 26 play and decor items (lamps, harp, tea set, snow globe, terrarium, cradle, teepee, sleeping bag ...) and 8 rugs. Prices 2 to 6; 33 have a recolourable magenta part (31 new colour-part names, the three recolourable rugs share the existing `rug`).
+- Not added: duplicates of existing items, the three beds (kept for the bed levels), wall pieces and hanging pieces. No back pictures: turning mirrors them like other items without one.
+- Prompts for the rest (back pictures, bigger redo, wall pieces, bed levels, nine more items): `docs/personal-space/GEMINI_PROMPTS_DREAMLAND.md`.
+- Page size is now about 915 KB of the 950 KB limit in `splittest`: the next art batch needs the limit raised or the catalog moved out of the page.
+- Tests updated: `catalogtest` (205 items), `colortest` (82 colourable parts), `spacetest` and `catalogtest` max-out price (783 for the items), `groundtest` (two items stand off-centre).

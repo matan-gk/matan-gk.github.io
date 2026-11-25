@@ -8,8 +8,8 @@ await p.goto(T.URL);await ev(()=>localStorage.clear());await p.reload();
 await p.fill('#pfName','X');await p.click('.gopt:has(input[value=f])');await p.click('[data-pact=save]');await p.waitForTimeout(500);
 await ev(()=>{space.earned=1000;space.spent=0;space.unlocked=true;golden=['🍪'];renderLevels();openSpace();});
 // data
-ok(await ev(()=>ROOM_CATALOG.filter(c=>c.g==='rugs').length===6&&ROOM_CATALOG.filter(c=>c.g==='rugs').every(c=>c.flat&&c.pk==='rug'&&c.base&&c.dc)),'6 rugs: flat, share one "rug" part key, magenta original + default colour');
-ok(await ev(()=>ROOM_CATALOG.filter(isFlat).length===7&&ROOM_CATALOG.filter(isFlat).every(c=>c.fw>=2*GU&&c.fd>=2*GU)),'7 flat things (6 rugs and the drawing mat), all at least 2x2 cells');
+ok(await ev(()=>ROOM_CATALOG.filter(c=>c.g==='rugs').length===14&&ROOM_CATALOG.filter(c=>c.g==='rugs').every(c=>c.flat&&(c.base?(c.pk==='rug'&&c.dc):(!c.pk&&!c.dc)))),'14 rugs: flat; the recolourable ones share one "rug" part key with a magenta original + default colour, the others have no part');
+ok(await ev(()=>ROOM_CATALOG.filter(isFlat).length===15&&ROOM_CATALOG.filter(isFlat).every(c=>c.fw>=2*GU&&c.fd>=2*GU)),'15 flat things (14 rugs and the drawing mat), all at least 2x2 cells');
 ok(await ev(()=>!!ROOM_GROUPS.rugs&&partLabel&&PART_NAMES.rug==='שטיח'),'rugs group and part name exist');
 ok(await ev(()=>partKeyOf(catOf('rug_rd'))==='rug'&&partKeyOf(catOf('rug_sq2'))==='rug'&&partKeyOf(catOf('car'))==='car'),'partKeyOf uses pk when given');
 // train toys, chess, lego, puzzles and tic-tac-toe are 1x1 and solid: nothing can be placed on them; chair, telescope and costume box are 2x2
