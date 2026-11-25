@@ -945,4 +945,5 @@ New sheet `art/sheet-d1-dreamland.jpg` (81 pastel pixel-art items in a loose 9 x
 - Not added: duplicates of existing items, the three beds (kept for the bed levels), wall pieces and hanging pieces. No back pictures: turning mirrors them like other items without one.
 - Prompts for the rest (back pictures, bigger redo, wall pieces, bed levels, nine more items): `docs/personal-space/GEMINI_PROMPTS_DREAMLAND.md`.
 - Page size is now about 915 KB of the 950 KB limit in `splittest`: the next art batch needs the limit raised or the catalog moved out of the page.
-- Tests updated: `catalogtest` (205 items), `colortest` (82 colourable parts), `spacetest` and `catalogtest` max-out price (783 for the items), `groundtest` (two items stand off-centre).
+- The 31 new colour parts have Hebrew names in `PART_NAMES` (without them the colour picker would show no name).
+- Tests updated: `flattest` (14 rugs), `catalogtest` (205 items), `colortest` (82 colourable parts), `spacetest` and `catalogtest` max-out price (783 for the items), `groundtest` (two items stand off-centre).
