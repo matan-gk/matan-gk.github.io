@@ -947,3 +947,7 @@ The first-run welcome had "שמירה" followed by three similar buttons (save c
 - Google buttons (welcome and the Backup tab) show the Google "G" on a white button.
 - Later profiles (not the first run) keep "שמירה" and have no restore options, as before.
 - Test: `welcomestarttest`.
+
+## Step 76: English version plan, tabled (branch `docs-english-plan`; version 2026.11.27a, documentation only)
+
+`docs/ENGLISH_PLAN.md` records the review of the code for an English (US) version, the decisions (US dollar and inches, one game with a language setting, ship as soon as something is playable, reading level last), the phases with effort estimates and the ship-early slicing. Nothing in the code changed; the work is tabled until the audience question is answered.
